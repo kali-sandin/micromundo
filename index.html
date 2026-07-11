@@ -32,7 +32,7 @@
         </div>
 
         <nav class="control-group" aria-label="Añadir seres">
-          <button class="tool-button add-producer" data-add="producer" type="button"><span class="being-icons producer-set" aria-hidden="true"><i class="being-dot producer-a"></i><i class="being-dot producer-b"></i><i class="being-colony"></i></span><span>Productor</span></button>
+          <button class="tool-button add-producer" data-add="producer" type="button"><span class="being-icons producer-set" aria-hidden="true"><i class="being-dot producer-a"></i><i class="being-colony producer-b"></i><i class="being-dot producer-c"></i></span><span>Productor</span></button>
           <button class="tool-button add-consumer" data-add="consumer" type="button"><span class="being-icons" aria-hidden="true"><i class="being-dot consumer-icon"></i></span><span>Consumidor</span></button>
           <button class="tool-button add-predator" data-add="predator" type="button"><span class="being-icons" aria-hidden="true"><i class="being-predator"></i></span><span>Depredador</span></button>
         </nav>
@@ -40,7 +40,7 @@
         <div class="control-group right">
           <button class="tool-button" id="toggleStats" type="button"><span class="btn-icon">Σ</span><span>Estadísticas</span></button>
           <button class="tool-button" id="toggleGraphs" type="button"><span class="btn-icon">▧</span><span>Gráficas</span></button>
-          <button class="tool-button" id="toggleGenes" type="button"><span class="btn-icon">⟲</span><span>Genes</span></button>
+          <button class="tool-button active" id="toggleGenes" type="button"><span class="btn-icon">⟲</span><span>Genes</span></button>
           <button class="tool-button" id="toggleDebug" type="button"><span class="btn-icon">◎</span><span>Rangos</span></button>
           <button class="tool-button" id="resetWorld" type="button"><span class="btn-icon">↻</span><span>Reiniciar</span></button>
         </div>
@@ -56,8 +56,8 @@
           </header>
           <div class="stats-grid">
             <span><i class="being-icons"><em class="being-dot producer-a"></em></i>Prod. A dens.</span><b id="statProducerA">0.00</b>
-            <span><i class="being-icons"><em class="being-dot producer-b"></em></i>Prod. B</span><b id="statProducerB">0</b>
-            <span><i class="being-icons"><em class="being-colony"></em></i>Prod. C</span><b id="statProducerC">0</b>
+            <span><i class="being-icons"><em class="being-colony producer-b"></em></i>Prod. B</span><b id="statProducerB">0</b>
+            <span><i class="being-icons"><em class="being-dot producer-c"></em></i>Prod. C</span><b id="statProducerC">0</b>
             <span><i class="being-icons"><em class="being-dot consumer-icon"></em></i>Consumidores</span><b id="statConsumers">0</b>
             <span><i class="being-icons"><em class="being-predator"></em></i>Depredadores</span><b id="statPredators">0</b>
             <span><i class="stat-symbol">⚡</i>Energía media</span><b id="statEnergy">0</b>
@@ -76,15 +76,18 @@
           </header>
           <canvas id="graph" width="840" height="170"></canvas>
           <div class="legend">
-            <span class="legend-producer-a">A dens. <b id="legendProducerA">0.00</b></span>
-            <span class="legend-producer-b">B <b id="legendProducerB">0</b></span>
-            <span class="legend-producer-c">C <b id="legendProducerC">0</b></span>
-            <span class="legend-consumer">Consumidores <b id="legendConsumers">0</b></span>
-            <span class="legend-predator">Depredadores <b id="legendPredators">0</b></span>
+            <span class="legend-producers">
+              <strong>Productores</strong>
+              <b class="legend-metric legend-a" data-pop-series="producerDensity" role="button" tabindex="0"><i class="legend-dot legend-producer-a"></i><em id="legendProducerA">0.00</em><small>dens.</small></b>
+              <b class="legend-metric legend-b" data-pop-series="producerB" role="button" tabindex="0"><i class="legend-dot legend-producer-b"></i><em id="legendProducerB">0</em><small>uds.</small></b>
+              <b class="legend-metric legend-c" data-pop-series="producerC" role="button" tabindex="0"><i class="legend-dot legend-producer-c"></i><em id="legendProducerC">0</em><small>uds.</small></b>
+            </span>
+            <span class="legend-consumer" data-pop-series="consumers" role="button" tabindex="0">Consumidores <b id="legendConsumers">0</b></span>
+            <span class="legend-predator" data-pop-series="predators" role="button" tabindex="0">Depredadores <b id="legendPredators">0</b></span>
           </div>
         </section>
 
-        <section class="hud panel gene-panel movable resizable hidden" id="genePanel" aria-label="Histórico de genes">
+        <section class="hud panel gene-panel movable resizable" id="genePanel" aria-label="Histórico de genes">
           <header class="panel-head drag-handle">
             <h2>Histórico genes</h2>
             <span class="panel-hint">media móvil por segundo</span>
@@ -118,13 +121,16 @@
             <p id="dialogKindLabel">Nuevo ser</p>
             <h2 id="dialogTitle">Configurar</h2>
           </div>
-          <button class="icon-button" value="cancel" type="submit" title="Cerrar">Cerrar</button>
+          <div class="dialog-actions">
+            <button class="icon-button lightning-button" id="quickMix" value="lightning" type="button" title="Rayo" aria-label="Rayo">⚡</button>
+            <button class="tool-button" id="defaultsAdd" value="defaults" type="button">Defaults</button>
+            <button class="icon-button" value="cancel" type="submit" title="Cerrar">Cerrar</button>
+          </div>
         </header>
 
         <div class="form-grid" id="dynamicFields"></div>
 
         <footer>
-          <button class="tool-button" value="cancel" type="submit">Cancelar</button>
           <button class="tool-button primary" id="confirmAdd" value="default" type="submit">Añadir</button>
         </footer>
       </form>
