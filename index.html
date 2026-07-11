@@ -3,27 +3,133 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Micromundo</title>
+    <title>MicroMundo 3.0</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
-    <main class="world-shell" aria-labelledby="title">
-      <section class="world-board">
-        <p class="eyebrow">Proyecto TheOffice</p>
-        <h1 id="title">Micromundo</h1>
-        <p class="intro">Un espacio pequeno para construir cosas vivas, raras y observables.</p>
-        <div class="micro-grid" aria-label="Micromundo inicial">
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
+    <div class="app">
+      <header class="toolbar" aria-label="Controles del ecosistema">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div>
+            <strong>MicroMundo 3.0</strong>
+            <button class="size-button" id="worldReadout" type="button" title="Configurar tamaño del ecosistema">16.000 x 9.000</button>
+          </div>
         </div>
-      </section>
-    </main>
+
+        <div class="control-group">
+          <button class="tool-button primary" id="playPause" type="button" title="Pausar o continuar"><span class="btn-icon">⏸</span><span>Pausa</span></button>
+          <label class="speed-control" for="speed">
+            <span>Speed</span>
+            <input id="speed" type="range" min="0" max="100" value="34">
+            <output id="speedLabel" for="speed">x1</output>
+          </label>
+          <label class="speed-control energy-control" for="systemEnergy">
+            <span>Energía</span>
+            <input id="systemEnergy" type="range" min="0" max="100" value="50">
+            <output id="systemEnergyLabel" for="systemEnergy">x1</output>
+          </label>
+        </div>
+
+        <nav class="control-group" aria-label="Añadir seres">
+          <button class="tool-button add-producer" data-add="producer" type="button"><span class="being-icons producer-set" aria-hidden="true"><i class="being-dot producer-a"></i><i class="being-dot producer-b"></i><i class="being-colony"></i></span><span>Productor</span></button>
+          <button class="tool-button add-consumer" data-add="consumer" type="button"><span class="being-icons" aria-hidden="true"><i class="being-dot consumer-icon"></i></span><span>Consumidor</span></button>
+          <button class="tool-button add-predator" data-add="predator" type="button"><span class="being-icons" aria-hidden="true"><i class="being-predator"></i></span><span>Depredador</span></button>
+        </nav>
+
+        <div class="control-group right">
+          <button class="tool-button" id="toggleStats" type="button"><span class="btn-icon">Σ</span><span>Estadísticas</span></button>
+          <button class="tool-button" id="toggleGraphs" type="button"><span class="btn-icon">▧</span><span>Gráficas</span></button>
+          <button class="tool-button" id="toggleGenes" type="button"><span class="btn-icon">⟲</span><span>Genes</span></button>
+          <button class="tool-button" id="toggleDebug" type="button"><span class="btn-icon">◎</span><span>Rangos</span></button>
+          <button class="tool-button" id="resetWorld" type="button"><span class="btn-icon">↻</span><span>Reiniciar</span></button>
+        </div>
+      </header>
+
+      <main class="world-viewport" aria-label="Simulador de microecosistema">
+        <canvas id="world"></canvas>
+
+        <section class="hud panel stats-panel movable" id="statsPanel" aria-label="Estadísticas del ecosistema">
+          <header class="panel-head drag-handle">
+            <h2>Estadísticas</h2>
+            <span class="panel-hint">arrastrar</span>
+          </header>
+          <div class="stats-grid">
+            <span><i class="being-icons"><em class="being-dot producer-a"></em></i>Prod. A dens.</span><b id="statProducerA">0.00</b>
+            <span><i class="being-icons"><em class="being-dot producer-b"></em></i>Prod. B</span><b id="statProducerB">0</b>
+            <span><i class="being-icons"><em class="being-colony"></em></i>Prod. C</span><b id="statProducerC">0</b>
+            <span><i class="being-icons"><em class="being-dot consumer-icon"></em></i>Consumidores</span><b id="statConsumers">0</b>
+            <span><i class="being-icons"><em class="being-predator"></em></i>Depredadores</span><b id="statPredators">0</b>
+            <span><i class="stat-symbol">⚡</i>Energía media</span><b id="statEnergy">0</b>
+            <span><i class="stat-symbol">☀</i>Sol sistema</span><b id="statSun">x1</b>
+            <span><i class="stat-symbol">✚</i>Nacimientos</span><b id="statBirths">0</b>
+            <span><i class="stat-symbol">×</i>Muertes</span><b id="statDeaths">0</b>
+            <span><i class="stat-symbol">◷</i>Tiempo sim.</span><b id="statTime">000m 00s</b>
+            <span><i class="stat-symbol">▥</i>FPS</span><b id="statFps">0</b>
+          </div>
+        </section>
+
+        <section class="hud panel graph-panel movable resizable" id="graphPanel" aria-label="Gráficas de población">
+          <header class="panel-head drag-handle">
+            <h2>Población</h2>
+            <span class="panel-hint">arrastrar · redimensionar</span>
+          </header>
+          <canvas id="graph" width="840" height="170"></canvas>
+          <div class="legend">
+            <span class="legend-producer-a">A dens. <b id="legendProducerA">0.00</b></span>
+            <span class="legend-producer-b">B <b id="legendProducerB">0</b></span>
+            <span class="legend-producer-c">C <b id="legendProducerC">0</b></span>
+            <span class="legend-consumer">Consumidores <b id="legendConsumers">0</b></span>
+            <span class="legend-predator">Depredadores <b id="legendPredators">0</b></span>
+          </div>
+        </section>
+
+        <section class="hud panel gene-panel movable resizable hidden" id="genePanel" aria-label="Histórico de genes">
+          <header class="panel-head drag-handle">
+            <h2>Histórico genes</h2>
+            <span class="panel-hint">media móvil por segundo</span>
+          </header>
+          <div class="gene-tabs" role="tablist" aria-label="Tipo de ser">
+            <button class="tab active" data-gene-tab="producer-a" type="button">Tipo A</button>
+            <button class="tab" data-gene-tab="producer-b" type="button">Tipo B</button>
+            <button class="tab" data-gene-tab="producer-c" type="button">Tipo C</button>
+            <button class="tab" data-gene-tab="consumer" type="button">Consumidores</button>
+            <button class="tab" data-gene-tab="predator" type="button">Depredadores</button>
+          </div>
+          <canvas id="geneGraph" width="700" height="190"></canvas>
+          <div id="geneSummary" class="gene-summary"></div>
+        </section>
+
+        <section class="hud panel inspect-panel movable hidden" id="inspectPanel" aria-label="Valores del ser seleccionado">
+          <header class="panel-head drag-handle">
+            <h2 id="inspectTitle">Ser</h2>
+            <button class="icon-button" id="closeInspect" type="button" title="Cerrar">×</button>
+          </header>
+          <div id="inspectBody" class="inspect-body"></div>
+        </section>
+
+      </main>
+    </div>
+
+    <dialog id="addDialog" class="add-dialog">
+      <form method="dialog" id="addForm">
+        <header>
+          <div>
+            <p id="dialogKindLabel">Nuevo ser</p>
+            <h2 id="dialogTitle">Configurar</h2>
+          </div>
+          <button class="icon-button" value="cancel" type="submit" title="Cerrar">Cerrar</button>
+        </header>
+
+        <div class="form-grid" id="dynamicFields"></div>
+
+        <footer>
+          <button class="tool-button" value="cancel" type="submit">Cancelar</button>
+          <button class="tool-button primary" id="confirmAdd" value="default" type="submit">Añadir</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <script src="app.js" defer></script>
   </body>
 </html>
