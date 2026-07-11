@@ -635,6 +635,8 @@ select {
 }
 
 #geneGraph {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: calc(100% - 116px);
   min-height: 160px;
@@ -642,6 +644,8 @@ select {
 }
 
 .gene-summary {
+  position: relative;
+  z-index: 2;
   min-height: 52px;
   display: flex;
   align-content: flex-start;
@@ -666,6 +670,7 @@ select {
   background: rgba(255, 255, 255, 0.055);
   font-size: inherit;
   cursor: pointer;
+  pointer-events: auto;
 }
 
 .gene-toggle::before {

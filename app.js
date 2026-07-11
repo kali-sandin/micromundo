@@ -718,7 +718,7 @@
       speed: mobile ? Number(opts.speed ?? 24) : 0,
       energy: colony ? 18 : 8,
       maxEnergy: colony ? 92 : 24,
-      armor: Number(opts.armor ?? (colony ? rand(3.1, 5.4) : rand(1.2, 2.6))),
+      armor: Number(opts.armor ?? (colony ? rand(3.1, 5.4) : mobile ? rand(2.2, 4.0) : rand(1.2, 2.6))),
       chemosense,
       perception: mobile ? Number(opts.perception ?? (280 + chemosense * 32)) : 160,
       movement,
@@ -919,11 +919,13 @@
     if (target?.virtualA) return true;
     if (!target || target.type !== TYPE.PRODUCER) return true;
     if (target.sub === PRODUCER.A) return true;
-    return feedingPower(e, target) >= armorResistance(target);
+    const mobileProducerShield = target.sub === PRODUCER.C && e.type === TYPE.CONSUMER ? 0.95 : 0;
+    return feedingPower(e, target) >= armorResistance(target) + mobileProducerShield;
   }
 
   const nearby = [];
   const mateCandidates = [];
+  const mateSeekCandidates = [];
   const producerThreats = [];
 
   function updateResting(e, dt, pressure = false) {
@@ -1144,7 +1146,8 @@
 
   function reproduceMobile(e, type) {
     if (e.energy < e.maxEnergy * 0.72 || e.cooldown > 0) return;
-    queryNearby(e.x, e.y, e.perception * 0.72, type, mateCandidates);
+    const mateRange = type === TYPE.PREDATOR ? Math.min(1800, e.perception * 2.4) : e.perception * 0.72;
+    queryNearby(e.x, e.y, mateRange, type, mateCandidates);
     let mate = null;
     for (let i = 0; i < mateCandidates.length; i += 1) {
       const c = mateCandidates[i];
@@ -1164,6 +1167,24 @@
     }
   }
 
+  function findMateTarget(e, type) {
+    if (e.energy < e.maxEnergy * 0.68 || e.cooldown > 0) return null;
+    const radius = type === TYPE.PREDATOR ? Math.min(2200, e.perception * 3.1) : e.perception;
+    queryNearby(e.x, e.y, radius, type, mateSeekCandidates);
+    let best = null;
+    let bestD2 = Infinity;
+    for (let i = 0; i < mateSeekCandidates.length; i += 1) {
+      const c = mateSeekCandidates[i];
+      if (c === e || !c.alive || c.energy < c.maxEnergy * 0.50 || c.cooldown > 0) continue;
+      const d2 = torusDistance2(e, c);
+      if (d2 < bestD2) {
+        best = c;
+        bestD2 = d2;
+      }
+    }
+    return best;
+  }
+
   function stepMobile(e, dt) {
     e.age += dt;
     e.cooldown -= dt;
@@ -1179,6 +1200,7 @@
     }
 
     let food = null;
+    let steeringTarget = null;
     if (e.type === TYPE.PREDATOR) {
       queryNearby(e.x, e.y, e.perception, TYPE.CONSUMER, nearby);
       food = nearestFood(e, nearby);
@@ -1197,6 +1219,7 @@
         }
         food = bestPlant;
       }
+      steeringTarget = food || findMateTarget(e, TYPE.PREDATOR);
     } else {
       queryNearby(e.x, e.y, e.perception, TYPE.PRODUCER, nearby);
       const entityFood = nearestFood(e, nearby);
@@ -1212,8 +1235,9 @@
           if ((fdx * fdx + fdy * fdy) * 0.75 < edx * edx + edy * edy) food = fieldFood;
         }
       }
+      steeringTarget = food;
     }
-    steerCreature(e, dt, food);
+    steerCreature(e, dt, steeringTarget);
     if (food) feedConsumer(e, food);
     reproduceMobile(e, e.type);
   }
@@ -1402,13 +1426,17 @@
       panel = document.createElement('section');
       panel.className = 'hud panel inspect-panel movable';
       panel.setAttribute('aria-label', 'Valores del ser seleccionado');
-      panel.innerHTML = '<header class="panel-head drag-handle"><button class="icon-button target-inspect" type="button" title="Centrar vista">⌖</button><h2>Ser</h2><button class="icon-button close-inspect" type="button" title="Cerrar">×</button></header><div class="inspect-body"></div>';
+      panel.innerHTML = '<header class="panel-head drag-handle"><button class="icon-button target-inspect" type="button" title="Centrar vista">⌖</button><button class="icon-button clone-inspect lightning-button" type="button" title="Crear como este">⚡</button><h2>Ser</h2><button class="icon-button close-inspect" type="button" title="Cerrar">×</button></header><div class="inspect-body"></div>';
       document.querySelector('.world-viewport').appendChild(panel);
       makePanelDraggable(panel);
     }
     const header = panel.querySelector('.panel-head');
     if (header && !header.querySelector('.target-inspect')) {
       header.insertAdjacentHTML('afterbegin', '<button class="icon-button target-inspect" type="button" title="Centrar vista">⌖</button>');
+    }
+    if (header && !header.querySelector('.clone-inspect')) {
+      const targetBtn = header.querySelector('.target-inspect');
+      targetBtn?.insertAdjacentHTML('afterend', '<button class="icon-button clone-inspect lightning-button" type="button" title="Crear como este">⚡</button>');
     }
     panel.dataset.inspectUid = String(key);
     panel.classList.remove('hidden');
@@ -1423,6 +1451,14 @@
       target.addEventListener('click', (ev) => {
         ev.stopPropagation();
         centerOnCreature(Number(panel.dataset.inspectUid), true);
+      });
+    }
+    const clone = panel.querySelector('.clone-inspect');
+    if (clone && !clone.dataset.boundInspectClone) {
+      clone.dataset.boundInspectClone = '1';
+      clone.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        openCloneDialog(Number(panel.dataset.inspectUid));
       });
     }
     return panel;
@@ -2226,7 +2262,7 @@
     return {
       sub,
       radius: vary(base.radius, 0.22, 3, 8),
-      armor: vary(base.armor, 0.20, 0.8, 3.2),
+      armor: vary(base.armor, 0.20, 1.8, 4.6),
       fertility: vary(base.fertility, 0.18, 0.010, 0.070),
       speed: vary(base.speed, 0.24, 14, 50),
       perception: vary(base.perception, 0.18, 180, 560),
@@ -2298,7 +2334,7 @@
         amount: ADD_AMOUNT_DEFAULT,
         sub,
         radius: isColonyProducer(sub) ? 18 : 5,
-        armor: isColonyProducer(sub) ? 3.8 : 1.8,
+        armor: isColonyProducer(sub) ? 3.8 : 3.0,
         fertility: isMobileProducer(sub) ? 0.026 : 0.024,
         speed: 24,
         perception: 340,
@@ -2331,6 +2367,49 @@
       return { ...defaultAddValues(kind, wantedSub), ...(saved && Number(saved.sub) === wantedSub ? saved : {}), sub: wantedSub };
     }
     return { ...defaultAddValues(kind), ...(saved || {}) };
+  }
+
+  function cloneAddValues(e) {
+    const amount = ADD_AMOUNT_DEFAULT;
+    if (e.type === TYPE.PRODUCER) {
+      return {
+        amount,
+        sub: e.sub,
+        radius: Number(e.radius || defaultAddValues('producer', e.sub).radius),
+        armor: Number(e.armor || 0),
+        fertility: Number(e.fertility || defaultAddValues('producer', e.sub).fertility),
+        speed: Number(e.speed || defaultAddValues('producer', e.sub).speed),
+        perception: Number(e.perception || defaultAddValues('producer', e.sub).perception),
+        chemosense: Number(e.chemosense || defaultAddValues('producer', e.sub).chemosense),
+        movementMask: movementMaskFromLegacy(e),
+        maxAge: Number.isFinite(Number(e.maxAge)) ? Number(e.maxAge) : defaultAddValues('producer', e.sub).maxAge
+      };
+    }
+    const kind = e.type === TYPE.PREDATOR ? 'predator' : 'consumer';
+    return {
+      amount,
+      size: Number(e.size || defaultAddValues(kind).size),
+      flagella: Number(e.flagella || 0),
+      cilia: Number(e.cilia || 0),
+      reserves: Number(e.reserves || defaultAddValues(kind).reserves),
+      pseudopodia: Number(e.pseudopodia || 0),
+      armor: Number(e.armor || 0),
+      chemosense: Number(e.chemosense || defaultAddValues(kind).chemosense),
+      vacuole: Number(e.vacuole || defaultAddValues(kind).vacuole),
+      feeding: Number(e.feeding || 0),
+      movementMask: movementMaskFromLegacy(e),
+      maxAge: Number.isFinite(Number(e.maxAge)) ? Number(e.maxAge) : defaultAddValues(kind).maxAge,
+      fertility: Number(e.fertility || defaultAddValues(kind).fertility)
+    };
+  }
+
+  function openCloneDialog(key) {
+    const e = creatureByKey(key);
+    if (!e || !e.alive || e.sub === PRODUCER.A) return;
+    const kind = e.type === TYPE.PRODUCER ? 'producer' : e.type === TYPE.PREDATOR ? 'predator' : 'consumer';
+    sim.lastAddValues[kind] = cloneAddValues(e);
+    renderAddDialog(kind);
+    els.addDialog.showModal();
   }
 
   function collectAddValues(form) {
@@ -2635,7 +2714,7 @@
     ev.preventDefault();
     const current = sim.populationPxPerSecond;
     const next = ev.deltaY > 0 ? current / 1.22 : current * 1.22;
-    sim.populationPxPerSecond = clamp(next, 0.18, 24);
+    sim.populationPxPerSecond = clamp(next, 0.09, 24);
     sim.genePxPerSecond = sim.populationPxPerSecond;
     drawGraph();
     drawGeneHistory();
@@ -2692,9 +2771,11 @@
       el.addEventListener('click', toggle);
       el.addEventListener('keydown', (ev) => handleToggleKey(ev, toggle));
     });
-    els.geneSummary.addEventListener('click', (ev) => {
+    els.geneSummary.addEventListener('pointerdown', (ev) => {
       const item = ev.target.closest('[data-gene-key]');
       if (!item) return;
+      ev.preventDefault();
+      ev.stopPropagation();
       toggleGeneSeries(item.dataset.geneKey);
     });
     els.geneSummary.addEventListener('keydown', (ev) => {
