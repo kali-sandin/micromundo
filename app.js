@@ -11,12 +11,14 @@
   const TYPE = { PRODUCER: 0, CONSUMER: 1, PREDATOR: 2 };
   const PRODUCER = { A: 0, B: 1, C: 2 };
   const FEEDING = ['grazer', 'filter', 'phagocyte', 'cytostome'];
-  const MOVE = ['run-tumble', 'chemotaxis', 'drift', 'spiral'];
+  const MOVE = ['run-tumble', 'chemotaxis', 'drift', 'spiral', 'pause', 'burst'];
   const MOVE_INFO = [
     ['run-tumble', 'Tramos rectos con giros bruscos. Huye bien y explora rápido, pero es menos fino siguiendo alimento.'],
     ['chemotaxis', 'Gira hacia alimento o lejos de amenazas usando percepción química. Favorece persecución y huida dirigida.'],
     ['drift', 'Movimiento suave y barato. Consume menos al girar, pero reacciona peor a depredadores o presas.'],
-    ['spiral', 'Búsqueda orbital/ondulante. Cubre área local y combina bien con cilios o alta percepción.']
+    ['spiral', 'Búsqueda orbital/ondulante. Cubre área local y combina bien con cilios o alta percepción.'],
+    ['pause', 'Permanece quieto intervalos breves para ahorrar energía cuando no necesita desplazarse.'],
+    ['burst', 'Muy de vez en cuando hace un impulso largo: gana distancia rápido, pero gasta mucha energía.']
   ];
   const FEEDING_INFO = [
     ['grazer', 'Pastoreo simple sobre biomasa y contacto directo. Barato y estable.'],
@@ -669,6 +671,9 @@
       fertility: 1,
       maxEnergy: 1,
       metabolism: 0,
+      restUntil: 0,
+      restCooldown: 0,
+      burstCooldown: 0,
       leafEnergy: 0,
       leafCount: 0,
       maxRadius: 18,
@@ -700,6 +705,7 @@
     const radius = colony ? Number(opts.radius ?? 18) : Number(opts.radius ?? (mobile ? 5 : 5));
     const maxRadius = colony ? Math.max(radius + 8, Number(opts.maxRadius ?? radius * 1.9 + 10)) : radius;
     const chemosense = mobile ? Number(opts.chemosense ?? rand(2.2, 3.4)) : 0;
+    const movement = Number(opts.movement ?? Math.floor(rand(0, MOVE.length)));
     const e = createCreature({
       type: TYPE.PRODUCER,
       sub,
@@ -710,16 +716,16 @@
       speed: mobile ? Number(opts.speed ?? 24) : 0,
       energy: colony ? 18 : 8,
       maxEnergy: colony ? 92 : 24,
-      armor: Number(opts.armor ?? (colony ? rand(2.0, 4.1) : rand(1.2, 2.6))),
+      armor: Number(opts.armor ?? (colony ? rand(3.1, 5.4) : rand(1.2, 2.6))),
       chemosense,
       perception: mobile ? Number(opts.perception ?? (280 + chemosense * 32)) : 160,
-      movement: Number(opts.movement ?? Math.floor(rand(0, MOVE.length))),
-      movementMask: opts.movementMask != null ? movementMaskFromValue(opts.movementMask) : (opts.movement != null ? 1 << Number(opts.movement) : 2),
+      movement,
+      movementMask: opts.movementMask != null ? movementMaskFromValue(opts.movementMask) : (1 << movement),
       leafEnergy: colony ? rand(8, 18) : 0,
       leafCount: colony ? Math.floor(rand(3, 7)) : 0,
       fertility: Number(opts.fertility ?? (mobile ? 0.026 : 0.024)),
       cooldown: rand(mobile ? 150 : 90, colony ? 360 : 260),
-      maxAge: colony ? Number(opts.maxAge ?? rand(1800, 3300)) : mobile ? Number(opts.maxAge ?? rand(1900, 3200)) : Infinity,
+      maxAge: colony ? Number(opts.maxAge ?? rand(9000, 16500)) : mobile ? Number(opts.maxAge ?? rand(1900, 3200)) : Infinity,
       competitionAt: sim.time + rand(0.5, 3.5),
       color: sub === PRODUCER.A ? GROUP_COLORS['producer-a'] : sub === PRODUCER.B ? GROUP_COLORS['producer-b'] : GROUP_COLORS['producer-c']
     });
@@ -738,13 +744,15 @@
     const tissueCost = e.size * 0.010 + e.reserves * 0.004 + e.armor * 0.007;
     const appendageCost = flagellaLoad * 0.014 + e.cilia * 0.004 + e.pseudopodia * 0.006;
     const sensoryCost = e.chemosense * 0.010 + Math.max(0, e.perception - 90) * 0.000075;
+    const motionCost = (hasMove(e, 4) ? -0.004 : 0) + (hasMove(e, 5) ? 0.010 : 0);
     const vacuoleEfficiency = Math.max(0.82, 1 - e.vacuole * 0.035);
-    e.metabolism = (0.014 + speedCost + tissueCost + appendageCost + sensoryCost) * vacuoleEfficiency;
+    e.metabolism = (0.014 + speedCost + tissueCost + appendageCost + sensoryCost + motionCost) * vacuoleEfficiency;
     e.maxEnergy = 30 + e.reserves * 16 + e.size * 6.5 + e.vacuole * 3.5;
     return e;
   }
 
   function spawnConsumer(opts = {}) {
+    const movement = Number(opts.movement ?? Math.floor(rand(0, MOVE.length)));
     const e = createCreature({
       type: TYPE.CONSUMER,
       x: opts.x ?? rand(0, WORLD.w),
@@ -760,8 +768,8 @@
       armor: Number(opts.armor ?? rand(0, 2)),
       vacuole: Number(opts.vacuole ?? rand(0.5, 2.2)),
       feeding: Number(opts.feeding ?? Math.floor(rand(0, FEEDING.length))),
-      movement: Number(opts.movement ?? Math.floor(rand(0, MOVE.length))),
-      movementMask: opts.movementMask != null ? movementMaskFromValue(opts.movementMask) : (opts.movement != null ? 1 << Number(opts.movement) : 2),
+      movement,
+      movementMask: opts.movementMask != null ? movementMaskFromValue(opts.movementMask) : (1 << movement),
       fertility: Number(opts.fertility ?? 1),
       energy: Number(opts.energy ?? rand(18, 34)),
       maxAge: Number(opts.maxAge ?? rand(1050, 1750)),
@@ -774,21 +782,22 @@
     const e = spawnConsumer({
       ...opts,
       size: opts.size ?? rand(3, 7),
-      reserves: opts.reserves ?? rand(2, 5),
+      reserves: opts.reserves ?? rand(7, 15),
       flagella: opts.flagella ?? Math.floor(rand(2, 4.99)),
       cilia: opts.cilia ?? Math.floor(rand(1, 3)),
       chemosense: opts.chemosense ?? rand(1.8, 3.6),
       armor: opts.armor ?? rand(1, 3),
-      energy: opts.energy ?? rand(78, 118)
+      energy: opts.energy ?? rand(120, 190)
     });
     e.type = TYPE.PREDATOR;
     e.color = '#f05b50';
     e.radius += 1.5;
     e.speed *= 1.28;
     e.perception += 125;
-    e.maxEnergy *= 1.55;
+    e.maxEnergy *= 4.65;
+    if (opts.energy == null) e.energy = rand(e.maxEnergy * 0.38, e.maxEnergy * 0.62);
     e.metabolism *= 0.82;
-    e.maxAge = Number(opts.maxAge ?? rand(2400, 3900));
+    e.maxAge = Number(opts.maxAge ?? rand(7200, 11700));
     return e;
   }
 
@@ -802,7 +811,7 @@
       x: (a.x + b.x) * 0.5 + rand(-24, 24),
       y: (a.y + b.y) * 0.5 + rand(-24, 24),
       size: inheritGene(a, b, 'size', 0.5, type === TYPE.PREDATOR ? 12 : 9),
-      reserves: inheritGene(a, b, 'reserves', 0, 14),
+      reserves: inheritGene(a, b, 'reserves', 0, type === TYPE.PREDATOR ? 24 : 14),
       flagella: inheritGene(a, b, 'flagella', 0, 7, true),
       cilia: inheritGene(a, b, 'cilia', 0, 6, true),
       chemosense: inheritGene(a, b, 'chemosense', 0, 5),
@@ -812,7 +821,7 @@
       feeding: chance(0.08) ? Math.floor(rand(0, FEEDING.length)) : pick('feeding'),
       movementMask: inheritMovementMask(a, b),
       fertility: inheritGene(a, b, 'fertility', 0.2, 3),
-      energy: type === TYPE.PREDATOR ? 42 : 26
+      energy: type === TYPE.PREDATOR ? 160 : 26
     };
     const child = type === TYPE.PREDATOR ? spawnPredator(opts) : spawnConsumer(opts);
     sim.births += 1;
@@ -911,6 +920,28 @@
   const mateCandidates = [];
   const producerThreats = [];
 
+  function updateResting(e, dt, pressure = false) {
+    if (!hasMove(e, 4)) return false;
+    if (sim.time < e.restUntil) return true;
+    if (pressure || sim.time < e.restCooldown) return false;
+    const restChance = e.energy < e.maxEnergy * 0.38 ? 0.34 : 0.16;
+    if (chance(dt * restChance)) {
+      e.restUntil = sim.time + rand(1.2, 3.4);
+      e.restCooldown = e.restUntil + rand(3, 9);
+      return true;
+    }
+    return false;
+  }
+
+  function burstMultiplier(e, dt, pressure = false) {
+    if (!hasMove(e, 5) || sim.time < e.burstCooldown || e.energy < e.maxEnergy * 0.18) return 1;
+    const p = pressure ? 0.035 : 0.007;
+    if (!chance(dt * p)) return 1;
+    e.burstCooldown = sim.time + rand(18, 42);
+    e.energy = Math.max(0, e.energy - Math.max(3, e.maxEnergy * 0.045));
+    return rand(2.6, 4.2);
+  }
+
   function stepProducer(e, dt) {
     e.age += dt;
     e.cooldown -= dt * e.fertility * clamp(sim.solarEnergy, 0.1, 6);
@@ -933,6 +964,7 @@
       scanThreats(nearby);
       queryNearby(e.x, e.y, e.perception || 420, TYPE.PREDATOR, producerThreats);
       scanThreats(producerThreats);
+      const resting = updateResting(e, dt, Boolean(threat));
       if (threat) {
         const away = Math.atan2(-threat.dy, -threat.dx);
         const pull = hasMove(e, 0) ? 0.52 : hasMove(e, 2) ? 0.24 : hasMove(e, 3) ? 0.38 : 0.46;
@@ -944,9 +976,10 @@
       }
       if (hasMove(e, 3)) e.angle += Math.sin(sim.time * 1.3 + e.id) * 0.02;
       const panic = threat ? (hasMove(e, 2) ? 1.34 : 1.82) : 1;
-      e.x += Math.cos(e.angle) * e.speed * panic * dt;
-      e.y += Math.sin(e.angle) * e.speed * panic * dt;
-      const sensoryCost = (Number(e.chemosense || 0) * 0.003 + Math.max(0, Number(e.perception || 0) - 160) * 0.000012) * dt;
+      const moveScale = resting ? 0 : burstMultiplier(e, dt, Boolean(threat));
+      e.x += Math.cos(e.angle) * e.speed * panic * moveScale * dt;
+      e.y += Math.sin(e.angle) * e.speed * panic * moveScale * dt;
+      const sensoryCost = (Number(e.chemosense || 0) * 0.003 + Math.max(0, Number(e.perception || 0) - 160) * 0.000012) * dt * (resting ? 0.42 : 1);
       e.energy = Math.min(e.maxEnergy, e.energy + dt * sim.solarEnergy * 0.014 - sensoryCost);
       if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / 120)) {
         kill(e, 'Productor C móvil muere por senescencia');
@@ -1013,9 +1046,9 @@
         y: mod(e.y + rand(-720, 720), WORLD.h),
         radius: inheritAsexual(e, 'radius', 14, 40),
         maxRadius: inheritAsexual(e, 'maxRadius', 28, 72),
-        armor: inheritAsexual(e, 'armor', 0.8, 5),
+        armor: inheritAsexual(e, 'armor', 1.2, 7),
         fertility: inheritAsexual(e, 'fertility', 0.012, 0.085),
-        maxAge: inheritAsexual(e, 'maxAge', 1500, 4300)
+        maxAge: inheritAsexual(e, 'maxAge', 7500, 21500)
       });
       sim.births += 1;
       return;
@@ -1041,6 +1074,8 @@
   }
 
   function steerCreature(e, dt, food) {
+    const pressure = Boolean(food && e.type === TYPE.PREDATOR);
+    const resting = updateResting(e, dt, pressure);
     const turnNoise = hasMove(e, 0) ? 2.5 : hasMove(e, 2) ? 1.2 : 0.8;
     e.angle += rand(-turnNoise, turnNoise) * dt;
 
@@ -1055,9 +1090,15 @@
       e.angle += Math.sin(sim.time * 0.9 + e.id) * 0.018;
     }
 
+    if (resting) {
+      wrapInsideWorld(e);
+      return;
+    }
+
     const ciliaPulse = 1 + Math.sin(sim.time * 5 + e.id) * (e.cilia * 0.015);
-    e.x += Math.cos(e.angle) * e.speed * ciliaPulse * dt;
-    e.y += Math.sin(e.angle) * e.speed * ciliaPulse * dt;
+    const burst = burstMultiplier(e, dt, pressure);
+    e.x += Math.cos(e.angle) * e.speed * ciliaPulse * burst * dt;
+    e.y += Math.sin(e.angle) * e.speed * ciliaPulse * burst * dt;
     wrapInsideWorld(e);
   }
 
@@ -1070,6 +1111,7 @@
     if (dx * dx + dy * dy > eatRange * eatRange) return false;
 
     if (isColonyProducer(target)) {
+      if (e.type === TYPE.PREDATOR) return false;
       if ((target.leafCount || 0) <= 0 || target.leafEnergy <= 0.35 || !canEatArmored(e, target)) return false;
       const bite = Math.min(target.leafEnergy, 1.0 + e.size * 0.48 + e.pseudopodia * 0.32 + (e.feeding === 2 ? 0.7 : 0));
       target.leafEnergy -= bite;
@@ -1119,7 +1161,8 @@
   function stepMobile(e, dt) {
     e.age += dt;
     e.cooldown -= dt;
-    e.energy -= e.metabolism * dt * 7.5;
+    const resting = hasMove(e, 4) && sim.time < e.restUntil;
+    e.energy -= e.metabolism * dt * (resting ? 3.4 : 7.5);
     if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / (e.type === TYPE.PREDATOR ? 150 : 95))) {
       kill(e, e.type === TYPE.PREDATOR ? 'Depredador muere por senescencia' : 'Consumidor muere por senescencia');
       return;
@@ -1139,7 +1182,7 @@
         let bestD2 = Infinity;
         for (let i = 0; i < nearby.length; i += 1) {
           const p = nearby[i];
-          if (!p.alive || p.sub === PRODUCER.A || !canEatArmored(e, p)) continue;
+          if (!p.alive || p.sub === PRODUCER.A || isColonyProducer(p) || !canEatArmored(e, p)) continue;
           const d2 = torusDistance2(e, p);
           if (d2 < bestD2) {
             bestPlant = p;
@@ -1361,7 +1404,7 @@
   }
 
   function placeInspectorPanel(panel, screenX, screenY, index) {
-    const x = clamp(screenX + 14 + index * 24, 8, window.innerWidth - 420);
+    const x = clamp(screenX + 112 + index * 30, 8, window.innerWidth - 420);
     const y = clamp(screenY + 14 + index * 24, 68, window.innerHeight - 240);
     panel.style.left = `${x}px`;
     panel.style.top = `${y}px`;
@@ -2078,43 +2121,115 @@
 
   function seedWorld() {
     const areaFactor = clamp((WORLD.w * WORLD.h) / (4000 * 2250), 0.35, 6);
-    for (let i = 0; i < Math.round(12 * areaFactor); i += 1) spawnProducer({ sub: PRODUCER.B });
-    for (let i = 0; i < Math.round(70 * areaFactor); i += 1) spawnProducer({ sub: PRODUCER.C });
-    for (let i = 0; i < Math.round(120 * areaFactor); i += 1) spawnConsumer();
-    for (let i = 0; i < Math.round(18 * areaFactor); i += 1) spawnPredator();
+    for (let i = 0; i < Math.round(12 * areaFactor); i += 1) spawnProducer(lightningProducerOptions(PRODUCER.B, i));
+    for (let i = 0; i < Math.round(70 * areaFactor); i += 1) spawnProducer(lightningProducerOptions(PRODUCER.C, i));
+    for (let i = 0; i < Math.round(120 * areaFactor); i += 1) spawnConsumer(lightningMobileOptions('consumer', i));
+    for (let i = 0; i < Math.round(18 * areaFactor); i += 1) spawnPredator(lightningMobileOptions('predator', i));
     logEvent('Seed inicial: biomasa base, consumidores y depredadores');
+  }
+
+  function vary(value, ratio = 0.18, min = -Infinity, max = Infinity) {
+    return clamp(value * rand(1 - ratio, 1 + ratio), min, max);
+  }
+
+  function balancedMovementMask(i) {
+    const primary = i % MOVE.length;
+    let mask = 1 << primary;
+    if (chance(0.34)) mask |= 1 << ((primary + 1 + Math.floor(rand(0, MOVE.length - 1))) % MOVE.length);
+    return mask;
+  }
+
+  function lightningProducerOptions(sub, i) {
+    const base = defaultAddValues('producer', sub);
+    if (isColonyProducer(sub)) {
+      return {
+        sub,
+        radius: vary(base.radius, 0.22, 12, 34),
+        armor: vary(base.armor, 0.18, 2.4, 7),
+        fertility: vary(base.fertility, 0.18, 0.012, 0.075),
+        maxAge: vary(base.maxAge, 0.28, 8500, 22000)
+      };
+    }
+    return {
+      sub,
+      radius: vary(base.radius, 0.22, 3, 8),
+      armor: vary(base.armor, 0.20, 0.8, 3.2),
+      fertility: vary(base.fertility, 0.18, 0.010, 0.070),
+      speed: vary(base.speed, 0.24, 14, 50),
+      perception: vary(base.perception, 0.18, 180, 560),
+      chemosense: vary(base.chemosense, 0.18, 1.4, 4.2),
+      movementMask: balancedMovementMask(i)
+    };
+  }
+
+  function lightningMobileOptions(kind, i) {
+    const pred = kind === 'predator';
+    const base = defaultAddValues(kind);
+    return {
+      size: vary(base.size, 0.28, pred ? 2.2 : 0.8, pred ? 9 : 6),
+      reserves: vary(base.reserves, 0.28, pred ? 5 : 1, pred ? 20 : 8),
+      flagella: clamp(Math.round(vary(base.flagella + (i % 3) - 1, 0.18, 0, pred ? 6 : 5)), 0, pred ? 6 : 5),
+      cilia: clamp(Math.round(vary(base.cilia + ((i + 1) % 3) - 1, 0.18, 0, 6)), 0, 6),
+      chemosense: vary(base.chemosense, 0.28, pred ? 1.1 : 0.4, pred ? 4.4 : 3.4),
+      pseudopodia: vary(base.pseudopodia, 0.32, 0, pred ? 3.2 : 3.8),
+      armor: vary(base.armor, 0.30, pred ? 0.8 : 0, pred ? 4 : 2.8),
+      vacuole: vary(base.vacuole, 0.24, 0.3, 3.2),
+      feeding: i % FEEDING.length,
+      movementMask: balancedMovementMask(i),
+      fertility: vary(base.fertility, 0.20, 0.45, 2.2)
+    };
+  }
+
+  function spawnLightningBatch(kind, sub = null, amount = null) {
+    let created = 0;
+    if (kind === 'producer') {
+      const producerSub = sub ?? PRODUCER.B;
+      const total = amount ?? (isMobileProducer(producerSub) ? 36 : 14);
+      for (let i = 0; i < total; i += 1) {
+        spawnProducer(lightningProducerOptions(producerSub, i));
+        created += 1;
+      }
+    } else if (kind === 'consumer') {
+      const total = amount ?? 48;
+      for (let i = 0; i < total; i += 1) {
+        spawnConsumer(lightningMobileOptions(kind, i));
+        created += 1;
+      }
+    } else {
+      const total = amount ?? 16;
+      for (let i = 0; i < total; i += 1) {
+        spawnPredator(lightningMobileOptions(kind, i));
+        created += 1;
+      }
+    }
+    sim.births += created;
+    updateStats(true);
   }
 
   function addLightningMix() {
     const form = new FormData(els.addForm);
     if (sim.selectedAddKind === 'producer') {
-      const sub = Number(form.get('sub') ?? PRODUCER.A);
-      const amount = sub === PRODUCER.A ? 36 : isMobileProducer(sub) ? 24 : 8;
-      for (let i = 0; i < amount; i += 1) {
-        if (sub === PRODUCER.A) spawnProducer({ sub, x: rand(0, WORLD.w), y: rand(0, WORLD.h), fertility: rand(0.5, 1.8), radius: rand(140, 320) });
-        else spawnProducer({ sub });
-      }
+      spawnLightningBatch('producer', Number(form.get('sub') ?? PRODUCER.B));
     } else if (sim.selectedAddKind === 'consumer') {
-      for (let i = 0; i < 42; i += 1) spawnConsumer();
+      spawnLightningBatch('consumer');
     } else {
-      for (let i = 0; i < 12; i += 1) spawnPredator();
+      spawnLightningBatch('predator');
     }
-    updateStats(true);
   }
 
-  function defaultAddValues(kind, sub = PRODUCER.A) {
+  function defaultAddValues(kind, sub = PRODUCER.B) {
     if (kind === 'producer') {
       return {
         amount: ADD_AMOUNT_DEFAULT,
         sub,
         radius: isColonyProducer(sub) ? 18 : 5,
-        armor: isColonyProducer(sub) ? 2.8 : 1.8,
-        fertility: sub === PRODUCER.A ? 1 : isMobileProducer(sub) ? 0.026 : 0.024,
+        armor: isColonyProducer(sub) ? 3.8 : 1.8,
+        fertility: isMobileProducer(sub) ? 0.026 : 0.024,
         speed: 24,
         perception: 340,
         chemosense: 2.7,
         movementMask: 2,
-        maxAge: 2400
+        maxAge: isColonyProducer(sub) ? 12000 : 2400
       };
     }
     return {
@@ -2122,7 +2237,7 @@
       size: kind === 'predator' ? 5 : 2.4,
       flagella: kind === 'predator' ? 3 : 1,
       cilia: kind === 'predator' ? 1 : 2,
-      reserves: kind === 'predator' ? 5 : 3,
+      reserves: kind === 'predator' ? 12 : 3,
       pseudopodia: kind === 'predator' ? 0.8 : 1.2,
       armor: kind === 'predator' ? 2 : 0.6,
       chemosense: kind === 'predator' ? 2.4 : 1.6,
@@ -2136,7 +2251,7 @@
   function savedAddValues(kind, sub = null, forceDefaults = false) {
     const saved = forceDefaults ? null : sim.lastAddValues[kind];
     if (kind === 'producer') {
-      const wantedSub = sub ?? Number(saved?.sub ?? PRODUCER.A);
+      const wantedSub = sub ?? Number(saved?.sub ?? PRODUCER.B);
       return { ...defaultAddValues(kind, wantedSub), ...(saved && Number(saved.sub) === wantedSub ? saved : {}), sub: wantedSub };
     }
     return { ...defaultAddValues(kind), ...(saved || {}) };
@@ -2228,7 +2343,7 @@
     if (sim.selectedAddKind === 'producer') {
       data.type = TYPE.PRODUCER;
       data.kind = 'producer';
-      data.sub = Number(data.sub ?? PRODUCER.A);
+      data.sub = Number(data.sub ?? PRODUCER.B);
       if (isColonyProducer(data.sub) && data.leafCount == null) data.leafCount = Math.max(2, Math.floor(2 + Number(data.radius || 18) / 8));
     } else {
       data.kind = sim.selectedAddKind;
@@ -2271,15 +2386,15 @@
     const initial = savedAddValues(kind, null, forceDefaults);
     const common = rangeField('amount', 'Cantidad', initial.amount ?? ADD_AMOUNT_DEFAULT, 1, ADD_AMOUNT_MAX, 1, 'Número de entidades a crear repartidas por todo el ecosistema. Valores altos pueden afectar al rendimiento.');
     if (kind === 'producer') {
-      const renderProducerForm = (sub = 0, producerForceDefaults = false) => {
+      const renderProducerForm = (sub = PRODUCER.B, producerForceDefaults = false) => {
         const values = savedAddValues(kind, sub, forceDefaults || producerForceDefaults);
         const amountField = rangeField('amount', 'Cantidad', values.amount ?? ADD_AMOUNT_DEFAULT, 1, ADD_AMOUNT_MAX, 1, 'Número de entidades a crear repartidas por todo el ecosistema. Valores altos pueden afectar al rendimiento.');
         const visualFields = rangeField('radius', 'Tamaño base', values.radius, 2, 40, 0.5, 'Radio inicial. En Tipo B aumenta con el sol hasta su radio máximo; en Tipo C afecta a contacto y visibilidad.')
-          + (sub !== 0 ? rangeField('armor', 'Armadura', values.armor, 0, 5, 0.1, 'Resistencia física: consumidores y depredadores necesitan alimentación y fenotipo suficientes para atravesarla.') : '');
+          + rangeField('armor', 'Armadura', values.armor, 0, 7, 0.1, 'Resistencia física: consumidores y depredadores necesitan alimentación y fenotipo suficientes para atravesarla.');
         els.dynamicFields.innerHTML = amountField
-          + segmentedField('sub', 'Modelo productor', sub, [[0, 'Tipo A', 'Biomasa fija agregada en el campo de densidades. Escala muy bien.'], [1, 'Tipo B', 'Colonia fija grande: crece, genera hojas comestibles y muere por edad.'], [2, 'Tipo C', 'Productor móvil: detecta consumidores y depredadores y huye.']], 'Tipo A no crea entidades individuales; B y C sí entran en la rejilla espacial.')
+          + segmentedField('sub', 'Modelo productor', sub, [[1, 'Tipo B', 'Colonia fija grande: crece, genera hojas comestibles y muere por edad.'], [2, 'Tipo C', 'Productor móvil: detecta consumidores y depredadores y huye.']], 'Tipo A queda como densidad agregada del campo y crece con la energía del sistema; B y C sí entran en la rejilla espacial.')
           + previewField(visualFields)
-          + rangeField('fertility', 'Reproducción', values.fertility, 0.004, sub === 0 ? 3 : 0.18, 0.001, 'Multiplica la velocidad del cooldown reproductivo; también escala con la energía solar. En productores entidad conviene mantenerlo bajo.')
+          + rangeField('fertility', 'Reproducción', values.fertility, 0.004, 0.18, 0.001, 'Multiplica la velocidad del cooldown reproductivo; también escala con la energía solar. En productores entidad conviene mantenerlo bajo.')
           + (isMobileProducer(sub)
             ? rangeField('speed', 'Velocidad Tipo C', values.speed, 0, 80, 1, 'Velocidad de productores móviles. Más velocidad ayuda a huir, pero captar sol en movimiento es lento y reproducirse cuesta más.')
               + rangeField('perception', 'Percepción Tipo C', values.perception, 60, 650, 10, 'Rango para detectar consumidores y depredadores cercanos y huir antes de ser alcanzado. Demasiada percepción cuesta energía.')
@@ -2287,20 +2402,20 @@
               + movementField('movementBits', 'Movimientos Tipo C', values.movementMask, 'Puede tener varios algoritmos simultáneos. En reproducción asexual mutan muy poco.')
             : '')
           + (isColonyProducer(sub)
-            ? rangeField('maxAge', 'Vida máxima', values.maxAge, 900, 4800, 10, 'Tiempo medio antes de morir por senescencia. Se hereda con margen controlado.')
+            ? rangeField('maxAge', 'Vida máxima', values.maxAge, 3000, 24000, 50, 'Tiempo medio antes de morir por senescencia. Se hereda con margen controlado.')
             : '');
         bindDynamicFields();
         els.dynamicFields.querySelectorAll('input[name="sub"]').forEach((input) => {
           input.addEventListener('change', () => renderProducerForm(Number(input.value)));
         });
       };
-      renderProducerForm(Number(initial.sub ?? PRODUCER.A));
+      renderProducerForm(Number(initial.sub ?? PRODUCER.B));
     } else {
       const values = initial;
       const visualFields = rangeField('size', 'Tamaño', values.size, 0.5, 12, 0.1, 'Aumenta radio, energía máxima y capacidad de pastar hojas blindadas, pero sube masa, coste basal y reduce velocidad.')
         + rangeField('flagella', 'Flagelos', values.flagella, 0, 7, 1, 'Aumentan impulso, pero ahora tienen coste no lineal: muchos flagelos añaden rozamiento, masa funcional y gasto energético alto.')
         + rangeField('cilia', 'Cilios', values.cilia, 0, 6, 1, 'Aumentan micropropulsión, percepción cercana y alcance de filtrado, con coste moderado.')
-        + rangeField('reserves', 'Reservas', values.reserves, 0, 14, 0.1, 'Amplían energía máxima y supervivencia, pero añaden masa y hacen al ser más lento.')
+        + rangeField('reserves', 'Reservas', values.reserves, 0, kind === 'predator' ? 24 : 14, 0.1, 'Amplían energía máxima y supervivencia, pero añaden masa y hacen al ser más lento.')
         + rangeField('pseudopodia', 'Pseudópodos', values.pseudopodia, 0, 4, 0.1, 'Mejoran mordida y consumo de hojas/presas, pero aportan coste y rozamiento.')
         + rangeField('armor', 'Película / armadura', values.armor, 0, 5, 0.1, 'Aumenta masa y coste; queda preparada para ventajas defensivas futuras.');
       els.dynamicFields.innerHTML = common
@@ -2375,6 +2490,7 @@
     delete opts.amount;
     sim.lastAddValues[sim.selectedAddKind] = collectAddValues(form);
     let lastCreated = null;
+    let created = 0;
     for (let i = 0; i < amount; i += 1) {
       const local = {
         ...opts,
@@ -2384,11 +2500,13 @@
       if (sim.selectedAddKind === 'producer') lastCreated = spawnProducer(local) || lastCreated;
       else if (sim.selectedAddKind === 'consumer') lastCreated = spawnConsumer(local);
       else lastCreated = spawnPredator(local);
+      if (lastCreated) created += 1;
     }
-    if (sim.selectedAddKind !== 'producer') {
-      sim.births += amount;
+    if (created) {
+      sim.births += created;
       const label = sim.selectedAddKind === 'consumer' ? 'consumidores' : 'depredadores';
-      logEvent(`Añadidos ${fmt.format(amount)} ${label} desde el popup`, 'birth');
+      const producerLabel = sim.selectedAddKind === 'producer' ? 'productores' : label;
+      logEvent(`Añadidos ${fmt.format(created)} ${producerLabel} desde el popup`, 'birth');
     }
     if (amount === 1 && lastCreated) selectCreature(lastCreated);
     updateStats(true);
@@ -2567,6 +2685,14 @@
 
     document.querySelectorAll('[data-add]').forEach((btn) => {
       btn.addEventListener('click', () => openAddDialog(btn.dataset.add));
+    });
+    document.querySelectorAll('[data-quick-add]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const kind = btn.dataset.quickAdd;
+        if (kind === 'producer-b') spawnLightningBatch('producer', PRODUCER.B);
+        else if (kind === 'producer-c') spawnLightningBatch('producer', PRODUCER.C);
+        else spawnLightningBatch(kind);
+      });
     });
 
     document.getElementById('quickMix').addEventListener('click', () => {

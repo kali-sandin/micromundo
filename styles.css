@@ -204,6 +204,28 @@ select {
   padding: 0 10px;
 }
 
+.quick-rayo {
+  width: 42px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.quick-rayo .being-icons {
+  width: 19px;
+  transform: scale(0.86);
+}
+
+.quick-rayo .bolt {
+  margin-left: -4px;
+  color: var(--gold);
+  font-size: 0.9rem;
+  font-weight: 900;
+  text-shadow: 0 0 8px rgba(229, 189, 85, 0.45);
+}
+
 .tool-button:hover,
 .icon-button:hover,
 .tool-button.active {
