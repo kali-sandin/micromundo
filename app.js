@@ -161,6 +161,8 @@
     selectedCreatureId: null,
     selectedCreatureIds: [],
     selectedTrails: new Map(),
+    followCreatureId: null,
+    lastCenteredCreatureId: null,
     lastAddValues: {},
     nextCreatureUid: 1,
     populationSeriesVisible: {
@@ -725,7 +727,7 @@
       leafCount: colony ? Math.floor(rand(3, 7)) : 0,
       fertility: Number(opts.fertility ?? (mobile ? 0.026 : 0.024)),
       cooldown: rand(mobile ? 150 : 90, colony ? 360 : 260),
-      maxAge: colony ? Number(opts.maxAge ?? rand(9000, 16500)) : mobile ? Number(opts.maxAge ?? rand(1900, 3200)) : Infinity,
+      maxAge: colony ? Number(opts.maxAge ?? rand(9000, 16500)) : mobile ? Number(opts.maxAge ?? rand(5200, 9000)) : Infinity,
       competitionAt: sim.time + rand(0.5, 3.5),
       color: sub === PRODUCER.A ? GROUP_COLORS['producer-a'] : sub === PRODUCER.B ? GROUP_COLORS['producer-b'] : GROUP_COLORS['producer-c']
     });
@@ -760,7 +762,7 @@
       angle: rand(-Math.PI, Math.PI),
       color: '#54b7f1',
       size: Number(opts.size ?? rand(1, 4)),
-      reserves: Number(opts.reserves ?? rand(1, 4)),
+      reserves: Number(opts.reserves ?? rand(2.5, 6)),
       flagella: Number(opts.flagella ?? Math.floor(rand(0, 3.99))),
       cilia: Number(opts.cilia ?? Math.floor(rand(0, 3.99))),
       chemosense: Number(opts.chemosense ?? rand(0.6, 2.4)),
@@ -771,11 +773,13 @@
       movement,
       movementMask: opts.movementMask != null ? movementMaskFromValue(opts.movementMask) : (1 << movement),
       fertility: Number(opts.fertility ?? 1),
-      energy: Number(opts.energy ?? rand(18, 34)),
-      maxAge: Number(opts.maxAge ?? rand(1050, 1750)),
+      energy: Number(opts.energy ?? rand(32, 58)),
+      maxAge: Number(opts.maxAge ?? rand(2800, 4600)),
       cooldown: rand(8, 35)
     });
-    return derivedConsumerStats(e);
+    const out = derivedConsumerStats(e);
+    out.metabolism *= 0.9;
+    return out;
   }
 
   function spawnPredator(opts = {}) {
@@ -821,6 +825,7 @@
       feeding: chance(0.08) ? Math.floor(rand(0, FEEDING.length)) : pick('feeding'),
       movementMask: inheritMovementMask(a, b),
       fertility: inheritGene(a, b, 'fertility', 0.2, 3),
+      maxAge: inheritGene(a, b, 'maxAge', type === TYPE.PREDATOR ? 5000 : 1800, type === TYPE.PREDATOR ? 15000 : 8000),
       energy: type === TYPE.PREDATOR ? 160 : 26
     };
     const child = type === TYPE.PREDATOR ? spawnPredator(opts) : spawnConsumer(opts);
@@ -878,6 +883,7 @@
     for (let i = 0; i < candidates.length; i += 1) {
       const t = candidates[i];
       if (!t.alive) continue;
+      if (e.type === TYPE.PREDATOR && isColonyProducer(t)) continue;
       if (isColonyProducer(t) && ((t.leafCount || 0) <= 0 || t.leafEnergy <= 0.35)) continue;
       if (t.type === TYPE.PRODUCER && t.sub !== PRODUCER.A && !canEatArmored(e, t)) continue;
       const dx = torusDelta(t.x - e.x, WORLD.w);
@@ -926,8 +932,8 @@
     if (pressure || sim.time < e.restCooldown) return false;
     const restChance = e.energy < e.maxEnergy * 0.38 ? 0.34 : 0.16;
     if (chance(dt * restChance)) {
-      e.restUntil = sim.time + rand(1.2, 3.4);
-      e.restCooldown = e.restUntil + rand(3, 9);
+      e.restUntil = sim.time + rand(1.8, 4.6);
+      e.restCooldown = e.restUntil + rand(4, 10);
       return true;
     }
     return false;
@@ -980,7 +986,7 @@
       e.x += Math.cos(e.angle) * e.speed * panic * moveScale * dt;
       e.y += Math.sin(e.angle) * e.speed * panic * moveScale * dt;
       const sensoryCost = (Number(e.chemosense || 0) * 0.003 + Math.max(0, Number(e.perception || 0) - 160) * 0.000012) * dt * (resting ? 0.42 : 1);
-      e.energy = Math.min(e.maxEnergy, e.energy + dt * sim.solarEnergy * 0.014 - sensoryCost);
+      e.energy = Math.min(e.maxEnergy, e.energy + dt * sim.solarEnergy * 0.024 - sensoryCost);
       if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / 120)) {
         kill(e, 'Productor C móvil muere por senescencia');
         return;
@@ -1067,7 +1073,7 @@
       chemosense: inheritAsexual(e, 'chemosense', 0, 5),
       movementMask: chance(0.04) ? inheritMovementMask(e, { movementMask: 1 << Math.floor(rand(0, MOVE.length)) }) : movementMaskFromLegacy(e),
       fertility: inheritAsexual(e, 'fertility', 0.006, 0.22),
-      maxAge: inheritAsexual(e, 'maxAge', 1400, 4300)
+      maxAge: inheritAsexual(e, 'maxAge', 3500, 12000)
     });
     e.energy *= 0.68;
     sim.births += 1;
@@ -1356,6 +1362,7 @@
     sim.selectedCreatureIds = sim.selectedCreatureIds.filter((selectedKey) => selectedKey !== key);
     sim.selectedCreatureId = sim.selectedCreatureIds[sim.selectedCreatureIds.length - 1] ?? null;
     sim.selectedTrails.delete(key);
+    if (sim.followCreatureId === key) setFollowCreature(key, false);
     const panel = document.querySelector(`.inspect-panel[data-inspect-uid="${key}"]`);
     if (panel && panel !== els.inspectPanel) panel.remove();
     else if (panel) {
@@ -1369,6 +1376,24 @@
     if (targetKey == null) return;
     removeInspectorPanel(targetKey);
     updateInspectors();
+  }
+
+  function setFollowCreature(key, enabled) {
+    sim.followCreatureId = enabled ? key : null;
+    if (!enabled && sim.lastCenteredCreatureId === key) sim.lastCenteredCreatureId = null;
+    updateFollowButtons();
+  }
+
+  function updateFollowButtons() {
+    document.querySelectorAll('.inspect-panel[data-inspect-uid]').forEach((panel) => {
+      const key = Number(panel.dataset.inspectUid);
+      const active = sim.followCreatureId === key;
+      const btn = panel.querySelector('.target-inspect');
+      if (btn) {
+        btn.classList.toggle('active', active);
+        btn.title = active ? 'Dejar de seguir' : 'Centrar vista';
+      }
+    });
   }
 
   function ensureInspectorPanel(key, index) {
@@ -1397,7 +1422,7 @@
       target.dataset.boundInspectTarget = '1';
       target.addEventListener('click', (ev) => {
         ev.stopPropagation();
-        centerOnCreature(Number(panel.dataset.inspectUid));
+        centerOnCreature(Number(panel.dataset.inspectUid), true);
       });
     }
     return panel;
@@ -1427,12 +1452,31 @@
     if (panel) placeInspectorPanel(panel, screenX, screenY, sim.selectedCreatureIds.length - 1);
   }
 
-  function centerOnCreature(key) {
+  function centerOnCreature(key, toggleFollow = false) {
     const e = creatureByKey(key);
     if (!e || !e.alive) return;
     camera.x = e.x;
     camera.y = e.y;
+    if (toggleFollow) {
+      if (sim.followCreatureId === key) setFollowCreature(key, false);
+      else if (sim.lastCenteredCreatureId === key) setFollowCreature(key, true);
+      else {
+        sim.lastCenteredCreatureId = key;
+        updateFollowButtons();
+      }
+    }
     clampCamera();
+  }
+
+  function updateCameraFollow() {
+    if (sim.followCreatureId == null || camera.dragging) return;
+    const e = creatureByKey(sim.followCreatureId);
+    if (!e || !e.alive) {
+      setFollowCreature(sim.followCreatureId, false);
+      return;
+    }
+    camera.x = e.x;
+    camera.y = e.y;
   }
 
   function inspectorHtml(e) {
@@ -1488,6 +1532,7 @@
     });
     if (!sim.selectedCreatureIds.length) {
       els.inspectPanel.classList.add('hidden');
+      updateFollowButtons();
       return;
     }
     for (let i = 0; i < sim.selectedCreatureIds.length; i += 1) {
@@ -1498,6 +1543,7 @@
       panel.querySelector('h2').innerHTML = `${escapeHtml(typeName(e))} <b class="inspect-id" style="color:${colorForCreature(e)}">#${creatureKey(e)}</b>`;
       panel.querySelector('.inspect-body').innerHTML = inspectorHtml(e);
     }
+    updateFollowButtons();
   }
 
   function findCreatureAt(screenX, screenY) {
@@ -2025,7 +2071,7 @@
     const latest = points[points.length - 1][group];
     const labels = allKeys.map((key, idx) => {
       const disabled = hidden.has(key) ? ' disabled' : '';
-      return `<span class="${disabled}" data-gene-key="${escapeHtml(key)}" role="button" tabindex="0" style="--gene-color:${GENE_COLORS[idx % GENE_COLORS.length]}">${escapeHtml(key)} <b>${formatValue(latest.avg[key])}</b></span>`;
+      return `<button class="gene-toggle${disabled}" type="button" data-gene-key="${escapeHtml(key)}" style="--gene-color:${GENE_COLORS[idx % GENE_COLORS.length]}">${escapeHtml(key)} <b>${formatValue(latest.avg[key])}</b></button>`;
     });
     els.geneSummary.innerHTML = `<strong>${GROUP_LABELS[group]}: <b style="color:${GROUP_COLORS[group]}">${fmt.format(latest.n)}</b></strong>${labels.join('')}`;
   }
@@ -2049,6 +2095,7 @@
       for (let i = 0; i < chunks; i += 1) simulate(dt);
     }
 
+    updateCameraFollow();
     render();
     updateStats();
     requestAnimationFrame(animationLoop);
@@ -2104,6 +2151,8 @@
     sim.selectedCreatureId = null;
     sim.selectedCreatureIds = [];
     sim.selectedTrails.clear();
+    sim.followCreatureId = null;
+    sim.lastCenteredCreatureId = null;
     sim.nextCreatureUid = 1;
     document.querySelectorAll('.inspect-panel[data-inspect-uid]').forEach((panel) => {
       if (panel === els.inspectPanel) {
@@ -2132,6 +2181,30 @@
     return clamp(value * rand(1 - ratio, 1 + ratio), min, max);
   }
 
+  function averageExisting(group, minCount = 6) {
+    const keys = GROUP_KEYS[group] || [];
+    const sums = Object.fromEntries(keys.map((key) => [key, 0]));
+    let n = 0;
+    for (let i = 0; i < sim.creatures.length; i += 1) {
+      const e = sim.creatures[i];
+      if (!e || !e.alive || groupForCreature(e) !== group) continue;
+      n += 1;
+      for (let k = 0; k < keys.length; k += 1) sums[keys[k]] += Number(e[keys[k]] || 0);
+    }
+    if (n < minCount) return null;
+    const avg = {};
+    for (let k = 0; k < keys.length; k += 1) avg[keys[k]] = sums[keys[k]] / n;
+    return avg;
+  }
+
+  function adaptiveBase(kind, sub = null) {
+    if (kind === 'producer') {
+      const group = sub === PRODUCER.B ? 'producer-b' : 'producer-c';
+      return { ...defaultAddValues(kind, sub), ...(averageExisting(group, isColonyProducer(sub) ? 5 : 12) || {}) };
+    }
+    return { ...defaultAddValues(kind), ...(averageExisting(kind, kind === 'predator' ? 4 : 12) || {}) };
+  }
+
   function balancedMovementMask(i) {
     const primary = i % MOVE.length;
     let mask = 1 << primary;
@@ -2140,7 +2213,7 @@
   }
 
   function lightningProducerOptions(sub, i) {
-    const base = defaultAddValues('producer', sub);
+    const base = adaptiveBase('producer', sub);
     if (isColonyProducer(sub)) {
       return {
         sub,
@@ -2158,13 +2231,14 @@
       speed: vary(base.speed, 0.24, 14, 50),
       perception: vary(base.perception, 0.18, 180, 560),
       chemosense: vary(base.chemosense, 0.18, 1.4, 4.2),
+      maxAge: vary(base.maxAge, 0.24, 4200, 12500),
       movementMask: balancedMovementMask(i)
     };
   }
 
   function lightningMobileOptions(kind, i) {
     const pred = kind === 'predator';
-    const base = defaultAddValues(kind);
+    const base = adaptiveBase(kind);
     return {
       size: vary(base.size, 0.28, pred ? 2.2 : 0.8, pred ? 9 : 6),
       reserves: vary(base.reserves, 0.28, pred ? 5 : 1, pred ? 20 : 8),
@@ -2174,6 +2248,7 @@
       pseudopodia: vary(base.pseudopodia, 0.32, 0, pred ? 3.2 : 3.8),
       armor: vary(base.armor, 0.30, pred ? 0.8 : 0, pred ? 4 : 2.8),
       vacuole: vary(base.vacuole, 0.24, 0.3, 3.2),
+      maxAge: vary(base.maxAge ?? (pred ? 9200 : 3600), 0.24, pred ? 6200 : 2400, pred ? 14000 : 6200),
       feeding: i % FEEDING.length,
       movementMask: balancedMovementMask(i),
       fertility: vary(base.fertility, 0.20, 0.45, 2.2)
@@ -2229,7 +2304,7 @@
         perception: 340,
         chemosense: 2.7,
         movementMask: 2,
-        maxAge: isColonyProducer(sub) ? 12000 : 2400
+        maxAge: isColonyProducer(sub) ? 12000 : 6800
       };
     }
     return {
@@ -2237,14 +2312,15 @@
       size: kind === 'predator' ? 5 : 2.4,
       flagella: kind === 'predator' ? 3 : 1,
       cilia: kind === 'predator' ? 1 : 2,
-      reserves: kind === 'predator' ? 12 : 3,
+      reserves: kind === 'predator' ? 12 : 5,
       pseudopodia: kind === 'predator' ? 0.8 : 1.2,
       armor: kind === 'predator' ? 2 : 0.6,
       chemosense: kind === 'predator' ? 2.4 : 1.6,
       vacuole: 1.2,
       feeding: 0,
       movementMask: 2,
-      fertility: 1
+      fertility: 1,
+      maxAge: kind === 'predator' ? 9200 : 3600
     };
   }
 
@@ -2424,6 +2500,7 @@
         + rangeField('vacuole', 'Vacuola contráctil', values.vacuole, 0, 4, 0.1, 'Reduce parcialmente el metabolismo efectivo, compensando algo el coste de tamaño y movilidad.')
         + segmentedField('feeding', 'Alimentación', values.feeding, FEEDING_INFO.map((item, idx) => [idx, item[0], item[1]]), 'Modo de alimentación: modifica alcance, mordida y eficiencia al comer biomasa, hojas o presas.')
         + movementField('movementBits', 'Movimientos', values.movementMask, 'Puede combinar varios algoritmos. La reproducción mezcla los algoritmos activos de ambos padres.')
+        + rangeField('maxAge', 'Vida máxima', values.maxAge, kind === 'predator' ? 5000 : 1800, kind === 'predator' ? 15000 : 8000, 50, 'Tiempo medio antes de morir por senescencia. Más vida permite que fenotipos lentos tengan opciones.')
         + rangeField('fertility', 'Fertilidad', values.fertility, 0.2, 3, 0.1, 'Reduce cooldown reproductivo cuando hay energía suficiente. Los hijos heredan dentro del rango parental ±20%.');
       bindDynamicFields();
     }
@@ -2571,6 +2648,14 @@
     drawGraph();
   }
 
+  function toggleGeneSeries(key) {
+    if (!key) return;
+    const hidden = geneHiddenSet(sim.geneHistoryGroup);
+    if (hidden.has(key)) hidden.delete(key);
+    else hidden.add(key);
+    drawGeneHistory();
+  }
+
   function handleToggleKey(ev, callback) {
     if (ev.key !== 'Enter' && ev.key !== ' ') return;
     ev.preventDefault();
@@ -2610,22 +2695,12 @@
     els.geneSummary.addEventListener('click', (ev) => {
       const item = ev.target.closest('[data-gene-key]');
       if (!item) return;
-      const hidden = geneHiddenSet(sim.geneHistoryGroup);
-      const key = item.dataset.geneKey;
-      if (hidden.has(key)) hidden.delete(key);
-      else hidden.add(key);
-      drawGeneHistory();
+      toggleGeneSeries(item.dataset.geneKey);
     });
     els.geneSummary.addEventListener('keydown', (ev) => {
       const item = ev.target.closest('[data-gene-key]');
       if (!item) return;
-      handleToggleKey(ev, () => {
-        const hidden = geneHiddenSet(sim.geneHistoryGroup);
-        const key = item.dataset.geneKey;
-        if (hidden.has(key)) hidden.delete(key);
-        else hidden.add(key);
-        drawGeneHistory();
-      });
+      handleToggleKey(ev, () => toggleGeneSeries(item.dataset.geneKey));
     });
     document.getElementById('toggleDebug').addEventListener('click', (ev) => {
       sim.debug = !sim.debug;
@@ -2637,10 +2712,6 @@
       resetWorld();
     });
     els.worldReadout.addEventListener('click', openWorldDialog);
-    els.closeInspect.addEventListener('click', () => {
-      const id = Number(els.inspectPanel.dataset.inspectUid);
-      closeInspector(Number.isFinite(id) ? id : null);
-    });
     window.addEventListener('keydown', (ev) => {
       const editable = ev.target?.closest?.('input, textarea, select, dialog');
       if (ev.key === 'Escape' && sim.selectedCreatureIds.length && !els.addDialog.open) closeInspector();
@@ -2711,6 +2782,7 @@
     });
 
     canvas.addEventListener('pointerdown', (ev) => {
+      if (sim.followCreatureId != null) setFollowCreature(sim.followCreatureId, false);
       camera.dragging = true;
       camera.moved = false;
       camera.lastX = ev.clientX;
@@ -2738,6 +2810,7 @@
       canvas.classList.remove('dragging');
     });
     canvas.addEventListener('dblclick', () => {
+      if (sim.followCreatureId != null) setFollowCreature(sim.followCreatureId, false);
       centerCamera({ fit: true });
     });
     canvas.addEventListener('click', (ev) => {
@@ -2748,6 +2821,7 @@
     });
     canvas.addEventListener('wheel', (ev) => {
       ev.preventDefault();
+      if (sim.followCreatureId != null) setFollowCreature(sim.followCreatureId, false);
       const before = screenToWorld(ev.clientX, ev.clientY);
       const factor = Math.exp(-ev.deltaY * 0.0012);
       camera.zoom = clamp(camera.zoom * factor, 0.028, 2.2);
