@@ -272,7 +272,7 @@
     const low = Math.min(av, bv);
     const high = Math.max(av, bv);
     const span = Math.max(high - low, Math.max(Math.abs((av + bv) * 0.5), 1));
-    const value = rand(low - span * 0.32, high + span * 0.32);
+    const value = rand(low - span * 0.18, high + span * 0.18);
     const out = clamp(value, min, max);
     return integer ? Math.round(out) : out;
   }
@@ -286,7 +286,7 @@
       const bit = 1 << i;
       if (union & bit && chance((ma & bit) && (mb & bit) ? 0.82 : 0.48)) child |= bit;
     }
-    if (chance(0.08)) child ^= 1 << Math.floor(rand(0, MOVE.length));
+    if (chance(0.04)) child ^= 1 << Math.floor(rand(0, MOVE.length));
     return child || (chance(0.5) ? ma : mb) || 2;
   }
 
@@ -725,7 +725,7 @@
       movementMask: opts.movementMask != null ? movementMaskFromValue(opts.movementMask) : (1 << movement),
       leafEnergy: colony ? rand(8, 18) : 0,
       leafCount: colony ? Math.floor(rand(3, 7)) : 0,
-      fertility: Number(opts.fertility ?? (mobile ? 0.026 : 0.024)),
+      fertility: Number(opts.fertility ?? (mobile ? 0.040 : 0.024)),
       cooldown: rand(mobile ? 150 : 90, colony ? 360 : 260),
       maxAge: colony ? Number(opts.maxAge ?? rand(9000, 16500)) : mobile ? Number(opts.maxAge ?? rand(5200, 9000)) : Infinity,
       competitionAt: sim.time + rand(0.5, 3.5),
@@ -778,6 +778,7 @@
       cooldown: rand(8, 35)
     });
     const out = derivedConsumerStats(e);
+    if (!opts.keepConsumerSpeed) out.speed *= 0.88;
     out.metabolism *= 0.9;
     return out;
   }
@@ -791,7 +792,8 @@
       cilia: opts.cilia ?? Math.floor(rand(1, 3)),
       chemosense: opts.chemosense ?? rand(1.8, 3.6),
       armor: opts.armor ?? rand(1, 3),
-      energy: opts.energy ?? rand(120, 190)
+      energy: opts.energy ?? rand(120, 190),
+      keepConsumerSpeed: true
     });
     e.type = TYPE.PREDATOR;
     e.color = '#f05b50';
@@ -927,9 +929,14 @@
   const mateCandidates = [];
   const mateSeekCandidates = [];
   const producerThreats = [];
+  const consumerThreats = [];
 
   function updateResting(e, dt, pressure = false) {
     if (!hasMove(e, 4)) return false;
+    if (pressure && sim.time < e.restUntil) {
+      e.restUntil = sim.time;
+      return false;
+    }
     if (sim.time < e.restUntil) return true;
     if (pressure || sim.time < e.restCooldown) return false;
     const restChance = e.energy < e.maxEnergy * 0.38 ? 0.34 : 0.16;
@@ -948,6 +955,25 @@
     e.burstCooldown = sim.time + rand(18, 42);
     e.energy = Math.max(0, e.energy - Math.max(3, e.maxEnergy * 0.045));
     return rand(2.6, 4.2);
+  }
+
+  function nearestThreat(e, list) {
+    let best = null;
+    let bestD2 = Infinity;
+    for (let i = 0; i < list.length; i += 1) {
+      const t = list[i];
+      if (!t || !t.alive || t === e) continue;
+      const d2 = torusDistance2(e, t);
+      if (d2 < bestD2) {
+        best = t;
+        bestD2 = d2;
+      }
+    }
+    return best;
+  }
+
+  function consumerThreatRange(e) {
+    return Math.min(920, Math.max(220, e.perception * 1.35 + e.chemosense * 55 + e.cilia * 12));
   }
 
   function stepProducer(e, dt) {
@@ -1036,7 +1062,7 @@
     }
 
     if (e.cooldown > 0) return;
-    e.cooldown = isColonyProducer(e) ? rand(180, 360) : rand(170, 360);
+    e.cooldown = isColonyProducer(e) ? rand(180, 360) : rand(110, 240);
 
     if (sim.creatures.length - sim.freeIds.length > 50000 && !chance(0.2)) return;
 
@@ -1081,13 +1107,21 @@
     sim.births += 1;
   }
 
-  function steerCreature(e, dt, food) {
-    const pressure = Boolean(food && e.type === TYPE.PREDATOR);
+  function steerCreature(e, dt, food, threat = null) {
+    const pressure = Boolean(threat || (food && e.type === TYPE.PREDATOR));
     const resting = updateResting(e, dt, pressure);
     const turnNoise = hasMove(e, 0) ? 2.5 : hasMove(e, 2) ? 1.2 : 0.8;
     e.angle += rand(-turnNoise, turnNoise) * dt;
 
-    if (food && (hasMove(e, 1) || e.chemosense > 1.3)) {
+    if (threat) {
+      const { dx, dy } = torusVector(e, threat);
+      const desired = Math.atan2(-dy, -dx);
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const urgency = clamp(1 - distance / Math.max(1, consumerThreatRange(e)), 0.18, 1);
+      const pull = hasMove(e, 1) ? 0.38 : hasMove(e, 0) ? 0.31 : hasMove(e, 3) ? 0.26 : 0.20;
+      e.angle += normalizeAngle(desired - e.angle) * pull * (0.75 + urgency * 0.65);
+      if (hasMove(e, 0) && chance(0.045)) e.angle += rand(-0.7, 0.7);
+    } else if (food && (hasMove(e, 1) || e.chemosense > 1.3)) {
       const { dx, dy } = torusVector(e, food);
       const desired = Math.atan2(dy, dx);
       const pull = clamp(e.chemosense * 0.09, 0.04, 0.32);
@@ -1105,8 +1139,9 @@
 
     const ciliaPulse = 1 + Math.sin(sim.time * 5 + e.id) * (e.cilia * 0.015);
     const burst = burstMultiplier(e, dt, pressure);
-    e.x += Math.cos(e.angle) * e.speed * ciliaPulse * burst * dt;
-    e.y += Math.sin(e.angle) * e.speed * ciliaPulse * burst * dt;
+    const panic = threat ? (hasMove(e, 2) ? 1.16 : hasMove(e, 3) ? 1.28 : 1.46) : 1;
+    e.x += Math.cos(e.angle) * e.speed * ciliaPulse * burst * panic * dt;
+    e.y += Math.sin(e.angle) * e.speed * ciliaPulse * burst * panic * dt;
     wrapInsideWorld(e);
   }
 
@@ -1201,6 +1236,7 @@
 
     let food = null;
     let steeringTarget = null;
+    let threat = null;
     if (e.type === TYPE.PREDATOR) {
       queryNearby(e.x, e.y, e.perception, TYPE.CONSUMER, nearby);
       food = nearestFood(e, nearby);
@@ -1221,6 +1257,8 @@
       }
       steeringTarget = food || findMateTarget(e, TYPE.PREDATOR);
     } else {
+      queryNearby(e.x, e.y, consumerThreatRange(e), TYPE.PREDATOR, consumerThreats);
+      threat = nearestThreat(e, consumerThreats);
       queryNearby(e.x, e.y, e.perception, TYPE.PRODUCER, nearby);
       const entityFood = nearestFood(e, nearby);
       const fieldFood = bestProducerDensityTarget(e.x, e.y, e.perception);
@@ -1237,7 +1275,7 @@
       }
       steeringTarget = food;
     }
-    steerCreature(e, dt, steeringTarget);
+    steerCreature(e, dt, steeringTarget, threat);
     if (food) feedConsumer(e, food);
     reproduceMobile(e, e.type);
   }
@@ -2263,7 +2301,7 @@
       sub,
       radius: vary(base.radius, 0.22, 3, 8),
       armor: vary(base.armor, 0.20, 1.8, 4.6),
-      fertility: vary(base.fertility, 0.18, 0.010, 0.070),
+      fertility: vary(base.fertility, 0.18, 0.018, 0.095),
       speed: vary(base.speed, 0.24, 14, 50),
       perception: vary(base.perception, 0.18, 180, 560),
       chemosense: vary(base.chemosense, 0.18, 1.4, 4.2),
@@ -2335,7 +2373,7 @@
         sub,
         radius: isColonyProducer(sub) ? 18 : 5,
         armor: isColonyProducer(sub) ? 3.8 : 3.0,
-        fertility: isMobileProducer(sub) ? 0.026 : 0.024,
+        fertility: isMobileProducer(sub) ? 0.040 : 0.024,
         speed: 24,
         perception: 340,
         chemosense: 2.7,
@@ -2580,7 +2618,7 @@
         + segmentedField('feeding', 'Alimentación', values.feeding, FEEDING_INFO.map((item, idx) => [idx, item[0], item[1]]), 'Modo de alimentación: modifica alcance, mordida y eficiencia al comer biomasa, hojas o presas.')
         + movementField('movementBits', 'Movimientos', values.movementMask, 'Puede combinar varios algoritmos. La reproducción mezcla los algoritmos activos de ambos padres.')
         + rangeField('maxAge', 'Vida máxima', values.maxAge, kind === 'predator' ? 5000 : 1800, kind === 'predator' ? 15000 : 8000, 50, 'Tiempo medio antes de morir por senescencia. Más vida permite que fenotipos lentos tengan opciones.')
-        + rangeField('fertility', 'Fertilidad', values.fertility, 0.2, 3, 0.1, 'Reduce cooldown reproductivo cuando hay energía suficiente. Los hijos heredan dentro del rango parental ±20%.');
+        + rangeField('fertility', 'Fertilidad', values.fertility, 0.2, 3, 0.1, 'Reduce cooldown reproductivo cuando hay energía suficiente. Los hijos heredan cerca del rango parental con poca variación.');
       bindDynamicFields();
     }
   }
