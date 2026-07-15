@@ -4,6 +4,8 @@
   const WORLD = { w: 16000, h: 9000 };
   const CELL = 190;
   const FIELD_CELL = 90;
+  const GRID_COLS = Math.max(1, Math.ceil(WORLD.w / CELL));
+  const GRID_ROWS = Math.max(1, Math.ceil(WORLD.h / CELL));
   const MAX_DEBUG_RANGES = 700;
   const BASE_DT = 1 / 30;
   const MAX_SIM_CHUNKS = 7;
@@ -136,8 +138,10 @@
     deaths: 0,
     fps: 0,
     creatures: [],
+    creatureIndex: new Map(),
     freeIds: [],
     grid: new Map(),
+    gridBucketPool: [],
     producerField: {
       cols: 0,
       rows: 0,
@@ -183,12 +187,8 @@
 
   function creatureByKey(key) {
     if (key == null) return null;
-    const needle = Number(key);
-    for (let i = 0; i < sim.creatures.length; i += 1) {
-      const e = sim.creatures[i];
-      if (e && e.alive && Number(creatureKey(e)) === needle) return e;
-    }
-    return null;
+    const e = sim.creatureIndex.get(Number(key));
+    return e && e.alive ? e : null;
   }
 
   function geneHiddenSet(group) {
@@ -684,12 +684,14 @@
     };
     const e = Object.assign(base, partial);
     sim.creatures[id] = e;
+    sim.creatureIndex.set(e.uid, e);
     return e;
   }
 
   function kill(e, reason) {
     if (!e || !e.alive) return;
     e.alive = false;
+    sim.creatureIndex.delete(e.uid);
     sim.selectedTrails.delete(creatureKey(e));
     sim.freeIds.push(e.id);
     sim.deaths += 1;
@@ -835,19 +837,29 @@
     return child;
   }
 
-  function cellKey(x, y) {
-    return `${Math.floor(x / CELL)},${Math.floor(y / CELL)}`;
+  function cellKeyInt(x, y) {
+    const col = Math.floor(x / CELL);
+    const row = Math.floor(y / CELL);
+    return row * GRID_COLS + col;
+  }
+
+  function acquireBucket() {
+    const b = sim.gridBucketPool.pop();
+    if (b) { b[0].length = 0; b[1].length = 0; b[2].length = 0; return b; }
+    return [[], [], []];
   }
 
   function rebuildGrid() {
+    // Return existing buckets to pool instead of letting GC collect them
+    for (const b of sim.grid.values()) sim.gridBucketPool.push(b);
     sim.grid.clear();
     for (let i = 0; i < sim.creatures.length; i += 1) {
       const e = sim.creatures[i];
       if (!e || !e.alive) continue;
-      const key = cellKey(e.x, e.y);
+      const key = cellKeyInt(e.x, e.y);
       let bucket = sim.grid.get(key);
       if (!bucket) {
-        bucket = [[], [], []];
+        bucket = acquireBucket();
         sim.grid.set(key, bucket);
       }
       bucket[e.type].push(e);
@@ -856,8 +868,6 @@
 
   function queryNearby(x, y, radius, type, out) {
     out.length = 0;
-    const cols = Math.max(1, Math.ceil(WORLD.w / CELL));
-    const rows = Math.max(1, Math.ceil(WORLD.h / CELL));
     const minX = Math.floor((x - radius) / CELL);
     const maxX = Math.floor((x + radius) / CELL);
     const minY = Math.floor((y - radius) / CELL);
@@ -865,7 +875,7 @@
     const r2 = radius * radius;
     for (let cy = minY; cy <= maxY; cy += 1) {
       for (let cx = minX; cx <= maxX; cx += 1) {
-        const bucket = sim.grid.get(`${mod(cx, cols)},${mod(cy, rows)}`);
+        const bucket = sim.grid.get(mod(cy, GRID_ROWS) * GRID_COLS + mod(cx, GRID_COLS));
         if (!bucket) continue;
         const list = bucket[type];
         for (let i = 0; i < list.length; i += 1) {
@@ -2214,8 +2224,10 @@
 
   function resetWorld() {
     sim.creatures = [];
+    sim.creatureIndex.clear();
     sim.freeIds = [];
     sim.grid.clear();
+    sim.gridBucketPool.length = 0;
     initProducerField();
     sim.time = 0;
     sim.births = 0;
