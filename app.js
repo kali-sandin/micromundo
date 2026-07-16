@@ -176,7 +176,8 @@
       consumers: true,
       predators: true
     },
-    geneSeriesHidden: {}
+    geneSeriesHidden: {},
+    carcasses: []
   };
 
   const fmt = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 });
@@ -700,6 +701,26 @@
     sim.selectedTrails.delete(creatureKey(e));
     sim.freeIds.push(e.id);
     sim.deaths += 1;
+
+    // Descomposicion: devuelve 50% de energia restante al producerField
+    if (e.energy > 0.5 && sim.producerField.mass.length) {
+      var returnEnergy = e.energy * 0.5;
+      var depositRadius = Math.max(60, e.radius * 4);
+      addProducerDensity(e.x, e.y, returnEnergy * 0.08, depositRadius);
+    }
+
+    // Carcass visual: efecto temporal en posicion de muerte
+    if (sim.carcasses.length < 400) {
+      sim.carcasses.push({
+        x: e.x,
+        y: e.y,
+        radius: Math.max(2, e.radius * 0.8),
+        color: e.color,
+        life: 0,
+        maxLife: 3.5
+      });
+    }
+
     if (reason && sim.deaths % 20 === 0) logEvent(`${reason}. Muertes acumuladas: ${fmt.format(sim.deaths)}`, 'death');
   }
 
@@ -1349,6 +1370,13 @@
       else stepMobile(e, dt);
     }
     if (sim.selectedCreatureIds.length) updateSelectedTrails();
+
+    // Actualizar carcarsses: desvanecer y eliminar
+    for (var ci = sim.carcasses.length - 1; ci >= 0; ci -= 1) {
+      sim.carcasses[ci].life += dt;
+      if (sim.carcasses[ci].life >= sim.carcasses[ci].maxLife) sim.carcasses.splice(ci, 1);
+    }
+
     compactIfNeeded();
   }
 
@@ -1918,6 +1946,35 @@
     ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
   }
 
+  function drawCarcasses() {
+    if (!sim.carcasses.length) return;
+    const offsets = visibleTileOffsets(900);
+    for (let c = 0; c < sim.carcasses.length; c += 1) {
+      const car = sim.carcasses[c];
+      const t = car.life / car.maxLife;
+      const alpha = (1 - t) * 0.6;
+      const r = car.radius * (1 + t * 0.5);
+      for (let o = 0; o < offsets.length; o += 1) {
+        const { ox, oy } = offsets[o];
+        const sx = car.x + ox - view.x;
+        const sy = car.y + oy - view.y;
+        if (sx < -20 || sy < -20 || sx > canvas.width + 20 || sy > canvas.height + 20) continue;
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = '#1a1a1a';
+        ctx.beginPath();
+        ctx.arc(sx, sy, r, 0, TAU);
+        ctx.fill();
+        ctx.globalAlpha = alpha * 0.5;
+        ctx.strokeStyle = car.color || '#444';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(sx, sy, r * 1.4, 0, TAU);
+        ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
   function drawSelectedTrails() {
     if (!sim.selectedTrails.size) return;
     const offsets = visibleTileOffsets(120);
@@ -1950,6 +2007,7 @@
     clampCamera();
     drawBackground();
     drawProducerField();
+    drawCarcasses();
     drawSelectedTrails();
 
     let debugDrawn = 0;
