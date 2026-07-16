@@ -1029,7 +1029,7 @@
       e.x += Math.cos(e.angle) * e.speed * panic * moveScale * dt;
       e.y += Math.sin(e.angle) * e.speed * panic * moveScale * dt;
       const sensoryCost = (Number(e.chemosense || 0) * 0.003 + Math.max(0, Number(e.perception || 0) - 80) * 0.000012) * dt * (resting ? 0.42 : 1);
-      e.energy = Math.min(e.maxEnergy, e.energy + dt * sim.solarEnergy * 0.024 - sensoryCost);
+      e.energy = Math.min(e.maxEnergy, e.energy + dt * sim.solarEnergy * 0.07 - sensoryCost);
       if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / 120)) {
         kill(e, 'Productor C móvil muere por senescencia');
         return;
