@@ -177,7 +177,9 @@
       predators: true
     },
     geneSeriesHidden: {},
-    carcasses: []
+    carcasses: [],
+    predatorCount: 0,
+    predatorCountTimer: 0
   };
 
   const fmt = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 });
@@ -1216,7 +1218,9 @@
   }
 
   function reproduceMobile(e, type) {
-    if (e.energy < e.maxEnergy * 0.72 || e.cooldown > 0) return;
+    // Boost reproductivo en escasez: depredadores bajan umbral si poblacion < 40
+    const reproThreshold = (type === TYPE.PREDATOR && sim.predatorCount < 40) ? 0.58 : 0.72;
+    if (e.energy < e.maxEnergy * reproThreshold || e.cooldown > 0) return;
     const mateRange = type === TYPE.PREDATOR ? Math.min(900, e.perception * 2.4) : e.perception * 0.72;
     queryNearby(e.x, e.y, mateRange, type, mateCandidates);
     let mate = null;
@@ -1239,7 +1243,9 @@
   }
 
   function findMateTarget(e, type) {
-    if (e.energy < e.maxEnergy * 0.68 || e.cooldown > 0) return null;
+    // Boost reproductivo en escasez: bajar umbral busqueda pareja
+    const mateSearchThreshold = (type === TYPE.PREDATOR && sim.predatorCount < 40) ? 0.52 : 0.68;
+    if (e.energy < e.maxEnergy * mateSearchThreshold || e.cooldown > 0) return null;
     const radius = type === TYPE.PREDATOR ? Math.min(1100, e.perception * 3.1) : e.perception;
     queryNearby(e.x, e.y, radius, type, mateSeekCandidates);
     let best = null;
@@ -1260,7 +1266,12 @@
     e.age += dt;
     e.cooldown -= dt;
     const resting = hasMove(e, 4) && sim.time < e.restUntil;
-    e.energy -= e.metabolism * dt * (resting ? 3.4 : 7.5);
+    // Metabolismo adaptativo: depredadores en escasez reducen metabolismo
+    let metabFactor = resting ? 3.4 : 7.5;
+    if (e.type === TYPE.PREDATOR && sim.predatorCount < 60) {
+      metabFactor *= 0.5;
+    }
+    e.energy -= e.metabolism * dt * metabFactor;
     if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / (e.type === TYPE.PREDATOR ? 150 : 95))) {
       kill(e, e.type === TYPE.PREDATOR ? 'Depredador muere por senescencia' : 'Consumidor muere por senescencia');
       return;
@@ -1361,6 +1372,19 @@
 
   function simulate(dt) {
     sim.time += dt;
+
+    // Cache predator count cada ~2s para metabolismo adaptativo
+    sim.predatorCountTimer -= dt;
+    if (sim.predatorCountTimer <= 0) {
+      let pc = 0;
+      for (let i = 0; i < sim.creatures.length; i += 1) {
+        const e = sim.creatures[i];
+        if (e && e.alive && e.type === TYPE.PREDATOR) pc++;
+      }
+      sim.predatorCount = pc;
+      sim.predatorCountTimer = 2.0;
+    }
+
     stepProducerField(dt);
     rebuildGrid();
     for (let i = 0; i < sim.creatures.length; i += 1) {
