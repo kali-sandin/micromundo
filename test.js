@@ -272,6 +272,18 @@ function runFunctionalTests() {
     expectEq(api.sim.deaths, deathsBefore + 1, 'Deaths no incremento');
   });
 
+  assert('kill recicla energia al producerField', () => {
+    api.initProducerField();
+    api.sim.producerField.mass.fill(0);
+    api.sim.producerField.total = 0;
+    const c = api.spawnConsumer({ x: 50, y: 50 });
+    c.energy = 100;
+    const fieldTotalBefore = api.sim.producerField.total;
+    api.kill(c, 'test-reciclaje');
+    const fieldTotalAfter = api.sim.producerField.total;
+    expectOk(fieldTotalAfter > fieldTotalBefore, 'kill no reciclo energia al campo');
+  });
+
   assert('kill sobre muerta no duplica deaths', () => {
     const c = api.spawnConsumer({ x: 50, y: 50 });
     api.kill(c);
