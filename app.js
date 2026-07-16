@@ -526,7 +526,7 @@
     smoothProducerFieldSeed(7);
   }
 
-  function addProducerDensity(x, y, amount = 1, radius = 180) {
+  function addProducerDensity(x, y, amount = 1, radius = 90) {
     const field = sim.producerField;
     if (!field.mass.length) return;
     const cx = fieldCellX(x);
@@ -701,7 +701,7 @@
   function spawnProducer(opts = {}) {
     const sub = opts.sub ?? PRODUCER.A;
     if (sub === PRODUCER.A) {
-      addProducerDensity(opts.x ?? rand(0, WORLD.w), opts.y ?? rand(0, WORLD.h), Number(opts.fertility ?? 1), Math.max(120, Number(opts.radius ?? 180)));
+      addProducerDensity(opts.x ?? rand(0, WORLD.w), opts.y ?? rand(0, WORLD.h), Number(opts.fertility ?? 1), Math.max(60, Number(opts.radius ?? 90)));
       return null;
     }
     const colony = isColonyProducer(sub);
@@ -722,7 +722,7 @@
       maxEnergy: colony ? 92 : 24,
       armor: Number(opts.armor ?? (colony ? rand(3.1, 5.4) : mobile ? rand(2.2, 4.0) : rand(1.2, 2.6))),
       chemosense,
-      perception: mobile ? Number(opts.perception ?? (280 + chemosense * 32)) : 160,
+      perception: mobile ? Number(opts.perception ?? (140 + chemosense * 16)) : 80,
       movement,
       movementMask: opts.movementMask != null ? movementMaskFromValue(opts.movementMask) : (1 << movement),
       leafEnergy: colony ? rand(8, 18) : 0,
@@ -743,11 +743,11 @@
     const massDrag = 1 + bodyMass * 0.2 + e.reserves * 0.08 + flagellaLoad * 0.055;
     e.radius = clamp(3.5 + e.size * 1.72 + e.reserves * 0.34, 3, 19);
     e.speed = locomotion / massDrag;
-    e.perception = 90 + e.chemosense * 65 + e.cilia * 12;
+    e.perception = 45 + e.chemosense * 32.5 + e.cilia * 6;
     const speedCost = Math.pow(Math.max(0, e.speed) / 42, 1.42) * 0.022;
     const tissueCost = e.size * 0.010 + e.reserves * 0.004 + e.armor * 0.007;
     const appendageCost = flagellaLoad * 0.014 + e.cilia * 0.004 + e.pseudopodia * 0.006;
-    const sensoryCost = e.chemosense * 0.010 + Math.max(0, e.perception - 90) * 0.000075;
+    const sensoryCost = e.chemosense * 0.010 + Math.max(0, e.perception - 45) * 0.000075;
     const motionCost = (hasMove(e, 4) ? -0.004 : 0) + (hasMove(e, 5) ? 0.010 : 0);
     const vacuoleEfficiency = Math.max(0.82, 1 - e.vacuole * 0.035);
     e.metabolism = (0.014 + speedCost + tissueCost + appendageCost + sensoryCost + motionCost) * vacuoleEfficiency;
@@ -801,7 +801,7 @@
     e.color = '#f05b50';
     e.radius += 1.5;
     e.speed *= 1.28;
-    e.perception += 125;
+    e.perception += 62.5;
     e.maxEnergy *= 4.65;
     if (opts.energy == null) e.energy = rand(e.maxEnergy * 0.38, e.maxEnergy * 0.62);
     e.metabolism *= 0.82;
@@ -983,7 +983,7 @@
   }
 
   function consumerThreatRange(e) {
-    return Math.min(920, Math.max(220, e.perception * 1.35 + e.chemosense * 55 + e.cilia * 12));
+    return Math.min(460, Math.max(110, e.perception * 1.35 + e.chemosense * 27.5 + e.cilia * 6));
   }
 
   function stepProducer(e, dt) {
@@ -991,7 +991,7 @@
     e.cooldown -= dt * e.fertility * clamp(sim.solarEnergy, 0.1, 6);
 
     if (isMobileProducer(e)) {
-      queryNearby(e.x, e.y, e.perception || 420, TYPE.CONSUMER, nearby);
+      queryNearby(e.x, e.y, e.perception || 210, TYPE.CONSUMER, nearby);
       let threat = null;
       let threatD2 = Infinity;
       const scanThreats = (list) => {
@@ -1006,7 +1006,7 @@
         }
       };
       scanThreats(nearby);
-      queryNearby(e.x, e.y, e.perception || 420, TYPE.PREDATOR, producerThreats);
+      queryNearby(e.x, e.y, e.perception || 210, TYPE.PREDATOR, producerThreats);
       scanThreats(producerThreats);
       const resting = updateResting(e, dt, Boolean(threat));
       if (threat) {
@@ -1023,7 +1023,7 @@
       const moveScale = resting ? 0 : burstMultiplier(e, dt, Boolean(threat));
       e.x += Math.cos(e.angle) * e.speed * panic * moveScale * dt;
       e.y += Math.sin(e.angle) * e.speed * panic * moveScale * dt;
-      const sensoryCost = (Number(e.chemosense || 0) * 0.003 + Math.max(0, Number(e.perception || 0) - 160) * 0.000012) * dt * (resting ? 0.42 : 1);
+      const sensoryCost = (Number(e.chemosense || 0) * 0.003 + Math.max(0, Number(e.perception || 0) - 80) * 0.000012) * dt * (resting ? 0.42 : 1);
       e.energy = Math.min(e.maxEnergy, e.energy + dt * sim.solarEnergy * 0.024 - sensoryCost);
       if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / 120)) {
         kill(e, 'Productor C móvil muere por senescencia');
@@ -1078,7 +1078,7 @@
 
     if (isColonyProducer(e)) {
       if (e.leafCount < COLONY_MIN_LEAVES_TO_REPRODUCE || e.energy < e.maxEnergy * 0.42) return;
-      queryNearby(e.x, e.y, 900, TYPE.PRODUCER, nearby);
+      queryNearby(e.x, e.y, 450, TYPE.PRODUCER, nearby);
       const hasLargeMate = nearby.some((p) => p !== e && isColonyProducer(p));
       if (!hasLargeMate || !chance(0.52)) return;
       e.leafCount = Math.max(0, e.leafCount - COLONY_MIN_LEAVES_TO_REPRODUCE);
@@ -1107,7 +1107,7 @@
       radius: inheritAsexual(e, 'radius', 3, 10),
       armor: inheritAsexual(e, 'armor', 0, 4),
       speed: e.speed ? inheritAsexual(e, 'speed', 8, 62) : 0,
-      perception: inheritAsexual(e, 'perception', 100, 620),
+      perception: inheritAsexual(e, 'perception', 50, 310),
       chemosense: inheritAsexual(e, 'chemosense', 0, 5),
       movementMask: chance(0.04) ? inheritMovementMask(e, { movementMask: 1 << Math.floor(rand(0, MOVE.length)) }) : movementMaskFromLegacy(e),
       fertility: inheritAsexual(e, 'fertility', 0.006, 0.22),
@@ -1191,7 +1191,7 @@
 
   function reproduceMobile(e, type) {
     if (e.energy < e.maxEnergy * 0.72 || e.cooldown > 0) return;
-    const mateRange = type === TYPE.PREDATOR ? Math.min(1800, e.perception * 2.4) : e.perception * 0.72;
+    const mateRange = type === TYPE.PREDATOR ? Math.min(900, e.perception * 2.4) : e.perception * 0.72;
     queryNearby(e.x, e.y, mateRange, type, mateCandidates);
     let mate = null;
     for (let i = 0; i < mateCandidates.length; i += 1) {
@@ -1214,7 +1214,7 @@
 
   function findMateTarget(e, type) {
     if (e.energy < e.maxEnergy * 0.68 || e.cooldown > 0) return null;
-    const radius = type === TYPE.PREDATOR ? Math.min(2200, e.perception * 3.1) : e.perception;
+    const radius = type === TYPE.PREDATOR ? Math.min(1100, e.perception * 3.1) : e.perception;
     queryNearby(e.x, e.y, radius, type, mateSeekCandidates);
     let best = null;
     let bestD2 = Infinity;
@@ -1798,7 +1798,7 @@
     const p = worldToScreen(e.x + ox, e.y + oy);
     const range = e.type === TYPE.PRODUCER
       ? isColonyProducer(e)
-        ? Math.max(e.radius + (e.leafCount || 0) * 1.8, 120)
+        ? Math.max(e.radius + (e.leafCount || 0) * 1.8, 60)
         : e.perception || e.radius * 8
       : e.perception;
     const r = range * camera.zoom;
@@ -2315,7 +2315,7 @@
       armor: vary(base.armor, 0.20, 1.8, 4.6),
       fertility: vary(base.fertility, 0.18, 0.018, 0.095),
       speed: vary(base.speed, 0.24, 14, 50),
-      perception: vary(base.perception, 0.18, 180, 560),
+      perception: vary(base.perception, 0.18, 90, 280),
       chemosense: vary(base.chemosense, 0.18, 1.4, 4.2),
       maxAge: vary(base.maxAge, 0.24, 4200, 12500),
       movementMask: balancedMovementMask(i)
@@ -2387,7 +2387,7 @@
         armor: isColonyProducer(sub) ? 3.8 : 3.0,
         fertility: isMobileProducer(sub) ? 0.040 : 0.024,
         speed: 24,
-        perception: 340,
+        perception: 170,
         chemosense: 2.7,
         movementMask: 2,
         maxAge: isColonyProducer(sub) ? 12000 : 6800
