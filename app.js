@@ -64,7 +64,7 @@
     leafCount: '#8bcf62',
     maxAge: '#c6d2dd'
   };
-  const COLONY_MIN_LEAVES_TO_REPRODUCE = 9;
+  const COLONY_MIN_LEAVES_TO_REPRODUCE = 2;
   const ADD_AMOUNT_DEFAULT = 50;
   const ADD_AMOUNT_MAX = 1000;
   const TRAIL_MAX_POINTS = 440;
@@ -728,7 +728,7 @@
       leafEnergy: colony ? rand(8, 18) : 0,
       leafCount: colony ? Math.floor(rand(3, 7)) : 0,
       fertility: Number(opts.fertility ?? (mobile ? 0.040 : 0.024)),
-      cooldown: rand(mobile ? 150 : 90, colony ? 360 : 260),
+      cooldown: rand(mobile ? 30 : 15, colony ? 80 : 60),
       maxAge: colony ? Number(opts.maxAge ?? rand(9000, 16500)) : mobile ? Number(opts.maxAge ?? rand(5200, 9000)) : Infinity,
       competitionAt: sim.time + rand(0.5, 3.5),
       color: sub === PRODUCER.A ? GROUP_COLORS['producer-a'] : sub === PRODUCER.B ? GROUP_COLORS['producer-b'] : GROUP_COLORS['producer-c']
@@ -988,7 +988,7 @@
 
   function stepProducer(e, dt) {
     e.age += dt;
-    e.cooldown -= dt * e.fertility * clamp(sim.solarEnergy, 0.1, 6);
+    e.cooldown -= dt * e.fertility * clamp(sim.solarEnergy, 0.1, 6) * 5;
 
     if (isMobileProducer(e)) {
       queryNearby(e.x, e.y, e.perception || 210, TYPE.CONSUMER, nearby);
@@ -1045,10 +1045,10 @@
       e.energy = Math.min(e.maxEnergy, e.energy + dt * sun * 0.12);
       e.radius = Math.min(e.maxRadius, e.radius + dt * sun * 0.018);
       const leafCap = 8 + e.radius * 0.9;
-      e.leafEnergy = Math.min(leafCap, e.leafEnergy + dt * sun * 0.095);
+      e.leafEnergy = Math.min(leafCap, e.leafEnergy + dt * sun * 0.13);
       const leafLimit = clamp(Math.floor(2 + e.radius / 6), 2, 14);
-      const leafTarget = clamp(Math.floor(e.leafEnergy / 4), 0, leafLimit);
-      if (leafTarget > e.leafCount && chance(dt * sun * 0.18)) e.leafCount += 1;
+      const leafTarget = clamp(Math.floor(e.leafEnergy / 3), 0, leafLimit);
+      if (leafTarget > e.leafCount && chance(dt * sun * 0.6)) e.leafCount += 1;
 
       if (sim.time >= e.competitionAt) {
         e.competitionAt = sim.time + rand(2.5, 6);
@@ -1072,15 +1072,15 @@
     }
 
     if (e.cooldown > 0) return;
-    e.cooldown = isColonyProducer(e) ? rand(180, 360) : rand(110, 240);
+    e.cooldown = isColonyProducer(e) ? rand(40, 100) : rand(30, 70);
 
     if (sim.creatures.length - sim.freeIds.length > 50000 && !chance(0.2)) return;
 
     if (isColonyProducer(e)) {
       if (e.leafCount < COLONY_MIN_LEAVES_TO_REPRODUCE || e.energy < e.maxEnergy * 0.42) return;
-      queryNearby(e.x, e.y, 450, TYPE.PRODUCER, nearby);
+      queryNearby(e.x, e.y, 800, TYPE.PRODUCER, nearby);
       const hasLargeMate = nearby.some((p) => p !== e && isColonyProducer(p));
-      if (!hasLargeMate || !chance(0.52)) return;
+      if (!hasLargeMate || !chance(0.58)) return;
       e.leafCount = Math.max(0, e.leafCount - COLONY_MIN_LEAVES_TO_REPRODUCE);
       e.leafEnergy = Math.max(0, e.leafEnergy - COLONY_MIN_LEAVES_TO_REPRODUCE * 3.4);
       e.energy *= 0.72;
