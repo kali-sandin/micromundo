@@ -1170,7 +1170,7 @@
       target.leafEnergy -= bite;
       target.leafCount = Math.max(0, (target.leafCount || 0) - 1);
       target.energy = Math.max(0, target.energy - bite * 0.16);
-      e.energy = Math.min(e.maxEnergy, e.energy + bite * (e.type === TYPE.PREDATOR ? 9.2 : 9.2));
+      e.energy = Math.min(e.maxEnergy, e.energy + bite * 9.2);
       return true;
     }
 
