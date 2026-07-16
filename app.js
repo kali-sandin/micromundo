@@ -1953,22 +1953,21 @@
       const car = sim.carcasses[c];
       const t = car.life / car.maxLife;
       const alpha = (1 - t) * 0.6;
-      const r = car.radius * (1 + t * 0.5);
+      const r = Math.max(1, car.radius * (1 + t * 0.5) * camera.zoom);
       for (let o = 0; o < offsets.length; o += 1) {
         const { ox, oy } = offsets[o];
-        const sx = car.x + ox - view.x;
-        const sy = car.y + oy - view.y;
-        if (sx < -20 || sy < -20 || sx > canvas.width + 20 || sy > canvas.height + 20) continue;
+        const p = worldToScreen(car.x + ox, car.y + oy);
+        if (p.x < -20 || p.y < -20 || p.x > canvas.width + 20 || p.y > canvas.height + 20) continue;
         ctx.globalAlpha = alpha;
         ctx.fillStyle = '#1a1a1a';
         ctx.beginPath();
-        ctx.arc(sx, sy, r, 0, TAU);
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
         ctx.fill();
         ctx.globalAlpha = alpha * 0.5;
         ctx.strokeStyle = car.color || '#444';
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.arc(sx, sy, r * 1.4, 0, TAU);
+        ctx.arc(p.x, p.y, r * 1.4, 0, Math.PI * 2);
         ctx.stroke();
       }
     }

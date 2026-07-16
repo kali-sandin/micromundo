@@ -53,7 +53,7 @@ function createDomMock() {
     getImageData: () => ({ data: new Uint8ClampedArray(4) }),
     putImageData() {}, createImageData: () => ({ data: new Uint8ClampedArray(4) }),
     save() {}, restore() {}, translate() {}, scale() {}, rotate() {},
-    beginPath() {}, closePath() {}, arc() {}, fill() {}, stroke() {},
+    beginPath() {}, closePath() {}, arc() {}, ellipse() {}, fill() {}, stroke() {},
     moveTo() {}, lineTo() {}, fillText() {}, measureText: () => ({ width: 0 }),
     drawImage() {},
   });
@@ -101,7 +101,9 @@ function loadApp() {
       queryNearby, nearestFood, feedingPower, armorResistance,
       canEatArmored, movementMaskFromValue, hasMove,
       GROUPS, GROUP_KEYS, GROUP_LABELS, TYPE, PRODUCER,
-      WORLD, CELL, FIELD_CELL
+      WORLD, CELL, FIELD_CELL,
+      camera, worldToScreen, visibleTileOffsets,
+      drawCarcasses, render
     };
   `;
   src = src.replace(/\n  init\(\);\n\}\)\(\);\s*$/, '\n' + exportsCode + '\n})();\n');
@@ -477,6 +479,51 @@ function runFunctionalTests() {
     // No debe crashear y debe mantener criaturas vivas
     const alive = api.sim.creatures.filter(e => e && e.alive).length;
     expectGte(alive, 15, 'Perdio criaturas vivas en compactacion');
+  });
+
+  // ─── Carcasses / Render ────────────────────────
+  suite('Carcasses y render');
+
+  assert('kill crea carcass en sim.carcasses', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.initProducerField();
+    const c = api.spawnConsumer({ x: 100, y: 100 });
+    api.kill(c, 'test-carcass');
+    expectOk(api.sim.carcasses.length > 0, 'kill no creo carcass');
+    const car = api.sim.carcasses[api.sim.carcasses.length - 1];
+    expectOk(car.x !== undefined && car.y !== undefined, 'carcass sin coords');
+    expectOk(car.radius > 0, 'carcass sin radio');
+    expectOk(car.maxLife > 0, 'carcass sin maxLife');
+  });
+
+  assert('drawCarcasses no crashea (bug view undefined)', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.initProducerField();
+    const c = api.spawnConsumer({ x: 100, y: 100 });
+    api.kill(c, 'test-render');
+    expectOk(api.sim.carcasses.length > 0, 'no hay carcasses que dibujar');
+    // Esta linea crasheba con ReferenceError: view is not defined
+    api.drawCarcasses();
+  });
+
+  assert('render completo con carcasses no crashea', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.initProducerField();
+    api.seedWorld();
+    // Matar algunas criaturas para generar carcasses
+    const creatures = api.sim.creatures.filter(e => e && e.alive);
+    for (let i = 0; i < Math.min(5, creatures.length); i++) {
+      api.kill(creatures[i], 'test-render-full');
+    }
+    expectOk(api.sim.carcasses.length > 0, 'no hay carcasses tras kills');
+    // render() llama a drawCarcasses internamente
+    api.render();
   });
 }
 
