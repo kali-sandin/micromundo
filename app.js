@@ -253,12 +253,17 @@
   }
 
   function movementMaskFromLegacy(e) {
-    if (e.movementMask != null) return movementMaskFromValue(e.movementMask);
-    return 1 << clamp(Math.round(Number(e.movement || 0)), 0, MOVE.length - 1);
+    if (e._moveMask != null) return e._moveMask;
+    const mask = e.movementMask != null
+      ? movementMaskFromValue(e.movementMask)
+      : 1 << clamp(Math.round(Number(e.movement || 0)), 0, MOVE.length - 1);
+    e._moveMask = mask;
+    return mask;
   }
 
   function hasMove(e, idx) {
-    return Boolean(movementMaskFromLegacy(e) & (1 << idx));
+    const m = e._moveMask;
+    return m != null ? (m & (1 << idx)) !== 0 : Boolean(movementMaskFromLegacy(e) & (1 << idx));
   }
 
   function movementNames(e) {
