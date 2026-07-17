@@ -1209,7 +1209,7 @@
         ? 62 + target.radius * 3.2 + target.energy * 0.35
         : 92 + target.size * 16 + target.reserves * 7
       : target.sub === PRODUCER.C
-          ? 34
+          ? 60
           : 7.5;
 
     e.energy = Math.min(e.maxEnergy, e.energy + gain);
