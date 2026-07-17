@@ -1814,6 +1814,20 @@
     }
   }
 
+  // LUT precomputed para drawProducerField: elimina string concat por celda por frame
+  const _PFIELD_LUT_SIZE = 256;
+  const _PFIELD_ALPHA_MIN = 0.035;
+  const _PFIELD_ALPHA_MAX = 0.24;
+  const _PFIELD_ALPHA_RANGE = _PFIELD_ALPHA_MAX - _PFIELD_ALPHA_MIN;
+  const producerFieldFillLUT = (() => {
+    const lut = new Array(_PFIELD_LUT_SIZE);
+    for (let i = 0; i < _PFIELD_LUT_SIZE; i++) {
+      const a = _PFIELD_ALPHA_MIN + (i / (_PFIELD_LUT_SIZE - 1)) * _PFIELD_ALPHA_RANGE;
+      lut[i] = `rgba(118, 210, 93, ${a})`;
+    }
+    return lut;
+  })();
+
   function drawProducerField() {
     const field = sim.producerField;
     if (!field.mass.length) return;
@@ -1842,8 +1856,9 @@
           const sy = Math.round(p0.y);
           const sw = Math.max(1, Math.round(p1.x) - sx);
           const sh = Math.max(1, Math.round(p1.y) - sy);
-          const a = clamp(0.035 + mass * 0.16, 0.035, 0.24);
-          ctx.fillStyle = `rgba(118, 210, 93, ${a})`;
+          const a = clamp(0.035 + mass * 0.16, _PFIELD_ALPHA_MIN, _PFIELD_ALPHA_MAX);
+          const lutIdx = ((a - _PFIELD_ALPHA_MIN) / _PFIELD_ALPHA_RANGE * (_PFIELD_LUT_SIZE - 1)) | 0;
+          ctx.fillStyle = producerFieldFillLUT[lutIdx];
           ctx.fillRect(sx, sy, sw, sh);
         }
       }
