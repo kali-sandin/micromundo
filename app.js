@@ -2050,12 +2050,23 @@
 
     let debugDrawn = 0;
     const offsets = visibleTileOffsets(900);
+    // Pre-compute viewport bounds in world-space (avoids per-creature worldToScreen call)
+    const wEps = 50 / camera.zoom;
+    const vwMinX = camera.x - window.innerWidth / (2 * camera.zoom) - wEps;
+    const vwMaxX = camera.x + window.innerWidth / (2 * camera.zoom) + wEps;
+    const vwMinY = camera.y - window.innerHeight / (2 * camera.zoom) - wEps;
+    const vwMaxY = camera.y + window.innerHeight / (2 * camera.zoom) + wEps;
     for (let i = 0; i < sim.creatures.length; i += 1) {
       const e = sim.creatures[i];
       if (!e || !e.alive) continue;
+      const er = e.radius || 2;
       for (let o = 0; o < offsets.length; o += 1) {
-        const { ox, oy } = offsets[o];
-        if (!isCreatureVisible(e, ox, oy)) continue;
+        const ox = offsets[o].ox;
+        const oy = offsets[o].oy;
+        const wx = e.x + ox;
+        const wy = e.y + oy;
+        if (wx - er > vwMaxX || wx + er < vwMinX) continue;
+        if (wy - er > vwMaxY || wy + er < vwMinY) continue;
         if (sim.debug && debugDrawn < MAX_DEBUG_RANGES) {
           drawDebugRange(e, ox, oy);
           debugDrawn += 1;
