@@ -284,6 +284,11 @@ select {
   grid-template-columns: auto minmax(100px, 160px) 54px;
 }
 
+.day-night-toggle.active {
+  background: rgba(100, 140, 255, 0.25);
+  border-color: rgba(100, 140, 255, 0.5);
+}
+
 .world-viewport {
   position: fixed;
   inset: 0;

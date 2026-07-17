@@ -83,6 +83,7 @@
     speedLabel: document.getElementById('speedLabel'),
     systemEnergy: document.getElementById('systemEnergy'),
     systemEnergyLabel: document.getElementById('systemEnergyLabel'),
+    dayNightToggle: document.getElementById('dayNightToggle'),
     addDialog: document.getElementById('addDialog'),
     addForm: document.getElementById('addForm'),
     dynamicFields: document.getElementById('dynamicFields'),
@@ -133,7 +134,10 @@
     debug: false,
     speed: 1,
     solarEnergy: 1,
-    time: 0,
+    solarEnergyBase: 1,
+    dayNightEnabled: false,
+    dayNightPeriod: 600,
+    dayNightPhase: 0,
     births: 0,
     deaths: 0,
     fps: 0,
@@ -1436,6 +1440,14 @@
   function simulate(dt) {
     sim.time += dt;
 
+    // Ciclo dia/noche: solarEnergy oscila sinusoidalmente sobre la base
+    if (sim.dayNightEnabled) {
+      const phase = (sim.time / sim.dayNightPeriod) * Math.PI * 2;
+      sim.dayNightPhase = phase;
+      const amp = 0.4;
+      sim.solarEnergy = Math.max(0.1, sim.solarEnergyBase + amp * Math.sin(phase));
+    }
+
     // Cache predator count cada ~2s para metabolismo adaptativo
     sim.predatorCountTimer -= dt;
     if (sim.predatorCountTimer <= 0) {
@@ -2143,6 +2155,17 @@
         drawCreature(e, ox, oy);
       }
     }
+
+    // Overlay dia/noche: tinta oscuro cuando solarEnergy < base (noche)
+    if (sim.dayNightEnabled) {
+      const sinPhase = Math.sin(sim.dayNightPhase);
+      if (sinPhase < 0) {
+        const darkness = (-sinPhase) * 0.35; // 0 a 0.35
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.fillStyle = `rgba(5, 8, 20, ${darkness})`;
+        ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+      }
+    }
   }
 
   function updateStats(force = false) {
@@ -2155,7 +2178,13 @@
     els.statConsumers.textContent = fmt.format(c.consumers);
     els.statPredators.textContent = fmt.format(c.predators);
     els.statEnergy.textContent = c.energyAvg.toFixed(1);
-    els.statSun.textContent = `x${sim.solarEnergy.toFixed(sim.solarEnergy < 2 ? 1 : 0)}`;
+    if (sim.dayNightEnabled) {
+      const sinP = Math.sin(sim.dayNightPhase);
+      const phaseLabel = sinP > 0.5 ? 'Día' : sinP > -0.5 ? 'Atardecer' : 'Noche';
+      els.statSun.textContent = `x${sim.solarEnergy.toFixed(sim.solarEnergy < 2 ? 1 : 0)} (${phaseLabel})`;
+    } else {
+      els.statSun.textContent = `x${sim.solarEnergy.toFixed(sim.solarEnergy < 2 ? 1 : 0)}`;
+    }
     els.statBirths.textContent = fmt.format(sim.births);
     els.statDeaths.textContent = fmt.format(sim.deaths);
     els.statTime.textContent = `${String(Math.floor(sim.time / 60)).padStart(3, '0')}m ${String(Math.floor(sim.time % 60)).padStart(2, '0')}s`;
@@ -2385,8 +2414,16 @@
   }
 
   function setSystemEnergy() {
-    sim.solarEnergy = energyFromSlider(els.systemEnergy.value);
-    els.systemEnergyLabel.textContent = `x${sim.solarEnergy.toFixed(sim.solarEnergy < 2 ? 1 : 0)}`;
+    sim.solarEnergyBase = energyFromSlider(els.systemEnergy.value);
+    if (!sim.dayNightEnabled) sim.solarEnergy = sim.solarEnergyBase;
+    els.systemEnergyLabel.textContent = `x${sim.solarEnergyBase.toFixed(sim.solarEnergyBase < 2 ? 1 : 0)}`;
+    updateStats(true);
+  }
+
+  function toggleDayNight() {
+    sim.dayNightEnabled = !sim.dayNightEnabled;
+    els.dayNightToggle.classList.toggle('active', sim.dayNightEnabled);
+    if (!sim.dayNightEnabled) sim.solarEnergy = sim.solarEnergyBase;
     updateStats(true);
   }
 
@@ -2980,6 +3017,7 @@
     });
     els.speed.addEventListener('input', setSpeed);
     els.systemEnergy.addEventListener('input', setSystemEnergy);
+    els.dayNightToggle.addEventListener('click', toggleDayNight);
     els.playPause.addEventListener('click', () => setPaused(!sim.paused));
     document.getElementById('toggleStats').addEventListener('click', (ev) => {
       els.statsPanel.classList.toggle('hidden');
