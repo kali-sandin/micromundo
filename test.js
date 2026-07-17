@@ -582,8 +582,8 @@ function runFunctionalTests() {
     // Crear dos depredadores con energia suficiente para reproducirse
     const p1 = api.spawnPredator({ x: 100, y: 100 });
     const p2 = api.spawnPredator({ x: 110, y: 110 });
-    // Dar energia suficiente para umbral normal (0.72) y boost (0.58)
-    const midEnergy = p1.maxEnergy * 0.62; // entre 0.58 y 0.72
+    // Dar energia suficiente para umbral normal predator (0.60) y boost (0.50)
+    const midEnergy = p1.maxEnergy * 0.55; // entre 0.50 y 0.60
     p1.energy = midEnergy;
     p2.energy = midEnergy;
     p1.cooldown = 0;

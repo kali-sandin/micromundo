@@ -1218,8 +1218,10 @@
   }
 
   function reproduceMobile(e, type) {
-    // Boost reproductivo en escasez: depredadores bajan umbral si poblacion < 40
-    const reproThreshold = (type === TYPE.PREDATOR && sim.predatorCount < 40) ? 0.58 : 0.72;
+    // Umbral reproductivo: depredadores mas bajo (0.60 base, 0.50 en crisis)
+    const reproThreshold = type === TYPE.PREDATOR
+      ? (sim.predatorCount < 40 ? 0.50 : 0.60)
+      : 0.72;
     if (e.energy < e.maxEnergy * reproThreshold || e.cooldown > 0) return;
     const mateRange = type === TYPE.PREDATOR ? Math.min(900, e.perception * 2.4) : e.perception * 0.72;
     queryNearby(e.x, e.y, mateRange, type, mateCandidates);
@@ -1243,8 +1245,10 @@
   }
 
   function findMateTarget(e, type) {
-    // Boost reproductivo en escasez: bajar umbral busqueda pareja
-    const mateSearchThreshold = (type === TYPE.PREDATOR && sim.predatorCount < 40) ? 0.52 : 0.68;
+    // Busqueda de pareja: depredadores mas agresivos (0.55 base, 0.45 en crisis)
+    const mateSearchThreshold = type === TYPE.PREDATOR
+      ? (sim.predatorCount < 40 ? 0.45 : 0.55)
+      : 0.68;
     if (e.energy < e.maxEnergy * mateSearchThreshold || e.cooldown > 0) return null;
     const radius = type === TYPE.PREDATOR ? Math.min(1100, e.perception * 3.1) : e.perception;
     queryNearby(e.x, e.y, radius, type, mateSeekCandidates);
