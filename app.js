@@ -179,7 +179,8 @@
     geneSeriesHidden: {},
     carcasses: [],
     predatorCount: 0,
-    predatorCountTimer: 0
+    predatorCountTimer: 0,
+    migrationTimer: 0
   };
 
   const fmt = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 });
@@ -1374,6 +1375,64 @@
     }
   }
 
+  function checkMigration() {
+    var cB = 0, cC = 0, cM = 0, cP = 0;
+    var sB = [], sC = [], sM = [], sP = [];
+    for (var i = 0; i < sim.creatures.length; i += 1) {
+      var e = sim.creatures[i];
+      if (!e || !e.alive) continue;
+      if (e.type === TYPE.PRODUCER && e.sub === PRODUCER.B) { cB++; sB.push(e); }
+      else if (e.type === TYPE.PRODUCER && e.sub === PRODUCER.C) { cC++; sC.push(e); }
+      else if (e.type === TYPE.CONSUMER) { cM++; sM.push(e); }
+      else if (e.type === TYPE.PREDATOR) { cP++; sP.push(e); }
+    }
+    var THRESHOLD = 15;
+    var prob = 0.005 * (5 / 60);
+    if (cB > 0 && cB < THRESHOLD && chance(prob)) migratePopulation('producerB', cB, sB);
+    if (cC > 0 && cC < THRESHOLD && chance(prob)) migratePopulation('producerC', cC, sC);
+    if (cM > 0 && cM < THRESHOLD && chance(prob)) migratePopulation('consumers', cM, sM);
+    if (cP > 0 && cP < THRESHOLD && chance(prob)) migratePopulation('predators', cP, sP);
+  }
+
+  function migratePopulation(type, count, survivors) {
+    var n = Math.floor(rand(3, 9));
+    var isPredator = type === 'predators';
+    var isProducerB = type === 'producerB';
+    var isProducerC = type === 'producerC';
+    for (var i = 0; i < n; i++) {
+      var donor = survivors[Math.floor(rand(0, survivors.length))];
+      var edge = Math.floor(rand(0, 4));
+      var margin = 80;
+      var x, y;
+      if (edge === 0) { x = rand(0, WORLD.w); y = margin; }
+      else if (edge === 1) { x = WORLD.w - margin; y = rand(0, WORLD.h); }
+      else if (edge === 2) { x = rand(0, WORLD.w); y = WORLD.h - margin; }
+      else { x = margin; y = rand(0, WORLD.h); }
+      var opts = {
+        x: x, y: y,
+        size: mutate(Number(donor.size), 0.8, 0.5, isPredator ? 12 : 9),
+        reserves: mutate(Number(donor.reserves), 1.0, 0, isPredator ? 24 : 14),
+        flagella: Math.round(mutate(Number(donor.flagella), 1, 0, 7)),
+        cilia: Math.round(mutate(Number(donor.cilia), 1, 0, 6)),
+        chemosense: mutate(Number(donor.chemosense), 0.4, 0, 5),
+        pseudopodia: mutate(Number(donor.pseudopodia), 0.4, 0, 4),
+        armor: mutate(Number(donor.armor), 0.5, 0, 5),
+        vacuole: mutate(Number(donor.vacuole), 0.4, 0, 4),
+        feeding: chance(0.12) ? Math.floor(rand(0, FEEDING.length)) : Number(donor.feeding || 0),
+        movementMask: chance(0.08) ? (1 << Math.floor(rand(0, MOVE.length))) : Number(donor.movementMask || 2),
+        fertility: mutate(Number(donor.fertility), 0.1, 0.22, 3),
+        maxAge: mutate(Number(donor.maxAge), Number(donor.maxAge) * 0.15, isPredator ? 5000 : 1800, isPredator ? 15000 : 8000)
+      };
+      if (isProducerB) { opts.sub = PRODUCER.B; spawnProducer(opts); }
+      else if (isProducerC) { opts.sub = PRODUCER.C; spawnProducer(opts); }
+      else if (type === 'consumers') spawnConsumer(opts);
+      else if (isPredator) spawnPredator(opts);
+      sim.births += 1;
+    }
+    var label = isPredator ? 'depredadores' : type === 'consumers' ? 'consumidores' : isProducerB ? 'productores B' : 'productores C';
+    logEvent('Migración: ' + n + ' ' + label + ' recoloniaron desde los bordes (pop. previa: ' + count + ')', 'birth');
+  }
+
   function simulate(dt) {
     sim.time += dt;
 
@@ -1406,6 +1465,12 @@
     }
 
     compactIfNeeded();
+
+    sim.migrationTimer -= dt;
+    if (sim.migrationTimer <= 0) {
+      sim.migrationTimer = 5.0;
+      checkMigration();
+    }
   }
 
   function counts() {

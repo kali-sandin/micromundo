@@ -100,6 +100,7 @@ function loadApp() {
       derivedConsumerStats, compactIfNeeded, rebuildGrid,
       queryNearby, nearestFood, feedingPower, armorResistance,
       canEatArmored, movementMaskFromValue, hasMove,
+      checkMigration, migratePopulation,
       GROUPS, GROUP_KEYS, GROUP_LABELS, TYPE, PRODUCER,
       WORLD, CELL, FIELD_CELL,
       camera, worldToScreen, visibleTileOffsets,
@@ -600,6 +601,94 @@ function runFunctionalTests() {
 }
 
 // ═════════════════════════════════════════════════════════════
+//  TESTS DE MIGRACION ANTI-EXTINCION
+// ═════════════════════════════════════════════════════════════
+
+function runMigrationTests() {
+  const api = loadApp();
+  suite('Migración anti-extinción');
+
+  assert('checkMigration no crashea con población sana', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.initProducerField();
+    api.seedWorld();
+    api.checkMigration();
+    expectOk(true, 'checkMutation crasheó con población sana');
+  });
+
+  assert('migratePopulation crea criaturas junto a bordes', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.initProducerField();
+    const donor = api.spawnConsumer({ x: 500, y: 500 });
+    const before = api.sim.creatures.filter(e => e && e.alive).length;
+    api.migratePopulation('consumers', 1, [donor]);
+    const after = api.sim.creatures.filter(e => e && e.alive).length;
+    expectGte(after, before + 3, 'migratePopulation no creó suficientes criaturas');
+    expectLte(after - before, 8, 'migratePopulation creó demasiadas criaturas');
+  });
+
+  assert('migratePopulation genera genes cercanos al donor', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.initProducerField();
+    const donor = api.spawnConsumer({ x: 500, y: 500, size: 3.5, flagella: 3, chemosense: 2.0 });
+    api.migratePopulation('consumers', 1, [donor]);
+    const migrants = api.sim.creatures.filter(e => e && e.alive && e !== donor);
+    expectOk(migrants.length >= 3, 'No se crearon migrantes');
+    for (const m of migrants) {
+      expectRange(m.size, 0.5, 9, 'size fuera de rango');
+      expectRange(m.flagella, 0, 7, 'flagella fuera de rango');
+      expectRange(m.chemosense, 0, 5, 'chemosense fuera de rango');
+    }
+  });
+
+  assert('checkMigration no dispara con population > 15', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.initProducerField();
+    for (let i = 0; i < 30; i++) api.spawnConsumer({ x: 100 + i * 10, y: 100 });
+    const before = api.sim.creatures.filter(e => e && e.alive).length;
+    for (let i = 0; i < 50; i++) api.checkMigration();
+    const after = api.sim.creatures.filter(e => e && e.alive).length;
+    expectEq(after, before, 'checkMigration creó criaturas con población sana');
+  });
+
+  assert('checkMigration no dispara cuando especie extinta (count=0)', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.initProducerField();
+    api.spawnConsumer({ x: 100, y: 100 });
+    const before = api.sim.creatures.filter(e => e && e.alive).length;
+    for (let i = 0; i < 50; i++) api.checkMigration();
+    const after = api.sim.creatures.filter(e => e && e.alive).length;
+    expectEq(after, before, 'checkMigration creó criaturas de especie sin donors');
+  });
+
+  assert('migratePopulation responde para depredadores', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.initProducerField();
+    const donor = api.spawnPredator({ x: 500, y: 500 });
+    const before = api.sim.creatures.filter(e => e && e.alive).length;
+    api.migratePopulation('predators', 1, [donor]);
+    const after = api.sim.creatures.filter(e => e && e.alive).length;
+    expectGte(after, before + 3, 'migratePopulation no creó depredadores');
+    const migrants = api.sim.creatures.filter(e => e && e.alive && e !== donor && e.type === api.TYPE.PREDATOR);
+    for (const m of migrants) {
+      expectEq(m.type, api.TYPE.PREDATOR, 'Migrante no es depredador');
+    }
+  });
+}
+
+// ═════════════════════════════════════════════════════════════
 //  TESTS DE RENDIMIENTO
 // ═════════════════════════════════════════════════════════════
 
@@ -736,6 +825,9 @@ function main() {
 
   if (filter === 'functional' || filter === 'all') {
     runFunctionalTests();
+  }
+  if (filter === 'migration' || filter === 'all') {
+    runMigrationTests();
   }
   if (filter === 'perf' || filter === 'all') {
     runPerfTests();
