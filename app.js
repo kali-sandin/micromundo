@@ -4,8 +4,13 @@
   const WORLD = { w: 16000, h: 9000 };
   const CELL = 190;
   const FIELD_CELL = 90;
-  const GRID_COLS = Math.max(1, Math.ceil(WORLD.w / CELL));
-  const GRID_ROWS = Math.max(1, Math.ceil(WORLD.h / CELL));
+  let GRID_COLS = Math.max(1, Math.ceil(WORLD.w / CELL));
+  let GRID_ROWS = Math.max(1, Math.ceil(WORLD.h / CELL));
+
+  function recomputeGridDimensions() {
+    GRID_COLS = Math.max(1, Math.ceil(WORLD.w / CELL));
+    GRID_ROWS = Math.max(1, Math.ceil(WORLD.h / CELL));
+  }
   const MAX_DEBUG_RANGES = 700;
   const BASE_DT = 1 / 30;
   const MAX_SIM_CHUNKS = 7;
@@ -2924,6 +2929,7 @@
     const width = clamp(Math.round(Number(form.get('width') || WORLD.w)), 1000, 32000);
     WORLD.w = width;
     WORLD.h = Math.round(width * 9 / 16);
+    recomputeGridDimensions();
     updateWorldReadout();
     centerCamera({ fit: true });
     resetWorld();
