@@ -3131,6 +3131,22 @@
       els.addDialog.close();
     });
 
+    // === Help dialog ===
+    const helpDialog = document.getElementById('helpDialog');
+    document.getElementById('helpButton').addEventListener('click', () => {
+      helpDialog.showModal();
+    });
+    helpDialog.addEventListener('click', (ev) => {
+      if (ev.target.matches('[data-help-close]')) helpDialog.close();
+    });
+    document.querySelectorAll('.help-tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.helpTab;
+        document.querySelectorAll('.help-tab').forEach((t) => t.classList.toggle('active', t === tab));
+        document.querySelectorAll('.help-section').forEach((s) => s.classList.toggle('active', s.dataset.helpSection === target));
+      });
+    });
+
     canvas.addEventListener('pointerdown', (ev) => {
       if (sim.followCreatureId != null) setFollowCreature(sim.followCreatureId, false);
       camera.dragging = true;

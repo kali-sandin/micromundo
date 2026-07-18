@@ -48,6 +48,7 @@
           <button class="tool-button active" id="toggleGenes" type="button"><span class="btn-icon">⟲</span><span>Genes</span></button>
           <button class="tool-button" id="toggleDebug" type="button"><span class="btn-icon">◎</span><span>Rangos</span></button>
           <button class="tool-button" id="resetWorld" type="button"><span class="btn-icon">↻</span><span>Reiniciar</span></button>
+          <button class="tool-button help-button" id="helpButton" type="button" title="Cómo funciona MicroMundo"><span class="btn-icon">?</span><span>Ayuda</span></button>
         </div>
       </header>
 
@@ -139,6 +140,333 @@
           <button class="tool-button primary" id="confirmAdd" value="default" type="submit">Añadir</button>
         </footer>
       </form>
+    </dialog>
+
+    <dialog id="helpDialog" class="help-dialog">
+      <div class="help-backdrop" data-help-close></div>
+      <div class="help-content">
+        <header class="help-header">
+          <div class="help-title-row">
+            <span class="help-logo">🌱</span>
+            <div>
+              <h2>MicroMundo — Guía del ecosistema</h2>
+              <p>Relaciones entre genes, variables y mecánicas. Sin fórmulas, solo cómo se afectan entre sí.</p>
+            </div>
+          </div>
+          <button class="icon-button help-close" data-help-close type="button" title="Cerrar">×</button>
+        </header>
+
+        <nav class="help-tabs" role="tablist">
+          <button class="help-tab active" data-help-tab="beings" type="button">Seres</button>
+          <button class="help-tab" data-help-tab="genes" type="button">Genes</button>
+          <button class="help-tab" data-help-tab="movement" type="button">Movimiento</button>
+          <button class="help-tab" data-help-tab="feeding" type="button">Alimentación</button>
+          <button class="help-tab" data-help-tab="energy" type="button">Energía</button>
+          <button class="help-tab" data-help-tab="reproduction" type="button">Reproducción</button>
+          <button class="help-tab" data-help-tab="world" type="button">Mundo</button>
+        </nav>
+
+        <div class="help-body">
+
+          <!-- SERES -->
+          <section class="help-section active" data-help-section="beings">
+            <div class="being-card being-producer-a">
+              <span class="being-icon-large">🟢</span>
+              <div>
+                <h3>Productor A — Biomasa</h3>
+                <p>No son individuos, sino un <strong>campo continuo de biomasa</strong> que cubre el fondo del mundo. Crecen con luz solar de forma logística: crecen más rápido donde hay masa moderada, más lento si están saturados o vacíos. Se difunden entre celdas vecinas.</p>
+                <p>Los consumidores pastan este campo directamente: lo vacían donde comen y tarda en recuperarse. <strong>Es la base de toda la cadena alimentaria.</strong></p>
+              </div>
+            </div>
+            <div class="being-card being-producer-b">
+              <span class="being-icon-large">🌿</span>
+              <div>
+                <h3>Productor B — Colonia</h3>
+                <p>Seres <strong>sésiles</strong> (no se mueven) que forman colonias. Tienen un cuerpo central con hojas que crecen con la luz. Cada hoja acumula energía propia.</p>
+                <p>Se reproducen generando esporas cerca de otras colonias. <strong>Compiten por espacio</strong>: cuando dos colonias se solapan, la más fuerte drena energía de la débil. Las hojas son comidas por consumidores y depredadores.</p>
+              </div>
+            </div>
+            <div class="being-card being-producer-c">
+              <span class="being-icon-large">🦠</span>
+              <div>
+                <h3>Productor C — Móvil</h3>
+                <p>Seres <strong>fotosintéticos que se mueven</strong>. Generan energía con luz solar pero en menor cantidad que B. Tienen percepción limitada y huyen de amenazas.</p>
+                <p>Son presa fácil de consumidores y depredadores. Su ventaja es que pueden <strong>colonizar zonas vacías</strong> y sobrevivir sin competencia. Representan el eslabón entre algas sésiles y organismos móviles.</p>
+              </div>
+            </div>
+            <div class="being-card being-consumer">
+              <span class="being-icon-large">🔵</span>
+              <div>
+                <h3>Consumidor</h3>
+                <p>Herbívoros móviles que <strong>se alimentan de los tres tipos de productores</strong>. Su supervivencia depende de encontrar comida antes de agotar sus reservas.</p>
+                <p>Son las presas de los depredadores. Su percepción y movimiento determinan si localizan alimento a tiempo. Tienen metabolismo adaptativo: gastan menos en reposo, más activos.</p>
+              </div>
+            </div>
+            <div class="being-card being-predator">
+              <span class="being-icon-large">🔴</span>
+              <div>
+                <h3>Depredador</h3>
+                <p>Carnívoros que <strong>cazan consumidores</strong>. Si no hay presas, pueden comer productores B o C como recurso de emergencia, pero ganan menos energía.</p>
+                <p>Tienen mayor tamaño, reservas y longevidad que los consumidores. Su metabolismo es más costoso. En escasez de presas, reducen su metabolismo a la mitad (modo crisis). Son los reguladores poblacionales del ecosistema.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- GENES -->
+          <section class="help-section" data-help-section="genes">
+            <p class="help-intro">Los genes se heredan de los padres con pequeña mutación aleatoria. Determinan el fenotipo completo de cada ser móvil (consumidores y depredadores). Los productores tienen subconjuntos más simples.</p>
+
+            <div class="gene-help-grid">
+              <div class="gene-help-card">
+                <span class="gene-help-color" style="background:#60d7c2"></span>
+                <div>
+                  <h4>size <small>tamaño</small></h4>
+                  <p>Determina el radio corporal, la masa y la energía máxima. A mayor tamaño, más reservas pero metabolismo más alto. Los depredadores necesitan tamaño grande para cazar eficazmente.</p>
+                </div>
+              </div>
+              <div class="gene-help-card">
+                <span class="gene-help-color" style="background:#e5bd55"></span>
+                <div>
+                  <h4>reserves <small>reservas</small></h4>
+                  <p>Almacén de energía. Más reservas = mayor energía máxima pero también más masa que arrastrar. Es el seguro contra periodos sin comida.</p>
+                </div>
+              </div>
+              <div class="gene-help-card">
+                <span class="gene-help-color" style="background:#54b7f1"></span>
+                <div>
+                  <h4>flagella <small>flagelos (0–7)</small></h4>
+                  <p>Apéndices de propulsión principal. Cada flagelo aumenta velocidad de nado, pero su coste metabólico crece de forma no lineal (más flagelos = coste desproporcionado). Son vitales para perseguir presas o huir.</p>
+                </div>
+              </div>
+              <div class="gene-help-card">
+                <span class="gene-help-color" style="background:#86d7ff"></span>
+                <div>
+                  <h4>cilia <small>cilios (0–6)</small></h4>
+                  <p>Apéndices finos que mejoran la alimentación por filtrado y aumentan la percepción ligeramente. Su coste metabólico es bajo. Combinan bien con filter-feeders y quimiotaxis.</p>
+                </div>
+              </div>
+              <div class="gene-help-card">
+                <span class="gene-help-color" style="background:#c38cff"></span>
+                <div>
+                  <h4>chemosense <small>quimiorrecepción (0–5)</small></h4>
+                  <p>Sensibilidad química para detectar comida y amenazas a distancia. Es el factor principal de percepción. Alto chemosense permite detectar presas/predadores más lejos, pero consume energía sensorial.</p>
+                </div>
+              </div>
+              <div class="gene-help-card">
+                <span class="gene-help-color" style="background:#f08fb0"></span>
+                <div>
+                  <h4>pseudopodia <small>pseudópodos (0–4)</small></h4>
+                  <p>Extensiones corporales que mejoran la captura de presas al contacto y el modo fagocito. Coste moderado. Utiles para consumidores que cazan presas pequeñas o depredadores que atacan colonias.</p>
+                </div>
+              </div>
+              <div class="gene-help-card">
+                <span class="gene-help-color" style="background:#d9e4df"></span>
+                <div>
+                  <h4>armor <small>armadura (0–5)</small></h4>
+                  <p>Placa defensiva que reduce la probabilidad de ser comido. Un depredador necesita ser significativamente más grande que la armadura de su presa para atacarla. Coste tisular permanente.</p>
+                </div>
+              </div>
+              <div class="gene-help-card">
+                <span class="gene-help-color" style="background:#7fd8a6"></span>
+                <div>
+                  <h4>vacuole <small>vacuola (0–4)</small></h4>
+                  <p>Orgánulo de almacenamiento que mejora la eficiencia metabólica: reduce el coste energético de mantenimiento. Más vacuolas = metabolismo más barato, permitiendo supervivencia más larga sin comer.</p>
+                </div>
+              </div>
+              <div class="gene-help-card">
+                <span class="gene-help-color" style="background:#ffb36b"></span>
+                <div>
+                  <h4>fertility <small>fertilidad (0.2–3)</small></h4>
+                  <p>Velocidad de recuperación del cooldown reproductivo. Alta fertilidad permite reproducirse con más frecuencia. En productores, también acelera la liberación de esporas.</p>
+                </div>
+              </div>
+              <div class="gene-help-card">
+                <span class="gene-help-color" style="background:#9bd1ff"></span>
+                <div>
+                  <h4>perception <small>percepción (derivado)</small></h4>
+                  <p>No es un gen independiente: se calcula a partir de chemosense y cilia. Determina el radio efectivo de detección de comida, parejas y amenazas. Un ser ciego muere de hambre rodeado de comida.</p>
+                </div>
+              </div>
+              <div class="gene-help-card">
+                <span class="gene-help-color" style="background:#ff8d8d"></span>
+                <div>
+                  <h4>metabolism <small>metabolismo (derivado)</small></h4>
+                  <p>Se calcula sumando el coste de todos los tejidos y apéndices: tamaño, reservas, flagelos, cilios, pseudópodos, quimiorrecepción y modos de movimiento. La vacuola lo reduce. Es el gasto energético por segundo en actividad.</p>
+                </div>
+              </div>
+              <div class="gene-help-card">
+                <span class="gene-help-color" style="background:#ffd071"></span>
+                <div>
+                  <h4>maxEnergy <small>energía máxima (derivada)</small></h4>
+                  <p>Se calcula a partir de tamaño, reservas y vacuola. Es el techo de energía que puede almacenar un ser. Determina cuánta energía puede acumular para reproducirse o sobrevivir periodos de escasez.</p>
+                </div>
+              </div>
+              <div class="gene-help-card">
+                <span class="gene-help-color" style="background:#c6d2dd"></span>
+                <div>
+                  <h4>maxAge <small>longevidad</small></h4>
+                  <p>Edad máxima aproximada. Al superarla, la probabilidad de muerte por senescencia aumenta progresivamente. Los depredadores viven más que los consumidores. Seres muy longevos acumulan experiencia reproductiva pero compiten con su propia descendencia.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- MOVIMIENTO -->
+          <section class="help-section" data-help-section="movement">
+            <p class="help-intro">Cada ser móvil tiene una máscara de bits que activa uno o varios modos de movimiento. Los modos activos se eligen dinámicamente según la situación (huida, búsqueda, reposo).</p>
+            <div class="mode-grid">
+              <div class="mode-card"><span class="mode-icon">➡️↩️</span><h4>Run-Tumble</h4><p>Tramos rectos con giros bruscos aleatorios. Explora rápido y esquiva bien, pero es menos preciso siguiendo rastros químicos.</p></div>
+              <div class="mode-card"><span class="mode-icon">🧪➡️</span><h4>Chemotaxis</h4><p>Gira hacia donde detecta más alimento o alejándose de amenazas. Necesita chemosense alto. Favorece persecución dirigida.</p></div>
+              <div class="mode-card"><span class="mode-icon">🌊</span><h4>Drift</h4><p>Movimiento suave y barato. Gasta poca energía al girar pero reacciona lento ante depredadores o presas.</p></div>
+              <div class="mode-card"><span class="mode-icon">🌀</span><h4>Spiral</h4><p>Trayectoria orbital/ondulante. Cubre área local de forma eficiente. Combina bien con cilios y alta percepción.</p></div>
+              <div class="mode-card"><span class="mode-icon">⏸️</span><h4>Pause</h4><p>Permanece quieto en intervalos para ahorrar energía. Reduce el metabolismo a un tercio. Útil en escasez pero arriesgado si hay depredadores cerca.</p></div>
+              <div class="mode-card"><span class="mode-icon">⚡</span><h4>Burst</h4><p>Impulsos largos ocasionales que cubren mucha distancia rápido. Gastan energía extra pero permiten alcanzar presas lejanas o huir.</p></div>
+            </div>
+          </section>
+
+          <!-- ALIMENTACIÓN -->
+          <section class="help-section" data-help-section="feeding">
+            <p class="help-intro">Los consumidores tienen una estrategia alimentaria que determina cómo extraen energía de lo que tocan.</p>
+            <div class="mode-grid">
+              <div class="mode-card"><span class="mode-icon">🐑</span><h4>Grazer (pastoreo)</h4><p>Pastoreo directo sobre la biomasa del campo y contacto con presas. Sencillo y estable, sin dependencia de apéndices.</p></div>
+              <div class="mode-card"><span class="mode-icon">🎏</span><h4>Filter (filtrado)</h4><p>Los cilios extienden el radio de captura de comida microscópica del campo. Moderado coste, buena opción para zonas ricas.</p></div>
+              <div class="mode-card"><span class="mode-icon">🫳</span><h4>Phagocyte (engulfimiento)</h4><p>Los pseudópodos mejoran la mordida sobre presas pequeñas u hojas de colonias. Más costoso pero más efectivo al contacto.</p></div>
+              <div class="mode-card"><span class="mode-icon">👄</span><h4>Cytostome (boca dirigida)</h4><p>Boca especializada muy eficiente al contactar presas. Depende más de la persecución y la percepción que del contacto pasivo.</p></div>
+            </div>
+            <div class="help-note">
+              <strong>Cadena trófica:</strong>
+              <span>Biomasa (A) → Consumidores → Depredadores</span>
+              <span>Productor B (hojas) → Consumidores</span>
+              <span>Productor C → Consumidores → Depredadores</span>
+              <span>Depredadores pueden comer Productor B/C como respaldo si no hay presas.</span>
+            </div>
+          </section>
+
+          <!-- ENERGÍA -->
+          <section class="help-section" data-help-section="energy">
+            <p class="help-intro">La energía es el recurso central. Todo ser gana energía comiendo o fotosintetizando, y la pierde metabolizando. Si llega a cero, muere.</p>
+            <div class="help-flow">
+              <div class="help-flow-box solar">
+                <span class="flow-icon">☀️</span>
+                <strong>Energía solar</strong>
+                <p>Controlada por el slider. Más sol = más fotosíntesis y crecimiento. Con ciclo día/noche activado, oscila sinusoidalmente.</p>
+              </div>
+              <span class="flow-arrow">→</span>
+              <div class="help-flow-box producer">
+                <span class="flow-icon">🌱</span>
+                <strong>Productores</strong>
+                <p>Convierten luz en energía. A growth lento pero constante. El campo A crece de forma logística y se difunde.</p>
+              </div>
+              <span class="flow-arrow">→</span>
+              <div class="help-flow-box consumer">
+                <span class="flow-icon">🔵</span>
+                <strong>Consumidores</strong>
+                <p>Ganan energía al comer productores. La ganancia es proporcional al tamaño de la presa. Gastan energía en movimiento y mantenimiento.</p>
+              </div>
+              <span class="flow-arrow">→</span>
+              <div class="help-flow-box predator">
+                <span class="flow-icon">🔴</span>
+                <strong>Depredadores</strong>
+                <p>Ganan mucha energía por presa cazada, pero su metabolismo es alto. En escasez, reducen metabolismo a la mitad (modo crisis).</p>
+              </div>
+            </div>
+            <div class="help-note">
+              <strong>Metabolismo en reposo vs activo:</strong>
+              <span>Un ser activo paga el coste completo de sus tejidos y apéndices.</span>
+              <span>En reposo (modo pause), el metabolismo baja a ~un tercio. Permite sobrevivir crisis largas.</span>
+              <span>Los depredadores con pocas presas entran en modo crisis: metabolismo al 50%.</span>
+            </div>
+          </section>
+
+          <!-- REPRODUCCIÓN -->
+          <section class="help-section" data-help-section="reproduction">
+            <p class="help-intro">Para reproducirse, un ser necesita suficiente energía y encontrar pareja cerca. Los hijos heredan genes de ambos padres con mutación.</p>
+            <div class="help-list">
+              <div class="help-list-item">
+                <span class="help-num">1</span>
+                <div>
+                  <strong>Umbral energético</strong>
+                  <p>Consumidores necesitan &gt;72% de su energía máxima. Depredadores &gt;60% (o 50% en crisis). Esto evita que se reproduzcan cuando no pueden mantenerse a sí mismos.</p>
+                </div>
+              </div>
+              <div class="help-list-item">
+                <span class="help-num">2</span>
+                <div>
+                  <strong>Búsqueda de pareja</strong>
+                  <p>Buscan individuos de su mismo tipo dentro de su rango de percepción. La pareja también debe tener energía suficiente y no estar en cooldown reproductivo.</p>
+                </div>
+              </div>
+              <div class="help-list-item">
+                <span class="help-num">3</span>
+                <div>
+                  <strong>Herencia genética</strong>
+                  <p>Cada gen se hereda como promedio de ambos padres + mutación aleatoria pequeña. Los modos de movimiento y alimentación pueden cambiar con baja probabilidad (mutación mayor). Esto genera diversidad fenotípica.</p>
+                </div>
+              </div>
+              <div class="help-list-item">
+                <span class="help-num">4</span>
+                <div>
+                  <strong>Coste reproductivo</strong>
+                  <p>Ambos padres pierden ~40% de su energía. El cooldown hasta la próxima reproducción depende del gen fertility. Los productores B generan esporas que requieren hojas adyacentes.</p>
+                </div>
+              </div>
+            </div>
+            <div class="help-note">
+              <strong>Anti-extinción:</strong>
+              <span>Si una especie cae por debajo de 15 individuos pero aún hay supervivientes, hay una pequeña probabilidad de migración: grupos de 3–8 individuos aparecen en los bordes del mundo con genes derivados de los supervivientes, aportando variabilidad genética.</span>
+            </div>
+          </section>
+
+          <!-- MUNDO -->
+          <section class="help-section" data-help-section="world">
+            <p class="help-intro">El mundo es un espacio toroidal: los bordes se conectan. Lo que sale por la derecha entra por la izquierda. Arriba se conecta con abajo.</p>
+            <div class="help-list">
+              <div class="help-list-item">
+                <span class="help-num">∞</span>
+                <div>
+                  <strong>Topología toroidal</strong>
+                  <p>No hay bordes ni esquinas refugio. Los depredadores pueden aparecer desde cualquier dirección. Las distancias se calculan considerando el wrap-around.</p>
+                </div>
+              </div>
+              <div class="help-list-item">
+                <span class="help-num">▦</span>
+                <div>
+                  <strong>Grid espacial</strong>
+                  <p>El mundo se divide en celdas para optimizar búsquedas de vecinos. Cada criatura solo interactúa con las que están en celdas próximas, lo que permite miles de seres sin colapsar el rendimiento.</p>
+                </div>
+              </div>
+              <div class="help-list-item">
+                <span class="help-num">🌗</span>
+                <div>
+                  <strong>Ciclo día/noche</strong>
+                  <p>Si está activado, la energía solar oscila con un periodo de 10 minutos. De día hay más fotosíntesis; de noche todos los productores generan menos energía. Esto crea presión selectiva hacia reservas y eficiencia.</p>
+                </div>
+              </div>
+              <div class="help-list-item">
+                <span class="help-num">↻</span>
+                <div>
+                  <strong>Senescencia y reciclaje</strong>
+                  <p>Todos los seres tienen una edad máxima. Al superarla, aumenta la probabilidad de muerte natural. Cuando un ser muere, parte de su energía se devuelve al campo de biomasa, cerrando el ciclo.</p>
+                </div>
+              </div>
+              <div class="help-list-item">
+                <span class="help-num">⚔</span>
+                <div>
+                  <strong>Competencia (colonias B)</strong>
+                  <p>Cuando dos colonias se solapan, la más fuerte (más energía, radio y armadura) drena energía de la débil. Esto limita la densidad de colonias y selecciona por vigor competitivo.</p>
+                </div>
+              </div>
+            </div>
+            <div class="help-note">
+              <strong>Consejos:</strong>
+              <span>Usa el inspector de criaturas (clic sobre un ser) para ver sus genes en tiempo real.</span>
+              <span>El panel de genes muestra la evolución de la media de cada gen a lo largo del tiempo.</span>
+              <span>Pausa la simulación para inspeccionar con calma. Los atajos: Espacio = pausa, 1/2/3 = añadir productor/consumidor/depredador.</span>
+            </div>
+          </section>
+
+        </div>
+      </div>
     </dialog>
 
     <script src="app.js" defer></script>
