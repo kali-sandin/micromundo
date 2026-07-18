@@ -693,7 +693,8 @@
       leafCount: 0,
       maxRadius: 18,
       maxAge: Infinity,
-      competitionAt: 0
+      competitionAt: 0,
+      starved: 0
     };
     const e = Object.assign(base, partial);
     sim.creatures[id] = e;
@@ -1290,6 +1291,25 @@
       return;
     }
 
+    // Starvation progresivo: reduce capacidades con baja energia
+    var origSpeed = e.speed;
+    var origPerception = e.perception;
+    var origFertility = e.fertility;
+    var canReproduce = true;
+    if (e.energy < e.maxEnergy * 0.05) {
+      e.speed *= 0.3;
+      e.perception *= 0.7;
+      canReproduce = false;
+      e.starved = 2;
+    } else if (e.energy < e.maxEnergy * 0.15) {
+      e.speed *= 0.6;
+      e.perception *= 0.8;
+      e.fertility *= 0.3;
+      e.starved = 1;
+    } else {
+      e.starved = 0;
+    }
+
     let food = null;
     let steeringTarget = null;
     let threat = null;
@@ -1333,7 +1353,11 @@
     }
     steerCreature(e, dt, steeringTarget, threat);
     if (food) feedConsumer(e, food);
-    reproduceMobile(e, e.type);
+    // Restaurar tras uso temporal
+    e.speed = origSpeed;
+    e.perception = origPerception;
+    e.fertility = origFertility;
+    if (canReproduce) reproduceMobile(e, e.type);
   }
 
   function compactIfNeeded() {
@@ -1978,7 +2002,10 @@
     const r = Math.max(1, e.radius * camera.zoom);
     if (p.x < -20 || p.y < -20 || p.x > window.innerWidth + 20 || p.y > window.innerHeight + 20) return;
 
-    ctx.fillStyle = e.color;
+    var fillC = e.color;
+    if (e.starved === 2) fillC = 'rgba(90,90,100,0.55)';
+    else if (e.starved === 1) fillC = 'rgba(120,120,140,0.70)';
+    ctx.fillStyle = fillC;
     if (r <= 2.2) {
       ctx.fillRect(p.x - r, p.y - r, r * 2, r * 2);
       return;
