@@ -1063,7 +1063,7 @@
       e.x += Math.cos(e.angle) * e.speed * panic * moveScale * dt;
       e.y += Math.sin(e.angle) * e.speed * panic * moveScale * dt;
       const sensoryCost = (Number(e.chemosense || 0) * 0.003 + Math.max(0, Number(e.perception || 0) - 40) * 0.000012) * dt * (resting ? 0.42 : 1);
-      e.energy = Math.min(e.maxEnergy, e.energy + dt * sim.solarEnergy * 0.07 - sensoryCost);
+      e.energy = Math.min(e.maxEnergy, e.energy + dt * sim.solarEnergy * 0.12 - sensoryCost);
       if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / 120)) {
         kill(e, 'Productor C móvil muere por senescencia');
         return;
@@ -1220,7 +1220,7 @@
         ? 62 + target.radius * 3.2 + target.energy * 0.35
         : 92 + target.size * 16 + target.reserves * 7
       : target.sub === PRODUCER.C
-          ? 60
+          ? Math.max(8, Math.min(target.energy * 1.8, 36))
           : 7.5;
 
     e.energy = Math.min(e.maxEnergy, e.energy + gain);
