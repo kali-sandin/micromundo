@@ -1215,13 +1215,21 @@
 
     if (!canEatArmored(e, target)) return false;
 
-    const gain = e.type === TYPE.PREDATOR
+    // Gape-limitation: depredadores no pueden comer presas mucho mas grandes
+    let gapeFactor = 1;
+    if (e.type === TYPE.PREDATOR && target.type === TYPE.CONSUMER) {
+      const sizeRatio = target.size / Math.max(1, e.size);
+      if (sizeRatio > 0.85) return false; // presa demasiado grande
+      if (sizeRatio > 0.5) gapeFactor = 0.85 / sizeRatio; // penalty progresivo
+    }
+
+    const gain = (e.type === TYPE.PREDATOR
       ? target.type === TYPE.PRODUCER
         ? 62 + target.radius * 3.2 + target.energy * 0.35
         : 92 + target.size * 16 + target.reserves * 7
       : target.sub === PRODUCER.C
           ? Math.max(8, Math.min(target.energy * 1.8, 36))
-          : 7.5;
+          : 7.5) * gapeFactor;
 
     e.energy = Math.min(e.maxEnergy, e.energy + gain);
     kill(target, e.type === TYPE.PREDATOR ? (target.type === TYPE.PRODUCER ? 'Depredador consume productor' : 'Depredador consume consumidor') : null);
