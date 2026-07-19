@@ -2004,7 +2004,9 @@
 
   function drawCreature(e, ox = 0, oy = 0) {
     const p = worldToScreen(e.x + ox, e.y + oy);
-    const r = Math.max(1, e.radius * camera.zoom);
+    // Minimum visible size: mobile creatures need to be visible at any zoom
+    const minR = e.type === TYPE.CONSUMER || e.type === TYPE.PREDATOR ? 3 : 1;
+    const r = Math.max(minR, e.radius * camera.zoom);
     if (p.x < -20 || p.y < -20 || p.x > window.innerWidth + 20 || p.y > window.innerHeight + 20) return;
 
     var fillC = e.color;
