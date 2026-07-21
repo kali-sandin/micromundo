@@ -13,7 +13,8 @@
   }
   const MAX_DEBUG_RANGES = 700;
   const BASE_DT = 1 / 30;
-  const MAX_SIM_CHUNKS = 7;
+  const MAX_SIM_CHUNKS = 30;
+  const MAX_DT = BASE_DT * 3; // 0.1s - clamp anti-inestabilidad a alta velocidad
 
   const TYPE = { PRODUCER: 0, CONSUMER: 1, PREDATOR: 2 };
   const PRODUCER = { A: 0, B: 1, C: 2 };
@@ -2431,7 +2432,7 @@
     if (!sim.paused) {
       const scaled = elapsed * sim.speed;
       const chunks = Math.max(1, Math.min(MAX_SIM_CHUNKS, Math.ceil(scaled / BASE_DT)));
-      const dt = scaled / chunks;
+      const dt = Math.min(scaled / chunks, MAX_DT);
       for (let i = 0; i < chunks; i += 1) simulate(dt);
     }
 
