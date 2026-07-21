@@ -656,7 +656,7 @@
     const bite = Math.min(mass, 0.018 + e.size * 0.006 + e.cilia * 0.003 + (e.feeding === 1 ? 0.014 : 0));
     field.mass[idx] = mass - bite;
     field.total -= bite;
-    e.energy = Math.min(e.maxEnergy, e.energy + bite * 52);
+    e.energy = Math.min(e.maxEnergy, e.energy + bite * 25);
     return true;
   }
 
