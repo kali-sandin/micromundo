@@ -715,11 +715,11 @@
     sim.freeIds.push(e.id);
     sim.deaths += 1;
 
-    // Descomposicion: devuelve 50% de energia restante al producerField
+    // Descomposicion: retorno minimo (0.5%) al producerField
+    // Antes era 4%, creaba bucle de reciclaje energetico en sistema ya inflado
     if (e.energy > 0.5 && sim.producerField.mass.length) {
-      var returnEnergy = e.energy * 0.5;
       var depositRadius = Math.max(60, e.radius * 4);
-      addProducerDensity(e.x, e.y, returnEnergy * 0.08, depositRadius);
+      addProducerDensity(e.x, e.y, e.energy * 0.005, depositRadius);
     }
 
     // Carcass visual: efecto temporal en posicion de muerte
