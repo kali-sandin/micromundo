@@ -77,6 +77,9 @@
   const TRAIL_MIN_STEP = 10;
   const HISTORY_MAX_POINTS = 21600;
   const DEFAULT_HISTORY_PX_PER_SECOND = 0.45;
+  const DEFAULT_INITIAL_PERCEPTION = 120;
+  const PRODUCER_C_MAX_PERCEPTION = 180;
+  const PRODUCER_C_DEFAULT_FERTILITY = 0.026;
 
   const canvas = document.getElementById('world');
   const ctx = canvas.getContext('2d', { alpha: false });
@@ -663,6 +666,56 @@
     return true;
   }
 
+  function returnCarcassEnergyToField(car) {
+    if (!car || !sim.producerField.mass.length || car.energy <= 0) return;
+    const depositRadius = Math.max(90, Math.min(240, car.radius * 12));
+    addProducerDensity(car.x, car.y, Math.max(0.18, car.energy * 0.035), depositRadius);
+    car.energy = 0;
+    car.alive = false;
+  }
+
+  function nearestCarcassFood(e, radius) {
+    let best = null;
+    let bestD2 = Infinity;
+    for (let i = 0; i < sim.carcasses.length; i += 1) {
+      const car = sim.carcasses[i];
+      if (!car || !car.alive || car.energy <= 0) continue;
+      const dx = torusDelta(car.x - e.x, WORLD.w);
+      const dy = torusDelta(car.y - e.y, WORLD.h);
+      const d2 = dx * dx + dy * dy;
+      if (d2 <= radius * radius && d2 < bestD2) {
+        best = car;
+        bestD2 = d2;
+      }
+    }
+    return best;
+  }
+
+  function eatCarcass(e, car) {
+    if (!car || !car.alive || car.energy <= 0) return false;
+    const dx = torusDelta(car.x - e.x, WORLD.w);
+    const dy = torusDelta(car.y - e.y, WORLD.h);
+    const eatRange = e.radius + car.radius + (e.feeding === 1 ? e.cilia * 2.2 : 4);
+    if (dx * dx + dy * dy > eatRange * eatRange) return false;
+    const bite = Math.min(car.energy, 0.9 + e.size * 0.58 + e.pseudopodia * 0.38 + (e.feeding === 2 ? 0.8 : 0));
+    car.energy -= bite;
+    e.energy = Math.min(e.maxEnergy, e.energy + bite * (e.type === TYPE.PREDATOR ? 11 : 6.5));
+    if (car.energy <= 0.2) {
+      car.energy = 0;
+      car.alive = false;
+    }
+    return true;
+  }
+
+  function stepCarcasses(dt) {
+    for (let ci = sim.carcasses.length - 1; ci >= 0; ci -= 1) {
+      const car = sim.carcasses[ci];
+      car.life += dt;
+      if (car.life >= car.maxLife) returnCarcassEnergyToField(car);
+      if (!car.alive || car.energy <= 0) sim.carcasses.splice(ci, 1);
+    }
+  }
+
   function createCreature(partial) {
     const id = sim.freeIds.pop() ?? sim.creatures.length;
     const base = {
@@ -691,7 +744,7 @@
       feeding: 0,
       movement: 0,
       movementMask: 2,
-      perception: 60,
+      perception: DEFAULT_INITIAL_PERCEPTION,
       fertility: 1,
       maxEnergy: 1,
       metabolism: 0,
@@ -719,22 +772,20 @@
     sim.freeIds.push(e.id);
     sim.deaths += 1;
 
-    // Descomposicion: retorno minimo (0.5%) al producerField
-    // Antes era 4%, creaba bucle de reciclaje energetico en sistema ya inflado
-    if (e.energy > 0.5 && sim.producerField.mass.length) {
-      var depositRadius = Math.max(60, e.radius * 4);
-      addProducerDensity(e.x, e.y, e.energy * 0.005, depositRadius);
-    }
-
-    // Carcass visual: efecto temporal en posicion de muerte
+    // El retorno al campo ocurre al descomponerse; mientras tanto el cadaver se puede comer.
     if (sim.carcasses.length < 400) {
+      const storedEnergy = Math.max(1.5, Number(e.energy || 0) * 0.55 + Number(e.radius || 1) * 1.2);
       sim.carcasses.push({
+        alive: true,
+        virtualCarcass: true,
         x: e.x,
         y: e.y,
-        radius: Math.max(2, e.radius * 0.8),
-        color: e.color,
+        radius: Math.max(2, e.radius * 0.9),
+        sourceType: e.type,
+        energy: storedEnergy,
+        maxEnergy: storedEnergy,
         life: 0,
-        maxLife: 3.5
+        maxLife: 8
       });
     }
 
@@ -765,12 +816,12 @@
       maxEnergy: colony ? 92 : 24,
       armor: Number(opts.armor ?? (colony ? rand(3.1, 5.4) : mobile ? rand(2.2, 4.0) : rand(1.2, 2.6))),
       chemosense,
-      perception: mobile ? Number(opts.perception ?? (80 + chemosense * 20)) : 40,
+      perception: mobile ? clamp(Number(opts.perception ?? DEFAULT_INITIAL_PERCEPTION), 40, PRODUCER_C_MAX_PERCEPTION) : 40,
       movement,
       movementMask: opts.movementMask != null ? movementMaskFromValue(opts.movementMask) : (1 << movement),
       leafEnergy: colony ? rand(8, 18) : 0,
       leafCount: colony ? Math.floor(rand(3, 7)) : 0,
-      fertility: Number(opts.fertility ?? (mobile ? 0.040 : 0.024)),
+      fertility: Number(opts.fertility ?? (mobile ? PRODUCER_C_DEFAULT_FERTILITY : 0.024)),
       cooldown: rand(mobile ? 30 : 15, colony ? 80 : 60),
       maxAge: colony ? Number(opts.maxAge ?? rand(9000, 16500)) : mobile ? Number(opts.maxAge ?? rand(5200, 9000)) : Infinity,
       competitionAt: sim.time + rand(0.5, 3.5),
@@ -786,11 +837,11 @@
     const massDrag = 1 + bodyMass * 0.2 + e.reserves * 0.08 + flagellaLoad * 0.055;
     e.radius = clamp(3.5 + e.size * 1.72 + e.reserves * 0.34, 3, 19);
     e.speed = locomotion / massDrag;
-    e.perception = 80 + e.chemosense * 32 + e.cilia * 8;
     const speedCost = Math.pow(Math.max(0, e.speed) / 42, 1.42) * 0.022;
     const tissueCost = e.size * 0.010 + e.reserves * 0.004 + e.armor * 0.007;
     const appendageCost = flagellaLoad * 0.014 + e.cilia * 0.004 + e.pseudopodia * 0.006;
-    const sensoryCost = e.chemosense * 0.010 + Math.max(0, e.perception - 80) * 0.000075;
+    if (!Number.isFinite(Number(e.perception)) || e.perception <= 0) e.perception = DEFAULT_INITIAL_PERCEPTION;
+    const sensoryCost = e.chemosense * 0.010 + Math.max(0, e.perception - DEFAULT_INITIAL_PERCEPTION) * 0.000075;
     const motionCost = (hasMove(e, 4) ? -0.004 : 0) + (hasMove(e, 5) ? 0.010 : 0);
     const vacuoleEfficiency = Math.max(0.82, 1 - e.vacuole * 0.035);
     e.metabolism = (0.014 + speedCost + tissueCost + appendageCost + sensoryCost + motionCost) * vacuoleEfficiency;
@@ -817,6 +868,7 @@
       feeding: Number(opts.feeding ?? Math.floor(rand(0, FEEDING.length))),
       movement,
       movementMask: opts.movementMask != null ? movementMaskFromValue(opts.movementMask) : (1 << movement),
+      perception: Number(opts.perception ?? DEFAULT_INITIAL_PERCEPTION),
       fertility: Number(opts.fertility ?? 1),
       energy: Number(opts.energy ?? rand(32, 58)),
       maxAge: Number(opts.maxAge ?? rand(2800, 4600)),
@@ -844,7 +896,6 @@
     e.color = '#f05b50';
     e.radius += 1.5;
     e.speed *= 1.28;
-    e.perception += 31.25;
     e.maxEnergy *= 4.65;
     if (opts.energy == null) e.energy = rand(e.maxEnergy * 0.38, e.maxEnergy * 0.62);
     e.metabolism *= 0.82;
@@ -1150,10 +1201,10 @@
       radius: inheritAsexual(e, 'radius', 3, 10),
       armor: inheritAsexual(e, 'armor', 0, 4),
       speed: e.speed ? inheritAsexual(e, 'speed', 8, 62) : 0,
-      perception: inheritAsexual(e, 'perception', 50, 310),
+      perception: inheritAsexual(e, 'perception', 45, PRODUCER_C_MAX_PERCEPTION),
       chemosense: inheritAsexual(e, 'chemosense', 0, 5),
       movementMask: chance(0.04) ? inheritMovementMask(e, { movementMask: 1 << Math.floor(rand(0, MOVE.length)) }) : movementMaskFromLegacy(e),
-      fertility: inheritAsexual(e, 'fertility', 0.006, 0.22),
+      fertility: inheritAsexual(e, 'fertility', 0.006, 0.075),
       maxAge: inheritAsexual(e, 'maxAge', 3500, 12000)
     });
     e.energy *= 0.68;
@@ -1199,7 +1250,9 @@
   }
 
   function feedConsumer(e, target) {
-    if (!target || !target.alive) return false;
+    if (!target) return false;
+    if (target.virtualCarcass) return eatCarcass(e, target);
+    if (!target.alive) return false;
     if (target.virtualA) return grazeProducerDensity(e);
     const dx = torusDelta(target.x - e.x, WORLD.w);
     const dy = torusDelta(target.y - e.y, WORLD.h);
@@ -1352,6 +1405,7 @@
         }
         food = bestPlant;
       }
+      if (!food) food = nearestCarcassFood(e, e.perception * 0.85);
       steeringTarget = food || findMateTarget(e, TYPE.PREDATOR);
     } else {
       queryNearby(e.x, e.y, consumerThreatRange(e), TYPE.PREDATOR, consumerThreats);
@@ -1370,6 +1424,7 @@
           if ((fdx * fdx + fdy * fdy) * 0.75 < edx * edx + edy * edy) food = fieldFood;
         }
       }
+      if (!food && e.energy < e.maxEnergy * 0.42) food = nearestCarcassFood(e, e.perception * 0.65);
       steeringTarget = food;
     }
     steerCreature(e, dt, steeringTarget, threat);
@@ -1515,11 +1570,7 @@
     }
     if (sim.selectedCreatureIds.length) updateSelectedTrails();
 
-    // Actualizar carcarsses: desvanecer y eliminar
-    for (var ci = sim.carcasses.length - 1; ci >= 0; ci -= 1) {
-      sim.carcasses[ci].life += dt;
-      if (sim.carcasses[ci].life >= sim.carcasses[ci].maxLife) sim.carcasses.splice(ci, 1);
-    }
+    stepCarcasses(dt);
 
     compactIfNeeded();
 
@@ -2025,10 +2076,7 @@
     const r = Math.max(minR, e.radius * camera.zoom);
     if (p.x < -20 || p.y < -20 || p.x > window.innerWidth + 20 || p.y > window.innerHeight + 20) return;
 
-    var fillC = e.color;
-    if (e.starved === 2) fillC = 'rgba(90,90,100,0.55)';
-    else if (e.starved === 1) fillC = 'rgba(120,120,140,0.70)';
-    ctx.fillStyle = fillC;
+    ctx.fillStyle = e.color;
     if (r <= 2.2) {
       ctx.fillRect(p.x - r, p.y - r, r * 2, r * 2);
       return;
@@ -2581,9 +2629,9 @@
       sub,
       radius: vary(base.radius, 0.22, 3, 8),
       armor: vary(base.armor, 0.20, 1.8, 4.6),
-      fertility: vary(base.fertility, 0.18, 0.018, 0.095),
+      fertility: vary(base.fertility, 0.18, 0.010, 0.050),
       speed: vary(base.speed, 0.24, 14, 50),
-      perception: vary(base.perception, 0.18, 90, 280),
+      perception: DEFAULT_INITIAL_PERCEPTION,
       chemosense: vary(base.chemosense, 0.18, 1.4, 4.2),
       maxAge: vary(base.maxAge, 0.24, 4200, 12500),
       movementMask: balancedMovementMask(i)
@@ -2653,9 +2701,9 @@
         sub,
         radius: isColonyProducer(sub) ? 18 : 5,
         armor: isColonyProducer(sub) ? 3.8 : 3.0,
-        fertility: isMobileProducer(sub) ? 0.040 : 0.024,
+        fertility: isMobileProducer(sub) ? PRODUCER_C_DEFAULT_FERTILITY : 0.024,
         speed: 24,
-        perception: 170,
+        perception: DEFAULT_INITIAL_PERCEPTION,
         chemosense: 2.7,
         movementMask: 2,
         maxAge: isColonyProducer(sub) ? 12000 : 6800
@@ -2870,7 +2918,7 @@
           + rangeField('fertility', 'Reproducción', values.fertility, 0.004, 0.18, 0.001, 'Multiplica la velocidad del cooldown reproductivo; también escala con la energía solar. En productores entidad conviene mantenerlo bajo.')
           + (isMobileProducer(sub)
             ? rangeField('speed', 'Velocidad Tipo C', values.speed, 0, 80, 1, 'Velocidad de productores móviles. Más velocidad ayuda a huir, pero captar sol en movimiento es lento y reproducirse cuesta más.')
-              + rangeField('perception', 'Percepción Tipo C', values.perception, 60, 650, 10, 'Rango para detectar consumidores y depredadores cercanos y huir antes de ser alcanzado. Demasiada percepción cuesta energía.')
+              + rangeField('perception', 'Percepción Tipo C', values.perception, 40, PRODUCER_C_MAX_PERCEPTION, 5, 'Rango para detectar consumidores y depredadores cercanos. Arranca igual que consumidores y depredadores; subirlo mucho rompe el equilibrio.')
               + rangeField('chemosense', 'Quimiosensibilidad Tipo C', values.chemosense, 0, 5, 0.1, 'Aumenta orientación y percepción efectiva, pero encarece mantener rangos altos.')
               + movementField('movementBits', 'Movimientos Tipo C', values.movementMask, 'Puede tener varios algoritmos simultáneos. En reproducción asexual mutan muy poco.')
             : '')

@@ -100,7 +100,8 @@ function loadApp() {
       derivedConsumerStats, compactIfNeeded, rebuildGrid,
       queryNearby, nearestFood, feedingPower, armorResistance,
       canEatArmored, movementMaskFromValue, hasMove,
-      checkMigration, migratePopulation,
+      checkMigration, migratePopulation, feedConsumer,
+      nearestCarcassFood, returnCarcassEnergyToField,
       GROUPS, GROUP_KEYS, GROUP_LABELS, TYPE, PRODUCER,
       WORLD, CELL, FIELD_CELL,
       camera, worldToScreen, visibleTileOffsets,
@@ -267,6 +268,14 @@ function runFunctionalTests() {
     expectGte(fieldTotalAfter, fieldTotalBefore, 'Densidad del campo no aumento');
   });
 
+  assert('seres moviles arrancan con la misma percepcion base', () => {
+    const prodC = api.spawnProducer({ sub: api.PRODUCER.C, x: 120, y: 120 });
+    const consumer = api.spawnConsumer({ x: 140, y: 140 });
+    const predator = api.spawnPredator({ x: 160, y: 160 });
+    expectEq(prodC.perception, consumer.perception, 'Productor C y consumidor arrancan con distinto rango');
+    expectEq(consumer.perception, predator.perception, 'Consumidor y depredador arrancan con distinto rango');
+  });
+
   // ─── Kill ───────────────────────────────────────
   suite('Kill y limpieza');
 
@@ -278,16 +287,19 @@ function runFunctionalTests() {
     expectEq(api.sim.deaths, deathsBefore + 1, 'Deaths no incremento');
   });
 
-  assert('kill recicla energia al producerField', () => {
+  assert('cadaver descompuesto recicla energia al producerField', () => {
     api.initProducerField();
     api.sim.producerField.mass.fill(0);
     api.sim.producerField.total = 0;
+    api.sim.carcasses = [];
     const c = api.spawnConsumer({ x: 50, y: 50 });
     c.energy = 100;
     const fieldTotalBefore = api.sim.producerField.total;
     api.kill(c, 'test-reciclaje');
+    expectOk(api.sim.carcasses.length > 0, 'kill no creo carcass reciclable');
+    api.returnCarcassEnergyToField(api.sim.carcasses[0]);
     const fieldTotalAfter = api.sim.producerField.total;
-    expectOk(fieldTotalAfter > fieldTotalBefore, 'kill no reciclo energia al campo');
+    expectOk(fieldTotalAfter > fieldTotalBefore, 'cadaver no reciclo energia al campo');
   });
 
   assert('kill sobre muerta no duplica deaths', () => {
@@ -513,7 +525,25 @@ function runFunctionalTests() {
     const car = api.sim.carcasses[api.sim.carcasses.length - 1];
     expectOk(car.x !== undefined && car.y !== undefined, 'carcass sin coords');
     expectOk(car.radius > 0, 'carcass sin radio');
+    expectOk(car.energy > 0, 'carcass sin energia comestible');
     expectOk(car.maxLife > 0, 'carcass sin maxLife');
+  });
+
+  assert('consumidor puede comer carcass', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.initProducerField();
+    const eater = api.spawnConsumer({ x: 100, y: 100, energy: 5 });
+    const dead = api.spawnConsumer({ x: 101, y: 101, energy: 80 });
+    api.kill(dead, 'test-carcass-food');
+    const car = api.nearestCarcassFood(eater, 40);
+    expectOk(car, 'no encontro carcass cercano');
+    const energyBefore = eater.energy;
+    const carEnergyBefore = car.energy;
+    expectOk(api.feedConsumer(eater, car), 'feedConsumer no pudo comer carcass');
+    expectOk(eater.energy > energyBefore, 'comer carcass no subio energia');
+    expectOk(car.energy < carEnergyBefore, 'comer carcass no redujo energia del cadaver');
   });
 
   assert('drawCarcasses no crashea (bug view undefined)', () => {

@@ -862,13 +862,12 @@ select {
 }
 
 .predator-shape {
-  width: 0;
-  height: 0;
+  width: calc(var(--body) * 1.38);
+  height: calc(var(--body) * 1.12);
   border-radius: 0;
-  background: transparent;
-  border-top: calc(var(--body) * 0.58) solid transparent;
-  border-bottom: calc(var(--body) * 0.58) solid transparent;
-  border-left: calc(var(--body) * 1.18) solid var(--preview-color);
+  background: var(--preview-color);
+  border: 0;
+  clip-path: polygon(100% 50%, 0 0, 0 100%);
   box-shadow: none;
   filter: drop-shadow(0 0 calc(var(--armor) * 1px) rgba(232, 244, 236, 0.55));
 }
@@ -1333,6 +1332,18 @@ select {
   flex-shrink: 0;
 }
 
+.help-being-visual {
+  width: 74px;
+  min-height: 64px;
+  grid-template-columns: 1fr;
+  flex: 0 0 74px;
+  padding: 4px;
+}
+
+.help-being-visual .preview-stage {
+  height: 58px;
+}
+
 .being-card h3 {
   margin: 0 0 6px;
   font-size: 14px;
@@ -1368,18 +1379,30 @@ select {
   gap: 10px;
   padding: 12px 14px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--line);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--gene-color) 14%, transparent), transparent 42%),
+    rgba(255, 255, 255, 0.03);
+  border: 1px solid color-mix(in srgb, var(--gene-color) 36%, var(--line));
 }
 
 .gene-help-color {
   width: 6px;
   border-radius: 3px;
   flex-shrink: 0;
+  background: var(--gene-color);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--gene-color) 55%, transparent);
 }
 
 .gene-help-card h4 {
+  display: inline-flex;
+  gap: 6px;
+  align-items: baseline;
   margin: 0 0 4px;
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--gene-color) 45%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--gene-color) 12%, transparent);
+  color: var(--gene-color);
   font-size: 13px;
 }
 

@@ -179,7 +179,17 @@
               </div>
             </div>
             <div class="being-card being-producer-b">
-              <span class="being-icon-large">🌿</span>
+              <div class="help-being-visual creature-preview producer-b" style="--body:44px;--armor:3.8">
+                <div class="preview-stage">
+                  <i class="preview-leaf" style="--a:0deg"></i>
+                  <i class="preview-leaf" style="--a:60deg"></i>
+                  <i class="preview-leaf" style="--a:120deg"></i>
+                  <i class="preview-leaf" style="--a:180deg"></i>
+                  <i class="preview-leaf" style="--a:240deg"></i>
+                  <i class="preview-leaf" style="--a:300deg"></i>
+                  <i class="preview-body"></i>
+                </div>
+              </div>
               <div>
                 <h3>Productor B — Colonia</h3>
                 <p>Seres <strong>sésiles</strong> (no se mueven) que forman colonias. Tienen un cuerpo central con hojas que crecen con la luz. Cada hoja acumula energía propia.</p>
@@ -187,7 +197,9 @@
               </div>
             </div>
             <div class="being-card being-producer-c">
-              <span class="being-icon-large">🦠</span>
+              <div class="help-being-visual creature-preview producer-c" style="--body:34px;--armor:3">
+                <div class="preview-stage"><i class="preview-body"></i></div>
+              </div>
               <div>
                 <h3>Productor C — Móvil</h3>
                 <p>Seres <strong>fotosintéticos que se mueven</strong>. Generan energía con luz solar pero en menor cantidad que B. Tienen percepción limitada y huyen de amenazas.</p>
@@ -195,7 +207,16 @@
               </div>
             </div>
             <div class="being-card being-consumer">
-              <span class="being-icon-large">🔵</span>
+              <div class="help-being-visual creature-preview consumer" style="--body:36px;--armor:0.6">
+                <div class="preview-stage">
+                  <i class="preview-flagellum" style="--a:-28deg"></i>
+                  <i class="preview-cilium" style="--a:20deg"></i>
+                  <i class="preview-cilium" style="--a:100deg"></i>
+                  <i class="preview-cilium" style="--a:180deg"></i>
+                  <i class="preview-cilium" style="--a:260deg"></i>
+                  <i class="preview-body"></i>
+                </div>
+              </div>
               <div>
                 <h3>Consumidor</h3>
                 <p>Herbívoros móviles que <strong>se alimentan de los tres tipos de productores</strong>. Su supervivencia depende de encontrar comida antes de agotar sus reservas.</p>
@@ -203,7 +224,13 @@
               </div>
             </div>
             <div class="being-card being-predator">
-              <span class="being-icon-large">🔴</span>
+              <div class="help-being-visual creature-preview predator" style="--body:48px;--armor:2">
+                <div class="preview-stage">
+                  <i class="preview-flagellum" style="--a:-24deg"></i>
+                  <i class="preview-flagellum" style="--a:24deg"></i>
+                  <i class="preview-body predator-shape"></i>
+                </div>
+              </div>
               <div>
                 <h3>Depredador</h3>
                 <p>Carnívoros que <strong>cazan consumidores</strong>. Si no hay presas, pueden comer productores B o C como recurso de emergencia, pero ganan menos energía.</p>
@@ -217,92 +244,92 @@
             <p class="help-intro">Los genes se heredan de los padres con pequeña mutación aleatoria. Determinan el fenotipo completo de cada ser móvil (consumidores y depredadores). Los productores tienen subconjuntos más simples.</p>
 
             <div class="gene-help-grid">
-              <div class="gene-help-card">
-                <span class="gene-help-color" style="background:#60d7c2"></span>
+              <div class="gene-help-card" style="--gene-color:#60d7c2">
+                <span class="gene-help-color"></span>
                 <div>
                   <h4>size <small>tamaño</small></h4>
                   <p>Determina el radio corporal, la masa y la energía máxima. A mayor tamaño, más reservas pero metabolismo más alto. Los depredadores necesitan tamaño grande para cazar eficazmente.</p>
                 </div>
               </div>
-              <div class="gene-help-card">
-                <span class="gene-help-color" style="background:#e5bd55"></span>
+              <div class="gene-help-card" style="--gene-color:#e5bd55">
+                <span class="gene-help-color"></span>
                 <div>
                   <h4>reserves <small>reservas</small></h4>
                   <p>Almacén de energía. Más reservas = mayor energía máxima pero también más masa que arrastrar. Es el seguro contra periodos sin comida.</p>
                 </div>
               </div>
-              <div class="gene-help-card">
-                <span class="gene-help-color" style="background:#54b7f1"></span>
+              <div class="gene-help-card" style="--gene-color:#54b7f1">
+                <span class="gene-help-color"></span>
                 <div>
                   <h4>flagella <small>flagelos (0–7)</small></h4>
                   <p>Apéndices de propulsión principal. Cada flagelo aumenta velocidad de nado, pero su coste metabólico crece de forma no lineal (más flagelos = coste desproporcionado). Son vitales para perseguir presas o huir.</p>
                 </div>
               </div>
-              <div class="gene-help-card">
-                <span class="gene-help-color" style="background:#86d7ff"></span>
+              <div class="gene-help-card" style="--gene-color:#f05b50">
+                <span class="gene-help-color"></span>
                 <div>
                   <h4>cilia <small>cilios (0–6)</small></h4>
                   <p>Apéndices finos que mejoran la alimentación por filtrado y aumentan la percepción ligeramente. Su coste metabólico es bajo. Combinan bien con filter-feeders y quimiotaxis.</p>
                 </div>
               </div>
-              <div class="gene-help-card">
-                <span class="gene-help-color" style="background:#c38cff"></span>
+              <div class="gene-help-card" style="--gene-color:#a6dd78">
+                <span class="gene-help-color"></span>
                 <div>
                   <h4>chemosense <small>quimiorrecepción (0–5)</small></h4>
-                  <p>Sensibilidad química para detectar comida y amenazas a distancia. Es el factor principal de percepción. Alto chemosense permite detectar presas/predadores más lejos, pero consume energía sensorial.</p>
+                  <p>Sensibilidad química para orientar giros hacia comida o lejos de amenazas dentro del rango de percepción. Alto chemosense mejora persecución y huida, pero consume energía sensorial.</p>
                 </div>
               </div>
-              <div class="gene-help-card">
-                <span class="gene-help-color" style="background:#f08fb0"></span>
+              <div class="gene-help-card" style="--gene-color:#c38cff">
+                <span class="gene-help-color"></span>
                 <div>
                   <h4>pseudopodia <small>pseudópodos (0–4)</small></h4>
                   <p>Extensiones corporales que mejoran la captura de presas al contacto y el modo fagocito. Coste moderado. Utiles para consumidores que cazan presas pequeñas o depredadores que atacan colonias.</p>
                 </div>
               </div>
-              <div class="gene-help-card">
-                <span class="gene-help-color" style="background:#d9e4df"></span>
+              <div class="gene-help-card" style="--gene-color:#f08fb0">
+                <span class="gene-help-color"></span>
                 <div>
                   <h4>armor <small>armadura (0–5)</small></h4>
                   <p>Placa defensiva que reduce la probabilidad de ser comido. Un depredador necesita ser significativamente más grande que la armadura de su presa para atacarla. Coste tisular permanente.</p>
                 </div>
               </div>
-              <div class="gene-help-card">
-                <span class="gene-help-color" style="background:#7fd8a6"></span>
+              <div class="gene-help-card" style="--gene-color:#cfd8dc">
+                <span class="gene-help-color"></span>
                 <div>
                   <h4>vacuole <small>vacuola (0–4)</small></h4>
                   <p>Orgánulo de almacenamiento que mejora la eficiencia metabólica: reduce el coste energético de mantenimiento. Más vacuolas = metabolismo más barato, permitiendo supervivencia más larga sin comer.</p>
                 </div>
               </div>
-              <div class="gene-help-card">
-                <span class="gene-help-color" style="background:#ffb36b"></span>
+              <div class="gene-help-card" style="--gene-color:#60d7c2">
+                <span class="gene-help-color"></span>
                 <div>
                   <h4>fertility <small>fertilidad (0.2–3)</small></h4>
                   <p>Velocidad de recuperación del cooldown reproductivo. Alta fertilidad permite reproducirse con más frecuencia. En productores, también acelera la liberación de esporas.</p>
                 </div>
               </div>
-              <div class="gene-help-card">
-                <span class="gene-help-color" style="background:#9bd1ff"></span>
+              <div class="gene-help-card" style="--gene-color:#e5bd55">
+                <span class="gene-help-color"></span>
                 <div>
-                  <h4>perception <small>percepción (derivado)</small></h4>
-                  <p>No es un gen independiente: se calcula a partir de chemosense y cilia. Determina el radio efectivo de detección de comida, parejas y amenazas. Un ser ciego muere de hambre rodeado de comida.</p>
+                  <h4>perception <small>percepción</small></h4>
+                  <p>Rango efectivo de detección de comida, parejas y amenazas. Arranca igual para los seres móviles y después puede heredarse con variación controlada. Un ser ciego muere de hambre rodeado de comida.</p>
                 </div>
               </div>
-              <div class="gene-help-card">
-                <span class="gene-help-color" style="background:#ff8d8d"></span>
+              <div class="gene-help-card" style="--gene-color:#54b7f1">
+                <span class="gene-help-color"></span>
                 <div>
                   <h4>metabolism <small>metabolismo (derivado)</small></h4>
                   <p>Se calcula sumando el coste de todos los tejidos y apéndices: tamaño, reservas, flagelos, cilios, pseudópodos, quimiorrecepción y modos de movimiento. La vacuola lo reduce. Es el gasto energético por segundo en actividad.</p>
                 </div>
               </div>
-              <div class="gene-help-card">
-                <span class="gene-help-color" style="background:#ffd071"></span>
+              <div class="gene-help-card" style="--gene-color:#f05b50">
+                <span class="gene-help-color"></span>
                 <div>
                   <h4>maxEnergy <small>energía máxima (derivada)</small></h4>
                   <p>Se calcula a partir de tamaño, reservas y vacuola. Es el techo de energía que puede almacenar un ser. Determina cuánta energía puede acumular para reproducirse o sobrevivir periodos de escasez.</p>
                 </div>
               </div>
-              <div class="gene-help-card">
-                <span class="gene-help-color" style="background:#c6d2dd"></span>
+              <div class="gene-help-card" style="--gene-color:#f08fb0">
+                <span class="gene-help-color"></span>
                 <div>
                   <h4>maxAge <small>longevidad</small></h4>
                   <p>Edad máxima aproximada. Al superarla, la probabilidad de muerte por senescencia aumenta progresivamente. Los depredadores viven más que los consumidores. Seres muy longevos acumulan experiencia reproductiva pero compiten con su propia descendencia.</p>
