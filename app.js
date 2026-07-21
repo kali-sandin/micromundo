@@ -80,6 +80,8 @@
   const DEFAULT_INITIAL_PERCEPTION = 120;
   const PRODUCER_C_MAX_PERCEPTION = 180;
   const PRODUCER_C_DEFAULT_FERTILITY = 0.026;
+  const PRODUCER_C_CROWD_RADIUS = 320;
+  const PRODUCER_C_CROWD_LIMIT = 2;
 
   const canvas = document.getElementById('world');
   const ctx = canvas.getContext('2d', { alpha: false });
@@ -1034,6 +1036,20 @@
   const mateSeekCandidates = [];
   const producerThreats = [];
   const consumerThreats = [];
+  const producerCrowd = [];
+
+  function producerCCrowdFactor(e) {
+    if (!e || !isMobileProducer(e)) return 1;
+    queryNearby(e.x, e.y, PRODUCER_C_CROWD_RADIUS, TYPE.PRODUCER, producerCrowd);
+    let close = 0;
+    for (let i = 0; i < producerCrowd.length; i += 1) {
+      const other = producerCrowd[i];
+      if (!other || other === e || !other.alive || !isMobileProducer(other)) continue;
+      close += 1;
+    }
+    if (close <= PRODUCER_C_CROWD_LIMIT) return 1;
+    return clamp(1 - (close - PRODUCER_C_CROWD_LIMIT) * 0.22, 0, 1);
+  }
 
   function updateResting(e, dt, pressure = false) {
     if (!hasMove(e, 4)) return false;
@@ -1117,8 +1133,10 @@
       const moveScale = resting ? 0 : burstMultiplier(e, dt, Boolean(threat));
       e.x += Math.cos(e.angle) * e.speed * panic * moveScale * dt;
       e.y += Math.sin(e.angle) * e.speed * panic * moveScale * dt;
+      const crowdFactor = producerCCrowdFactor(e);
       const sensoryCost = (Number(e.chemosense || 0) * 0.003 + Math.max(0, Number(e.perception || 0) - 40) * 0.000012) * dt * (resting ? 0.42 : 1);
-      e.energy = Math.min(e.maxEnergy, e.energy + dt * sim.solarEnergy * 0.12 - sensoryCost);
+      const crowdStress = (1 - crowdFactor) * dt * 0.12;
+      e.energy = Math.min(e.maxEnergy, e.energy + dt * sim.solarEnergy * 0.12 * crowdFactor - sensoryCost - crowdStress);
       if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / 120)) {
         kill(e, 'Productor C móvil muere por senescencia');
         return;
@@ -1192,7 +1210,9 @@
       return;
     }
 
-    if (isMobileProducer(e) && e.energy < e.maxEnergy * 0.58) return;
+    if (isMobileProducer(e)) {
+      if (producerCCrowdFactor(e) < 0.85 || e.energy < e.maxEnergy * 0.58) return;
+    }
     const spread = rand(70, 180);
     spawnProducer({
       sub: e.sub,
@@ -2293,7 +2313,7 @@
     els.legendConsumers.textContent = fmt.format(c.consumers);
     els.legendPredators.textContent = fmt.format(c.predators);
 
-    if (sim.time - sim.lastGraphAt >= 1) {
+    if (force || sim.time - sim.lastGraphAt >= 1) {
       sim.lastGraphAt = sim.time;
       sim.graph.push({ t: sim.time, ...c });
       if (sim.graph.length > HISTORY_MAX_POINTS) sim.graph.shift();
@@ -2550,6 +2570,8 @@
     sim.deaths = 0;
     sim.graph = [];
     sim.geneHistory = [];
+    sim.lastGraphAt = -Infinity;
+    sim.lastStatsAt = -Infinity;
     sim.selectedCreatureId = null;
     sim.selectedCreatureIds = [];
     sim.selectedTrails.clear();
@@ -2573,7 +2595,7 @@
   function seedWorld() {
     const areaFactor = clamp((WORLD.w * WORLD.h) / (4000 * 2250), 0.35, 6);
     for (let i = 0; i < Math.round(12 * areaFactor); i += 1) spawnProducer(lightningProducerOptions(PRODUCER.B, i));
-    for (let i = 0; i < Math.round(70 * areaFactor); i += 1) spawnProducer(lightningProducerOptions(PRODUCER.C, i));
+    for (let i = 0; i < Math.round(38 * areaFactor); i += 1) spawnProducer(lightningProducerOptions(PRODUCER.C, i));
     for (let i = 0; i < Math.round(120 * areaFactor); i += 1) spawnConsumer(lightningMobileOptions('consumer', i));
     for (let i = 0; i < Math.round(18 * areaFactor); i += 1) spawnPredator(lightningMobileOptions('predator', i));
     logEvent('Seed inicial: biomasa base, consumidores y depredadores');
@@ -2969,8 +2991,8 @@
         ['16000x9000', 'Completo por defecto · 16.000 x 9.000'],
         ['custom', 'Personalizado']
       ], 'Cambiar el tamaño reinicia el ecosistema.')
-      + numberField('width', 'Ancho', WORLD.w, 1000, 32000, 100)
-      + numberField('height', 'Alto', WORLD.h, 563, 18000, 100, 'Se fuerza proporción 16:9 al aplicar.');
+      + numberField('width', 'Ancho', WORLD.w, 1000, 32000, 1)
+      + numberField('height', 'Alto', WORLD.h, 563, 18000, 1, 'Se fuerza proporción 16:9 al aplicar.');
     const preset = document.getElementById('preset');
     const width = document.getElementById('width');
     const height = document.getElementById('height');

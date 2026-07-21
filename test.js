@@ -102,6 +102,8 @@ function loadApp() {
       canEatArmored, movementMaskFromValue, hasMove,
       checkMigration, migratePopulation, feedConsumer,
       nearestCarcassFood, returnCarcassEnergyToField,
+      producerCCrowdFactor,
+      applyWorldSizeFromForm,
       GROUPS, GROUP_KEYS, GROUP_LABELS, TYPE, PRODUCER,
       WORLD, CELL, FIELD_CELL,
       camera, worldToScreen, visibleTileOffsets,
@@ -274,6 +276,24 @@ function runFunctionalTests() {
     const predator = api.spawnPredator({ x: 160, y: 160 });
     expectEq(prodC.perception, consumer.perception, 'Productor C y consumidor arrancan con distinto rango');
     expectEq(consumer.perception, predator.perception, 'Consumidor y depredador arrancan con distinto rango');
+  });
+
+  assert('apelotonamiento de Prod.C reduce captacion solar', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.grid.clear();
+    const center = api.spawnProducer({ sub: api.PRODUCER.C, x: 400, y: 400 });
+    for (let i = 0; i < 8; i++) {
+      api.spawnProducer({ sub: api.PRODUCER.C, x: 410 + i * 3, y: 410 + i * 2 });
+    }
+    api.rebuildGrid();
+    expectOk(api.producerCCrowdFactor(center) < 1, 'Prod.C denso no penaliza captacion');
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.grid.clear();
+    const alone = api.spawnProducer({ sub: api.PRODUCER.C, x: 1000, y: 1000 });
+    api.rebuildGrid();
+    expectEq(api.producerCCrowdFactor(alone), 1, 'Prod.C aislado no deberia estar penalizado');
   });
 
   // ─── Kill ───────────────────────────────────────
@@ -462,6 +482,25 @@ function runFunctionalTests() {
     expectOk(c.producerC > 0, 'No hay producerC tras seed');
     expectOk(c.consumers > 0, 'No hay consumidores tras seed');
     expectOk(c.predators > 0, 'No hay depredadores tras seed');
+  });
+
+  assert('resetWorld deja graficas con punto inicial', () => {
+    api.sim.graph = [{ t: 300, consumers: 1, predators: 1, producerB: 1, producerC: 1, producerDensity: 0.1 }];
+    api.sim.geneHistory = [{ t: 300 }];
+    api.sim.lastGraphAt = 300;
+    api.resetWorld();
+    expectOk(api.sim.graph.length > 0, 'resetWorld dejo grafica de poblacion sin puntos');
+    expectOk(api.sim.geneHistory.length > 0, 'resetWorld dejo grafica de genes sin historico');
+    expectEq(api.sim.graph[0].t, 0, 'grafica no reinicio en t=0');
+  });
+
+  assert('cambio de tamaño aplica ratio 16:9', () => {
+    api.applyWorldSizeFromForm({ get: (key) => key === 'width' ? '4000' : key === 'height' ? '2250' : null });
+    expectEq(api.WORLD.w, 4000, 'ancho no aplicado');
+    expectEq(api.WORLD.h, 2250, 'alto 16:9 no aplicado');
+    api.applyWorldSizeFromForm({ get: (key) => key === 'width' ? '16000' : key === 'height' ? '9000' : null });
+    expectEq(api.WORLD.w, 16000, 'ancho no restaurado');
+    expectEq(api.WORLD.h, 9000, 'alto no restaurado');
   });
 
   // ─── Espacio toroidal ───────────────────────────
