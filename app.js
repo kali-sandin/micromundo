@@ -761,7 +761,7 @@
       maxEnergy: colony ? 92 : 24,
       armor: Number(opts.armor ?? (colony ? rand(3.1, 5.4) : mobile ? rand(2.2, 4.0) : rand(1.2, 2.6))),
       chemosense,
-      perception: mobile ? Number(opts.perception ?? (70 + chemosense * 8)) : 40,
+      perception: mobile ? Number(opts.perception ?? (80 + chemosense * 20)) : 40,
       movement,
       movementMask: opts.movementMask != null ? movementMaskFromValue(opts.movementMask) : (1 << movement),
       leafEnergy: colony ? rand(8, 18) : 0,
@@ -782,11 +782,11 @@
     const massDrag = 1 + bodyMass * 0.2 + e.reserves * 0.08 + flagellaLoad * 0.055;
     e.radius = clamp(3.5 + e.size * 1.72 + e.reserves * 0.34, 3, 19);
     e.speed = locomotion / massDrag;
-    e.perception = 22.5 + e.chemosense * 16.25 + e.cilia * 3;
+    e.perception = 80 + e.chemosense * 32 + e.cilia * 8;
     const speedCost = Math.pow(Math.max(0, e.speed) / 42, 1.42) * 0.022;
     const tissueCost = e.size * 0.010 + e.reserves * 0.004 + e.armor * 0.007;
     const appendageCost = flagellaLoad * 0.014 + e.cilia * 0.004 + e.pseudopodia * 0.006;
-    const sensoryCost = e.chemosense * 0.010 + Math.max(0, e.perception - 22.5) * 0.000075;
+    const sensoryCost = e.chemosense * 0.010 + Math.max(0, e.perception - 80) * 0.000075;
     const motionCost = (hasMove(e, 4) ? -0.004 : 0) + (hasMove(e, 5) ? 0.010 : 0);
     const vacuoleEfficiency = Math.max(0.82, 1 - e.vacuole * 0.035);
     e.metabolism = (0.014 + speedCost + tissueCost + appendageCost + sensoryCost + motionCost) * vacuoleEfficiency;
