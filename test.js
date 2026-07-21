@@ -207,6 +207,11 @@ function runFunctionalTests() {
     expectOk(api.WORLD.w > 0 && api.WORLD.h > 0);
   });
 
+  assert('estado inicial tiene tiempo valido', () => {
+    expectEq(api.sim.time, 0, 'sim.time debe arrancar en 0 antes de simulate/reset');
+    expectOk(Number.isFinite(api.sim.time), 'sim.time no es finito');
+  });
+
   // ─── Spawn ──────────────────────────────────────
   suite('Spawn de seres');
 

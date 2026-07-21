@@ -75,6 +75,8 @@
   const ADD_AMOUNT_MAX = 1000;
   const TRAIL_MAX_POINTS = 440;
   const TRAIL_MIN_STEP = 10;
+  const HISTORY_MAX_POINTS = 21600;
+  const DEFAULT_HISTORY_PX_PER_SECOND = 0.45;
 
   const canvas = document.getElementById('world');
   const ctx = canvas.getContext('2d', { alpha: false });
@@ -138,6 +140,7 @@
   const sim = {
     paused: false,
     debug: false,
+    time: 0,
     speed: 1,
     solarEnergy: 1,
     solarEnergyBase: 1,
@@ -165,8 +168,8 @@
     graph: [],
     geneHistory: [],
     geneHistoryGroup: 'producer-a',
-    populationPxPerSecond: 4,
-    genePxPerSecond: 4,
+    populationPxPerSecond: DEFAULT_HISTORY_PX_PER_SECOND,
+    genePxPerSecond: DEFAULT_HISTORY_PX_PER_SECOND,
     lastGraphAt: 0,
     lastStatsAt: 0,
     frameCounter: 0,
@@ -1589,7 +1592,7 @@
       point[group] = { n, avg };
     }
     sim.geneHistory.push(point);
-    if (sim.geneHistory.length > 3600) sim.geneHistory.shift();
+    if (sim.geneHistory.length > HISTORY_MAX_POINTS) sim.geneHistory.shift();
     drawGeneHistory();
   }
 
@@ -2245,7 +2248,7 @@
     if (sim.time - sim.lastGraphAt >= 1) {
       sim.lastGraphAt = sim.time;
       sim.graph.push({ t: sim.time, ...c });
-      if (sim.graph.length > 3600) sim.graph.shift();
+      if (sim.graph.length > HISTORY_MAX_POINTS) sim.graph.shift();
       drawGraph();
       recordGeneHistory();
     }
@@ -2374,7 +2377,7 @@
     const allKeys = GROUP_KEYS[group].slice(0, 8);
     const hidden = geneHiddenSet(group);
     const keys = allKeys.filter((key) => !hidden.has(key));
-    const pxPerSecond = sim.populationPxPerSecond;
+    const pxPerSecond = sim.genePxPerSecond;
     const visibleSeconds = Math.max(8, Math.floor((w - 10) / pxPerSecond));
     const minT = Math.max(0, sim.time - visibleSeconds);
     const points = sim.geneHistory.filter((p) => p.t >= minT && p[group]?.n > 0);
@@ -3028,10 +3031,11 @@
 
   function stretchTimeAxis(ev) {
     ev.preventDefault();
-    const current = sim.populationPxPerSecond;
+    const isGeneGraph = ev.currentTarget === geneCanvas;
+    const current = isGeneGraph ? sim.genePxPerSecond : sim.populationPxPerSecond;
     const next = ev.deltaY > 0 ? current / 1.22 : current * 1.22;
-    sim.populationPxPerSecond = clamp(next, 0.09, 24);
-    sim.genePxPerSecond = sim.populationPxPerSecond;
+    if (isGeneGraph) sim.genePxPerSecond = clamp(next, 0.09, 24);
+    else sim.populationPxPerSecond = clamp(next, 0.09, 24);
     drawGraph();
     drawGeneHistory();
   }
@@ -3235,13 +3239,17 @@
     });
     canvas.addEventListener('wheel', (ev) => {
       ev.preventDefault();
-      if (sim.followCreatureId != null) setFollowCreature(sim.followCreatureId, false);
-      const before = screenToWorld(ev.clientX, ev.clientY);
+      const following = sim.followCreatureId != null;
+      const before = following ? null : screenToWorld(ev.clientX, ev.clientY);
       const factor = Math.exp(-ev.deltaY * 0.0012);
       camera.zoom = clamp(camera.zoom * factor, 0.028, 2.2);
-      const after = screenToWorld(ev.clientX, ev.clientY);
-      camera.x += before.x - after.x;
-      camera.y += before.y - after.y;
+      if (following) {
+        updateCameraFollow();
+      } else {
+        const after = screenToWorld(ev.clientX, ev.clientY);
+        camera.x += before.x - after.x;
+        camera.y += before.y - after.y;
+      }
       clampCamera();
     }, { passive: false });
   }
