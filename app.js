@@ -1370,11 +1370,11 @@
     }
     steerCreature(e, dt, steeringTarget, threat);
     if (food) feedConsumer(e, food);
-    // Restaurar tras uso temporal
+    // Restaurar tras uso temporal (fertility despues de reproduceMobile)
     e.speed = origSpeed;
     e.perception = origPerception;
-    e.fertility = origFertility;
     if (canReproduce) reproduceMobile(e, e.type);
+    e.fertility = origFertility;
   }
 
   function compactIfNeeded() {
