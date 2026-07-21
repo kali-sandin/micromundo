@@ -1237,6 +1237,10 @@
   }
 
   function reproduceMobile(e, type) {
+    // Population cap: mismo patron que stepProducer pero mas restrictivo para mobiles
+    // Seed ~828 mobiles. 5000 permite ~6x crecimiento, frena explosion boom-bust
+    const aliveCount = sim.creatures.length - sim.freeIds.length;
+    if (aliveCount > 5000 && !chance(0.2)) return;
     // Umbral reproductivo: depredadores mas bajo (0.60 base, 0.50 en crisis)
     const reproThreshold = type === TYPE.PREDATOR
       ? (sim.predatorCount < 40 ? 0.50 : 0.60)
