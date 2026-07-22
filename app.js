@@ -231,7 +231,10 @@
     carcasses: [],
     predatorCount: 0,
     predatorCountTimer: 0,
-    migrationTimer: 0
+    migrationTimer: 0,
+    liveConsumerCount: 0,
+    liveProducerBCount: 0,
+    liveProducerCCount: 0
   };
 
   const fmt = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 });
@@ -815,6 +818,16 @@
     sim.freeIds.push(e.id);
     sim.deaths += 1;
 
+    // Live counters
+    if (e.type === TYPE.PRODUCER) {
+      if (e.sub === PRODUCER.B) sim.liveProducerBCount--;
+      else if (e.sub === PRODUCER.C) sim.liveProducerCCount--;
+    } else if (e.type === TYPE.CONSUMER) {
+      sim.liveConsumerCount--;
+    } else if (e.type === TYPE.PREDATOR) {
+      sim.predatorCount--;
+    }
+
     // El retorno al campo ocurre al descomponerse; mientras tanto el cadaver se puede comer.
     if (sim.carcasses.length < 400) {
       const storedEnergy = Math.max(1.5, Number(e.energy || 0) * 0.55 + Number(e.radius || 1) * 1.2);
@@ -870,6 +883,8 @@
       competitionAt: sim.time + rand(0.5, 3.5),
       color: sub === PRODUCER.A ? GROUP_COLORS['producer-a'] : sub === PRODUCER.B ? GROUP_COLORS['producer-b'] : GROUP_COLORS['producer-c']
     });
+    if (sub === PRODUCER.B) sim.liveProducerBCount++;
+    else if (sub === PRODUCER.C) sim.liveProducerCCount++;
     return e;
   }
 
@@ -920,6 +935,7 @@
     const out = derivedConsumerStats(e);
     if (!opts.keepConsumerSpeed) out.speed *= 0.88;
     out.metabolism *= 0.9;
+    sim.liveConsumerCount++;
     return out;
   }
 
@@ -943,6 +959,8 @@
     if (opts.energy == null) e.energy = rand(e.maxEnergy * 0.38, e.maxEnergy * 0.62);
     e.metabolism *= 0.82;
     e.maxAge = Number(opts.maxAge ?? rand(7200, 11700));
+    sim.liveConsumerCount--;
+    sim.predatorCount++;
     return e;
   }
 
@@ -1622,17 +1640,7 @@
       sim.solarEnergy = Math.max(0.1, sim.solarEnergyBase + amp * Math.sin(phase));
     }
 
-    // Cache predator count cada ~2s para metabolismo adaptativo
-    sim.predatorCountTimer -= dt;
-    if (sim.predatorCountTimer <= 0) {
-      let pc = 0;
-      for (let i = 0; i < sim.creatures.length; i += 1) {
-        const e = sim.creatures[i];
-        if (e && e.alive && e.type === TYPE.PREDATOR) pc++;
-      }
-      sim.predatorCount = pc;
-      sim.predatorCountTimer = 2.0;
-    }
+    // predatorCount now maintained live via spawn/kill counters
 
     stepProducerField(dt);
     for (let i = 0; i < sim.creatures.length; i += 1) {
@@ -1655,29 +1663,18 @@
   }
 
   function counts() {
-    let producerB = 0;
-    let producerC = 0;
-    let consumers = 0;
-    let predators = 0;
     let energy = 0;
     let energyN = 0;
     for (let i = 0; i < sim.creatures.length; i += 1) {
       const e = sim.creatures[i];
       if (!e || !e.alive) continue;
-      if (e.type === TYPE.PRODUCER && e.sub === PRODUCER.B) producerB += 1;
-      else if (e.type === TYPE.PRODUCER && e.sub === PRODUCER.C) producerC += 1;
-      else if (e.type === TYPE.CONSUMER) {
-        consumers += 1;
-        energy += e.energy;
-        energyN += 1;
-      } else {
-        predators += 1;
+      if (e.type === TYPE.CONSUMER || e.type === TYPE.PREDATOR) {
         energy += e.energy;
         energyN += 1;
       }
     }
     const producerDensity = sim.producerField.mass.length ? sim.producerField.total / sim.producerField.mass.length : 0;
-    return { producerDensity, producerB, producerC, consumers, predators, energyAvg: energyN ? energy / energyN : 0 };
+    return { producerDensity, producerB: sim.liveProducerBCount, producerC: sim.liveProducerCCount, consumers: sim.liveConsumerCount, predators: sim.predatorCount, energyAvg: energyN ? energy / energyN : 0 };
   }
 
   function recordGeneHistory() {
@@ -2654,6 +2651,12 @@
     sim.time = 0;
     sim.births = 0;
     sim.deaths = 0;
+    sim.predatorCount = 0;
+    sim.liveConsumerCount = 0;
+    sim.liveProducerBCount = 0;
+    sim.liveProducerCCount = 0;
+    sim.carcasses.length = 0;
+    sim.migrationTimer = 0;
     sim.graph.clear();
     sim.geneHistory.clear();
     sim.lastGraphAt = -Infinity;
