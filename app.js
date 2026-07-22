@@ -348,11 +348,11 @@
     return dx * dx + dy * dy;
   }
 
+  const _scrTV = { dx: 0, dy: 0 };
   function torusVector(from, to) {
-    return {
-      dx: torusDelta(to.x - from.x, WORLD.w),
-      dy: torusDelta(to.y - from.y, WORLD.h)
-    };
+    _scrTV.dx = torusDelta(to.x - from.x, WORLD.w);
+    _scrTV.dy = torusDelta(to.y - from.y, WORLD.h);
+    return _scrTV;
   }
 
   function chance(p) {
