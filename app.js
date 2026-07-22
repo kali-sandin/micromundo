@@ -1375,7 +1375,7 @@
       ? (sim.predatorCount < 40 ? 0.50 : 0.60)
       : 0.72;
     if (e.energy < e.maxEnergy * reproThreshold || e.cooldown > 0) return;
-    const mateRange = type === TYPE.PREDATOR ? Math.min(450, e.perception * 1.2) : e.perception * 0.36;
+    const mateRange = type === TYPE.PREDATOR ? Math.min(450, e.perception * 1.2) : e.perception * 0.8;
     queryNearby(e.x, e.y, mateRange, type, mateCandidates);
     let mate = null;
     for (let i = 0; i < mateCandidates.length; i += 1) {
@@ -1402,7 +1402,7 @@
       ? (sim.predatorCount < 40 ? 0.45 : 0.55)
       : 0.68;
     if (e.energy < e.maxEnergy * mateSearchThreshold || e.cooldown > 0) return null;
-    const radius = type === TYPE.PREDATOR ? Math.min(550, e.perception * 1.55) : e.perception * 0.5;
+    const radius = type === TYPE.PREDATOR ? Math.min(550, e.perception * 1.55) : e.perception * 0.9;
     queryNearby(e.x, e.y, radius, type, mateSeekCandidates);
     let best = null;
     let bestD2 = Infinity;
