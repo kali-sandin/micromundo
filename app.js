@@ -653,7 +653,7 @@
     };
   }
 
-  function grazeProducerDensity(e) {
+  function grazeProducerDensity(e, dt) {
     const field = sim.producerField;
     if (!field.mass.length) return false;
     const cx = fieldCellX(e.x);
@@ -661,7 +661,10 @@
     const idx = fieldIndex(cx, cy);
     const mass = field.mass[idx];
     if (mass < 0.035) return false;
-    const bite = Math.min(mass, 0.018 + e.size * 0.006 + e.cilia * 0.003 + (e.feeding === 1 ? 0.014 : 0));
+    // dt-scaled: normalizar a BASE_DT para que el gain sea independiente de velocidad/FPS
+    const dtScale = dt / BASE_DT;
+    const biteRate = 0.018 + e.size * 0.006 + e.cilia * 0.003 + (e.feeding === 1 ? 0.014 : 0);
+    const bite = Math.min(mass, biteRate * dtScale);
     field.mass[idx] = mass - bite;
     field.total -= bite;
     e.energy = Math.min(e.maxEnergy, e.energy + bite * 25);
@@ -1273,11 +1276,11 @@
     wrapInsideWorld(e);
   }
 
-  function feedConsumer(e, target) {
+  function feedConsumer(e, target, dt) {
     if (!target) return false;
     if (target.virtualCarcass) return eatCarcass(e, target);
     if (!target.alive) return false;
-    if (target.virtualA) return grazeProducerDensity(e);
+    if (target.virtualA) return grazeProducerDensity(e, dt);
     const dx = torusDelta(target.x - e.x, WORLD.w);
     const dy = torusDelta(target.y - e.y, WORLD.h);
     const eatRange = e.radius + target.radius + (e.feeding === 1 ? e.cilia * 2.2 : 3);
@@ -1460,7 +1463,7 @@
       steeringTarget = food;
     }
     steerCreature(e, dt, steeringTarget, threat);
-    if (food) feedConsumer(e, food);
+    if (food) feedConsumer(e, food, dt);
     // Restaurar tras uso temporal (fertility despues de reproduceMobile)
     e.speed = origSpeed;
     e.perception = origPerception;
