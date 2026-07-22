@@ -1184,10 +1184,10 @@
         const away = Math.atan2(-threat.dy, -threat.dx);
         const pull = hasMove(e, 0) ? 0.52 : hasMove(e, 2) ? 0.24 : hasMove(e, 3) ? 0.38 : 0.46;
         e.angle += normalizeAngle(away - e.angle) * pull;
-        if (hasMove(e, 0) && chance(0.035)) e.angle += rand(-1.4, 1.4);
+        if (hasMove(e, 0) && chance(0.035 * dt / BASE_DT)) e.angle += rand(-1.4, 1.4);
       } else {
         const wander = hasMove(e, 2) ? 0.65 : hasMove(e, 3) ? 1.1 : 1.6;
-        e.angle += rand(-wander, wander) * dt;
+        e.angle += rand(-wander, wander) * Math.sqrt(dt * BASE_DT);
       }
       if (hasMove(e, 3)) e.angle += Math.sin(sim.time * 1.3 + e.id) * 0.02;
       const panic = threat ? (hasMove(e, 2) ? 1.34 : 1.82) : 1;
@@ -1298,7 +1298,7 @@
     const pressure = Boolean(threat || (food && e.type === TYPE.PREDATOR));
     const resting = updateResting(e, dt, pressure);
     const turnNoise = hasMove(e, 0) ? 2.5 : hasMove(e, 2) ? 1.2 : 0.8;
-    e.angle += rand(-turnNoise, turnNoise) * dt;
+    e.angle += rand(-turnNoise, turnNoise) * Math.sqrt(dt * BASE_DT);
 
     if (threat) {
       const { dx, dy } = torusVector(e, threat);
@@ -1307,7 +1307,7 @@
       const urgency = clamp(1 - distance / Math.max(1, consumerThreatRange(e)), 0.18, 1);
       const pull = hasMove(e, 1) ? 0.38 : hasMove(e, 0) ? 0.31 : hasMove(e, 3) ? 0.26 : 0.20;
       e.angle += normalizeAngle(desired - e.angle) * pull * (0.75 + urgency * 0.65);
-      if (hasMove(e, 0) && chance(0.045)) e.angle += rand(-0.7, 0.7);
+      if (hasMove(e, 0) && chance(0.045 * dt / BASE_DT)) e.angle += rand(-0.7, 0.7);
     } else if (food && (hasMove(e, 1) || e.chemosense > 1.3)) {
       const { dx, dy } = torusVector(e, food);
       const desired = Math.atan2(dy, dx);
