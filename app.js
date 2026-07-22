@@ -1303,13 +1303,20 @@
       if (sizeRatio > 0.5) gapeFactor = 0.85 / sizeRatio; // penalty progresivo
     }
 
-    const gain = (e.type === TYPE.PREDATOR
+    const rawGain = e.type === TYPE.PREDATOR
       ? target.type === TYPE.PRODUCER
         ? 62 + target.radius * 3.2 + target.energy * 0.35
         : 92 + target.size * 16 + target.reserves * 7
       : target.sub === PRODUCER.C
           ? Math.max(8, Math.min(target.energy * 1.8, 36))
-          : 7.5) * gapeFactor;
+          : 7.5;
+    // Cap gain to prevent energy creation in trophic transfers
+    const maxTransfer = e.type === TYPE.PREDATOR
+      ? target.type === TYPE.PRODUCER
+        ? target.energy * 2.0   // predator->ProducerC: max 2x prey energy
+        : target.energy * 1.3   // predator->consumer: max 1.3x (30% ecological loss)
+      : target.energy * 1.8;    // consumer->ProducerC already capped above
+    const gain = Math.min(rawGain, Math.max(rawGain * 0.5, maxTransfer)) * gapeFactor;
 
     e.energy = Math.min(e.maxEnergy, e.energy + gain);
     kill(target, e.type === TYPE.PREDATOR ? (target.type === TYPE.PRODUCER ? 'Depredador consume productor' : 'Depredador consume consumidor') : null);
