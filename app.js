@@ -70,6 +70,39 @@
     leafCount: '#8bcf62',
     maxAge: '#c6d2dd'
   };
+  class RingBuffer {
+    constructor(cap) {
+      this.cap = cap;
+      this.buf = new Array(cap);
+      this.head = 0;
+      this.count = 0;
+    }
+    push(item) {
+      const idx = (this.head + this.count) % this.cap;
+      this.buf[idx] = item;
+      if (this.count < this.cap) { this.count++; }
+      else { this.head = (this.head + 1) % this.cap; }
+    }
+    get length() { return this.count; }
+    at(i) {
+      if (i < 0 || i >= this.count) return undefined;
+      return this.buf[(this.head + i) % this.cap];
+    }
+    filter(fn) {
+      const result = [];
+      for (let i = 0; i < this.count; i++) {
+        const item = this.buf[(this.head + i) % this.cap];
+        if (fn(item)) result.push(item);
+      }
+      return result;
+    }
+    clear() {
+      this.head = 0;
+      this.count = 0;
+      this.buf.fill(null);
+    }
+  }
+
   const COLONY_MIN_LEAVES_TO_REPRODUCE = 2;
   const ADD_AMOUNT_DEFAULT = 50;
   const ADD_AMOUNT_MAX = 1000;
@@ -170,8 +203,8 @@
       total: 0,
       accumulator: 0
     },
-    graph: [],
-    geneHistory: [],
+    graph: new RingBuffer(HISTORY_MAX_POINTS),
+    geneHistory: new RingBuffer(HISTORY_MAX_POINTS),
     geneHistoryGroup: 'producer-a',
     populationPxPerSecond: DEFAULT_HISTORY_PX_PER_SECOND,
     genePxPerSecond: DEFAULT_HISTORY_PX_PER_SECOND,
@@ -1683,7 +1716,6 @@
       point[group] = { n, avg };
     }
     sim.geneHistory.push(point);
-    if (sim.geneHistory.length > HISTORY_MAX_POINTS) sim.geneHistory.shift();
     drawGeneHistory();
   }
 
@@ -2341,7 +2373,6 @@
     if (force || sim.time - sim.lastGraphAt >= 1) {
       sim.lastGraphAt = sim.time;
       sim.graph.push({ t: sim.time, ...c });
-      if (sim.graph.length > HISTORY_MAX_POINTS) sim.graph.shift();
       drawGraph();
       recordGeneHistory();
     }
@@ -2594,8 +2625,8 @@
     sim.time = 0;
     sim.births = 0;
     sim.deaths = 0;
-    sim.graph = [];
-    sim.geneHistory = [];
+    sim.graph.clear();
+    sim.geneHistory.clear();
     sim.lastGraphAt = -Infinity;
     sim.lastStatsAt = -Infinity;
     sim.selectedCreatureId = null;
