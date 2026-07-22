@@ -592,7 +592,7 @@
     const dst = field.scratch;
     let total = 0;
     const sunlight = clamp(sim.solarEnergy, 0.1, 6);
-    const growth = 0.010 * sunlight * t;
+    const growth = 0.015 * sunlight * t;
     const diffusion = 0.028 * t;
 
     for (let y = 0; y < rows; y += 1) {
@@ -604,7 +604,7 @@
         const up = src[mod(y - 1, rows) * cols + x];
         const down = src[mod(y + 1, rows) * cols + x];
         const avg = (left + right + up + down) * 0.25;
-        const grown = m + m * (1 - Math.min(1, m)) * growth;
+        const grown = m + m * (1.3 - Math.min(1.3, m)) * growth;
         const next = clamp(grown + (avg - m) * diffusion, 0, 1.8);
         dst[idx] = next;
         total += next;
