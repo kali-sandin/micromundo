@@ -1138,7 +1138,8 @@
       const crowdFactor = producerCCrowdFactor(e);
       const sensoryCost = (Number(e.chemosense || 0) * 0.003 + Math.max(0, Number(e.perception || 0) - 40) * 0.000012) * dt * (resting ? 0.42 : 1);
       const crowdStress = (1 - crowdFactor) * dt * 0.12;
-      e.energy = Math.min(e.maxEnergy, e.energy + dt * sim.solarEnergy * 0.12 * crowdFactor - sensoryCost - crowdStress);
+      const respCost = dt * 0.008; // basal metabolism for mobile ProducerC
+      e.energy = Math.min(e.maxEnergy, e.energy + dt * sim.solarEnergy * 0.12 * crowdFactor - sensoryCost - crowdStress - respCost);
       if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / 120)) {
         kill(e, 'Productor C móvil muere por senescencia');
         return;
