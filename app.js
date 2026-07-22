@@ -1154,7 +1154,8 @@
         kill(e, 'Productor B muere por senescencia');
         return;
       }
-      e.energy = Math.min(e.maxEnergy, e.energy + dt * sun * 0.12);
+      const respCost = dt * (0.015 + e.radius * 0.0005);
+      e.energy = Math.min(e.maxEnergy, e.energy + dt * sun * 0.12 - respCost);
       e.radius = Math.min(e.maxRadius, e.radius + dt * sun * 0.018);
       const leafCap = 8 + e.radius * 0.9;
       e.leafEnergy = Math.min(leafCap, e.leafEnergy + dt * sun * 0.13);
