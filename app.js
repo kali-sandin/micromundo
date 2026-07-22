@@ -1583,7 +1583,6 @@
     }
 
     stepProducerField(dt);
-    rebuildGrid();
     for (let i = 0; i < sim.creatures.length; i += 1) {
       const e = sim.creatures[i];
       if (!e || !e.alive) continue;
@@ -2511,6 +2510,7 @@
       const scaled = elapsed * sim.speed;
       const chunks = Math.max(1, Math.min(MAX_SIM_CHUNKS, Math.ceil(scaled / BASE_DT)));
       const dt = Math.min(scaled / chunks, MAX_DT);
+      rebuildGrid();
       for (let i = 0; i < chunks; i += 1) simulate(dt);
     }
 
