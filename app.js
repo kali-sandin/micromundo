@@ -1934,24 +1934,25 @@
     if (fit) camera.zoom = fitWorldZoom();
   }
 
+  const _scrW2S = { x: 0, y: 0 };
+  const _scrS2W = { x: 0, y: 0 };
+
   function screenToWorld(x, y) {
     const cx = window.innerWidth * 0.5;
     const cy = window.innerHeight * 0.5;
-    return {
-      x: camera.x + (x - cx) / camera.zoom,
-      y: camera.y + (y - cy) / camera.zoom
-    };
+    _scrS2W.x = camera.x + (x - cx) / camera.zoom;
+    _scrS2W.y = camera.y + (y - cy) / camera.zoom;
+    return _scrS2W;
   }
 
   function worldToScreen(x, y) {
-    return {
-      x: (x - camera.x) * camera.zoom + window.innerWidth * 0.5,
-      y: (y - camera.y) * camera.zoom + window.innerHeight * 0.5
-    };
+    _scrW2S.x = (x - camera.x) * camera.zoom + window.innerWidth * 0.5;
+    _scrW2S.y = (y - camera.y) * camera.zoom + window.innerHeight * 0.5;
+    return _scrW2S;
   }
 
   function nearestScreenPosition(x, y, screenX, screenY) {
-    let best = null;
+    let bestX = 0, bestY = 0;
     let bestD2 = Infinity;
     for (let oy = -WORLD.h; oy <= WORLD.h; oy += WORLD.h) {
       for (let ox = -WORLD.w; ox <= WORLD.w; ox += WORLD.w) {
@@ -1960,12 +1961,13 @@
         const dy = p.y - screenY;
         const d2 = dx * dx + dy * dy;
         if (d2 < bestD2) {
-          best = p;
+          bestX = p.x; bestY = p.y;
           bestD2 = d2;
         }
       }
     }
-    return best;
+    _scrW2S.x = bestX; _scrW2S.y = bestY;
+    return _scrW2S;
   }
 
   function clampCamera() {
@@ -2005,11 +2007,12 @@
     for (let i = 0; i < offsets.length; i += 1) {
       const { ox, oy } = offsets[i];
       const topLeft = worldToScreen(ox, oy);
+      const tlx = topLeft.x, tly = topLeft.y;
       const bottomRight = worldToScreen(WORLD.w + ox, WORLD.h + oy);
-      const w = bottomRight.x - topLeft.x;
-      const h = bottomRight.y - topLeft.y;
+      const w = bottomRight.x - tlx;
+      const h = bottomRight.y - tly;
       ctx.fillStyle = '#0b1413';
-      ctx.fillRect(topLeft.x, topLeft.y, w + 1, h + 1);
+      ctx.fillRect(tlx, tly, w + 1, h + 1);
     }
   }
 
@@ -2039,10 +2042,11 @@
     for (let o = 0; o < offsets.length; o += 1) {
       const { ox, oy } = offsets[o];
       const start = screenToWorld(-cellW, -cellH);
+      const sX = start.x, sY = start.y;
       const end = screenToWorld(window.innerWidth + cellW, window.innerHeight + cellH);
-      const minX = clamp(Math.floor((start.x - ox) / cellW), 0, cols - 1);
+      const minX = clamp(Math.floor((sX - ox) / cellW), 0, cols - 1);
       const maxX = clamp(Math.ceil((end.x - ox) / cellW), 0, cols - 1);
-      const minY = clamp(Math.floor((start.y - oy) / cellH), 0, rows - 1);
+      const minY = clamp(Math.floor((sY - oy) / cellH), 0, rows - 1);
       const maxY = clamp(Math.ceil((end.y - oy) / cellH), 0, rows - 1);
 
       for (let y = minY; y <= maxY; y += 1) {
@@ -2050,9 +2054,10 @@
           const mass = field.mass[fieldIndex(x, y)];
           if (mass < 0.035) continue;
           const p0 = worldToScreen(x * cellW + ox, y * cellH + oy);
+          const p0x = p0.x, p0y = p0.y;
           const p1 = worldToScreen((x + 1) * cellW + ox, (y + 1) * cellH + oy);
-          const sx = Math.round(p0.x);
-          const sy = Math.round(p0.y);
+          const sx = Math.round(p0x);
+          const sy = Math.round(p0y);
           const sw = Math.max(1, Math.round(p1.x) - sx);
           const sh = Math.max(1, Math.round(p1.y) - sy);
           const a = clamp(0.035 + mass * 0.16, _PFIELD_ALPHA_MIN, _PFIELD_ALPHA_MAX);
@@ -3313,14 +3318,15 @@
       ev.preventDefault();
       const following = sim.followCreatureId != null;
       const before = following ? null : screenToWorld(ev.clientX, ev.clientY);
+      const bX = before ? before.x : 0, bY = before ? before.y : 0;
       const factor = Math.exp(-ev.deltaY * 0.0012);
       camera.zoom = clamp(camera.zoom * factor, 0.028, 2.2);
       if (following) {
         updateCameraFollow();
       } else {
         const after = screenToWorld(ev.clientX, ev.clientY);
-        camera.x += before.x - after.x;
-        camera.y += before.y - after.y;
+        camera.x += bX - after.x;
+        camera.y += bY - after.y;
       }
       clampCamera();
     }, { passive: false });
