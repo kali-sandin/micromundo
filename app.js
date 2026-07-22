@@ -2026,20 +2026,34 @@
     camera.y = mod(camera.y, WORLD.h);
   }
 
+  // Scratch pool for visibleTileOffsets: reuses objects across calls (zero alloc)
+  const _tileOffsetsScratch = [];
+  for (let i = 0; i < 25; i += 1) _tileOffsetsScratch.push({ ox: 0, oy: 0 });
+  const _tileOffsetsResult = [];
+
   function visibleTileOffsets(extraWorld = 0) {
     const halfW = window.innerWidth / (camera.zoom * 2) + extraWorld;
     const halfH = window.innerHeight / (camera.zoom * 2) + extraWorld;
-    const minTileX = Math.floor((camera.x - halfW) / WORLD.w);
-    const maxTileX = Math.floor((camera.x + halfW) / WORLD.w);
-    const minTileY = Math.floor((camera.y - halfH) / WORLD.h);
-    const maxTileY = Math.floor((camera.y + halfH) / WORLD.h);
-    const offsets = [];
-    for (let ty = Math.max(-2, minTileY); ty <= Math.min(2, maxTileY); ty += 1) {
-      for (let tx = Math.max(-2, minTileX); tx <= Math.min(2, maxTileX); tx += 1) {
-        offsets.push({ ox: tx * WORLD.w, oy: ty * WORLD.h });
+    const minTileX = Math.max(-2, Math.floor((camera.x - halfW) / WORLD.w));
+    const maxTileX = Math.min(2, Math.floor((camera.x + halfW) / WORLD.w));
+    const minTileY = Math.max(-2, Math.floor((camera.y - halfH) / WORLD.h));
+    const maxTileY = Math.min(2, Math.floor((camera.y + halfH) / WORLD.h));
+    _tileOffsetsResult.length = 0;
+    let si = 0;
+    for (let ty = minTileY; ty <= maxTileY; ty += 1) {
+      for (let tx = minTileX; tx <= maxTileX; tx += 1) {
+        const s = _tileOffsetsScratch[si++];
+        s.ox = tx * WORLD.w;
+        s.oy = ty * WORLD.h;
+        _tileOffsetsResult.push(s);
       }
     }
-    return offsets.length ? offsets : [{ ox: 0, oy: 0 }];
+    if (!_tileOffsetsResult.length) {
+      _tileOffsetsScratch[0].ox = 0;
+      _tileOffsetsScratch[0].oy = 0;
+      _tileOffsetsResult.push(_tileOffsetsScratch[0]);
+    }
+    return _tileOffsetsResult;
   }
 
   function isCreatureVisible(e, ox = 0, oy = 0, margin = 32) {
