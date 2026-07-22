@@ -656,6 +656,8 @@
   function grazeProducerDensity(e, dt) {
     const field = sim.producerField;
     if (!field.mass.length) return false;
+    // Holling Type II: handling time evita graze continuo. Limita a ~1.5-3 eventos/s.
+    if ((e.grazeCooldown || 0) > 0) return false;
     const cx = fieldCellX(e.x);
     const cy = fieldCellY(e.y);
     const idx = fieldIndex(cx, cy);
@@ -667,7 +669,10 @@
     const bite = Math.min(mass, biteRate * dtScale);
     field.mass[idx] = mass - bite;
     field.total -= bite;
-    e.energy = Math.min(e.maxEnergy, e.energy + bite * 25);
+    // Gain por evento aumentado (25->55) compensando cooldown. Antes: bite*25 cada frame.
+    // Ahora: bite*55 cada 0.3-0.8s = throughput neto ~55/0.55 = 100/s vs 25*30fps=750/s anterior.
+    e.energy = Math.min(e.maxEnergy, e.energy + bite * 55);
+    e.grazeCooldown = rand(0.3, 0.8);
     return true;
   }
 
@@ -1383,6 +1388,7 @@
   function stepMobile(e, dt) {
     e.age += dt;
     e.cooldown -= dt;
+    if (e.grazeCooldown > 0) e.grazeCooldown -= dt;
     const resting = hasMove(e, 4) && sim.time < e.restUntil;
     // Metabolismo adaptativo: reduccion gradual para depredadores en baja cuenta
     // Antes era *=0.5 binario que hacia preds inmortales (84min sin comer)
