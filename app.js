@@ -1083,6 +1083,8 @@
     for (let i = 0; i < list.length; i += 1) {
       const t = list[i];
       if (!t || !t.alive || t === e) continue;
+      // Skip predators that can't eat this consumer (gape limitation)
+      if (e.size / Math.max(1, t.size) > 0.85) continue;
       const d2 = torusDistance2(e, t);
       if (d2 < bestD2) {
         best = t;
