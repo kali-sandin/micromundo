@@ -1719,11 +1719,26 @@
     drawGeneHistory();
   }
 
+  // Cached canvas sizing: only calls getBoundingClientRect when ResizeObserver marks dirty
+  const _canvasSizeCache = new WeakMap();
+
   function resizeCanvasToDisplay(canvasEl, context, fallbackW, fallbackH) {
+    let entry = _canvasSizeCache.get(canvasEl);
+    if (!entry) {
+      entry = { w: 0, h: 0, dirty: true };
+      _canvasSizeCache.set(canvasEl, entry);
+      new ResizeObserver(() => { entry.dirty = true; }).observe(canvasEl);
+    }
+    if (!entry.dirty && canvasEl.width === entry.w && canvasEl.height === entry.h) {
+      return { w: entry.w, h: entry.h };
+    }
     const rect = canvasEl.getBoundingClientRect();
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     const w = Math.max(fallbackW, Math.floor(rect.width * dpr));
     const h = Math.max(fallbackH, Math.floor(rect.height * dpr));
+    entry.w = w;
+    entry.h = h;
+    entry.dirty = false;
     if (canvasEl.width !== w || canvasEl.height !== h) {
       canvasEl.width = w;
       canvasEl.height = h;
