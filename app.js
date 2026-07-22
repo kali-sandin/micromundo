@@ -1370,10 +1370,11 @@
     e.age += dt;
     e.cooldown -= dt;
     const resting = hasMove(e, 4) && sim.time < e.restUntil;
-    // Metabolismo adaptativo: depredadores en escasez reducen metabolismo
+    // Metabolismo adaptativo: reduccion gradual para depredadores en baja cuenta
+    // Antes era *=0.5 binario que hacia preds inmortales (84min sin comer)
     let metabFactor = resting ? 3.4 : 7.5;
-    if (e.type === TYPE.PREDATOR && sim.predatorCount < 60) {
-      metabFactor *= 0.5;
+    if (e.type === TYPE.PREDATOR) {
+      metabFactor *= 0.7 + 0.3 * clamp(sim.predatorCount / 60, 0, 1);
     }
     e.energy -= e.metabolism * dt * metabFactor;
     if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / (e.type === TYPE.PREDATOR ? 150 : 95))) {
