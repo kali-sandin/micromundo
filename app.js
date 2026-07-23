@@ -868,7 +868,7 @@
       radius,
       maxRadius,
       speed: mobile ? Number(opts.speed ?? 24) : 0,
-      energy: colony ? 18 : 8,
+      energy: colony ? 18 : Number(opts.energy ?? 8),
       maxEnergy: colony ? 92 : 24,
       armor: Number(opts.armor ?? (colony ? rand(3.1, 5.4) : mobile ? rand(2.2, 4.0) : rand(1.2, 2.6))),
       chemosense,
@@ -1276,6 +1276,7 @@
     if (isMobileProducer(e)) {
       if (producerCCrowdFactor(e) < 0.85 || e.energy < e.maxEnergy * 0.58) return;
     }
+    const childEnergy = isMobileProducer(e) ? Math.min(8, e.energy * 0.32) : undefined;
     const spread = rand(70, 180);
     spawnProducer({
       sub: e.sub,
@@ -1288,7 +1289,8 @@
       chemosense: inheritAsexual(e, 'chemosense', 0, 5),
       movementMask: chance(0.04) ? inheritMovementMask(e, { movementMask: 1 << Math.floor(rand(0, MOVE.length)) }) : movementMaskFromLegacy(e),
       fertility: inheritAsexual(e, 'fertility', 0.006, 0.075),
-      maxAge: inheritAsexual(e, 'maxAge', 3500, 12000)
+      maxAge: inheritAsexual(e, 'maxAge', 3500, 12000),
+      ...(childEnergy != null ? { energy: childEnergy } : {})
     });
     e.energy *= 0.68;
     sim.births += 1;
