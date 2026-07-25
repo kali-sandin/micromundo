@@ -715,7 +715,7 @@
   function returnCarcassEnergyToField(car) {
     if (!car || !sim.producerField.mass.length || car.energy <= 0) return;
     const depositRadius = Math.max(90, Math.min(240, car.radius * 12));
-    addProducerDensity(car.x, car.y, Math.max(0.18, car.energy * 0.035), depositRadius);
+    addProducerDensity(car.x, car.y, Math.max(0.18, car.energy * 0.5), depositRadius);
     car.energy = 0;
     car.alive = false;
   }
@@ -745,7 +745,7 @@
     if (dx * dx + dy * dy > eatRange * eatRange) return false;
     const bite = Math.min(car.energy, 0.9 + e.size * 0.58 + e.pseudopodia * 0.38 + (e.feeding === 2 ? 0.8 : 0));
     car.energy -= bite;
-    e.energy = Math.min(e.maxEnergy, e.energy + bite * (e.type === TYPE.PREDATOR ? 11 : 6.5));
+    e.energy = Math.min(e.maxEnergy, e.energy + bite);
     if (car.energy <= 0.2) {
       car.energy = 0;
       car.alive = false;
