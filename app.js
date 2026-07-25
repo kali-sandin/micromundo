@@ -701,7 +701,7 @@
     if (mass < 0.035) return false;
     // dt-scaled: normalizar a BASE_DT para que el gain sea independiente de velocidad/FPS
     const dtScale = dt / BASE_DT;
-    const biteRate = 0.018 + e.size * 0.006 + e.cilia * 0.003 + (e.feeding === 1 ? 0.014 : 0);
+    const biteRate = (0.018 + e.size * 0.006 + e.cilia * 0.003 + (e.feeding === 1 ? 0.014 : 0)) * (e.fearFactor || 1);
     const bite = Math.min(mass, biteRate * dtScale);
     field.mass[idx] = mass - bite;
     field.total -= bite;
@@ -1504,6 +1504,8 @@
     } else {
       queryNearby(e.x, e.y, consumerThreatRange(e), TYPE.PREDATOR, consumerThreats);
       threat = nearestThreat(e, consumerThreats);
+      // Fear ecology (NCE): consumers grazan 40% menos cuando detectan predator cercano
+      e.fearFactor = threat ? 0.6 : 1;
       queryNearby(e.x, e.y, e.perception, TYPE.PRODUCER, nearby);
       const entityFood = nearestFood(e, nearby);
       const fieldFood = bestProducerDensityTarget(e.x, e.y, e.perception);
