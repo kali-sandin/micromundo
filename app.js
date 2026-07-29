@@ -830,7 +830,7 @@
 
     // El retorno al campo ocurre al descomponerse; mientras tanto el cadaver se puede comer.
     if (sim.carcasses.length < 400) {
-      const storedEnergy = Math.max(1.5, Number(e.energy || 0) * 0.55 + Number(e.radius || 1) * 1.2);
+      const storedEnergy = Math.max(1.5, Number(e.energy || 0) * 0.55);
       sim.carcasses.push({
         alive: true,
         virtualCarcass: true,
@@ -988,6 +988,11 @@
       energy: type === TYPE.PREDATOR ? 160 : 26
     };
     const child = type === TYPE.PREDATOR ? spawnPredator(opts) : spawnConsumer(opts);
+    // growthCost: el crecimiento de size encima de la media parental tiene coste energetico inmediato
+    const parentAvgSize = (a.size + b.size) * 0.5;
+    if (child.size > parentAvgSize) {
+      child.energy = Math.max(1, child.energy - (child.size - parentAvgSize) * 4);
+    }
     sim.births += 1;
     return child;
   }
