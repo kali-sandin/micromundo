@@ -580,7 +580,7 @@ function runFunctionalTests() {
     expectOk(car, 'no encontro carcass cercano');
     const energyBefore = eater.energy;
     const carEnergyBefore = car.energy;
-    expectOk(api.feedConsumer(eater, car), 'feedConsumer no pudo comer carcass');
+    expectOk(api.feedConsumer(eater, car, 1 / 30), 'feedConsumer no pudo comer carcass');
     expectOk(eater.energy > energyBefore, 'comer carcass no subio energia');
     expectOk(car.energy < carEnergyBefore, 'comer carcass no redujo energia del cadaver');
   });

@@ -737,19 +737,22 @@
     return best;
   }
 
-  function eatCarcass(e, car) {
+  function eatCarcass(e, car, dt) {
     if (!car || !car.alive || car.energy <= 0) return false;
+    if ((e.grazeCooldown || 0) > 0) return false;
     const dx = torusDelta(car.x - e.x, WORLD.w);
     const dy = torusDelta(car.y - e.y, WORLD.h);
     const eatRange = e.radius + car.radius + (e.feeding === 1 ? e.cilia * 2.2 : 4);
     if (dx * dx + dy * dy > eatRange * eatRange) return false;
-    const bite = Math.min(car.energy, 0.9 + e.size * 0.58 + e.pseudopodia * 0.38 + (e.feeding === 2 ? 0.8 : 0));
+    const dtScale = (dt || BASE_DT) / BASE_DT;
+    const bite = Math.min(car.energy, (0.9 + e.size * 0.58 + e.pseudopodia * 0.38 + (e.feeding === 2 ? 0.8 : 0)) * dtScale);
     car.energy -= bite;
     e.energy = Math.min(e.maxEnergy, e.energy + bite);
     if (car.energy <= 0.2) {
       car.energy = 0;
       car.alive = false;
     }
+    e.grazeCooldown = rand(0.3, 0.8);
     return true;
   }
 
@@ -1341,7 +1344,7 @@
 
   function feedConsumer(e, target, dt) {
     if (!target) return false;
-    if (target.virtualCarcass) return eatCarcass(e, target);
+    if (target.virtualCarcass) return eatCarcass(e, target, dt);
     if (!target.alive) return false;
     if (target.virtualA) return grazeProducerDensity(e, dt);
     const dx = torusDelta(target.x - e.x, WORLD.w);
