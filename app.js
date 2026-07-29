@@ -2460,16 +2460,15 @@
     const points = sim.graph.filter((p) => p.t >= minT);
     if (!points.length) return;
     const visible = sim.populationSeriesVisible;
-    const valuesForMax = [];
+    let max = 10;
     for (let i = 0; i < points.length; i += 1) {
       const p = points[i];
-      if (visible.producerDensity) valuesForMax.push(p.producerDensity * 1000);
-      if (visible.producerB) valuesForMax.push(p.producerB);
-      if (visible.producerC) valuesForMax.push(p.producerC);
-      if (visible.consumers) valuesForMax.push(p.consumers);
-      if (visible.predators) valuesForMax.push(p.predators);
+      if (visible.producerDensity) max = Math.max(max, p.producerDensity * 1000);
+      if (visible.producerB) max = Math.max(max, p.producerB);
+      if (visible.producerC) max = Math.max(max, p.producerC);
+      if (visible.consumers) max = Math.max(max, p.consumers);
+      if (visible.predators) max = Math.max(max, p.predators);
     }
-    const max = Math.max(10, ...valuesForMax);
     const yForGraphPoint = (p, key) => {
       const raw = key === 'producerDensity' ? p[key] * 1000 : p[key];
       return h - 20 - (raw / max) * (h - 34);
@@ -2486,7 +2485,10 @@
       const lastX = xForGraphPoint(points[points.length - 1]);
       graphCtx.lineTo(lastX, h - 20);
       graphCtx.closePath();
-      const peak = Math.max(...points.map((p) => p.producerDensity * 1000));
+      let peak = 0;
+      for (let i = 0; i < points.length; i += 1) {
+        peak = Math.max(peak, points[i].producerDensity * 1000);
+      }
       graphCtx.fillStyle = `rgba(118, 210, 93, ${clamp(0.055 + (peak / max) * 0.12, 0.06, 0.18)})`;
       graphCtx.fill();
     };
@@ -2548,7 +2550,13 @@
       return;
     }
 
-    const max = Math.max(1, ...points.flatMap((p) => keys.map((key) => p[group].avg[key] || 0)));
+    let max = 1;
+    for (let i = 0; i < points.length; i += 1) {
+      const avg = points[i][group].avg;
+      for (let j = 0; j < keys.length; j += 1) {
+        max = Math.max(max, avg[keys[j]] || 0);
+      }
+    }
     keys.forEach((key, idx) => {
       const colorIndex = allKeys.indexOf(key);
       geneCtx.beginPath();
