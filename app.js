@@ -838,7 +838,9 @@
       maxRadius: 18,
       maxAge: Infinity,
       competitionAt: 0,
-      starved: 0
+      starved: 0,
+      grazeCooldown: 0,
+      huntCooldown: 0
     };
     const e = Object.assign(base, partial);
     sim.creatures[id] = e;
@@ -1444,6 +1446,11 @@
 
     if (!canEatArmored(e, target)) return false;
 
+    // Holling Type II: handling time tras kill exitoso limita throughput maximo.
+    // Un predator no puede encadenar kills sin tiempo de procesado.
+    // Esto satura la tasa de consumo cuando la densidad de presas es alta.
+    if (e.huntCooldown > 0) return false;
+
     // Gape-limitation: depredadores no pueden comer presas mucho mas grandes
     let gapeFactor = 1;
     if (e.type === TYPE.PREDATOR && target.type === TYPE.CONSUMER) {
@@ -1472,6 +1479,15 @@
     target.energy = Math.max(0, target.energy - gain);
 
     e.energy = Math.min(e.maxEnergy, e.energy + gain);
+    // Holling Type II handling time: el predator pierde tiempo procesando la presa.
+    // Escala con el tamano de la presa: presas grandes = mas handling.
+    // Consumer->ProducerC: handling corto (1.5-2.5s). Predator->Consumer/Producer: mas largo.
+    const preySize = e.type === TYPE.PREDATOR
+      ? (target.type === TYPE.PRODUCER ? target.radius * 0.1 : target.size * 0.35)
+      : 0;
+    e.huntCooldown = e.type === TYPE.PREDATOR
+      ? 1.8 + preySize + rand(0, 0.8)   // 1.8-3.5s para predators
+      : 1.2 + rand(0, 0.5);              // 1.2-1.7s para consumers (ProducerC)
     kill(target, e.type === TYPE.PREDATOR ? (target.type === TYPE.PRODUCER ? 'Depredador consume productor' : 'Depredador consume consumidor') : null);
     return true;
   }
@@ -1533,6 +1549,7 @@
     e.age += dt;
     e.cooldown -= dt;
     if (e.grazeCooldown > 0) e.grazeCooldown -= dt;
+    if (e.huntCooldown > 0) e.huntCooldown -= dt;
     const resting = hasMove(e, 4) && sim.time < e.restUntil;
     // Metabolismo adaptativo: reduccion gradual para depredadores en baja cuenta
     // Antes era *=0.5 binario que hacia preds inmortales (84min sin comer)
