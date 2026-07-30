@@ -234,7 +234,11 @@
     migrationTimer: 0,
     liveConsumerCount: 0,
     liveProducerBCount: 0,
-    liveProducerCCount: 0
+    liveProducerCCount: 0,
+    // Thermal entropy: disipacion adaptativa si energia total excede promedio movil
+    thermalAccumulator: 0,
+    thermalEnergyHistory: [],     // ultimas N muestras de energia total
+    thermalDecayRate: 0           // rate actual de disipacion (0 = inactivo)
   };
 
   const fmt = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 });
@@ -1502,6 +1506,10 @@
       metabFactor *= 0.7 + 0.3 * clamp(sim.predatorCount / 60, 0, 1);
     }
     e.energy -= e.metabolism * dt * metabFactor;
+    // Thermal entropy: disipacion adaptativa si el sistema tiene inflacion energetica
+    if (sim.thermalDecayRate > 0 && (e.type === TYPE.CONSUMER || e.type === TYPE.PREDATOR)) {
+      e.energy -= e.energy * sim.thermalDecayRate * dt;
+    }
     if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / (e.type === TYPE.PREDATOR ? 150 : 95))) {
       kill(e, e.type === TYPE.PREDATOR ? 'Depredador muere por senescencia' : 'Consumidor muere por senescencia');
       return;
@@ -1741,6 +1749,38 @@
       sim.migrationTimer = 5.0;
       checkMigration();
     }
+  }
+
+  // Thermal entropy: muestrea energia total cada 5s y aplica disipacion suave si excede promedio movil.
+  // Simula perdida termica en transferencias troficas. Solo activo cuando hay inflacion energetica clara.
+  function applyThermalDecay() {
+    // Calcular energia total aproximada: mobiles + field
+    let mobileEnergy = 0;
+    for (let i = 0; i < sim.creatures.length; i += 1) {
+      const e = sim.creatures[i];
+      if (!e || !e.alive) continue;
+      mobileEnergy += e.energy || 0;
+    }
+    const fieldEnergy = sim.producerField.total || 0;
+    const total = mobileEnergy + fieldEnergy;
+    const hist = sim.thermalEnergyHistory;
+    hist.push(total);
+    if (hist.length > 12) hist.shift(); // ultimas 12 muestras = ~60s
+    if (hist.length < 4) { sim.thermalDecayRate = 0; return; } // necesita warmup
+    // Promedio movil excluyendo el valor actual
+    let sum = 0;
+    for (let i = 0; i < hist.length - 1; i += 1) sum += hist[i];
+    const movingAvg = sum / (hist.length - 1);
+    if (movingAvg < 1) { sim.thermalDecayRate = 0; return; }
+    const ratio = total / movingAvg;
+    if (ratio > 1.3) {
+      // Inflacion detectada: disipacion proporcional al exceso, max 2%/s
+      sim.thermalDecayRate = Math.min(0.02, (ratio - 1.3) * 0.015);
+    } else if (ratio < 1.1) {
+      // Sistema equilibrado o deflacion: desactivar
+      sim.thermalDecayRate = 0;
+    }
+    // thermalDecayRate se aplica continuamente en stepMobile como disipacion suave
   }
 
   function counts() {
@@ -2452,14 +2492,21 @@
 
   function updateStats(force = false) {
     if (!force && sim.time - sim.lastStatsAt < 0.35) return;
+    const dtStats = sim.time - sim.lastStatsAt;
     sim.lastStatsAt = sim.time;
     const c = counts();
+    // Thermal entropy check cada ~5s
+    sim.thermalAccumulator += dtStats;
+    if (sim.thermalAccumulator >= 5) {
+      sim.thermalAccumulator = 0;
+      applyThermalDecay();
+    }
     els.statProducerA.textContent = c.producerDensity.toFixed(3);
     els.statProducerB.textContent = fmt.format(c.producerB);
     els.statProducerC.textContent = fmt.format(c.producerC);
     els.statConsumers.textContent = fmt.format(c.consumers);
     els.statPredators.textContent = fmt.format(c.predators);
-    els.statEnergy.textContent = c.energyAvg.toFixed(1);
+    els.statEnergy.textContent = c.energyAvg.toFixed(1) + (sim.thermalDecayRate > 0 ? ` ⚡${(sim.thermalDecayRate * 100).toFixed(1)}%` : '');
     if (sim.dayNightEnabled) {
       const sinP = Math.sin(sim.dayNightPhase);
       const phaseLabel = sinP > 0.5 ? 'Día' : sinP > -0.5 ? 'Atardecer' : 'Noche';
