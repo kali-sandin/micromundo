@@ -1437,7 +1437,7 @@
     if (e.type === TYPE.PREDATOR && target.type === TYPE.CONSUMER) {
       const sizeRatio = target.size / Math.max(1, e.size);
       if (sizeRatio > 0.85) return false; // presa demasiado grande
-      if (sizeRatio > 0.5) gapeFactor = 0.85 / sizeRatio; // penalty progresivo
+      if (sizeRatio > 0.5) gapeFactor = Math.min(1.0, 0.85 / sizeRatio); // penalty progresivo, nunca bonus
     }
 
     const rawGain = e.type === TYPE.PREDATOR
