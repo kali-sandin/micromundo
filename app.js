@@ -1204,7 +1204,7 @@
       const crowdFactor = producerCCrowdFactor(e);
       const sensoryCost = (Number(e.chemosense || 0) * 0.003 + Math.max(0, Number(e.perception || 0) - 40) * 0.000012) * dt * (resting ? 0.42 : 1);
       const crowdStress = (1 - crowdFactor) * dt * 0.12;
-      const respCost = dt * 0.008; // basal metabolism for mobile ProducerC
+      const respCost = dt * (0.008 + (e.armor || 0) * 0.003); // basal metabolism + armor cost for mobile ProducerC
       e.energy = Math.min(e.maxEnergy, e.energy + dt * sim.solarEnergy * 0.12 * crowdFactor - sensoryCost - crowdStress - respCost);
       if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / 120)) {
         kill(e, 'Productor C móvil muere por senescencia');
@@ -1223,7 +1223,7 @@
         kill(e, 'Productor B muere por senescencia');
         return;
       }
-      const respCost = dt * (0.015 + e.radius * 0.0005);
+      const respCost = dt * (0.015 + e.radius * 0.0005 + (e.armor || 0) * 0.004);
       e.energy = Math.min(e.maxEnergy, e.energy + dt * sun * 0.12 - respCost);
       e.radius = Math.min(e.maxRadius, e.radius + dt * sun * 0.018);
       const leafCap = 8 + e.radius * 0.9;
