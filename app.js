@@ -1266,7 +1266,7 @@
       e.leafCount = Math.max(0, e.leafCount - COLONY_MIN_LEAVES_TO_REPRODUCE);
       e.leafEnergy = Math.max(0, e.leafEnergy - COLONY_MIN_LEAVES_TO_REPRODUCE * 3.4);
       e.energy *= 0.72;
-      spawnProducer({
+      const childB = spawnProducer({
         sub: PRODUCER.B,
         x: mod(e.x + rand(-720, 720), WORLD.w),
         y: mod(e.y + rand(-720, 720), WORLD.h),
@@ -1276,6 +1276,13 @@
         fertility: inheritAsexual(e, 'fertility', 0.012, 0.085),
         maxAge: inheritAsexual(e, 'maxAge', 7500, 21500)
       });
+      // growthCost asexual: si hijo crece radius/armor sobre padre, paga coste
+      if (childB) {
+        const dRadius = childB.radius - e.radius;
+        const dArmor = (childB.armor || 0) - (e.armor || 0);
+        if (dRadius > 0) childB.energy = Math.max(1, childB.energy - dRadius * 0.8);
+        if (dArmor > 0) childB.energy = Math.max(1, childB.energy - dArmor * 2.5);
+      }
       sim.births += 1;
       return;
     }
@@ -1285,7 +1292,7 @@
     }
     const childEnergy = isMobileProducer(e) ? Math.min(8, e.energy * 0.32) : undefined;
     const spread = rand(70, 180);
-    spawnProducer({
+    const childP = spawnProducer({
       sub: e.sub,
       x: mod(e.x + Math.cos(rand(-Math.PI, Math.PI)) * spread, WORLD.w),
       y: mod(e.y + Math.sin(rand(-Math.PI, Math.PI)) * spread, WORLD.h),
@@ -1299,6 +1306,13 @@
       maxAge: inheritAsexual(e, 'maxAge', 3500, 12000),
       ...(childEnergy != null ? { energy: childEnergy } : {})
     });
+    // growthCost asexual: si hijo crece radius/armor sobre padre, paga coste
+    if (childP && isMobileProducer(e)) {
+      const dRadius = childP.radius - e.radius;
+      const dArmor = (childP.armor || 0) - (e.armor || 0);
+      if (dRadius > 0) childP.energy = Math.max(0.5, childP.energy - dRadius * 0.6);
+      if (dArmor > 0) childP.energy = Math.max(0.5, childP.energy - dArmor * 1.5);
+    }
     e.energy *= 0.68;
     sim.births += 1;
   }
