@@ -867,6 +867,7 @@
     // El retorno al campo ocurre al descomponerse; mientras tanto el cadaver se puede comer.
     if (sim.carcasses.length < 400) {
       const storedEnergy = Math.max(1.5, Number(e.energy || 0) * 0.55);
+      e.energy = 0;
       sim.carcasses.push({
         alive: true,
         virtualCarcass: true,
@@ -2420,7 +2421,7 @@
       for (let o = 0; o < offsets.length; o += 1) {
         const { ox, oy } = offsets[o];
         const p = worldToScreen(car.x + ox, car.y + oy);
-        if (p.x < -20 || p.y < -20 || p.x > canvas.width + 20 || p.y > canvas.height + 20) continue;
+        if (p.x < -20 || p.y < -20 || p.x > window.innerWidth + 20 || p.y > window.innerHeight + 20) continue;
         ctx.globalAlpha = alpha;
         ctx.fillStyle = '#1a1a1a';
         ctx.beginPath();
