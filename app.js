@@ -635,10 +635,14 @@
       for (let x = 0; x < cols; x += 1) {
         const idx = y * cols + x;
         const m = src[idx];
-        const left = src[y * cols + mod(x - 1, cols)];
-        const right = src[y * cols + mod(x + 1, cols)];
-        const up = src[mod(y - 1, rows) * cols + x];
-        const down = src[mod(y + 1, rows) * cols + x];
+        const xL = x > 0 ? x - 1 : cols - 1;
+        const xR = x < cols - 1 ? x + 1 : 0;
+        const yU = y > 0 ? y - 1 : rows - 1;
+        const yD = y < rows - 1 ? y + 1 : 0;
+        const left = src[y * cols + xL];
+        const right = src[y * cols + xR];
+        const up = src[yU * cols + x];
+        const down = src[yD * cols + x];
         const avg = (left + right + up + down) * 0.25;
         const grown = m + m * (1.3 - m) * growth;
         const next = clamp(grown + (avg - m) * diffusion, 0, 1.8);
