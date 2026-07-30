@@ -960,6 +960,7 @@
     e.speed *= 1.28;
     e.maxEnergy *= 4.65;
     if (opts.energy == null) e.energy = rand(e.maxEnergy * 0.38, e.maxEnergy * 0.62);
+    else e.energy = e.maxEnergy * 0.35;
     e.metabolism *= 0.82;
     e.maxAge = Number(opts.maxAge ?? rand(7200, 11700));
     sim.liveConsumerCount--;
