@@ -1820,26 +1820,38 @@
     return { producerDensity, producerB: sim.liveProducerBCount, producerC: sim.liveProducerCCount, consumers: sim.liveConsumerCount, predators: sim.predatorCount, energyAvg: energyN ? energy / energyN : 0 };
   }
 
+  // Pre-allocated scratch for recordGeneHistory (avoids Object.fromEntries allocs each call)
+  const _geneTotalsScratch = {};
+  for (let i = 0; i < GROUPS.length; i += 1) {
+    const group = GROUPS[i];
+    const keys = GROUP_KEYS[group];
+    const sums = {};
+    for (let k = 0; k < keys.length; k += 1) sums[keys[k]] = 0;
+    _geneTotalsScratch[group] = { n: 0, sums };
+  }
+
   function recordGeneHistory() {
-    const totals = {};
+    // Reset scratch
     for (let i = 0; i < GROUPS.length; i += 1) {
       const group = GROUPS[i];
+      _geneTotalsScratch[group].n = 0;
       const keys = GROUP_KEYS[group];
-      totals[group] = { n: 0, sums: Object.fromEntries(keys.map((key) => [key, 0])) };
+      const sums = _geneTotalsScratch[group].sums;
+      for (let k = 0; k < keys.length; k += 1) sums[keys[k]] = 0;
     }
 
-    totals['producer-a'].n = 1;
-    totals['producer-a'].sums.densityTotal = sim.producerField.total;
+    _geneTotalsScratch['producer-a'].n = 1;
+    _geneTotalsScratch['producer-a'].sums.densityTotal = sim.producerField.total;
 
     for (let i = 0; i < sim.creatures.length; i += 1) {
       const e = sim.creatures[i];
       if (!e || !e.alive) continue;
       const group = groupForCreature(e);
       const keys = GROUP_KEYS[group];
-      totals[group].n += 1;
+      _geneTotalsScratch[group].n += 1;
+      const sums = _geneTotalsScratch[group].sums;
       for (let k = 0; k < keys.length; k += 1) {
-        const key = keys[k];
-        totals[group].sums[key] += Number(e[key] || 0);
+        sums[keys[k]] += e[keys[k]] || 0;
       }
     }
 
@@ -1847,11 +1859,11 @@
     for (let i = 0; i < GROUPS.length; i += 1) {
       const group = GROUPS[i];
       const keys = GROUP_KEYS[group];
-      const n = totals[group].n || 0;
+      const n = _geneTotalsScratch[group].n || 0;
       const avg = {};
+      const sums = _geneTotalsScratch[group].sums;
       for (let k = 0; k < keys.length; k += 1) {
-        const key = keys[k];
-        avg[key] = n ? totals[group].sums[key] / n : 0;
+        avg[keys[k]] = n ? sums[keys[k]] / n : 0;
       }
       point[group] = { n, avg };
     }
