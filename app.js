@@ -1225,6 +1225,10 @@
       }
       const respCost = dt * (0.015 + e.radius * 0.0005 + (e.armor || 0) * 0.004);
       e.energy = Math.min(e.maxEnergy, e.energy + dt * sun * 0.12 - respCost);
+      if (e.energy <= 0) {
+        kill(e, 'Productor B muere por inanición');
+        return;
+      }
       e.radius = Math.min(e.maxRadius, e.radius + dt * sun * 0.018);
       const leafCap = 8 + e.radius * 0.9;
       e.leafEnergy = Math.min(leafCap, e.leafEnergy + dt * sun * 0.13);
