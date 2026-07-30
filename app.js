@@ -1764,8 +1764,6 @@
 
     stepCarcasses(dt);
 
-    compactIfNeeded();
-
     sim.migrationTimer -= dt;
     if (sim.migrationTimer <= 0) {
       sim.migrationTimer = 5.0;
@@ -2758,6 +2756,7 @@
       const dt = Math.min(scaled / chunks, MAX_DT);
       rebuildGrid();
       for (let i = 0; i < chunks; i += 1) simulate(dt);
+      compactIfNeeded();
     }
 
     updateCameraFollow();
