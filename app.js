@@ -705,9 +705,11 @@
     const bite = Math.min(mass, biteRate);
     field.mass[idx] = mass - bite;
     field.total -= bite;
-    // Gain por evento aumentado (25->55) compensando cooldown. Antes: bite*25 cada frame.
-    // Ahora: bite*55 cada 0.3-0.8s = throughput neto ~55/0.55 = 100/s vs 25*30fps=750/s anterior.
-    e.energy = Math.min(e.maxEnergy, e.energy + bite * 55);
+    // Density-dependent grazing efficiency: celdas pobres rinden menos energia por bite.
+    // densityFactor: 0.3 (celdas muy pobres) a 1.2 (celdas ricas). mass tipica ~0.5-1.3.
+    // Esto frena overgrazing en zonas degradadas y estabiliza boom-bust.
+    const densityFactor = Math.max(0.3, Math.min(1.2, mass / 0.5));
+    e.energy = Math.min(e.maxEnergy, e.energy + bite * 55 * densityFactor);
     e.grazeCooldown = rand(0.3, 0.8);
     return true;
   }
