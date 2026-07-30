@@ -1497,6 +1497,15 @@
     // Seed ~828 mobiles. 5000 permite ~6x crecimiento, frena explosion boom-bust
     const aliveCount = sim.creatures.length - sim.freeIds.length;
     if (aliveCount > 5000 && !chance(0.2)) return;
+    // Density-dependent reproduction (carrying capacity):
+    //_factor logistico reduce fert cuando pop > K/2. frena boom suavemente.
+    const K = type === TYPE.PREDATOR ? 300 : 2000;
+    const pop = type === TYPE.PREDATOR ? sim.predatorCount : sim.liveConsumerCount;
+    if (pop > K * 0.5) {
+      const over = (pop - K * 0.5) / (K * 0.5); // 0 en K/2, 1 en K, >1 sobre K
+      const fertilityFactor = 1 / (1 + over * over);
+      if (!chance(fertilityFactor)) return;
+    }
     // Umbral reproductivo: depredadores mas bajo (0.60 base, 0.50 en crisis)
     const reproThreshold = type === TYPE.PREDATOR
       ? (sim.predatorCount < 40 ? 0.50 : 0.60)
