@@ -1411,6 +1411,10 @@
       : target.energy * 1.8;    // consumer->ProducerC already capped above
     const gain = Math.min(rawGain, maxTransfer) * gapeFactor;
 
+    // Descuento gain de target ANTES de kill para evitar doble conteo energetico
+    // (sin esto, kill lee target.energy intacta y crea carcass con energy ya consumida)
+    target.energy = Math.max(0, target.energy - gain);
+
     e.energy = Math.min(e.maxEnergy, e.energy + gain);
     kill(target, e.type === TYPE.PREDATOR ? (target.type === TYPE.PRODUCER ? 'Depredador consume productor' : 'Depredador consume consumidor') : null);
     return true;
