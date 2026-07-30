@@ -1175,15 +1175,16 @@
 
     if (isMobileProducer(e)) {
       queryNearby(e.x, e.y, e.perception || 105, TYPE.CONSUMER, nearby);
-      let threat = null;
+      let threatDx = 0, threatDy = 0;
       let threatD2 = Infinity;
       const scanThreats = (list) => {
         for (let i = 0; i < list.length; i += 1) {
           const c = list[i];
-          const { dx, dy } = torusVector(e, c);
-          const d2 = dx * dx + dy * dy;
+          const tv = torusVector(e, c);
+          const d2 = tv.dx * tv.dx + tv.dy * tv.dy;
           if (d2 < threatD2) {
-            threat = { dx, dy };
+            threatDx = tv.dx;
+            threatDy = tv.dy;
             threatD2 = d2;
           }
         }
@@ -1191,9 +1192,10 @@
       scanThreats(nearby);
       queryNearby(e.x, e.y, e.perception || 105, TYPE.PREDATOR, producerThreats);
       scanThreats(producerThreats);
-      const resting = updateResting(e, dt, Boolean(threat));
-      if (threat) {
-        const away = Math.atan2(-threat.dy, -threat.dx);
+      const hasThreat = threatD2 < Infinity;
+      const resting = updateResting(e, dt, hasThreat);
+      if (hasThreat) {
+        const away = Math.atan2(-threatDy, -threatDx);
         const pull = hasMove(e, 0) ? 0.52 : hasMove(e, 2) ? 0.24 : hasMove(e, 3) ? 0.38 : 0.46;
         e.angle += normalizeAngle(away - e.angle) * pull;
         if (hasMove(e, 0) && chance(0.035 * dt / BASE_DT)) e.angle += rand(-1.4, 1.4);
@@ -1202,8 +1204,8 @@
         e.angle += rand(-wander, wander) * Math.sqrt(dt * BASE_DT);
       }
       if (hasMove(e, 3)) e.angle += Math.sin(sim.time * 1.3 + e.id) * 0.02;
-      const panic = threat ? (hasMove(e, 2) ? 1.34 : 1.82) : 1;
-      const moveScale = resting ? 0 : burstMultiplier(e, dt, Boolean(threat));
+      const panic = hasThreat ? (hasMove(e, 2) ? 1.34 : 1.82) : 1;
+      const moveScale = resting ? 0 : burstMultiplier(e, dt, hasThreat);
       e.x += Math.cos(e.angle) * e.speed * panic * moveScale * dt;
       e.y += Math.sin(e.angle) * e.speed * panic * moveScale * dt;
       const crowdFactor = producerCCrowdFactor(e);
