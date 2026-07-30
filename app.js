@@ -1313,7 +1313,11 @@
     if (isColonyProducer(e)) {
       if (e.leafCount < COLONY_MIN_LEAVES_TO_REPRODUCE || e.energy < e.maxEnergy * 0.42) return;
       queryNearby(e.x, e.y, 400, TYPE.PRODUCER, nearby);
-      const hasLargeMate = nearby.some((p) => p !== e && isColonyProducer(p));
+      let hasLargeMate = false;
+      for (let ni = 0; ni < nearby.length; ni += 1) {
+        const p = nearby[ni];
+        if (p !== e && isColonyProducer(p)) { hasLargeMate = true; break; }
+      }
       if (!hasLargeMate || !chance(0.58)) return;
       e.leafCount = Math.max(0, e.leafCount - COLONY_MIN_LEAVES_TO_REPRODUCE);
       e.leafEnergy = Math.max(0, e.leafEnergy - COLONY_MIN_LEAVES_TO_REPRODUCE * 3.4);
