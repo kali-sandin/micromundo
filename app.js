@@ -709,7 +709,9 @@
     // densityFactor: 0.3 (celdas muy pobres) a 1.2 (celdas ricas). mass tipica ~0.5-1.3.
     // Esto frena overgrazing en zonas degradadas y estabiliza boom-bust.
     const densityFactor = Math.max(0.3, Math.min(1.2, mass / 0.5));
-    e.energy = Math.min(e.maxEnergy, e.energy + bite * 55 * densityFactor);
+    // Mult 22 (antes 55): field genera ~0.015/s por celda. Bite tipico 0.024 cada ~0.55s.
+    // gain=0.024*22*densityFactor ~= 0.53/evento. Rentable pero no buffet infinito.
+    e.energy = Math.min(e.maxEnergy, e.energy + bite * 22 * densityFactor);
     e.grazeCooldown = rand(0.3, 0.8);
     return true;
   }
@@ -1386,8 +1388,8 @@
       e.grazeCooldown = rand(0.3, 0.8);
       target.leafEnergy -= bite;
       target.leafCount = Math.max(0, (target.leafCount || 0) - 1);
-      target.energy = Math.max(0, target.energy - bite * 0.16);
-      e.energy = Math.min(e.maxEnergy, e.energy + bite * 9.2);
+      target.energy = Math.max(0, target.energy - bite * 0.30);
+      e.energy = Math.min(e.maxEnergy, e.energy + bite * 4.5);
       return true;
     }
 
