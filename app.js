@@ -790,7 +790,11 @@
       const car = sim.carcasses[ci];
       car.life += dt;
       if (car.life >= car.maxLife) returnCarcassEnergyToField(car);
-      if (!car.alive || car.energy <= 0) { sim.carcasses[ci] = sim.carcasses[sim.carcasses.length - 1]; sim.carcasses.pop(); }
+      if (!car.alive || car.energy <= 0) {
+        sim.carcasses[ci] = sim.carcasses[sim.carcasses.length - 1];
+        sim.carcasses.pop();
+        if (ci < sim.carcasses.length) ci += 1; // re-procesa elemento intercambiado
+      }
     }
   }
 
