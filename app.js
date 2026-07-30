@@ -1047,7 +1047,13 @@
     const r2 = radius * radius;
     for (let cy = minY; cy <= maxY; cy += 1) {
       for (let cx = minX; cx <= maxX; cx += 1) {
-        const bucket = sim.grid.get(mod(cy, GRID_ROWS) * GRID_COLS + mod(cx, GRID_COLS));
+        let wy = cy;
+        if (wy < 0) wy += GRID_ROWS;
+        else if (wy >= GRID_ROWS) wy -= GRID_ROWS;
+        let wx = cx;
+        if (wx < 0) wx += GRID_COLS;
+        else if (wx >= GRID_COLS) wx -= GRID_COLS;
+        const bucket = sim.grid.get(wy * GRID_COLS + wx);
         if (!bucket) continue;
         const list = bucket[type];
         for (let i = 0; i < list.length; i += 1) {
