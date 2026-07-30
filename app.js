@@ -1549,10 +1549,6 @@
       kill(e, e.type === TYPE.PREDATOR ? 'Depredador muere por senescencia' : 'Consumidor muere por senescencia');
       return;
     }
-    if (e.energy <= 0) {
-      kill(e, e.type === TYPE.PREDATOR ? 'Depredador muere por energía' : 'Consumidor muere por energía');
-      return;
-    }
 
     // Starvation progresivo: reduce capacidades con baja energia
     var origSpeed = e.speed;
@@ -1620,6 +1616,12 @@
     }
     steerCreature(e, dt, steeringTarget, threat);
     if (food) feedConsumer(e, food, dt);
+    // Check de muerte por energia despues de comer: da oportunidad a criaturas
+    // que estan junto a comida sobrevivir un chunk mas
+    if (e.energy <= 0) {
+      kill(e, e.type === TYPE.PREDATOR ? 'Depredador muere por energía' : 'Consumidor muere por energía');
+      return;
+    }
     // Restaurar tras uso temporal (fertility despues de reproduceMobile)
     e.speed = origSpeed;
     e.perception = origPerception;
