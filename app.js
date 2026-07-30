@@ -699,10 +699,10 @@
     const idx = fieldIndex(cx, cy);
     const mass = field.mass[idx];
     if (mass < 0.035) return false;
-    // dt-scaled: normalizar a BASE_DT para que el gain sea independiente de velocidad/FPS
-    const dtScale = dt / BASE_DT;
+    // Bite constante: el cooldown regula la frecuencia en tiempo de sim.
+    // Sin dtScale: throughput independiente de framerate/speed.
     const biteRate = (0.018 + e.size * 0.006 + e.cilia * 0.003 + (e.feeding === 1 ? 0.014 : 0)) * (e.fearFactor || 1);
-    const bite = Math.min(mass, biteRate * dtScale);
+    const bite = Math.min(mass, biteRate);
     field.mass[idx] = mass - bite;
     field.total -= bite;
     // Gain por evento aumentado (25->55) compensando cooldown. Antes: bite*25 cada frame.
@@ -744,8 +744,7 @@
     const dy = torusDelta(car.y - e.y, WORLD.h);
     const eatRange = e.radius + car.radius + (e.feeding === 1 ? e.cilia * 2.2 : 4);
     if (dx * dx + dy * dy > eatRange * eatRange) return false;
-    const dtScale = (dt || BASE_DT) / BASE_DT;
-    const bite = Math.min(car.energy, (0.9 + e.size * 0.58 + e.pseudopodia * 0.38 + (e.feeding === 2 ? 0.8 : 0)) * dtScale);
+    const bite = Math.min(car.energy, 0.9 + e.size * 0.58 + e.pseudopodia * 0.38 + (e.feeding === 2 ? 0.8 : 0));
     car.energy -= bite;
     e.energy = Math.min(e.maxEnergy, e.energy + bite);
     if (car.energy <= 0.2) {
@@ -1356,8 +1355,7 @@
       if (e.type === TYPE.PREDATOR) return false;
       if ((e.grazeCooldown || 0) > 0) return false;
       if ((target.leafCount || 0) <= 0 || target.leafEnergy <= 0.35 || !canEatArmored(e, target)) return false;
-      const dtScale = (dt || BASE_DT) / BASE_DT;
-      const bite = Math.min(target.leafEnergy, (1.0 + e.size * 0.48 + e.pseudopodia * 0.32 + (e.feeding === 2 ? 0.7 : 0)) * dtScale);
+      const bite = Math.min(target.leafEnergy, 1.0 + e.size * 0.48 + e.pseudopodia * 0.32 + (e.feeding === 2 ? 0.7 : 0));
       e.grazeCooldown = rand(0.3, 0.8);
       target.leafEnergy -= bite;
       target.leafCount = Math.max(0, (target.leafCount || 0) - 1);
