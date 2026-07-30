@@ -995,10 +995,10 @@
     // para que speedCost y metabolism reflejen la masa y velocidad reales
     derivedConsumerStats(e);
     e.radius += 1.5;
-    e.maxEnergy *= 4.65;
+    e.maxEnergy *= 2.0;
     if (opts.energy == null) e.energy = rand(e.maxEnergy * 0.38, e.maxEnergy * 0.62);
     else e.energy = e.maxEnergy * 0.35;
-    e.metabolism *= 0.82;
+    e.metabolism *= 0.92;
     e.maxAge = Number(opts.maxAge ?? rand(7200, 11700));
     sim.liveConsumerCount--;
     sim.predatorCount++;
