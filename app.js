@@ -388,6 +388,24 @@
     return dx * dx + dy * dy;
   }
 
+  // --- Trig LUT: 4096-entry sin/cos tables, error < 0.0016 rad ---
+  const TRIG_LUT_SIZE = 4096;
+  const TRIG_LUT_MASK = TRIG_LUT_SIZE - 1;
+  const TRIG_LUT_FACTOR = TRIG_LUT_SIZE / (Math.PI * 2);
+  const _sinLUT = new Float64Array(TRIG_LUT_SIZE);
+  const _cosLUT = new Float64Array(TRIG_LUT_SIZE);
+  for (let i = 0; i < TRIG_LUT_SIZE; i++) {
+    const a = (i / TRIG_LUT_SIZE) * Math.PI * 2;
+    _sinLUT[i] = Math.sin(a);
+    _cosLUT[i] = Math.cos(a);
+  }
+  function lutSin(angle) {
+    return _sinLUT[Math.floor(angle * TRIG_LUT_FACTOR) & TRIG_LUT_MASK];
+  }
+  function lutCos(angle) {
+    return _cosLUT[Math.floor(angle * TRIG_LUT_FACTOR) & TRIG_LUT_MASK];
+  }
+
   const _scrTV = { dx: 0, dy: 0 };
   function torusVector(from, to) {
     _scrTV.dx = torusDelta(to.x - from.x, WORLD.w);
@@ -1219,11 +1237,11 @@
         const wander = hasMove(e, 2) ? 0.65 : hasMove(e, 3) ? 1.1 : 1.6;
         e.angle += rand(-wander, wander) * Math.sqrt(dt * BASE_DT);
       }
-      if (hasMove(e, 3)) e.angle += Math.sin(sim.time * 1.3 + e.id) * 0.02;
+      if (hasMove(e, 3)) e.angle += lutSin(sim.time * 1.3 + e.id) * 0.02;
       const panic = hasThreat ? (hasMove(e, 2) ? 1.34 : 1.82) : 1;
       const moveScale = resting ? 0 : burstMultiplier(e, dt, hasThreat);
-      e.x += Math.cos(e.angle) * e.speed * panic * moveScale * dt;
-      e.y += Math.sin(e.angle) * e.speed * panic * moveScale * dt;
+      e.x += lutCos(e.angle) * e.speed * panic * moveScale * dt;
+      e.y += lutSin(e.angle) * e.speed * panic * moveScale * dt;
       const crowdFactor = producerCCrowdFactor(e);
       const sensoryCost = (Number(e.chemosense || 0) * 0.003 + Math.max(0, Number(e.perception || 0) - 40) * 0.000012) * dt * (resting ? 0.42 : 1);
       const crowdStress = (1 - crowdFactor) * dt * 0.12;
@@ -1368,7 +1386,7 @@
     }
 
     if (hasMove(e, 3)) {
-      e.angle += Math.sin(sim.time * 0.9 + e.id) * 0.018;
+      e.angle += lutSin(sim.time * 0.9 + e.id) * 0.018;
     }
 
     if (resting) {
@@ -1376,11 +1394,11 @@
       return;
     }
 
-    const ciliaPulse = 1 + Math.sin(sim.time * 5 + e.id) * (e.cilia * 0.015);
+    const ciliaPulse = 1 + lutSin(sim.time * 5 + e.id) * (e.cilia * 0.015);
     const burst = burstMultiplier(e, dt, pressure);
     const panic = threat ? (hasMove(e, 2) ? 1.16 : hasMove(e, 3) ? 1.28 : 1.46) : 1;
-    e.x += Math.cos(e.angle) * e.speed * ciliaPulse * burst * panic * dt;
-    e.y += Math.sin(e.angle) * e.speed * ciliaPulse * burst * panic * dt;
+    e.x += lutCos(e.angle) * e.speed * ciliaPulse * burst * panic * dt;
+    e.y += lutSin(e.angle) * e.speed * ciliaPulse * burst * panic * dt;
     wrapInsideWorld(e);
   }
 
@@ -2310,10 +2328,10 @@
       const leaves = Math.min(14, Math.max(0, e.leafCount || 0));
       ctx.fillStyle = '#7fd867';
       for (let i = 0; i < leaves; i += 1) {
-        const a = e.angle + (i / Math.max(1, leaves)) * Math.PI * 2 + Math.sin(sim.time * 0.12 + e.id) * 0.18;
+        const a = e.angle + (i / Math.max(1, leaves)) * Math.PI * 2 + lutSin(sim.time * 0.12 + e.id) * 0.18;
         const leafR = Math.max(1, r * 0.34);
-        const lx = p.x + Math.cos(a) * r * 1.18;
-        const ly = p.y + Math.sin(a) * r * 1.18;
+        const lx = p.x + lutCos(a) * r * 1.18;
+        const ly = p.y + lutSin(a) * r * 1.18;
         ctx.beginPath();
         ctx.ellipse(lx, ly, leafR * 1.45, leafR * 0.72, a, 0, Math.PI * 2);
         ctx.fill();
@@ -2335,9 +2353,9 @@
 
     if (e.type === TYPE.PREDATOR) {
       ctx.beginPath();
-      ctx.moveTo(p.x + Math.cos(e.angle) * r * 1.8, p.y + Math.sin(e.angle) * r * 1.8);
-      ctx.lineTo(p.x + Math.cos(e.angle + 2.45) * r * 1.35, p.y + Math.sin(e.angle + 2.45) * r * 1.35);
-      ctx.lineTo(p.x + Math.cos(e.angle - 2.45) * r * 1.35, p.y + Math.sin(e.angle - 2.45) * r * 1.35);
+      ctx.moveTo(p.x + lutCos(e.angle) * r * 1.8, p.y + lutSin(e.angle) * r * 1.8);
+      ctx.lineTo(p.x + lutCos(e.angle + 2.45) * r * 1.35, p.y + lutSin(e.angle + 2.45) * r * 1.35);
+      ctx.lineTo(p.x + lutCos(e.angle - 2.45) * r * 1.35, p.y + lutSin(e.angle - 2.45) * r * 1.35);
       ctx.closePath();
       ctx.fill();
       if (isSelectedCreature(e)) {
@@ -2356,7 +2374,7 @@
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(p.x, p.y);
-      ctx.lineTo(p.x - Math.cos(e.angle) * r * (1.6 + e.flagella * 0.5), p.y - Math.sin(e.angle) * r * (1.6 + e.flagella * 0.5));
+      ctx.lineTo(p.x - lutCos(e.angle) * r * (1.6 + e.flagella * 0.5), p.y - lutSin(e.angle) * r * (1.6 + e.flagella * 0.5));
       ctx.stroke();
     }
     if (isSelectedCreature(e)) {
