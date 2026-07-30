@@ -3560,7 +3560,7 @@
       const before = following ? null : screenToWorld(ev.clientX, ev.clientY);
       const bX = before ? before.x : 0, bY = before ? before.y : 0;
       const factor = Math.exp(-ev.deltaY * 0.0012);
-      camera.zoom = clamp(camera.zoom * factor, 0.028, 2.2);
+      camera.zoom = clamp(camera.zoom * factor, minCameraZoom(), 2.2);
       if (following) {
         updateCameraFollow();
       } else {
