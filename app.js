@@ -1070,6 +1070,7 @@
       if (d2 < bestD2) {
         best = t;
         bestD2 = d2;
+        if (bestD2 < 4) break; // early-exit: presa adyacente
       }
     }
     return best;
