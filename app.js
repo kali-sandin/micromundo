@@ -1627,10 +1627,9 @@
     sim.creatures = alive;
     sim.freeIds = [];
     sim.selectedCreatureIds = selected.filter((e) => e.alive).map((e) => creatureKey(e));
-    sim.selectedTrails.clear();
-    for (let i = 0; i < selected.length; i += 1) {
-      const e = selected[i];
-      if (e && e.alive) sim.selectedTrails.set(creatureKey(e), [{ x: e.x, y: e.y }]);
+    // Trails se clave por uid (estable durante compaction), solo limpiar seleccionados muertos
+    for (let i = sim.selectedCreatureIds.length - 1; i >= 0; i--) {
+      if (!creatureByKey(sim.selectedCreatureIds[i])) sim.selectedTrails.delete(sim.selectedCreatureIds[i]);
     }
     sim.selectedCreatureId = sim.selectedCreatureIds[sim.selectedCreatureIds.length - 1] ?? null;
   }
