@@ -1386,7 +1386,7 @@
         ? target.energy * 2.0   // predator->ProducerC: max 2x prey energy
         : target.energy * 1.3   // predator->consumer: max 1.3x (30% ecological loss)
       : target.energy * 1.8;    // consumer->ProducerC already capped above
-    const gain = Math.min(rawGain, Math.max(rawGain * 0.5, maxTransfer)) * gapeFactor;
+    const gain = Math.min(rawGain, maxTransfer) * gapeFactor;
 
     e.energy = Math.min(e.maxEnergy, e.energy + gain);
     kill(target, e.type === TYPE.PREDATOR ? (target.type === TYPE.PRODUCER ? 'Depredador consume productor' : 'Depredador consume consumidor') : null);
