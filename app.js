@@ -1354,8 +1354,11 @@
 
     if (isColonyProducer(target)) {
       if (e.type === TYPE.PREDATOR) return false;
+      if ((e.grazeCooldown || 0) > 0) return false;
       if ((target.leafCount || 0) <= 0 || target.leafEnergy <= 0.35 || !canEatArmored(e, target)) return false;
-      const bite = Math.min(target.leafEnergy, 1.0 + e.size * 0.48 + e.pseudopodia * 0.32 + (e.feeding === 2 ? 0.7 : 0));
+      const dtScale = (dt || BASE_DT) / BASE_DT;
+      const bite = Math.min(target.leafEnergy, (1.0 + e.size * 0.48 + e.pseudopodia * 0.32 + (e.feeding === 2 ? 0.7 : 0)) * dtScale);
+      e.grazeCooldown = rand(0.3, 0.8);
       target.leafEnergy -= bite;
       target.leafCount = Math.max(0, (target.leafCount || 0) - 1);
       target.energy = Math.max(0, target.energy - bite * 0.16);
