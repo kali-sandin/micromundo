@@ -1622,11 +1622,20 @@
       else if (e.type === TYPE.PREDATOR) { cP++; sP.push(e); }
     }
     var THRESHOLD = 15;
-    var prob = 0.005 * (5 / 60);
-    if (cB > 0 && cB < THRESHOLD && chance(prob)) migratePopulation('producerB', cB, sB);
-    if (cC > 0 && cC < THRESHOLD && chance(prob)) migratePopulation('producerC', cC, sC);
-    if (cM > 0 && cM < THRESHOLD && chance(prob)) migratePopulation('consumers', cM, sM);
-    if (cP > 0 && cP < THRESHOLD && chance(prob)) migratePopulation('predators', cP, sP);
+    var baseProb = 0.005 * (5 / 60);
+    // Prob escalada inversa: menor poblacion = mayor chance de rescue
+    // count<=3: rescue garantizado (prob>=1). count=THRESHOLD-1: prob base.
+    // Ademas: count=0 permite recolonizacion (antes bloqueada por cB>0)
+    function rescueChance(count) {
+      if (count === 0) return baseProb * 4; // recolonizacion espontanea rara
+      if (count <= 3) return 1; // rescue garantizado cuando esta al borde
+      var scale = 1 + (THRESHOLD - count) / THRESHOLD; // 1.07..1.87x
+      return baseProb * scale;
+    }
+    if (cB < THRESHOLD && chance(rescueChance(cB))) migratePopulation('producerB', cB, sB);
+    if (cC < THRESHOLD && chance(rescueChance(cC))) migratePopulation('producerC', cC, sC);
+    if (cM < THRESHOLD && chance(rescueChance(cM))) migratePopulation('consumers', cM, sM);
+    if (cP < THRESHOLD && chance(rescueChance(cP))) migratePopulation('predators', cP, sP);
   }
 
   function migratePopulation(type, count, survivors) {
@@ -1634,8 +1643,24 @@
     var isPredator = type === 'predators';
     var isProducerB = type === 'producerB';
     var isProducerC = type === 'producerC';
+    // Si no hay survivors (especie extinguida), usar genes base aleatorios para recolonizacion
+    var hasSurvivors = survivors && survivors.length > 0;
+    var fallbackDonor = hasSurvivors ? null : {
+      size: isPredator ? rand(4, 7) : rand(1, 3),
+      reserves: rand(2, 8),
+      flagella: Math.floor(rand(1, 4)),
+      cilia: Math.floor(rand(0, 3)),
+      chemosense: rand(0.5, 2),
+      pseudopodia: rand(0, 2),
+      armor: rand(0, 2),
+      vacuole: rand(0, 2),
+      feeding: Math.floor(rand(0, 3)),
+      movementMask: 1 << Math.floor(rand(0, 3)),
+      fertility: rand(0.4, 0.7),
+      maxAge: isPredator ? rand(6000, 10000) : rand(2000, 5000)
+    };
     for (var i = 0; i < n; i++) {
-      var donor = survivors[Math.floor(rand(0, survivors.length))];
+      var donor = hasSurvivors ? survivors[Math.floor(rand(0, survivors.length))] : fallbackDonor;
       var edge = Math.floor(rand(0, 4));
       var margin = 80;
       var x, y;
