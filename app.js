@@ -870,7 +870,7 @@
       radius,
       maxRadius,
       speed: mobile ? Number(opts.speed ?? 24) : 0,
-      energy: colony ? 18 : Number(opts.energy ?? 8),
+      energy: colony ? Number(opts.energy ?? 18) : Number(opts.energy ?? 8),
       maxEnergy: colony ? 92 : 24,
       armor: Number(opts.armor ?? (colony ? rand(3.1, 5.4) : mobile ? rand(2.2, 4.0) : rand(1.2, 2.6))),
       chemosense,
@@ -1270,11 +1270,13 @@
       if (!hasLargeMate || !chance(0.58)) return;
       e.leafCount = Math.max(0, e.leafCount - COLONY_MIN_LEAVES_TO_REPRODUCE);
       e.leafEnergy = Math.max(0, e.leafEnergy - COLONY_MIN_LEAVES_TO_REPRODUCE * 3.4);
+      const childEnergyB = e.energy * 0.28;
       e.energy *= 0.72;
       const childB = spawnProducer({
         sub: PRODUCER.B,
         x: mod(e.x + rand(-720, 720), WORLD.w),
         y: mod(e.y + rand(-720, 720), WORLD.h),
+        energy: childEnergyB,
         radius: inheritAsexual(e, 'radius', 14, 40),
         maxRadius: inheritAsexual(e, 'maxRadius', 28, 72),
         armor: inheritAsexual(e, 'armor', 1.2, 7),
