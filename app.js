@@ -2264,17 +2264,17 @@
       const minY = clamp(Math.floor((sY - oy) / cellH), 0, rows - 1);
       const maxY = clamp(Math.ceil((end.y - oy) / cellH), 0, rows - 1);
 
+      const cellScreenW = cellW * camera.zoom;
+      const cellScreenH = cellH * camera.zoom;
       for (let y = minY; y <= maxY; y += 1) {
         for (let x = minX; x <= maxX; x += 1) {
           const mass = field.mass[fieldIndex(x, y)];
           if (mass < 0.035) continue;
           const p0 = worldToScreen(x * cellW + ox, y * cellH + oy);
-          const p0x = p0.x, p0y = p0.y;
-          const p1 = worldToScreen((x + 1) * cellW + ox, (y + 1) * cellH + oy);
-          const sx = Math.round(p0x);
-          const sy = Math.round(p0y);
-          const sw = Math.max(1, Math.round(p1.x) - sx);
-          const sh = Math.max(1, Math.round(p1.y) - sy);
+          const sx = Math.round(p0.x);
+          const sy = Math.round(p0.y);
+          const sw = Math.max(1, Math.round(p0.x + cellScreenW) - sx);
+          const sh = Math.max(1, Math.round(p0.y + cellScreenH) - sy);
           const a = clamp(0.035 + mass * 0.16, _PFIELD_ALPHA_MIN, _PFIELD_ALPHA_MAX);
           const lutIdx = ((a - _PFIELD_ALPHA_MIN) / _PFIELD_ALPHA_RANGE * (_PFIELD_LUT_SIZE - 1)) | 0;
           ctx.fillStyle = producerFieldFillLUT[lutIdx];
