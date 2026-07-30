@@ -640,7 +640,7 @@
         const up = src[mod(y - 1, rows) * cols + x];
         const down = src[mod(y + 1, rows) * cols + x];
         const avg = (left + right + up + down) * 0.25;
-        const grown = m + m * (1.3 - Math.min(1.3, m)) * growth;
+        const grown = m + m * (1.3 - m) * growth;
         const next = clamp(grown + (avg - m) * diffusion, 0, 1.8);
         dst[idx] = next;
         total += next;
