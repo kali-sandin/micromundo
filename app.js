@@ -936,7 +936,7 @@
     });
     const out = derivedConsumerStats(e);
     if (!opts.keepConsumerSpeed) out.speed *= 0.88;
-    out.metabolism *= 0.9;
+    if (!opts.keepConsumerMetabolism) out.metabolism *= 0.9;
     sim.liveConsumerCount++;
     return out;
   }
@@ -951,7 +951,8 @@
       chemosense: opts.chemosense ?? rand(1.8, 3.6),
       armor: opts.armor ?? rand(1, 3),
       energy: opts.energy ?? rand(120, 190),
-      keepConsumerSpeed: true
+      keepConsumerSpeed: true,
+      keepConsumerMetabolism: true
     });
     e.type = TYPE.PREDATOR;
     e.color = '#f05b50';
