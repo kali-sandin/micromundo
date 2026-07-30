@@ -1553,7 +1553,7 @@
     const resting = hasMove(e, 4) && sim.time < e.restUntil;
     // Metabolismo adaptativo: reduccion gradual para depredadores en baja cuenta
     // Antes era *=0.5 binario que hacia preds inmortales (84min sin comer)
-    let metabFactor = resting ? 3.4 : 7.5;
+    let metabFactor = resting ? 1.5 : 7.5;
     if (e.type === TYPE.PREDATOR) {
       metabFactor *= 0.7 + 0.3 * clamp(sim.predatorCount / 60, 0, 1);
     }
