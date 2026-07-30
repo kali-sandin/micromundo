@@ -991,8 +991,10 @@
     });
     e.type = TYPE.PREDATOR;
     e.color = '#f05b50';
+    // Recalcular derived stats con atributos finales de predator
+    // para que speedCost y metabolism reflejen la masa y velocidad reales
+    derivedConsumerStats(e);
     e.radius += 1.5;
-    e.speed *= 1.28;
     e.maxEnergy *= 4.65;
     if (opts.energy == null) e.energy = rand(e.maxEnergy * 0.38, e.maxEnergy * 0.62);
     else e.energy = e.maxEnergy * 0.35;
