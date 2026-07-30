@@ -1406,7 +1406,7 @@
         ? 62 + target.radius * 3.2 + target.energy * 0.35
         : 92 + target.size * 16 + target.reserves * 7
       : target.sub === PRODUCER.C
-          ? Math.max(8, Math.min(target.energy * 1.8, 36))
+          ? Math.min(target.energy * 1.8, 36)
           : 7.5;
     // Cap gain to prevent energy creation in trophic transfers
     const maxTransfer = e.type === TYPE.PREDATOR
