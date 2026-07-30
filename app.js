@@ -1137,10 +1137,14 @@
 
   function canEatArmored(e, target) {
     if (target?.virtualA) return true;
-    if (!target || target.type !== TYPE.PRODUCER) return true;
-    if (target.sub === PRODUCER.A) return true;
-    const mobileProducerShield = target.sub === PRODUCER.C && e.type === TYPE.CONSUMER ? 0.95 : 0;
-    return feedingPower(e, target) >= armorResistance(target) + mobileProducerShield;
+    if (!target) return true;
+    if (target.type === TYPE.PRODUCER) {
+      if (target.sub === PRODUCER.A) return true;
+      const mobileProducerShield = target.sub === PRODUCER.C && e.type === TYPE.CONSUMER ? 0.95 : 0;
+      return feedingPower(e, target) >= armorResistance(target) + mobileProducerShield;
+    }
+    // Consumers/predators: armor protege si feedingPower no supera armorResistance
+    return feedingPower(e, target) >= armorResistance(target);
   }
 
   const nearby = [];
@@ -1197,6 +1201,8 @@
       if (!t || !t.alive || t === e) continue;
       // Skip predators that can't eat this consumer (gape limitation)
       if (e.size / Math.max(1, t.size) > 0.85) continue;
+      // Skip predators that can't penetrate this consumer's armor
+      if (!canEatArmored(t, e)) continue;
       const d2 = torusDistance2(e, t);
       if (d2 < bestD2) {
         best = t;
