@@ -2420,8 +2420,10 @@
     if (e.type === TYPE.PRODUCER && isColonyProducer(e)) {
       const leaves = Math.min(14, Math.max(0, e.leafCount || 0));
       ctx.fillStyle = '#7fd867';
+      const wobble = lutSin(sim.time * 0.12 + e.id) * 0.18;
+      const invLeaves = 1 / Math.max(1, leaves);
       for (let i = 0; i < leaves; i += 1) {
-        const a = e.angle + (i / Math.max(1, leaves)) * Math.PI * 2 + lutSin(sim.time * 0.12 + e.id) * 0.18;
+        const a = e.angle + i * invLeaves * Math.PI * 2 + wobble;
         const leafR = Math.max(1, r * 0.34);
         const lx = p.x + lutCos(a) * r * 1.18;
         const ly = p.y + lutSin(a) * r * 1.18;
