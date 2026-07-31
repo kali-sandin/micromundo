@@ -1654,12 +1654,19 @@
       const sizeRatio = target.size / Math.max(1, e.size);
       if (sizeRatio > 0.85) return false; // presa demasiado grande
       if (sizeRatio > 0.5) gapeFactor = Math.min(1.0, 0.85 / sizeRatio); // penalty progresivo, nunca bonus
+    } else if (e.type === TYPE.PREDATOR && target.type === TYPE.PREDATOR) {
+      // Intraguild predation: solo presas claramente mas pequeñas, gain reducido
+      const sizeRatio = target.size / Math.max(1, e.size);
+      if (sizeRatio > 0.85) return false;
+      gapeFactor = 0.5; // canibalismo es menos eficiente
     }
 
     const rawGain = e.type === TYPE.PREDATOR
       ? target.type === TYPE.PRODUCER
         ? 62 + target.radius * 3.2 + target.energy * 0.35
-        : 92 + target.size * 16 + target.reserves * 7
+        : target.type === TYPE.PREDATOR
+          ? 46 + target.size * 8 + target.reserves * 3.5 // intraguild: 50% efficiency
+          : 92 + target.size * 16 + target.reserves * 7
       : target.sub === PRODUCER.C
           ? Math.min(target.energy * 1.8, 36)
           : 7.5;
@@ -1667,7 +1674,9 @@
     const maxTransfer = e.type === TYPE.PREDATOR
       ? target.type === TYPE.PRODUCER
         ? target.energy * 1.0   // predator->ProducerC: max 1x prey energy (no creacion)
-        : target.energy * 1.3   // predator->consumer: max 1.3x (30% ecological loss)
+        : target.type === TYPE.PREDATOR
+          ? target.energy * 0.5  // intraguild: max 0.5x (50% loss, canibalismo costoso)
+          : target.energy * 1.3   // predator->consumer: max 1.3x (30% ecological loss)
       : target.energy * 1.8;    // consumer->ProducerC already capped above
     const gain = Math.min(rawGain, maxTransfer) * gapeFactor;
 
@@ -1710,6 +1719,9 @@
       ? (sim.predatorCount < 40 ? 0.50 : 0.60)
       : 0.78;
     if (e.energy < e.maxEnergy * reproThreshold || e.cooldown > 0) return;
+    // Reproductive senescence: fertility declines con edad (Gompertz reproductivo)
+    const ageFactor = clamp(1 - (e.age / e.maxAge) * 0.6, 0.2, 1);
+    if (!chance(ageFactor)) return;
     const mateRange = type === TYPE.PREDATOR ? Math.min(450, e.perception * 1.2) : e.perception * 0.8;
     let mate = null;
     if (cachedMate && cachedMate.alive && cachedMate.energy > cachedMate.maxEnergy * 0.55 && cachedMate.cooldown <= 0) {
@@ -1853,6 +1865,24 @@
           }
         }
         food = bestPlant;
+      }
+      // Intraguild predation: si no encontro comida y predatorCount>25, cazar predators mas pequeños
+      if (!food && sim.predatorCount > 25) {
+        queryNearby(e.x, e.y, e.perception * 0.6, TYPE.PREDATOR, nearby);
+        let bestPrey = null;
+        let bestPreyD2 = Infinity;
+        for (let i = 0; i < nearby.length; i += 1) {
+          const p = nearby[i];
+          if (p === e || !p.alive) continue;
+          const sizeRatio = p.size / e.size;
+          if (sizeRatio > 0.85) continue; // solo presas claramente más pequeñas
+          const d2 = torusDistance2(e, p);
+          if (d2 < bestPreyD2) {
+            bestPrey = p;
+            bestPreyD2 = d2;
+          }
+        }
+        if (bestPrey) food = bestPrey;
       }
       steeringTarget = food || (cachedMate = findMateTarget(e, TYPE.PREDATOR));
     } else {
