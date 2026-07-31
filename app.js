@@ -572,13 +572,17 @@
     for (let pass = 0; pass < passes; pass += 1) {
       let total = 0;
       for (let y = 0; y < rows; y += 1) {
+        const yU = y > 0 ? y - 1 : rows - 1;
+        const yD = y < rows - 1 ? y + 1 : 0;
         for (let x = 0; x < cols; x += 1) {
           const idx = y * cols + x;
           const center = src[idx];
-          const left = src[y * cols + mod(x - 1, cols)];
-          const right = src[y * cols + mod(x + 1, cols)];
-          const up = src[mod(y - 1, rows) * cols + x];
-          const down = src[mod(y + 1, rows) * cols + x];
+          const xL = x > 0 ? x - 1 : cols - 1;
+          const xR = x < cols - 1 ? x + 1 : 0;
+          const left = src[y * cols + xL];
+          const right = src[y * cols + xR];
+          const up = src[yU * cols + x];
+          const down = src[yD * cols + x];
           const next = center * 0.58 + (left + right + up + down) * 0.105;
           dst[idx] = next;
           total += next;
@@ -619,17 +623,19 @@
     const cy = fieldCellY(y);
     const r = fieldCellRadius(radius);
     const gain = Math.max(0.05, amount);
+    const r2 = r * r;
     for (let yy = cy - r; yy <= cy + r; yy += 1) {
-      const wy = mod(yy, field.rows);
+      const wy = yy < 0 ? yy + field.rows : yy >= field.rows ? yy - field.rows : yy;
+      const dy = yy - cy;
+      const dy2 = dy * dy;
       for (let xx = cx - r; xx <= cx + r; xx += 1) {
-        const wx = mod(xx, field.cols);
         const dx = xx - cx;
-        const dy = yy - cy;
-        const d2 = dx * dx + dy * dy;
-        if (d2 > r * r) continue;
-        const idx = fieldIndex(wx, wy);
+        const d2 = dx * dx + dy2;
+        if (d2 > r2) continue;
+        const wx = xx < 0 ? xx + field.cols : xx >= field.cols ? xx - field.cols : xx;
+        const idx = wy * field.cols + wx;
         const before = field.mass[idx];
-        const falloff = 1 - d2 / (r * r + 1);
+        const falloff = 1 - d2 / (r2 + 1);
         let add = gain * falloff * 0.18;
         if (before > 1.5) add *= (1.8 - before) / 0.3;
         const next = clamp(before + add, 0, 1.8);
@@ -689,15 +695,17 @@
     let best = 0.035;
     let bestX = -1;
     let bestY = -1;
+    const r2 = r * r;
     for (let yy = cy - r; yy <= cy + r; yy += 1) {
-      const wy = mod(yy, field.rows);
+      const wy = yy < 0 ? yy + field.rows : yy >= field.rows ? yy - field.rows : yy;
+      const dy = yy - cy;
+      const dy2 = dy * dy;
       for (let xx = cx - r; xx <= cx + r; xx += 1) {
-        const wx = mod(xx, field.cols);
         const dx = xx - cx;
-        const dy = yy - cy;
-        const d2 = dx * dx + dy * dy;
-        if (d2 > r * r) continue;
-        const mass = field.mass[fieldIndex(wx, wy)];
+        const d2 = dx * dx + dy2;
+        if (d2 > r2) continue;
+        const wx = xx < 0 ? xx + field.cols : xx >= field.cols ? xx - field.cols : xx;
+        const mass = field.mass[wy * field.cols + wx];
         const score = mass / (1 + d2 * 0.12);
         if (score > best) {
           best = score;
