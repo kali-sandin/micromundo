@@ -739,7 +739,8 @@
     if (mass < 0.035) return false;
     // Bite constante: el cooldown regula la frecuencia en tiempo de sim.
     // Sin dtScale: throughput independiente de framerate/speed.
-    const biteRate = (0.018 + e.size * 0.006 + e.cilia * 0.003 + (e.feeding === 1 ? 0.014 : 0)) * (e.fearFactor || 1);
+    const feedBonus = e.feeding === 1 ? 0.014 : e.feeding === 0 ? 0.010 : 0;
+    const biteRate = (0.018 + e.size * 0.006 + e.cilia * 0.003 + feedBonus) * (e.fearFactor || 1);
     const bite = Math.min(mass, biteRate);
     field.mass[idx] = mass - bite;
     field.total -= bite;
@@ -786,7 +787,7 @@
     const dy = torusDelta(car.y - e.y, WORLD.h);
     const eatRange = e.radius + car.radius + (e.feeding === 1 ? e.cilia * 2.2 : 4);
     if (dx * dx + dy * dy > eatRange * eatRange) return false;
-    const bite = Math.min(car.energy, 0.9 + e.size * 0.58 + e.pseudopodia * 0.38 + (e.feeding === 2 ? 0.8 : 0));
+    const bite = Math.min(car.energy, 0.9 + e.size * 0.58 + e.pseudopodia * 0.38 + (e.feeding === 2 ? 0.8 : 0) + (e.feeding === 3 ? 0.6 : 0));
     car.energy -= bite;
     e.energy = Math.min(e.maxEnergy, e.energy + bite);
     if (car.energy <= 0.2) {
@@ -1447,7 +1448,7 @@
       if (e.type === TYPE.PREDATOR) return false;
       if ((e.grazeCooldown || 0) > 0) return false;
       if ((target.leafCount || 0) <= 0 || target.leafEnergy <= 0.35 || !canEatArmored(e, target)) return false;
-      const bite = Math.min(target.leafEnergy, 1.0 + e.size * 0.48 + e.pseudopodia * 0.32 + (e.feeding === 2 ? 0.7 : 0));
+      const bite = Math.min(target.leafEnergy, 1.0 + e.size * 0.48 + e.pseudopodia * 0.32 + (e.feeding === 2 ? 0.7 : 0) + (e.feeding === 3 ? 0.5 : 0));
       e.grazeCooldown = rand(0.3, 0.8);
       target.leafEnergy -= bite;
       target.leafCount = Math.max(0, (target.leafCount || 0) - 1);
