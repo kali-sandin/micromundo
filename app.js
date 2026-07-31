@@ -684,7 +684,7 @@
     const cx = fieldCellX(x);
     const cy = fieldCellY(y);
     const r = clamp(fieldCellRadius(radius), 1, 6);
-    let best = 0.08;
+    let best = 0.035;
     let bestX = -1;
     let bestY = -1;
     for (let yy = cy - r; yy <= cy + r; yy += 1) {
