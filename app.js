@@ -239,7 +239,8 @@
     // Thermal entropy: disipacion adaptativa si energia total excede promedio movil
     thermalAccumulator: 0,
     thermalEnergyHistory: [],     // ultimas N muestras de energia total
-    thermalDecayRate: 0           // rate actual de disipacion (0 = inactivo)
+    thermalDecayRate: 0,           // rate actual de disipacion (0 = inactivo)
+    mobileEnergySum: 0             // running sum de energy de consumers+predators vivos
   };
 
   const fmt = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 });
@@ -748,7 +749,10 @@
     const densityFactor = Math.max(0.3, Math.min(1.2, mass / 0.5));
     // Mult 22 (antes 55): field genera ~0.015/s por celda. Bite tipico 0.024 cada ~0.55s.
     // gain=0.024*22*densityFactor ~= 0.53/evento. Rentable pero no buffet infinito.
-    e.energy = Math.min(e.maxEnergy, e.energy + bite * 22 * densityFactor);
+    const gain = bite * 22 * densityFactor;
+    const newEnergy = Math.min(e.maxEnergy, e.energy + gain);
+    sim.mobileEnergySum += newEnergy - e.energy;
+    e.energy = newEnergy;
     e.grazeCooldown = rand(0.3, 0.8);
     return true;
   }
@@ -787,7 +791,9 @@
     if (dx * dx + dy * dy > eatRange * eatRange) return false;
     const bite = Math.min(car.energy, 0.9 + e.size * 0.58 + e.pseudopodia * 0.38 + (e.feeding === 2 ? 0.8 : 0) + (e.feeding === 3 ? 0.6 : 0));
     car.energy -= bite;
-    e.energy = Math.min(e.maxEnergy, e.energy + bite);
+    const newEng = Math.min(e.maxEnergy, e.energy + bite);
+    sim.mobileEnergySum += newEng - e.energy;
+    e.energy = newEng;
     if (car.energy <= 0.2) {
       car.energy = 0;
       car.alive = false;
@@ -861,6 +867,7 @@
 
   function kill(e, reason) {
     if (!e || !e.alive) return;
+    if (e.type === TYPE.CONSUMER || e.type === TYPE.PREDATOR) sim.mobileEnergySum -= e.energy;
     e.alive = false;
     sim.creatureIndex.delete(e.uid);
     sim.selectedTrails.delete(creatureKey(e));
@@ -986,6 +993,7 @@
     if (!opts.keepConsumerSpeed) out.speed *= 0.88;
     if (!opts.keepConsumerMetabolism) out.metabolism *= 0.9;
     sim.liveConsumerCount++;
+    sim.mobileEnergySum += e.energy;
     return out;
   }
 
@@ -1009,10 +1017,12 @@
     derivedConsumerStats(e);
     e.radius += 1.5;
     e.maxEnergy *= 2.0;
+    const oldEnergy = e.energy;
     if (opts.energy == null) e.energy = rand(e.maxEnergy * 0.38, e.maxEnergy * 0.62);
     else e.energy = e.maxEnergy * 0.35;
     e.metabolism *= 0.92;
     e.maxAge = Number(opts.maxAge ?? rand(7200, 11700));
+    sim.mobileEnergySum += e.energy - oldEnergy;
     sim.liveConsumerCount--;
     sim.predatorCount++;
     return e;
@@ -1045,7 +1055,10 @@
     // growthCost: el crecimiento de size encima de la media parental tiene coste energetico inmediato
     const parentAvgSize = (a.size + b.size) * 0.5;
     if (child.size > parentAvgSize) {
-      child.energy = Math.max(1, child.energy - (child.size - parentAvgSize) * 4);
+      const growthCost = (child.size - parentAvgSize) * 4;
+      const actualCost = Math.min(growthCost, child.energy - 1);
+      child.energy -= actualCost;
+      sim.mobileEnergySum -= actualCost;
     }
     sim.births += 1;
     return child;
@@ -1470,7 +1483,10 @@
       target.leafEnergy -= bite;
       target.leafCount = Math.max(0, (target.leafCount || 0) - 1);
       target.energy = Math.max(0, target.energy - bite * 0.30);
-      e.energy = Math.min(e.maxEnergy, e.energy + bite * 4.5);
+      const gainCol = bite * 4.5;
+      const newEng = Math.min(e.maxEnergy, e.energy + gainCol);
+      sim.mobileEnergySum += newEng - e.energy;
+      e.energy = newEng;
       return true;
     }
 
@@ -1507,8 +1523,10 @@
     // Descuento gain de target ANTES de kill para evitar doble conteo energetico
     // (sin esto, kill lee target.energy intacta y crea carcass con energy ya consumida)
     target.energy = Math.max(0, target.energy - gain);
-
-    e.energy = Math.min(e.maxEnergy, e.energy + gain);
+    // Si target es mobile, su energy ya se resto del sum via kill(). Si es producer, no esta en el sum.
+    const newEng = Math.min(e.maxEnergy, e.energy + gain);
+    sim.mobileEnergySum += newEng - e.energy;
+    e.energy = newEng;
     // Holling Type II handling time: el predator pierde tiempo procesando la presa.
     // Escala con el tamano de la presa: presas grandes = mas handling.
     // Consumer->ProducerC: handling corto (1.5-2.5s). Predator->Consumer/Producer: mas largo.
@@ -1553,8 +1571,10 @@
     }
     if (!mate) return;
     const child = childFrom(e, mate, type);
+    const parentLoss = e.energy * (1 - 0.58) + mate.energy * (1 - 0.62);
     e.energy *= 0.58;
     mate.energy *= 0.62;
+    sim.mobileEnergySum -= parentLoss;
     e.cooldown = rand(18, 55) / e.fertility;
     mate.cooldown = rand(18, 55) / mate.fertility;
     if (sim.births % 12 === 0) {
@@ -1601,10 +1621,14 @@
       const sp = Math.sin(sim.dayNightPhase);
       if (sp < 0) metabFactor *= 1 + 0.25 * sp;
     }
-    e.energy -= e.metabolism * dt * metabFactor;
+    const metabCost = e.metabolism * dt * metabFactor;
+    e.energy -= metabCost;
+    sim.mobileEnergySum -= metabCost;
     // Thermal entropy: disipacion adaptativa si el sistema tiene inflacion energetica
     if (sim.thermalDecayRate > 0 && (e.type === TYPE.CONSUMER || e.type === TYPE.PREDATOR)) {
-      e.energy -= e.energy * sim.thermalDecayRate * dt;
+      const thermalLoss = e.energy * sim.thermalDecayRate * dt;
+      e.energy -= thermalLoss;
+      sim.mobileEnergySum -= thermalLoss;
     }
     if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / (e.type === TYPE.PREDATOR ? 150 : 95))) {
       kill(e, e.type === TYPE.PREDATOR ? 'Depredador muere por senescencia' : 'Consumidor muere por senescencia');
@@ -1853,12 +1877,7 @@
   // Simula perdida termica en transferencias troficas. Solo activo cuando hay inflacion energetica clara.
   function applyThermalDecay() {
     // Calcular energia total aproximada: mobiles + field
-    let mobileEnergy = 0;
-    for (let i = 0; i < sim.creatures.length; i += 1) {
-      const e = sim.creatures[i];
-      if (!e || !e.alive) continue;
-      mobileEnergy += e.energy || 0;
-    }
+    const mobileEnergy = sim.mobileEnergySum;
     const fieldEnergy = sim.producerField.total || 0;
     const total = mobileEnergy + fieldEnergy;
     const hist = sim.thermalEnergyHistory;
@@ -1882,18 +1901,9 @@
   }
 
   function counts() {
-    let energy = 0;
-    let energyN = 0;
-    for (let i = 0; i < sim.creatures.length; i += 1) {
-      const e = sim.creatures[i];
-      if (!e || !e.alive) continue;
-      if (e.type === TYPE.CONSUMER || e.type === TYPE.PREDATOR) {
-        energy += e.energy;
-        energyN += 1;
-      }
-    }
+    const energyN = sim.liveConsumerCount + sim.predatorCount;
     const producerDensity = sim.producerField.mass.length ? sim.producerField.total / sim.producerField.mass.length : 0;
-    return { producerDensity, producerB: sim.liveProducerBCount, producerC: sim.liveProducerCCount, consumers: sim.liveConsumerCount, predators: sim.predatorCount, energyAvg: energyN ? energy / energyN : 0 };
+    return { producerDensity, producerB: sim.liveProducerBCount, producerC: sim.liveProducerCCount, consumers: sim.liveConsumerCount, predators: sim.predatorCount, energyAvg: energyN ? sim.mobileEnergySum / energyN : 0 };
   }
 
   // Pre-allocated scratch for recordGeneHistory (avoids Object.fromEntries allocs each call)
@@ -2605,6 +2615,18 @@
     if (!force && sim.time - sim.lastStatsAt < 0.35) return;
     const dtStats = sim.time - sim.lastStatsAt;
     sim.lastStatsAt = sim.time;
+    // Re-sync mobileEnergySum cada ~60s para corregir drift acumulado
+    sim.energyResyncAccum = (sim.energyResyncAccum || 0) + dtStats;
+    if (sim.energyResyncAccum >= 60) {
+      sim.energyResyncAccum = 0;
+      let rs = 0;
+      for (let i = 0; i < sim.creatures.length; i += 1) {
+        const e = sim.creatures[i];
+        if (!e || !e.alive) continue;
+        if (e.type === TYPE.CONSUMER || e.type === TYPE.PREDATOR) rs += e.energy;
+      }
+      sim.mobileEnergySum = rs;
+    }
     const c = counts();
     // Thermal entropy check cada ~5s
     sim.thermalAccumulator += dtStats;
@@ -2903,6 +2925,7 @@
     sim.liveConsumerCount = 0;
     sim.liveProducerBCount = 0;
     sim.liveProducerCCount = 0;
+    sim.mobileEnergySum = 0;
     sim.carcasses.length = 0;
     sim.migrationTimer = 0;
     sim.graph.clear();
