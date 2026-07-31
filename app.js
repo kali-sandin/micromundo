@@ -1799,7 +1799,8 @@
   }
 
   function compactIfNeeded() {
-    if (sim.freeIds.length < 200 || sim.freeIds.length < sim.creatures.length * 0.4) return;
+    const aliveCount = sim.creatures.length - sim.freeIds.length;
+    if (sim.freeIds.length < 200 || sim.freeIds.length < aliveCount * 0.5) return;
     const alive = [];
     const selected = sim.selectedCreatureIds.map((key) => creatureByKey(key)).filter((e) => e && e.alive);
     for (let i = 0; i < sim.creatures.length; i += 1) {
@@ -2419,6 +2420,7 @@
   const _PFIELD_ALPHA_MIN = 0.035;
   const _PFIELD_ALPHA_MAX = 0.24;
   const _PFIELD_ALPHA_RANGE = _PFIELD_ALPHA_MAX - _PFIELD_ALPHA_MIN;
+  const _PFIELD_MASS_TO_LUT = 0.16 / _PFIELD_ALPHA_RANGE * (_PFIELD_LUT_SIZE - 1);
   const producerFieldFillLUT = (() => {
     const lut = new Array(_PFIELD_LUT_SIZE);
     for (let i = 0; i < _PFIELD_LUT_SIZE; i++) {
@@ -2458,8 +2460,7 @@
           const sy = Math.round(p0.y);
           const sw = Math.max(1, Math.round(p0.x + cellScreenW) - sx);
           const sh = Math.max(1, Math.round(p0.y + cellScreenH) - sy);
-          const a = clamp(0.035 + mass * 0.16, _PFIELD_ALPHA_MIN, _PFIELD_ALPHA_MAX);
-          const lutIdx = ((a - _PFIELD_ALPHA_MIN) / _PFIELD_ALPHA_RANGE * (_PFIELD_LUT_SIZE - 1)) | 0;
+          const lutIdx = Math.min((mass * _PFIELD_MASS_TO_LUT) | 0, _PFIELD_LUT_SIZE - 1);
           ctx.fillStyle = producerFieldFillLUT[lutIdx];
           ctx.fillRect(sx, sy, sw, sh);
         }
@@ -2939,9 +2940,9 @@
       const scaled = elapsed * sim.speed;
       const chunks = Math.max(1, Math.min(MAX_SIM_CHUNKS, Math.ceil(scaled / MAX_DT)));
       const dt = Math.min(scaled / chunks, MAX_DT);
+      compactIfNeeded();
       rebuildGrid();
       for (let i = 0; i < chunks; i += 1) simulate(dt);
-      compactIfNeeded();
     }
 
     updateCameraFollow();
