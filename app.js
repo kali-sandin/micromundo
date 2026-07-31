@@ -1712,6 +1712,11 @@
       const sp = Math.sin(sim.dayNightPhase);
       if (sp < 0) metabFactor *= 1 + 0.25 * sp;
     }
+    // Metabolic depression anti-extincion: organismos en inanicion reducen metabolismo.
+    // Coma metabolico a <3% energy (x0.25), depression severa a <8% (x0.45).
+    // Extiende supervivencia 2-4x en famine, permite recovery si encuentra comida.
+    if (e.energy < e.maxEnergy * 0.03) metabFactor *= 0.25;
+    else if (e.energy < e.maxEnergy * 0.08) metabFactor *= 0.45;
     const metabCost = e.metabolism * dt * metabFactor;
     e.energy -= metabCost;
     sim.mobileEnergySum -= metabCost;
