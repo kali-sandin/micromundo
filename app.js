@@ -1089,6 +1089,25 @@
     const minY = Math.floor((y - radius) / CELL);
     const maxY = Math.floor((y + radius) / CELL);
     const r2 = radius * radius;
+    // Fast path: query area fully inside world bounds — skip per-cell wrapping
+    if (minX >= 0 && maxX < GRID_COLS && minY >= 0 && maxY < GRID_ROWS) {
+      for (let cy = minY; cy <= maxY; cy += 1) {
+        const rowBase = cy * GRID_COLS;
+        for (let cx = minX; cx <= maxX; cx += 1) {
+          const bucket = sim.grid.get(rowBase + cx);
+          if (!bucket) continue;
+          const list = bucket[type];
+          for (let i = 0; i < list.length; i += 1) {
+            const e = list[i];
+            const dx = torusDelta(e.x - x, WORLD.w);
+            const dy = torusDelta(e.y - y, WORLD.h);
+            if (dx * dx + dy * dy <= r2) out.push(e);
+          }
+        }
+      }
+      return out;
+    }
+    // Slow path: query area crosses world bounds — wrap coordinates
     for (let cy = minY; cy <= maxY; cy += 1) {
       for (let cx = minX; cx <= maxX; cx += 1) {
         let wy = cy;
