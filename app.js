@@ -1735,6 +1735,10 @@
   }
 
   function checkMigration() {
+    // Fast exit: use live counters to skip full scan when all pops healthy
+    var THRESHOLD = 15;
+    if (sim.liveProducerBCount >= THRESHOLD && sim.liveProducerCCount >= THRESHOLD &&
+        sim.liveConsumerCount >= THRESHOLD && sim.predatorCount >= THRESHOLD) return;
     var cB = 0, cC = 0, cM = 0, cP = 0;
     var sB = [], sC = [], sM = [], sP = [];
     for (var i = 0; i < sim.creatures.length; i += 1) {
@@ -1745,7 +1749,6 @@
       else if (e.type === TYPE.CONSUMER) { cM++; sM.push(e); }
       else if (e.type === TYPE.PREDATOR) { cP++; sP.push(e); }
     }
-    var THRESHOLD = 15;
     var baseProb = 0.005 * (5 / 60);
     // Prob escalada inversa: menor poblacion = mayor chance de rescue
     // count<=3: rescue garantizado (prob>=1). count=THRESHOLD-1: prob base.
