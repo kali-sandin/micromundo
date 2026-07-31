@@ -2733,7 +2733,7 @@
       sim.lastGraphAt = sim.time;
       sim.graph.push({ t: sim.time, ...c });
       drawGraph();
-      recordGeneHistory();
+      if (!els.genePanel.classList.contains('hidden')) recordGeneHistory();
     }
     if (sim.selectedCreatureIds.length) updateInspectors();
   }
@@ -3578,7 +3578,7 @@
     });
     document.getElementById('toggleGraphs').addEventListener('click', (ev) => togglePanel(ev.currentTarget, els.graphPanel));
     document.getElementById('toggleGenes').addEventListener('click', (ev) => {
-      if (!sim.geneHistory.length) recordGeneHistory();
+      recordGeneHistory();
       togglePanel(ev.currentTarget, els.genePanel);
     });
     document.querySelectorAll('[data-gene-tab]').forEach((btn) => {
