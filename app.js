@@ -1727,6 +1727,9 @@
     }
 
     // Starvation progresivo: reduce capacidades con baja energia
+    // NOTA: fertility *= 0.3 en este bloque NO afecta cooldown en reproduceMobile
+    // porque el threshold de repro (72% maxEnergy) es incompatible con starvation (<15%).
+    // El save/restore de origFertility abajo es belt-and-suspenders.
     var origSpeed = e.speed;
     var origPerception = e.perception;
     var origFertility = e.fertility;
