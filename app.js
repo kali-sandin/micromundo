@@ -118,6 +118,7 @@
 
   const canvas = document.getElementById('world');
   const ctx = canvas.getContext('2d', { alpha: false });
+  let mainCanvasDpr = 1;
   const graphCanvas = document.getElementById('graph');
   const graphCtx = graphCanvas.getContext('2d');
   const geneCanvas = document.getElementById('geneGraph');
@@ -1566,6 +1567,11 @@
     if (e.type === TYPE.PREDATOR) {
       metabFactor *= 0.7 + 0.3 * clamp(sim.predatorCount / 60, 0, 1);
     }
+    // Metabolismo circadiano: 25% menos en pico nocturno compensa deficit de producers
+    if (sim.dayNightEnabled) {
+      const sp = Math.sin(sim.dayNightPhase);
+      if (sp < 0) metabFactor *= 1 + 0.25 * sp;
+    }
     e.energy -= e.metabolism * dt * metabFactor;
     // Thermal entropy: disipacion adaptativa si el sistema tiene inflacion energetica
     if (sim.thermalDecayRate > 0 && (e.type === TYPE.CONSUMER || e.type === TYPE.PREDATOR)) {
@@ -2166,13 +2172,15 @@
   }
 
   function resize() {
-    const w = Math.floor(window.innerWidth);
-    const h = Math.floor(window.innerHeight);
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = Math.floor(window.innerWidth * dpr);
+    const h = Math.floor(window.innerHeight * dpr);
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w;
       canvas.height = h;
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
+    mainCanvasDpr = dpr;
+    ctx.setTransform(mainCanvasDpr, 0, 0, mainCanvasDpr, 0, 0);
   }
 
   function minCameraZoom() {
@@ -2268,7 +2276,7 @@
   }
 
   function drawBackground() {
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.setTransform(mainCanvasDpr, 0, 0, mainCanvasDpr, 0, 0);
     ctx.fillStyle = '#0a1010';
     ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
@@ -2555,7 +2563,7 @@
       const sinPhase = Math.sin(sim.dayNightPhase);
       if (sinPhase < 0) {
         const darkness = (-sinPhase) * 0.35; // 0 a 0.35
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.setTransform(mainCanvasDpr, 0, 0, mainCanvasDpr, 0, 0);
         ctx.fillStyle = `rgba(5, 8, 20, ${darkness})`;
         ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
       }

@@ -48,17 +48,22 @@ results.meta.git_commit = getGitHash();
 
 // ─── DOM mock (compartido con debug-sim) ─────────────────────
 function createDomMock() {
-  const noopCtx = () => ({
-    setTransform() {}, fillRect() {}, clearRect() {},
-    getImageData: () => ({ data: new Uint8ClampedArray(4) }),
-    putImageData() {}, createImageData: () => ({ data: new Uint8ClampedArray(4) }),
-    save() {}, restore() {}, translate() {}, scale() {}, rotate() {},
-    beginPath() {}, closePath() {}, arc() {}, ellipse() {}, fill() {}, stroke() {},
-    moveTo() {}, lineTo() {}, fillText() {}, measureText: () => ({ width: 0 }),
-    drawImage() {},
-  });
+  const noopCtx = () => {
+    const ctx = {
+      _lastTransform: null,
+      setTransform(...args) { ctx._lastTransform = args; }, fillRect() {}, clearRect() {},
+      getImageData: () => ({ data: new Uint8ClampedArray(4) }),
+      putImageData() {}, createImageData: () => ({ data: new Uint8ClampedArray(4) }),
+      save() {}, restore() {}, translate() {}, scale() {}, rotate() {},
+      beginPath() {}, closePath() {}, arc() {}, ellipse() {}, fill() {}, stroke() {},
+      moveTo() {}, lineTo() {}, fillText() {}, measureText: () => ({ width: 0 }),
+      drawImage() {},
+    };
+    return ctx;
+  };
+  const worldCtx = noopCtx();
   const fakeCanvas = {
-    width: 800, height: 600, getContext: noopCtx,
+    width: 800, height: 600, _ctx: worldCtx, getContext: () => worldCtx,
     getBoundingClientRect: () => ({ width: 800, height: 600, left: 0, top: 0 }),
   };
   const fakeEl = {
@@ -114,6 +119,11 @@ function loadApp() {
   if (!src.includes('globalThis.__sim')) throw new Error('No se pudo inyectar exports');
 
   const { document, window } = createDomMock();
+  class ResizeObserverMock {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
   const ctx = {
     window, document,
     performance: { now: () => Date.now() },
@@ -121,15 +131,18 @@ function loadApp() {
     Intl, Number, Math, Date, console,
     setTimeout: () => {}, clearTimeout: () => {},
     setInterval: () => {}, clearInterval: () => {},
+    ResizeObserver: ResizeObserverMock,
     Float32Array, Uint8ClampedArray, Map, Set,
     Array, Object, String, Boolean, JSON, Error,
   };
+  window.ResizeObserver = ResizeObserverMock;
   ctx.globalThis = ctx;
   ctx.self = ctx;
 
   vm.createContext(ctx);
   vm.runInContext(src, ctx, { filename: 'app.js' });
   if (!ctx.__sim) throw new Error('No se pudo extraer __sim');
+  ctx.__sim.__test = { window, worldCanvas: document.getElementById('world') };
   return ctx.__sim;
 }
 
@@ -611,6 +624,17 @@ function runFunctionalTests() {
     expectOk(api.sim.carcasses.length > 0, 'no hay carcasses tras kills');
     // render() llama a drawCarcasses internamente
     api.render();
+  });
+
+  assert('canvas principal usa backing store HiDPI sin cambiar coordenadas CSS', () => {
+    api.__test.window.devicePixelRatio = 2;
+    api.__test.window.innerWidth = 800;
+    api.__test.window.innerHeight = 600;
+    api.render();
+    expectEq(api.__test.worldCanvas.width, 1600, 'canvas.width no escala con DPR');
+    expectEq(api.__test.worldCanvas.height, 1200, 'canvas.height no escala con DPR');
+    expectEq(api.__test.worldCanvas._ctx._lastTransform[0], 2, 'transform X no aplica DPR');
+    expectEq(api.__test.worldCanvas._ctx._lastTransform[3], 2, 'transform Y no aplica DPR');
   });
 
   // ─── Metabolismo adaptativo ─────────────────────
