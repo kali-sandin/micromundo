@@ -678,8 +678,8 @@
         const before = field.mass[idx];
         const falloff = 1 - d2 / (r2 + 1);
         let add = gain * falloff * 0.18;
-        if (before > 1.5) add *= (1.8 - before) / 0.3;
-        const next = clamp(before + add, 0, 1.8);
+        if (before > 1.2) add *= (1.5 - before) / 0.3;
+        const next = clamp(before + add, 0, 1.5);
         field.mass[idx] = next;
         field.total += next - before;
       }
@@ -719,8 +719,8 @@
         const up = src[ycU];
         const down = src[ycD];
         const avg = (left + right + up + down) * 0.25;
-        const grown = m + m * (1.3 - m) * growth;
-        const next = clamp(grown + (avg - m) * diffusion, 0, 1.8);
+        const grown = m + m * (1.0 - m) * growth;
+        const next = clamp(grown + (avg - m) * diffusion, 0, 1.5);
         dst[idx] = next;
         total += next;
       }
@@ -734,8 +734,8 @@
         const up = src[ycU + x];
         const down = src[ycD + x];
         const avg = (left + right + up + down) * 0.25;
-        const grown = m + m * (1.3 - m) * growth;
-        const next = clamp(grown + (avg - m) * diffusion, 0, 1.8);
+        const grown = m + m * (1.0 - m) * growth;
+        const next = clamp(grown + (avg - m) * diffusion, 0, 1.5);
         dst[idx] = next;
         total += next;
       }
@@ -749,8 +749,8 @@
         const up = src[ycU + cols - 1];
         const down = src[ycD + cols - 1];
         const avg = (left + right + up + down) * 0.25;
-        const grown = m + m * (1.3 - m) * growth;
-        const next = clamp(grown + (avg - m) * diffusion, 0, 1.8);
+        const grown = m + m * (1.0 - m) * growth;
+        const next = clamp(grown + (avg - m) * diffusion, 0, 1.5);
         dst[idx] = next;
         total += next;
       }
@@ -1694,7 +1694,7 @@
     // Umbral reproductivo: depredadores mas bajo (0.60 base, 0.50 en crisis)
     const reproThreshold = type === TYPE.PREDATOR
       ? (sim.predatorCount < 40 ? 0.50 : 0.60)
-      : 0.72;
+      : 0.78;
     if (e.energy < e.maxEnergy * reproThreshold || e.cooldown > 0) return;
     const mateRange = type === TYPE.PREDATOR ? Math.min(450, e.perception * 1.2) : e.perception * 0.8;
     let mate = null;
