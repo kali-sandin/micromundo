@@ -10,6 +10,25 @@
   function recomputeGridDimensions() {
     GRID_COLS = Math.max(1, Math.ceil(WORLD.w / CELL));
     GRID_ROWS = Math.max(1, Math.ceil(WORLD.h / CELL));
+    initGrid();
+  }
+
+  function initGrid() {
+    const n = GRID_COLS * GRID_ROWS;
+    const pool = sim.gridBucketPool;
+    // Vaciar pool existente al grid
+    const oldGrid = sim.grid;
+    // Reciclar buckets existentes al pool
+    for (let i = 0; i < oldGrid.length; i += 1) {
+      const b = oldGrid[i];
+      if (b) { b[0].length = 0; b[1].length = 0; b[2].length = 0; pool.push(b); }
+    }
+    sim.grid = new Array(n);
+    for (let i = 0; i < n; i += 1) {
+      const b = pool.pop() || [[], [], []];
+      b[0].length = 0; b[1].length = 0; b[2].length = 0;
+      sim.grid[i] = b;
+    }
   }
   const MAX_DEBUG_RANGES = 700;
   const BASE_DT = 1 / 30;
@@ -192,7 +211,7 @@
     creatures: [],
     creatureIndex: new Map(),
     freeIds: [],
-    grid: new Map(),
+    grid: [],
     gridBucketPool: [],
     producerField: {
       cols: 0,
@@ -1065,36 +1084,31 @@
   }
 
   function cellKeyInt(x, y) {
-    const col = Math.floor(x / CELL);
-    const row = Math.floor(y / CELL);
+    let col = Math.floor(x / CELL);
+    let row = Math.floor(y / CELL);
+    if (col < 0) col = 0; else if (col >= GRID_COLS) col = GRID_COLS - 1;
+    if (row < 0) row = 0; else if (row >= GRID_ROWS) row = GRID_ROWS - 1;
     return row * GRID_COLS + col;
   }
 
-  function acquireBucket() {
-    const b = sim.gridBucketPool.pop();
-    if (b) { b[0].length = 0; b[1].length = 0; b[2].length = 0; return b; }
-    return [[], [], []];
-  }
-
   function rebuildGrid() {
-    // Return existing buckets to pool instead of letting GC collect them
-    for (const b of sim.grid.values()) sim.gridBucketPool.push(b);
-    sim.grid.clear();
+    const grid = sim.grid;
+    for (let i = 0; i < grid.length; i += 1) {
+      grid[i][0].length = 0;
+      grid[i][1].length = 0;
+      grid[i][2].length = 0;
+    }
     for (let i = 0; i < sim.creatures.length; i += 1) {
       const e = sim.creatures[i];
       if (!e || !e.alive) continue;
       const key = cellKeyInt(e.x, e.y);
-      let bucket = sim.grid.get(key);
-      if (!bucket) {
-        bucket = acquireBucket();
-        sim.grid.set(key, bucket);
-      }
-      bucket[e.type].push(e);
+      grid[key][e.type].push(e);
     }
   }
 
   function queryNearby(x, y, radius, type, out) {
     out.length = 0;
+    const grid = sim.grid;
     const minX = Math.floor((x - radius) / CELL);
     const maxX = Math.floor((x + radius) / CELL);
     const minY = Math.floor((y - radius) / CELL);
@@ -1105,8 +1119,7 @@
       for (let cy = minY; cy <= maxY; cy += 1) {
         const rowBase = cy * GRID_COLS;
         for (let cx = minX; cx <= maxX; cx += 1) {
-          const bucket = sim.grid.get(rowBase + cx);
-          if (!bucket) continue;
+          const bucket = grid[rowBase + cx];
           const list = bucket[type];
           for (let i = 0; i < list.length; i += 1) {
             const e = list[i];
@@ -1127,8 +1140,7 @@
         let wx = cx;
         if (wx < 0) wx += GRID_COLS;
         else if (wx >= GRID_COLS) wx -= GRID_COLS;
-        const bucket = sim.grid.get(wy * GRID_COLS + wx);
-        if (!bucket) continue;
+        const bucket = grid[wy * GRID_COLS + wx];
         const list = bucket[type];
         for (let i = 0; i < list.length; i += 1) {
           const e = list[i];
@@ -2915,8 +2927,7 @@
     sim.creatures = [];
     sim.creatureIndex.clear();
     sim.freeIds = [];
-    sim.grid.clear();
-    sim.gridBucketPool.length = 0;
+    initGrid();
     initProducerField();
     sim.time = 0;
     sim.births = 0;
@@ -3692,6 +3703,7 @@
     resize();
     updateWorldReadout();
     centerCamera({ fit: true });
+    initGrid();
     initProducerField();
     seedWorld();
     recordGeneHistory();
