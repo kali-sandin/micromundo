@@ -409,6 +409,7 @@
   }
 
   const _scrTV = { dx: 0, dy: 0 };
+  const _scratchFieldFood = { virtualA: true, alive: true, sub: 0, radius: 0, x: 0, y: 0, density: 0 };
   function torusVector(from, to) {
     _scrTV.dx = torusDelta(to.x - from.x, WORLD.w);
     _scrTV.dy = torusDelta(to.y - from.y, WORLD.h);
@@ -716,15 +717,12 @@
       }
     }
     if (bestX < 0) return null;
-    return {
-      virtualA: true,
-      alive: true,
-      sub: PRODUCER.A,
-      radius: Math.max(field.cellW, field.cellH) * 0.45,
-      x: (bestX + 0.5) * field.cellW,
-      y: (bestY + 0.5) * field.cellH,
-      density: field.mass[fieldIndex(bestX, bestY)]
-    };
+    _scratchFieldFood.sub = PRODUCER.A;
+    _scratchFieldFood.radius = Math.max(field.cellW, field.cellH) * 0.45;
+    _scratchFieldFood.x = (bestX + 0.5) * field.cellW;
+    _scratchFieldFood.y = (bestY + 0.5) * field.cellH;
+    _scratchFieldFood.density = field.mass[fieldIndex(bestX, bestY)];
+    return _scratchFieldFood;
   }
 
   function grazeProducerDensity(e, dt) {
