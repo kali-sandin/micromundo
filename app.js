@@ -1003,8 +1003,8 @@
       perception: mobile ? clamp(Number(opts.perception ?? DEFAULT_INITIAL_PERCEPTION), 40, PRODUCER_C_MAX_PERCEPTION) : 40,
       movement,
       movementMask: opts.movementMask != null ? movementMaskFromValue(opts.movementMask) : (1 << movement),
-      leafEnergy: colony ? rand(8, 18) : 0,
-      leafCount: colony ? Math.floor(rand(3, 7)) : 0,
+      leafEnergy: colony ? Number(opts.leafEnergy ?? rand(8, 18)) : 0,
+      leafCount: colony ? (opts.leafCount != null ? Math.floor(Number(opts.leafCount)) : Math.floor(rand(3, 7))) : 0,
       fertility: Number(opts.fertility ?? (mobile ? PRODUCER_C_DEFAULT_FERTILITY : 0.024)),
       cooldown: rand(mobile ? 30 : 15, colony ? 80 : 60),
       maxAge: colony ? Number(opts.maxAge ?? rand(9000, 16500)) : mobile ? Number(opts.maxAge ?? rand(5200, 9000)) : Infinity,
@@ -1520,7 +1520,9 @@
         maxRadius: inheritAsexual(e, 'maxRadius', 28, 72),
         armor: inheritAsexual(e, 'armor', 1.2, 7),
         fertility: inheritAsexual(e, 'fertility', 0.012, 0.085),
-        maxAge: inheritAsexual(e, 'maxAge', 7500, 21500)
+        maxAge: inheritAsexual(e, 'maxAge', 7500, 21500),
+        leafEnergy: inheritAsexual(e, 'leafEnergy', 4, 22),
+        leafCount: inheritAsexual(e, 'leafCount', 2, 9, true)
       });
       // growthCost asexual: si hijo crece radius/armor sobre padre, paga coste
       if (childB) {
