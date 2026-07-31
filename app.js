@@ -34,6 +34,10 @@
   const BASE_DT = 1 / 30;
   const MAX_SIM_CHUNKS = 60;
   const MAX_DT = BASE_DT * 3; // 0.1s - clamp anti-inestabilidad a alta velocidad
+  // Cap efectivo: MAX_SIM_CHUNKS * MAX_DT = 6.0s simulados por frame maximo.
+  // A speed=100 y 60fps reales (elapsed=0.016): scaled=1.6, sin perdida.
+  // Solo hay perdida en lag spikes (elapsed alto + speed alto), donde es
+  // preferible mantener dt estable que simular tiempo extra con dt inestable.
 
   const TYPE = { PRODUCER: 0, CONSUMER: 1, PREDATOR: 2 };
   const PRODUCER = { A: 0, B: 1, C: 2 };
@@ -2950,9 +2954,14 @@
       const scaled = elapsed * sim.speed;
       const chunks = Math.max(1, Math.min(MAX_SIM_CHUNKS, Math.ceil(scaled / MAX_DT)));
       const dt = Math.min(scaled / chunks, MAX_DT);
+      // Cuando scaled > chunks*MAX_DT (cap hit), simular chunks*MAX_DT y usar
+      // el remainder como un paso extra si hay margen de chunks disponibles.
+      const simTime = chunks * dt;
+      const remainder = scaled - simTime;
       compactIfNeeded();
       rebuildGrid();
       for (let i = 0; i < chunks; i += 1) simulate(dt);
+      if (remainder > 0 && chunks < MAX_SIM_CHUNKS) simulate(Math.min(remainder, MAX_DT));
     }
 
     updateCameraFollow();
