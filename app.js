@@ -2324,12 +2324,12 @@
     return p.x >= -margin - r && p.y >= -margin - r && p.x <= window.innerWidth + margin + r && p.y <= window.innerHeight + margin + r;
   }
 
-  function drawBackground() {
+  function drawBackground(offsets) {
     ctx.setTransform(mainCanvasDpr, 0, 0, mainCanvasDpr, 0, 0);
     ctx.fillStyle = '#0a1010';
     ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
-    const offsets = visibleTileOffsets();
+    // offsets passed from render() (cached)
     for (let i = 0; i < offsets.length; i += 1) {
       const { ox, oy } = offsets[i];
       const topLeft = worldToScreen(ox, oy);
@@ -2356,14 +2356,14 @@
     return lut;
   })();
 
-  function drawProducerField() {
+  function drawProducerField(offsets) {
     const field = sim.producerField;
     if (!field.mass.length) return;
     const cols = field.cols;
     const rows = field.rows;
     const cellW = field.cellW;
     const cellH = field.cellH;
-    const offsets = visibleTileOffsets(Math.max(cellW, cellH));
+    // offsets passed from render() (cached)
 
     for (let o = 0; o < offsets.length; o += 1) {
       const { ox, oy } = offsets[o];
@@ -2521,9 +2521,8 @@
     ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
   }
 
-  function drawCarcasses() {
+  function drawCarcasses(offsets) {
     if (!sim.carcasses.length) return;
-    const offsets = visibleTileOffsets(900);
     for (let c = 0; c < sim.carcasses.length; c += 1) {
       const car = sim.carcasses[c];
       const t = car.life / car.maxLife;
@@ -2549,9 +2548,8 @@
     ctx.globalAlpha = 1;
   }
 
-  function drawSelectedTrails() {
+  function drawSelectedTrails(offsets) {
     if (!sim.selectedTrails.size) return;
-    const offsets = visibleTileOffsets(120);
     ctx.save();
     ctx.lineWidth = 1.6;
     ctx.lineJoin = 'round';
@@ -2579,13 +2577,14 @@
   function render() {
     resize();
     clampCamera();
-    drawBackground();
-    drawProducerField();
-    drawCarcasses();
-    drawSelectedTrails();
+    // Single visibleTileOffsets call per frame - margin 900 covers all use cases
+    const offsets = visibleTileOffsets(900);
+    drawBackground(offsets);
+    drawProducerField(offsets);
+    drawCarcasses(offsets);
+    drawSelectedTrails(offsets);
 
     let debugDrawn = 0;
-    const offsets = visibleTileOffsets(900);
     // Pre-compute viewport bounds in world-space (avoids per-creature worldToScreen call)
     const wEps = 50 / camera.zoom;
     const vwMinX = camera.x - window.innerWidth / (2 * camera.zoom) - wEps;
