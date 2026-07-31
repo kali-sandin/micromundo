@@ -2163,6 +2163,7 @@
     const raw = screenToWorld(screenX, screenY);
     const pos = { x: mod(raw.x, WORLD.w), y: mod(raw.y, WORLD.h) };
     const worldRadius = clamp(22 / camera.zoom, 18, 360);
+    updateClickOffset(raw.x, raw.y);
     let best = null;
     let bestScreenD2 = Infinity;
     for (let type = 0; type <= 2; type += 1) {
@@ -2226,22 +2227,16 @@
     return _scrW2S;
   }
 
+  // Pre-computed tile offset for click hit-testing (avoids 3x3 loop per creature)
+  let _clickOx = 0, _clickOy = 0;
+  function updateClickOffset(clickWorldX, clickWorldY) {
+    _clickOx = Math.round(clickWorldX / WORLD.w) * WORLD.w;
+    _clickOy = Math.round(clickWorldY / WORLD.h) * WORLD.h;
+  }
+
   function nearestScreenPosition(x, y, screenX, screenY) {
-    let bestX = 0, bestY = 0;
-    let bestD2 = Infinity;
-    for (let oy = -WORLD.h; oy <= WORLD.h; oy += WORLD.h) {
-      for (let ox = -WORLD.w; ox <= WORLD.w; ox += WORLD.w) {
-        const p = worldToScreen(x + ox, y + oy);
-        const dx = p.x - screenX;
-        const dy = p.y - screenY;
-        const d2 = dx * dx + dy * dy;
-        if (d2 < bestD2) {
-          bestX = p.x; bestY = p.y;
-          bestD2 = d2;
-        }
-      }
-    }
-    _scrW2S.x = bestX; _scrW2S.y = bestY;
+    const p = worldToScreen(x + _clickOx, y + _clickOy);
+    _scrW2S.x = p.x; _scrW2S.y = p.y;
     return _scrW2S;
   }
 
