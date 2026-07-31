@@ -1009,7 +1009,13 @@
       cooldown: rand(8, 35)
     });
     const out = derivedConsumerStats(e);
-    if (!opts.keepConsumerSpeed) out.speed *= 0.88;
+    if (!opts.keepConsumerSpeed) {
+      // Recalcular speedCost con la velocidad reducida para que metabolism sea consistente
+      const oldSpeedCost = Math.pow(Math.max(0, out.speed) / 42, 1.42) * 0.022;
+      out.speed *= 0.88;
+      const newSpeedCost = Math.pow(Math.max(0, out.speed) / 42, 1.42) * 0.022;
+      out.metabolism += (newSpeedCost - oldSpeedCost);
+    }
     if (!opts.keepConsumerMetabolism) out.metabolism *= 0.9;
     sim.liveConsumerCount++;
     sim.mobileEnergySum += e.energy;
