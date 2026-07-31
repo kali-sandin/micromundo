@@ -1613,7 +1613,7 @@
     return true;
   }
 
-  function reproduceMobile(e, type) {
+  function reproduceMobile(e, type, cachedMate) {
     // Population cap: mismo patron que stepProducer pero mas restrictivo para mobiles
     // Seed ~828 mobiles. 5000 permite ~6x crecimiento, frena explosion boom-bust
     const aliveCount = sim.creatures.length - sim.freeIds.length;
@@ -1633,13 +1633,17 @@
       : 0.72;
     if (e.energy < e.maxEnergy * reproThreshold || e.cooldown > 0) return;
     const mateRange = type === TYPE.PREDATOR ? Math.min(450, e.perception * 1.2) : e.perception * 0.8;
-    queryNearby(e.x, e.y, mateRange, type, mateCandidates);
     let mate = null;
-    for (let i = 0; i < mateCandidates.length; i += 1) {
-      const c = mateCandidates[i];
-      if (c !== e && c.alive && c.energy > c.maxEnergy * 0.55 && c.cooldown <= 0) {
-        mate = c;
-        break;
+    if (cachedMate && cachedMate.alive && cachedMate.energy > cachedMate.maxEnergy * 0.55 && cachedMate.cooldown <= 0) {
+      mate = cachedMate;
+    } else {
+      queryNearby(e.x, e.y, mateRange, type, mateCandidates);
+      for (let i = 0; i < mateCandidates.length; i += 1) {
+        const c = mateCandidates[i];
+        if (c !== e && c.alive && c.energy > c.maxEnergy * 0.55 && c.cooldown <= 0) {
+          mate = c;
+          break;
+        }
       }
     }
     if (!mate) return;
@@ -1730,6 +1734,7 @@
     let food = null;
     let steeringTarget = null;
     let threat = null;
+    let cachedMate = null; // reuso de findMateTarget para reproduceMobile
     if (e.type === TYPE.PREDATOR) {
       queryNearby(e.x, e.y, e.perception, TYPE.CONSUMER, nearby);
       food = nearestFood(e, nearby);
@@ -1749,7 +1754,7 @@
         food = bestPlant;
       }
       if (!food) food = nearestCarcassFood(e, e.perception * 0.85);
-      steeringTarget = food || findMateTarget(e, TYPE.PREDATOR);
+      steeringTarget = food || (cachedMate = findMateTarget(e, TYPE.PREDATOR));
     } else {
       queryNearby(e.x, e.y, consumerThreatRange(e), TYPE.PREDATOR, consumerThreats);
       threat = nearestThreat(e, consumerThreats);
@@ -1783,7 +1788,7 @@
     // Restaurar tras uso temporal (fertility despues de reproduceMobile)
     e.speed = origSpeed;
     e.perception = origPerception;
-    if (canReproduce) reproduceMobile(e, e.type);
+    if (canReproduce) reproduceMobile(e, e.type, cachedMate);
     e.fertility = origFertility;
   }
 
