@@ -2748,7 +2748,13 @@
       drawGraph();
       if (!els.genePanel.classList.contains('hidden')) recordGeneHistory();
     }
-    if (sim.selectedCreatureIds.length) updateInspectors();
+    if (sim.selectedCreatureIds.length) {
+      sim._inspectThrottle = (sim._inspectThrottle || 0) + 1;
+      if (force || sim._inspectThrottle >= 3) {
+        sim._inspectThrottle = 0;
+        updateInspectors();
+      }
+    }
   }
 
   function drawTimeAxis(context, w, h, pxPerSecond) {
