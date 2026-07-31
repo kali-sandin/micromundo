@@ -1060,8 +1060,8 @@
   function childFrom(a, b, type) {
     const pick = (key) => chance(0.5) ? a[key] : b[key];
     const opts = {
-      x: (a.x + b.x) * 0.5 + rand(-24, 24),
-      y: (a.y + b.y) * 0.5 + rand(-24, 24),
+      x: mod(a.x + torusDelta(b.x - a.x, WORLD.w) * 0.5 + rand(-24, 24), WORLD.w),
+      y: mod(a.y + torusDelta(b.y - a.y, WORLD.h) * 0.5 + rand(-24, 24), WORLD.h),
       size: inheritGene(a, b, 'size', 0.5, type === TYPE.PREDATOR ? 12 : 9),
       reserves: inheritGene(a, b, 'reserves', 0, type === TYPE.PREDATOR ? 24 : 14),
       flagella: inheritGene(a, b, 'flagella', 0, 7, true),
@@ -1382,7 +1382,8 @@
       const crowdFactor = producerCCrowdFactor(e);
       const sensoryCost = (Number(e.chemosense || 0) * 0.003 + Math.max(0, Number(e.perception || 0) - 40) * 0.000012) * dt * (resting ? 0.42 : 1);
       const crowdStress = (1 - crowdFactor) * dt * 0.12;
-      const respCost = dt * (0.008 + (e.armor || 0) * 0.003); // basal metabolism + armor cost for mobile ProducerC
+      const speedCost = Math.pow(Math.max(0, e.speed) / 42, 1.42) * 0.011; // speed metabolism for mobile ProducerC (half of consumer rate)
+      const respCost = dt * (0.008 + speedCost + (e.armor || 0) * 0.003); // basal + speed + armor cost
       e.energy = Math.min(e.maxEnergy, e.energy + dt * sim.solarEnergy * 0.12 * crowdFactor - sensoryCost - crowdStress - respCost);
       if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / 120)) {
         kill(e, 'Productor C móvil muere por senescencia');
