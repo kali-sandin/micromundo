@@ -2584,9 +2584,12 @@
 
   function drawCarcasses(offsets) {
     if (!sim.carcasses.length) return;
+    ctx.fillStyle = '#1a1a1a';
+    ctx.lineWidth = 1;
     for (let c = 0; c < sim.carcasses.length; c += 1) {
       const car = sim.carcasses[c];
       const t = car.life / car.maxLife;
+      if (t > 0.92) continue; // skip nearly invisible
       const alpha = (1 - t) * 0.6;
       const r = Math.max(1, car.radius * (1 + t * 0.5) * camera.zoom);
       for (let o = 0; o < offsets.length; o += 1) {
@@ -2594,13 +2597,11 @@
         const p = worldToScreen(car.x + ox, car.y + oy);
         if (p.x < -20 || p.y < -20 || p.x > window.innerWidth + 20 || p.y > window.innerHeight + 20) continue;
         ctx.globalAlpha = alpha;
-        ctx.fillStyle = '#1a1a1a';
         ctx.beginPath();
         ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
         ctx.fill();
         ctx.globalAlpha = alpha * 0.5;
         ctx.strokeStyle = car.color || '#444';
-        ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.arc(p.x, p.y, r * 1.4, 0, Math.PI * 2);
         ctx.stroke();
