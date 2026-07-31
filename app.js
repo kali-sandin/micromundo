@@ -630,7 +630,9 @@
         const idx = fieldIndex(wx, wy);
         const before = field.mass[idx];
         const falloff = 1 - d2 / (r * r + 1);
-        const next = clamp(before + gain * falloff * 0.18, 0, 1.8);
+        let add = gain * falloff * 0.18;
+        if (before > 1.5) add *= (1.8 - before) / 0.3;
+        const next = clamp(before + add, 0, 1.8);
         field.mass[idx] = next;
         field.total += next - before;
       }
