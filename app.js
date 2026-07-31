@@ -339,7 +339,8 @@
     const bv = Number(b[key] ?? av);
     const low = Math.min(av, bv);
     const high = Math.max(av, bv);
-    const span = Math.max(high - low, Math.max(Math.abs((av + bv) * 0.5), 1));
+    const mid = Math.abs((av + bv) * 0.5);
+    const span = Math.max(high - low, Math.max(mid * 0.33, 0.02));
     const value = rand(low - span * 0.18, high + span * 0.18);
     const out = clamp(value, min, max);
     return integer ? Math.round(out) : out;
