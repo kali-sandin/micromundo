@@ -779,7 +779,7 @@
   function returnCarcassEnergyToField(car) {
     if (!car || !sim.producerField.mass.length || car.energy <= 0) return;
     const depositRadius = Math.max(90, Math.min(240, car.radius * 12));
-    addProducerDensity(car.x, car.y, Math.max(0.18, car.energy * 0.5), depositRadius);
+    addProducerDensity(car.x, car.y, Math.max(0.18, car.energy * 0.15), depositRadius);
     car.energy = 0;
     car.alive = false;
   }
