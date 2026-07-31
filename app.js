@@ -358,14 +358,14 @@
     return MOVE.filter((_, idx) => mask & (1 << idx)).join(' + ');
   }
 
-  function inheritGene(a, b, key, min, max, integer = false) {
+  function inheritGene(a, b, key, min, max, integer = false, stressFactor = 1) {
     const av = Number(a[key] ?? 0);
     const bv = Number(b[key] ?? av);
     const low = Math.min(av, bv);
     const high = Math.max(av, bv);
     const mid = Math.abs((av + bv) * 0.5);
     const span = Math.max(high - low, Math.max(mid * 0.33, 0.02));
-    const value = rand(low - span * 0.18, high + span * 0.18);
+    const value = rand(low - span * 0.18 * stressFactor, high + span * 0.18 * stressFactor);
     const out = clamp(value, min, max);
     return integer ? Math.round(out) : out;
   }
@@ -1066,21 +1066,26 @@
 
   function childFrom(a, b, type) {
     const pick = (key) => chance(0.5) ? a[key] : b[key];
+    // Stress-induced mutagenesis (SOS response): parents con baja energia producen
+    // offspring con mayor diversidad fenotipica. Triplica mutation spread cuando
+    // parent mas estresado esta bajo 30% maxEnergy. Anti-extincion evolutivo.
+    const minParentEnergy = Math.min(a.energy / a.maxEnergy, b.energy / b.maxEnergy);
+    const stressFactor = minParentEnergy < 0.3 ? 2.5 : 1;
     const opts = {
       x: mod(a.x + torusDelta(b.x - a.x, WORLD.w) * 0.5 + rand(-24, 24), WORLD.w),
       y: mod(a.y + torusDelta(b.y - a.y, WORLD.h) * 0.5 + rand(-24, 24), WORLD.h),
-      size: inheritGene(a, b, 'size', 0.5, type === TYPE.PREDATOR ? 12 : 9),
-      reserves: inheritGene(a, b, 'reserves', 0, type === TYPE.PREDATOR ? 24 : 14),
-      flagella: inheritGene(a, b, 'flagella', 0, 7, true),
-      cilia: inheritGene(a, b, 'cilia', 0, 6, true),
-      chemosense: inheritGene(a, b, 'chemosense', 0, 5),
-      pseudopodia: inheritGene(a, b, 'pseudopodia', 0, 4),
-      armor: inheritGene(a, b, 'armor', 0, 5),
-      vacuole: inheritGene(a, b, 'vacuole', 0, 4),
+      size: inheritGene(a, b, 'size', 0.5, type === TYPE.PREDATOR ? 12 : 9, false, stressFactor),
+      reserves: inheritGene(a, b, 'reserves', 0, type === TYPE.PREDATOR ? 24 : 14, false, stressFactor),
+      flagella: inheritGene(a, b, 'flagella', 0, 7, true, stressFactor),
+      cilia: inheritGene(a, b, 'cilia', 0, 6, true, stressFactor),
+      chemosense: inheritGene(a, b, 'chemosense', 0, 5, false, stressFactor),
+      pseudopodia: inheritGene(a, b, 'pseudopodia', 0, 4, false, stressFactor),
+      armor: inheritGene(a, b, 'armor', 0, 5, false, stressFactor),
+      vacuole: inheritGene(a, b, 'vacuole', 0, 4, false, stressFactor),
       feeding: chance(0.08) ? Math.floor(rand(0, FEEDING.length)) : pick('feeding'),
       movementMask: inheritMovementMask(a, b),
-      fertility: inheritGene(a, b, 'fertility', 0.2, 3),
-      maxAge: inheritGene(a, b, 'maxAge', type === TYPE.PREDATOR ? 5000 : 1800, type === TYPE.PREDATOR ? 15000 : 8000),
+      fertility: inheritGene(a, b, 'fertility', 0.2, 3, false, stressFactor),
+      maxAge: inheritGene(a, b, 'maxAge', type === TYPE.PREDATOR ? 5000 : 1800, type === TYPE.PREDATOR ? 15000 : 8000, false, stressFactor),
       energy: type === TYPE.PREDATOR ? 160 : 26
     };
     const child = type === TYPE.PREDATOR ? spawnPredator(opts) : spawnConsumer(opts);
