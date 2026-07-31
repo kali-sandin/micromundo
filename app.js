@@ -1598,8 +1598,16 @@
     const ciliaPulse = 1 + lutSin(sim.time * 5 + e.id) * (e.cilia * 0.015);
     const burst = burstMultiplier(e, dt, pressure);
     const panic = threat ? (hasMove(e, 2) ? 1.16 : hasMove(e, 3) ? 1.28 : 1.46) : 1;
-    e.x += lutCos(e.angle) * e.speed * ciliaPulse * burst * panic * dt;
-    e.y += lutSin(e.angle) * e.speed * ciliaPulse * burst * panic * dt;
+    // Vegetation refuge: zonas con alta densidad de producerField ralentizan criaturas
+    let vegFactor = 1;
+    if (sim.producerField.mass.length) {
+      const fMass = sim.producerField.mass[fieldIndex(fieldCellX(e.x), fieldCellY(e.y))];
+      if (fMass > 1.2) {
+        vegFactor = e.type === TYPE.PREDATOR ? 0.6 : 0.85;
+      }
+    }
+    e.x += lutCos(e.angle) * e.speed * ciliaPulse * burst * panic * vegFactor * dt;
+    e.y += lutSin(e.angle) * e.speed * ciliaPulse * burst * panic * vegFactor * dt;
     wrapInsideWorld(e);
   }
 
@@ -1820,7 +1828,17 @@
     let cachedMate = null; // reuso de findMateTarget para reproduceMobile
     if (e.type === TYPE.PREDATOR) {
       queryNearby(e.x, e.y, e.perception, TYPE.CONSUMER, nearby);
-      food = nearestFood(e, nearby);
+      // Prey-switching: si <3 consumers cerca, priorizar carrion antes que cazar vivos
+      const consumerCount = nearby.length;
+      food = consumerCount >= 3 ? nearestFood(e, nearby) : null;
+      if (!food) {
+        const carrion = nearestCarcassFood(e, e.perception * 0.85);
+        if (carrion) {
+          food = carrion;
+        } else if (consumerCount > 0) {
+          food = nearestFood(e, nearby);
+        }
+      }
       if (!food) {
         queryNearby(e.x, e.y, e.perception * 0.72, TYPE.PRODUCER, nearby);
         let bestPlant = null;
@@ -1836,7 +1854,6 @@
         }
         food = bestPlant;
       }
-      if (!food) food = nearestCarcassFood(e, e.perception * 0.85);
       steeringTarget = food || (cachedMate = findMateTarget(e, TYPE.PREDATOR));
     } else {
       queryNearby(e.x, e.y, consumerThreatRange(e), TYPE.PREDATOR, consumerThreats);
