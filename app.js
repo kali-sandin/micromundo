@@ -2016,7 +2016,13 @@
     // predatorCount now maintained live via spawn/kill counters
 
     stepProducerField(dt);
-    for (let i = 0; i < sim.creatures.length; i += 1) {
+    // Anti first-mover bias: rotar offset de inicio del loop cada simulate().
+    // Las criaturas con ID bajo ya no actuan siempre primero.
+    sim._loopOffset = ((sim._loopOffset || 0) + 1) % sim.creatures.length;
+    const n = sim.creatures.length;
+    const off = sim._loopOffset;
+    for (let k = 0; k < n; k += 1) {
+      const i = (k + off) % n;
       const e = sim.creatures[i];
       if (!e || !e.alive) continue;
       if (e.type === TYPE.PRODUCER) stepProducer(e, dt);
