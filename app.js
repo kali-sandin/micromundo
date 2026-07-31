@@ -1153,6 +1153,68 @@
     return out;
   }
 
+  // Scans grid cells once, distributes creatures into outA/outB by type.
+  // Equivalent to two queryNearby calls with same x/y/radius but different types.
+  function queryNearby2(x, y, radius, typeA, typeB, outA, outB) {
+    outA.length = 0;
+    outB.length = 0;
+    const grid = sim.grid;
+    const minX = Math.floor((x - radius) / CELL);
+    const maxX = Math.floor((x + radius) / CELL);
+    const minY = Math.floor((y - radius) / CELL);
+    const maxY = Math.floor((y + radius) / CELL);
+    const r2 = radius * radius;
+    if (minX >= 0 && maxX < GRID_COLS && minY >= 0 && maxY < GRID_ROWS) {
+      for (let cy = minY; cy <= maxY; cy += 1) {
+        const rowBase = cy * GRID_COLS;
+        for (let cx = minX; cx <= maxX; cx += 1) {
+          const bucket = grid[rowBase + cx];
+          const listA = bucket[typeA];
+          for (let i = 0; i < listA.length; i += 1) {
+            const e = listA[i];
+            const dx = torusDelta(e.x - x, WORLD.w);
+            const dy = torusDelta(e.y - y, WORLD.h);
+            if (dx * dx + dy * dy <= r2) outA.push(e);
+          }
+          const listB = bucket[typeB];
+          for (let i = 0; i < listB.length; i += 1) {
+            const e = listB[i];
+            const dx = torusDelta(e.x - x, WORLD.w);
+            const dy = torusDelta(e.y - y, WORLD.h);
+            if (dx * dx + dy * dy <= r2) outB.push(e);
+          }
+        }
+      }
+      return;
+    }
+    // Slow path: wrap
+    for (let cy = minY; cy <= maxY; cy += 1) {
+      for (let cx = minX; cx <= maxX; cx += 1) {
+        let wy = cy;
+        if (wy < 0) wy += GRID_ROWS;
+        else if (wy >= GRID_ROWS) wy -= GRID_ROWS;
+        let wx = cx;
+        if (wx < 0) wx += GRID_COLS;
+        else if (wx >= GRID_COLS) wx -= GRID_COLS;
+        const bucket = grid[wy * GRID_COLS + wx];
+        const listA = bucket[typeA];
+        for (let i = 0; i < listA.length; i += 1) {
+          const e = listA[i];
+          const dx = torusDelta(e.x - x, WORLD.w);
+          const dy = torusDelta(e.y - y, WORLD.h);
+          if (dx * dx + dy * dy <= r2) outA.push(e);
+        }
+        const listB = bucket[typeB];
+        for (let i = 0; i < listB.length; i += 1) {
+          const e = listB[i];
+          const dx = torusDelta(e.x - x, WORLD.w);
+          const dy = torusDelta(e.y - y, WORLD.h);
+          if (dx * dx + dy * dy <= r2) outB.push(e);
+        }
+      }
+    }
+  }
+
   function nearestFood(e, candidates) {
     let best = null;
     let bestD2 = Infinity;
@@ -1278,7 +1340,7 @@
     e.cooldown -= dt * e.fertility * clamp(sim.solarEnergy, 0.1, 6) * 5;
 
     if (isMobileProducer(e)) {
-      queryNearby(e.x, e.y, e.perception || 105, TYPE.CONSUMER, nearby);
+      queryNearby2(e.x, e.y, e.perception || 105, TYPE.CONSUMER, TYPE.PREDATOR, nearby, producerThreats);
       let threatDx = 0, threatDy = 0;
       let threatD2 = Infinity;
       const scanThreats = (list) => {
@@ -1294,7 +1356,6 @@
         }
       };
       scanThreats(nearby);
-      queryNearby(e.x, e.y, e.perception || 105, TYPE.PREDATOR, producerThreats);
       scanThreats(producerThreats);
       const hasThreat = threatD2 < Infinity;
       const resting = updateResting(e, dt, hasThreat);
