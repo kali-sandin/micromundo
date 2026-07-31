@@ -685,17 +685,20 @@
     const diffusion = 0.028 * t;
 
     for (let y = 0; y < rows; y += 1) {
+      const yc = y * cols;
+      const yU = y > 0 ? y - 1 : rows - 1;
+      const yD = y < rows - 1 ? y + 1 : 0;
+      const ycU = yU * cols;
+      const ycD = yD * cols;
       for (let x = 0; x < cols; x += 1) {
-        const idx = y * cols + x;
+        const idx = yc + x;
         const m = src[idx];
         const xL = x > 0 ? x - 1 : cols - 1;
         const xR = x < cols - 1 ? x + 1 : 0;
-        const yU = y > 0 ? y - 1 : rows - 1;
-        const yD = y < rows - 1 ? y + 1 : 0;
-        const left = src[y * cols + xL];
-        const right = src[y * cols + xR];
-        const up = src[yU * cols + x];
-        const down = src[yD * cols + x];
+        const left = src[yc + xL];
+        const right = src[yc + xR];
+        const up = src[ycU + x];
+        const down = src[ycD + x];
         const avg = (left + right + up + down) * 0.25;
         const grown = m + m * (1.3 - m) * growth;
         const next = clamp(grown + (avg - m) * diffusion, 0, 1.8);
