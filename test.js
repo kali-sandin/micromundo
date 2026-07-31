@@ -292,18 +292,14 @@ function runFunctionalTests() {
   });
 
   assert('apelotonamiento de Prod.C reduce captacion solar', () => {
-    api.sim.creatures = [];
-    api.sim.freeIds = [];
-    api.sim.grid.clear();
+    api.resetWorld();
     const center = api.spawnProducer({ sub: api.PRODUCER.C, x: 400, y: 400 });
     for (let i = 0; i < 8; i++) {
       api.spawnProducer({ sub: api.PRODUCER.C, x: 410 + i * 3, y: 410 + i * 2 });
     }
     api.rebuildGrid();
     expectOk(api.producerCCrowdFactor(center) < 1, 'Prod.C denso no penaliza captacion');
-    api.sim.creatures = [];
-    api.sim.freeIds = [];
-    api.sim.grid.clear();
+    api.resetWorld();
     const alone = api.spawnProducer({ sub: api.PRODUCER.C, x: 1000, y: 1000 });
     api.rebuildGrid();
     expectEq(api.producerCCrowdFactor(alone), 1, 'Prod.C aislado no deberia estar penalizado');
@@ -354,6 +350,10 @@ function runFunctionalTests() {
   assert('counts refleja poblacion correcta', () => {
     api.sim.creatures = [];
     api.sim.freeIds = [];
+    api.sim.liveProducerBCount = 0;
+    api.sim.liveProducerCCount = 0;
+    api.sim.liveConsumerCount = 0;
+    api.sim.predatorCount = 0;
     api.initProducerField();
     api.spawnConsumer({ x: 10, y: 10 });
     api.spawnConsumer({ x: 20, y: 20 });
@@ -370,6 +370,10 @@ function runFunctionalTests() {
   assert('counts no cuenta muertas', () => {
     api.sim.creatures = [];
     api.sim.freeIds = [];
+    api.sim.liveProducerBCount = 0;
+    api.sim.liveProducerCCount = 0;
+    api.sim.liveConsumerCount = 0;
+    api.sim.predatorCount = 0;
     const c1 = api.spawnConsumer({ x: 10, y: 10 });
     api.spawnConsumer({ x: 20, y: 20 });
     api.kill(c1);
@@ -464,18 +468,14 @@ function runFunctionalTests() {
   });
 
   assert('simulate con seres vivos no crashea tras 10s', () => {
-    api.sim.creatures = [];
-    api.sim.freeIds = [];
-    api.initProducerField();
+    api.resetWorld();
     api.seedWorld();
     for (let i = 0; i < 20; i++) api.simulate(0.5);
     expectGte(api.sim.time, 10, 'Tiempo simulado insuficiente');
   });
 
   assert('simulate mantiene seres en el mundo (toroidal)', () => {
-    api.sim.creatures = [];
-    api.sim.freeIds = [];
-    api.initProducerField();
+    api.resetWorld();
     const c = api.spawnConsumer({ x: 100, y: 100 });
     for (let i = 0; i < 60; i++) api.simulate(1.0);
     // Aunque muera por edad, mientras viva no debe salir del mundo
@@ -486,9 +486,7 @@ function runFunctionalTests() {
   });
 
   assert('seedWorld pobla el ecosistema', () => {
-    api.sim.creatures = [];
-    api.sim.freeIds = [];
-    api.initProducerField();
+    api.resetWorld();
     api.seedWorld();
     const c = api.counts();
     expectOk(c.producerB > 0, 'No hay producerB tras seed');
@@ -498,13 +496,13 @@ function runFunctionalTests() {
   });
 
   assert('resetWorld deja graficas con punto inicial', () => {
-    api.sim.graph = [{ t: 300, consumers: 1, predators: 1, producerB: 1, producerC: 1, producerDensity: 0.1 }];
-    api.sim.geneHistory = [{ t: 300 }];
+    api.sim.graph.clear();
+    api.sim.geneHistory.clear();
     api.sim.lastGraphAt = 300;
     api.resetWorld();
     expectOk(api.sim.graph.length > 0, 'resetWorld dejo grafica de poblacion sin puntos');
     expectOk(api.sim.geneHistory.length > 0, 'resetWorld dejo grafica de genes sin historico');
-    expectEq(api.sim.graph[0].t, 0, 'grafica no reinicio en t=0');
+    expectEq(api.sim.graph.at(0).t, 0, 'grafica no reinicio en t=0');
   });
 
   assert('cambio de tamaño aplica ratio 16:9', () => {
@@ -532,10 +530,10 @@ function runFunctionalTests() {
   suite('Gene history');
 
   assert('recordGeneHistory registra punto con todos los grupos', () => {
-    api.sim.geneHistory = [];
+    api.sim.geneHistory.clear();
     api.recordGeneHistory();
     expectEq(api.sim.geneHistory.length, 1, 'No se registro punto');
-    const point = api.sim.geneHistory[0];
+    const point = api.sim.geneHistory.at(0);
     for (const g of api.GROUPS) {
       expectOk(point[g], `Grupo ${g} no presente en geneHistory`);
       expectOk(typeof point[g].n === 'number');
@@ -599,22 +597,16 @@ function runFunctionalTests() {
   });
 
   assert('drawCarcasses no crashea (bug view undefined)', () => {
-    api.sim.creatures = [];
-    api.sim.freeIds = [];
-    api.sim.carcasses = [];
-    api.initProducerField();
+    api.resetWorld();
     const c = api.spawnConsumer({ x: 100, y: 100 });
     api.kill(c, 'test-render');
     expectOk(api.sim.carcasses.length > 0, 'no hay carcasses que dibujar');
     // Esta linea crasheba con ReferenceError: view is not defined
-    api.drawCarcasses();
+    api.drawCarcasses(api.visibleTileOffsets());
   });
 
   assert('render completo con carcasses no crashea', () => {
-    api.sim.creatures = [];
-    api.sim.freeIds = [];
-    api.sim.carcasses = [];
-    api.initProducerField();
+    api.resetWorld();
     api.seedWorld();
     // Matar algunas criaturas para generar carcasses
     const creatures = api.sim.creatures.filter(e => e && e.alive);
@@ -661,16 +653,12 @@ function runFunctionalTests() {
   });
 
   assert('predatorCount se actualiza durante simulate', () => {
-    api.sim.creatures = [];
-    api.sim.freeIds = [];
-    api.sim.carcasses = [];
-    api.initProducerField();
+    api.resetWorld();
+    const before = api.sim.predatorCount;
     api.spawnPredator({ x: 100, y: 100 });
     api.spawnPredator({ x: 200, y: 200 });
-    api.sim.predatorCount = 0;
-    api.sim.predatorCountTimer = 0; // forzar update en siguiente simulate
-    api.simulate(0.1);
-    expectEq(api.sim.predatorCount, 2, 'predatorCount no se actualizo correctamente');
+    // predatorCount se mantiene live via spawn/kill
+    expectEq(api.sim.predatorCount, before + 2, 'predatorCount no se actualizo correctamente');
   });
 
   assert('boost reproductivo baja umbral cuando predatorCount < 40', () => {
@@ -802,9 +790,7 @@ function runPerfTests() {
   suite('Rendimiento');
 
   perf('init+seed completo', () => {
-    api.sim.creatures = [];
-    api.sim.freeIds = [];
-    api.initProducerField();
+    api.resetWorld();
     api.seedWorld();
     api.recordGeneHistory();
     const c = api.counts();
@@ -812,6 +798,8 @@ function runPerfTests() {
   }, { maxMs: 5000 });
 
   perf('1000 steps de simulate (dt=0.5)', () => {
+    api.resetWorld();
+    api.seedWorld();
     let totalCreatures = 0;
     for (let i = 0; i < 1000; i++) {
       api.simulate(0.5);
@@ -841,9 +829,7 @@ function runPerfTests() {
 
   perf('rebuildGrid + queryNearby x100', () => {
     // Necesita criaturas vivas
-    api.sim.creatures = [];
-    api.sim.freeIds = [];
-    api.initProducerField();
+    api.resetWorld();
     api.seedWorld();
     for (let i = 0; i < 100; i++) {
       api.rebuildGrid();
@@ -861,9 +847,7 @@ function runPerfTests() {
 
   // Test de estabilidad: sim larga sin crashear
   perf('Simulacion 60s sin crashear', () => {
-    api.sim.creatures = [];
-    api.sim.freeIds = [];
-    api.initProducerField();
+    api.resetWorld();
     api.seedWorld();
     let extinct = false;
     for (let i = 0; i < 120; i++) {

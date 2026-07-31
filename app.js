@@ -469,14 +469,9 @@
     // El log visual se retiró: mantener esta función como no-op evita ramas calientes extra.
   }
 
+  const _ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   function escapeHtml(value) {
-    return String(value).replace(/[&<>"']/g, (c) => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;'
-    }[c]));
+    return String(value).replace(/[&<>"']/g, (c) => _ESC_MAP[c]);
   }
 
   function geneLabelHtml(key, label) {
@@ -1406,20 +1401,16 @@
       queryNearby2(e.x, e.y, e.perception || 105, TYPE.CONSUMER, TYPE.PREDATOR, nearby, producerThreats);
       let threatDx = 0, threatDy = 0;
       let threatD2 = Infinity;
-      const scanThreats = (list) => {
+      for (let li = 0; li < 2; li += 1) {
+        const list = li === 0 ? nearby : producerThreats;
         for (let i = 0; i < list.length; i += 1) {
           const c = list[i];
-          const tv = torusVector(e, c);
-          const d2 = tv.dx * tv.dx + tv.dy * tv.dy;
-          if (d2 < threatD2) {
-            threatDx = tv.dx;
-            threatDy = tv.dy;
-            threatD2 = d2;
-          }
+          const tdx = torusDelta(e.x - c.x, WORLD.w);
+          const tdy = torusDelta(e.y - c.y, WORLD.h);
+          const d2 = tdx * tdx + tdy * tdy;
+          if (d2 < threatD2) { threatDx = tdx; threatDy = tdy; threatD2 = d2; }
         }
-      };
-      scanThreats(nearby);
-      scanThreats(producerThreats);
+      }
       const hasThreat = threatD2 < Infinity;
       const resting = updateResting(e, dt, hasThreat);
       if (hasThreat) {
