@@ -1771,6 +1771,11 @@
     // Extiende supervivencia 2-4x en famine, permite recovery si encuentra comida.
     if (e.energy < e.maxEnergy * 0.03) metabFactor *= 0.25;
     else if (e.energy < e.maxEnergy * 0.08) metabFactor *= 0.45;
+    // Senescence cost (Gompertz): criaturas viejas pagan mas metabolismo.
+    // >60% maxAge: hasta +50% metab. Acelera turnover, previene inmortales.
+    if (e.maxAge > 0 && e.age > e.maxAge * 0.6) {
+      metabFactor *= 1 + ((e.age - e.maxAge * 0.6) / (e.maxAge * 0.4)) * 0.5;
+    }
     const metabCost = e.metabolism * dt * metabFactor;
     e.energy -= metabCost;
     sim.mobileEnergySum -= metabCost;
