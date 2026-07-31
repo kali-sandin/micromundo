@@ -119,6 +119,21 @@
       }
       return result;
     }
+    // Binary search para encontrar primer indice con t >= minT.
+    // Asume orden monotono creciente de 't' en los items.
+    rangeFrom(minT) {
+      let lo = 0, hi = this.count;
+      while (lo < hi) {
+        const mid = (lo + hi) >>> 1;
+        const item = this.buf[(this.head + mid) % this.cap];
+        if (item.t < minT) lo = mid + 1;
+        else hi = mid;
+      }
+      return { head: lo, count: this.count - lo };
+    }
+    atRaw(i) {
+      return this.buf[(this.head + i) % this.cap];
+    }
     clear() {
       this.head = 0;
       this.count = 0;
@@ -694,15 +709,45 @@
       const yD = y < rows - 1 ? y + 1 : 0;
       const ycU = yU * cols;
       const ycD = yD * cols;
-      for (let x = 0; x < cols; x += 1) {
+
+      // x == 0 (left wrap border)
+      {
+        const idx = yc;
+        const m = src[idx];
+        const left = src[yc + cols - 1];
+        const right = src[idx + 1];
+        const up = src[ycU];
+        const down = src[ycD];
+        const avg = (left + right + up + down) * 0.25;
+        const grown = m + m * (1.3 - m) * growth;
+        const next = clamp(grown + (avg - m) * diffusion, 0, 1.8);
+        dst[idx] = next;
+        total += next;
+      }
+
+      // 0 < x < cols-1 (fast path, no wrapping)
+      for (let x = 1; x < cols - 1; x += 1) {
         const idx = yc + x;
         const m = src[idx];
-        const xL = x > 0 ? x - 1 : cols - 1;
-        const xR = x < cols - 1 ? x + 1 : 0;
-        const left = src[yc + xL];
-        const right = src[yc + xR];
+        const left = src[idx - 1];
+        const right = src[idx + 1];
         const up = src[ycU + x];
         const down = src[ycD + x];
+        const avg = (left + right + up + down) * 0.25;
+        const grown = m + m * (1.3 - m) * growth;
+        const next = clamp(grown + (avg - m) * diffusion, 0, 1.8);
+        dst[idx] = next;
+        total += next;
+      }
+
+      // x == cols-1 (right wrap border)
+      if (cols > 1) {
+        const idx = yc + cols - 1;
+        const m = src[idx];
+        const left = src[idx - 1];
+        const right = src[yc];
+        const up = src[ycU + cols - 1];
+        const down = src[ycD + cols - 1];
         const avg = (left + right + up + down) * 0.25;
         const grown = m + m * (1.3 - m) * growth;
         const next = clamp(grown + (avg - m) * diffusion, 0, 1.8);
@@ -2818,17 +2863,17 @@
     const pxPerSecond = sim.populationPxPerSecond;
     const visibleSeconds = Math.max(8, Math.floor((w - 10) / pxPerSecond));
     const minT = Math.max(0, sim.time - visibleSeconds);
-    const points = sim.graph.filter((p) => p.t >= minT);
-    if (!points.length) return;
+    const range = sim.graph.rangeFrom(minT);
+    if (!range.count) return;
     const visible = sim.populationSeriesVisible;
     let max = 10;
-    for (let i = 0; i < points.length; i += 1) {
-      const p = points[i];
-      if (visible.producerDensity) max = Math.max(max, p.producerDensity * 1000);
-      if (visible.producerB) max = Math.max(max, p.producerB);
-      if (visible.producerC) max = Math.max(max, p.producerC);
-      if (visible.consumers) max = Math.max(max, p.consumers);
-      if (visible.predators) max = Math.max(max, p.predators);
+    for (let i = range.head, n = range.head + range.count; i < n; i += 1) {
+      const p = sim.graph.atRaw(i);
+      if (visible.producerDensity) { const v = p.producerDensity * 1000; if (v > max) max = v; }
+      if (visible.producerB) { if (p.producerB > max) max = p.producerB; }
+      if (visible.producerC) { if (p.producerC > max) max = p.producerC; }
+      if (visible.consumers) { if (p.consumers > max) max = p.consumers; }
+      if (visible.predators) { if (p.predators > max) max = p.predators; }
     }
     const yForGraphPoint = (p, key) => {
       const raw = key === 'producerDensity' ? p[key] * 1000 : p[key];
@@ -2837,18 +2882,21 @@
     const xForGraphPoint = (p) => w - (sim.time - p.t) * pxPerSecond - 5;
     const drawDensityArea = () => {
       graphCtx.beginPath();
-      for (let i = 0; i < points.length; i += 1) {
-        const x = xForGraphPoint(points[i]);
-        const y = yForGraphPoint(points[i], 'producerDensity');
-        if (i === 0) graphCtx.moveTo(x, h - 20);
+      for (let i = range.head, n = range.head + range.count; i < n; i += 1) {
+        const p = sim.graph.atRaw(i);
+        const x = xForGraphPoint(p);
+        const y = yForGraphPoint(p, 'producerDensity');
+        if (i === range.head) graphCtx.moveTo(x, h - 20);
         graphCtx.lineTo(x, y);
       }
-      const lastX = xForGraphPoint(points[points.length - 1]);
+      const lastP = sim.graph.atRaw(range.head + range.count - 1);
+      const lastX = xForGraphPoint(lastP);
       graphCtx.lineTo(lastX, h - 20);
       graphCtx.closePath();
       let peak = 0;
-      for (let i = 0; i < points.length; i += 1) {
-        peak = Math.max(peak, points[i].producerDensity * 1000);
+      for (let i = range.head, n = range.head + range.count; i < n; i += 1) {
+        const v = sim.graph.atRaw(i).producerDensity * 1000;
+        if (v > peak) peak = v;
       }
       graphCtx.fillStyle = `rgba(118, 210, 93, ${clamp(0.055 + (peak / max) * 0.12, 0.06, 0.18)})`;
       graphCtx.fill();
@@ -2859,16 +2907,17 @@
       graphCtx.lineWidth = 2;
       let lastX = 0;
       let lastY = 0;
-      for (let i = 0; i < points.length; i += 1) {
-        const x = xForGraphPoint(points[i]);
-        const y = yForGraphPoint(points[i], key);
+      for (let i = range.head, n = range.head + range.count; i < n; i += 1) {
+        const p = sim.graph.atRaw(i);
+        const x = xForGraphPoint(p);
+        const y = yForGraphPoint(p, key);
         lastX = x;
         lastY = y;
-        if (i === 0) graphCtx.moveTo(x, y);
+        if (i === range.head) graphCtx.moveTo(x, y);
         else graphCtx.lineTo(x, y);
       }
       graphCtx.stroke();
-      if (points.length === 1) {
+      if (range.count === 1) {
         graphCtx.fillStyle = color;
         graphCtx.beginPath();
         graphCtx.arc(lastX, lastY, 2.5, 0, Math.PI * 2);
@@ -2905,17 +2954,25 @@
     const pxPerSecond = sim.genePxPerSecond;
     const visibleSeconds = Math.max(8, Math.floor((w - 10) / pxPerSecond));
     const minT = Math.max(0, sim.time - visibleSeconds);
-    const points = sim.geneHistory.filter((p) => p.t >= minT && p[group]?.n > 0);
-    if (!points.length) {
+    const range = sim.geneHistory.rangeFrom(minT);
+    let pointCount = 0;
+    for (let i = range.head, n = range.head + range.count; i < n; i += 1) {
+      const p = sim.geneHistory.atRaw(i);
+      if (p[group] && p[group].n > 0) pointCount++;
+    }
+    if (!pointCount) {
       els.geneSummary.textContent = 'Sin histórico todavía.';
       return;
     }
 
     let max = 1;
-    for (let i = 0; i < points.length; i += 1) {
-      const avg = points[i][group].avg;
+    for (let i = range.head, n = range.head + range.count; i < n; i += 1) {
+      const p = sim.geneHistory.atRaw(i);
+      if (!p[group] || p[group].n <= 0) continue;
+      const avg = p[group].avg;
       for (let j = 0; j < keys.length; j += 1) {
-        max = Math.max(max, avg[keys[j]] || 0);
+        const v = avg[keys[j]] || 0;
+        if (v > max) max = v;
       }
     }
     keys.forEach((key, idx) => {
@@ -2925,16 +2982,19 @@
       geneCtx.lineWidth = 1.8;
       let lastX = 0;
       let lastY = 0;
-      for (let i = 0; i < points.length; i += 1) {
-        const x = w - (sim.time - points[i].t) * pxPerSecond - 5;
-        const y = h - 22 - ((points[i][group].avg[key] || 0) / max) * (h - 38);
+      let first = true;
+      for (let i = range.head, n = range.head + range.count; i < n; i += 1) {
+        const p = sim.geneHistory.atRaw(i);
+        if (!p[group] || p[group].n <= 0) continue;
+        const x = w - (sim.time - p.t) * pxPerSecond - 5;
+        const y = h - 22 - ((p[group].avg[key] || 0) / max) * (h - 38);
         lastX = x;
         lastY = y;
-        if (i === 0) geneCtx.moveTo(x, y);
+        if (first) { geneCtx.moveTo(x, y); first = false; }
         else geneCtx.lineTo(x, y);
       }
       geneCtx.stroke();
-      if (points.length === 1) {
+      if (pointCount === 1) {
         geneCtx.fillStyle = GENE_COLORS[colorIndex % GENE_COLORS.length];
         geneCtx.beginPath();
         geneCtx.arc(lastX, lastY, 2.3, 0, Math.PI * 2);
@@ -2943,7 +3003,12 @@
     });
 
     drawTimeAxis(geneCtx, w, h, pxPerSecond);
-    const latest = points[points.length - 1][group];
+    let latest = null;
+    for (let i = range.head + range.count - 1; i >= range.head; i -= 1) {
+      const p = sim.geneHistory.atRaw(i);
+      if (p[group] && p[group].n > 0) { latest = p[group]; break; }
+    }
+    if (!latest) { els.geneSummary.textContent = 'Sin histórico.'; return; }
     const labels = allKeys.map((key, idx) => {
       const disabled = hidden.has(key) ? ' disabled' : '';
       return `<button class="gene-toggle${disabled}" type="button" data-gene-key="${escapeHtml(key)}" style="--gene-color:${GENE_COLORS[idx % GENE_COLORS.length]}">${escapeHtml(key)} <b>${formatValue(latest.avg[key])}</b></button>`;
