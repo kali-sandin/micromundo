@@ -1652,7 +1652,7 @@
     // Cap gain to prevent energy creation in trophic transfers
     const maxTransfer = e.type === TYPE.PREDATOR
       ? target.type === TYPE.PRODUCER
-        ? target.energy * 2.0   // predator->ProducerC: max 2x prey energy
+        ? target.energy * 1.0   // predator->ProducerC: max 1x prey energy (no creacion)
         : target.energy * 1.3   // predator->consumer: max 1.3x (30% ecological loss)
       : target.energy * 1.8;    // consumer->ProducerC already capped above
     const gain = Math.min(rawGain, maxTransfer) * gapeFactor;
