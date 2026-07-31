@@ -1634,6 +1634,10 @@
     // Esto satura la tasa de consumo cuando la densidad de presas es alta.
     if (e.huntCooldown > 0) return false;
 
+    // Predator satiation: depredadores saciados (>85% energy) fallan 50% capturas.
+    // Reduce overpredation en boom phases cuando predators estan bien alimentados.
+    if (e.type === TYPE.PREDATOR && e.energy > e.maxEnergy * 0.85 && chance(0.5)) return false;
+
     // Gape-limitation: depredadores no pueden comer presas mucho mas grandes
     let gapeFactor = 1;
     if (e.type === TYPE.PREDATOR && target.type === TYPE.CONSUMER) {
