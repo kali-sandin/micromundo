@@ -2393,6 +2393,8 @@
     if (p.x < -20 || p.y < -20 || p.x > window.innerWidth + 20 || p.y > window.innerHeight + 20) return;
 
     ctx.fillStyle = e.color;
+    if (e.starved === 2) ctx.fillStyle = '#e8d44a';
+    else if (e.starved === 1) ctx.fillStyle = '#b8a842';
     if (r <= 2.2) {
       ctx.fillRect(p.x - r, p.y - r, r * 2, r * 2);
       return;
