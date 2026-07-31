@@ -1577,7 +1577,7 @@
     // Antes era *=0.5 binario que hacia preds inmortales (84min sin comer)
     let metabFactor = resting ? 1.5 : 7.5;
     if (e.type === TYPE.PREDATOR) {
-      metabFactor *= 0.7 + 0.3 * clamp(sim.predatorCount / 60, 0, 1);
+      metabFactor *= 0.85 + 0.15 * clamp(sim.predatorCount / 60, 0, 1);
     }
     // Metabolismo circadiano: 25% menos en pico nocturno compensa deficit de producers
     if (sim.dayNightEnabled) {
