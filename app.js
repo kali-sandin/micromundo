@@ -1153,7 +1153,7 @@
     if (!target) return true;
     if (target.type === TYPE.PRODUCER) {
       if (target.sub === PRODUCER.A) return true;
-      const mobileProducerShield = target.sub === PRODUCER.C && e.type === TYPE.CONSUMER ? 0.95 : 0;
+      const mobileProducerShield = target.sub === PRODUCER.C ? 0.95 : 0;
       return feedingPower(e, target) >= armorResistance(target) + mobileProducerShield;
     }
     // Consumers/predators: armor protege si feedingPower no supera armorResistance
