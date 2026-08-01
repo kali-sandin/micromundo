@@ -1743,7 +1743,13 @@
       const density = e._localPreyDensity || 6;
       typeIII = (density * density) / (density * density + 36); // halfSat=6
     }
-    const gain = Math.min(rawGain, maxTransfer) * gapeFactor * typeIII;
+    // Beddington-DeAngelis predator interference: a alta densidad de predators,
+    // cada uno caza menos por interferencia entre competidores.
+    // gain *= 60/predatorCount cuando predatorCount>60. Baja densidad: sin efecto.
+    const bdaInterference = (e.type === TYPE.PREDATOR && sim.predatorCount > 60)
+      ? 60 / sim.predatorCount
+      : 1;
+    const gain = Math.min(rawGain, maxTransfer) * gapeFactor * typeIII * bdaInterference;
 
     // Descuento gain de target ANTES de kill para evitar doble conteo energetico
     // (sin esto, kill lee target.energy intacta y crea carcass con energy ya consumida)
