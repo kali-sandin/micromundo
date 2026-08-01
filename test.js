@@ -425,6 +425,21 @@ function runFunctionalTests() {
     expectRange(child.y, 0, api.WORLD.h);
   });
 
+  assert('childFrom no crea energia: child <= perdida parental', () => {
+    const a = api.spawnConsumer({ x: 100, y: 100, energy: 60 });
+    const b = api.spawnConsumer({ x: 120, y: 120, energy: 60 });
+    const parentLoss = a.energy * 0.42 + b.energy * 0.38;
+    const child = api.childFrom(a, b, api.TYPE.CONSUMER);
+    expectOk(child.energy <= parentLoss, 'child energy (' + child.energy.toFixed(2) + ') excede perdida parental (' + parentLoss.toFixed(2) + ')');
+  });
+
+  assert('childFrom respeta maxEnergy del child', () => {
+    const a = api.spawnConsumer({ x: 100, y: 100, energy: 200, size: 1, reserves: 0 });
+    const b = api.spawnConsumer({ x: 120, y: 120, energy: 200, size: 1, reserves: 0 });
+    const child = api.childFrom(a, b, api.TYPE.CONSUMER);
+    expectOk(child.energy <= child.maxEnergy, 'child energy supera maxEnergy');
+  });
+
   // ─── derivedConsumerStats ───────────────────────
   suite('derivedConsumerStats');
 
