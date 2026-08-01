@@ -758,7 +758,10 @@
       }
     }
 
-    field.mass.set(dst);
+    // Swap mass and scratch (avoids full Float32Array copy)
+    const tmp = field.mass;
+    field.mass = field.scratch;
+    field.scratch = tmp;
     field.total = total;
   }
 
