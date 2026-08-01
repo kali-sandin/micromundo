@@ -1610,6 +1610,7 @@
     const ciliaPulse = 1 + lutSin(sim.time * 5 + e.id) * (e.cilia * 0.015);
     const burst = burstMultiplier(e, dt, pressure);
     const panic = threat ? (hasMove(e, 2) ? 1.16 : hasMove(e, 3) ? 1.28 : 1.46) : 1;
+    if (threat) e._hadPanic = panic; // flag for next step's metabolism surcharge
     // Vegetation refuge: zonas con alta densidad de producerField ralentizan criaturas
     let vegFactor = 1;
     if (sim.producerField.mass.length) {
@@ -1817,6 +1818,13 @@
     // >60% maxAge: hasta +50% metab. Acelera turnover, previene inmortales.
     if (e.maxAge > 0 && e.age > e.maxAge * 0.6) {
       metabFactor *= 1 + ((e.age - e.maxAge * 0.6) / (e.maxAge * 0.4)) * 0.5;
+    }
+    // Panic metabolism: huida tiene coste energetico extra (sprint anaerobico).
+    // Usa flag del step anterior (e._hadPanic) porque threat aun no se ha calculado aqui.
+    // panic=1.16 -> +8% metab, panic=1.46 -> +64% metab, panic=1.82 -> +201% metab.
+    if (e._hadPanic) {
+      metabFactor *= 1 + (e._hadPanic - 1) * (e._hadPanic - 1) * 3;
+      e._hadPanic = 0;
     }
     const metabCost = e.metabolism * dt * metabFactor;
     e.energy -= metabCost;
