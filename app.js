@@ -1528,9 +1528,9 @@
           if (other === e || !other.alive || !isColonyProducer(other) || other.id < e.id) continue;
           const minGap = (e.radius + other.radius) * 0.72;
           if (torusDistance2(e, other) > minGap * minGap) continue;
-          const winner = e.energy + e.radius + e.armor >= other.energy + other.radius + other.armor ? e : other;
+          const winner = e.energy + e.radius >= other.energy + other.radius ? e : other;
           const loser = winner === e ? other : e;
-          const drain = Math.min(loser.energy, 1.2 + winner.radius * 0.08 + winner.armor * 0.35);
+          const drain = Math.min(loser.energy, 1.2 + winner.radius * 0.08);
           loser.energy -= drain;
           loser.leafEnergy = Math.max(0, loser.leafEnergy - drain * 0.18);
           loser.leafCount = Math.max(0, loser.leafCount - (drain > 1.6 ? 1 : 0));
