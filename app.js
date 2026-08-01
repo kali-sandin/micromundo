@@ -1961,17 +1961,21 @@
   function checkMigration() {
     // Fast exit: use live counters to skip full scan when all pops healthy
     var THRESHOLD = 15;
-    if (sim.liveProducerBCount >= THRESHOLD && sim.liveProducerCCount >= THRESHOLD &&
-        sim.liveConsumerCount >= THRESHOLD && sim.predatorCount >= THRESHOLD) return;
+    var needB = sim.liveProducerBCount < THRESHOLD;
+    var needC = sim.liveProducerCCount < THRESHOLD;
+    var needM = sim.liveConsumerCount < THRESHOLD;
+    var needP = sim.predatorCount < THRESHOLD;
+    if (!needB && !needC && !needM && !needP) return;
+    // Count-first: only build arrays for types that need rescue
     var cB = 0, cC = 0, cM = 0, cP = 0;
-    var sB = [], sC = [], sM = [], sP = [];
+    var sB = needB ? [] : null, sC = needC ? [] : null, sM = needM ? [] : null, sP = needP ? [] : null;
     for (var i = 0; i < sim.creatures.length; i += 1) {
       var e = sim.creatures[i];
       if (!e || !e.alive) continue;
-      if (e.type === TYPE.PRODUCER && e.sub === PRODUCER.B) { cB++; sB.push(e); }
-      else if (e.type === TYPE.PRODUCER && e.sub === PRODUCER.C) { cC++; sC.push(e); }
-      else if (e.type === TYPE.CONSUMER) { cM++; sM.push(e); }
-      else if (e.type === TYPE.PREDATOR) { cP++; sP.push(e); }
+      if (e.type === TYPE.PRODUCER && e.sub === PRODUCER.B) { cB++; if (sB) sB.push(e); }
+      else if (e.type === TYPE.PRODUCER && e.sub === PRODUCER.C) { cC++; if (sC) sC.push(e); }
+      else if (e.type === TYPE.CONSUMER) { cM++; if (sM) sM.push(e); }
+      else if (e.type === TYPE.PREDATOR) { cP++; if (sP) sP.push(e); }
     }
     var baseProb = 0.005 * (5 / 60);
     // Prob escalada inversa: menor poblacion = mayor chance de rescue
@@ -2191,10 +2195,6 @@
       context.setTransform(1, 0, 0, 1, 0, 0);
     }
     return { w, h };
-  }
-
-  function isSelectedCreature(e) {
-    return Boolean(e && sim.selectedCreatureIds.includes(creatureKey(e)));
   }
 
   function removeInspectorPanel(key) {
