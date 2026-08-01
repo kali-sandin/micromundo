@@ -1760,10 +1760,11 @@
   }
 
   function reproduceMobile(e, type, cachedMate) {
-    // Population cap: mismo patron que stepProducer pero mas restrictivo para mobiles
-    // Seed ~828 mobiles. 5000 permite ~6x crecimiento, frena explosion boom-bust
-    const aliveCount = sim.creatures.length - sim.freeIds.length;
-    if (aliveCount > 5000 && !chance(0.2)) return;
+    // Population cap: contar SOLO mobiles (consumers+predators), no producers.
+    // Antes contaba todas las criaturas incluyendo colonies+ProducerC,
+    // lo que bloqueaba reproduccion mobile cuando habia muchos producers.
+    const mobileCount = sim.liveConsumerCount + sim.predatorCount;
+    if (mobileCount > 5000 && !chance(0.2)) return;
     // Density-dependent reproduction (carrying capacity):
     //_factor logistico reduce fert cuando pop > K/2. frena boom suavemente.
     const K = type === TYPE.PREDATOR ? 300 : 2000;
