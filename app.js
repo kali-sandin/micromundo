@@ -951,9 +951,11 @@
       competitionAt: 0,
       starved: 0,
       grazeCooldown: 0,
-      huntCooldown: 0
+      huntCooldown: 0,
+      _birthStep: -1
     };
     const e = Object.assign(base, partial);
+    e._birthStep = sim.time;
     sim.creatures[id] = e;
     sim.creatureIndex.set(e.uid, e);
     return e;
@@ -2145,6 +2147,7 @@
       const i = (k + off) % n;
       const e = sim.creatures[i];
       if (!e || !e.alive) continue;
+      if (e._birthStep === sim.time) continue;
       if (e.type === TYPE.PRODUCER) stepProducer(e, dt);
       else stepMobile(e, dt);
     }
