@@ -2132,8 +2132,8 @@
       };
       if (isProducerB) { opts.sub = PRODUCER.B; spawnProducer(opts); }
       else if (isProducerC) { opts.sub = PRODUCER.C; spawnProducer(opts); }
-      else if (type === 'consumers') spawnConsumer(opts);
-      else if (isPredator) spawnPredator(opts);
+      else if (type === 'consumers') { opts.energy = rand(10, 15); spawnConsumer(opts); }
+      else if (isPredator) { opts.energy = rand(30, 50); spawnPredator(opts); }
       sim.births += 1;
     }
     if (LOG_EVENTS) { var label = isPredator ? 'depredadores' : type === 'consumers' ? 'consumidores' : isProducerB ? 'productores B' : 'productores C'; logEvent('Migración: ' + n + ' ' + label + ' recoloniaron desde los bordes (pop. previa: ' + count + ')', 'birth'); }
