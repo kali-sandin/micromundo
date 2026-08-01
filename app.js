@@ -1521,7 +1521,12 @@
       }
       e.radius = Math.min(e.maxRadius, e.radius + dt * sun * 0.018);
       const leafCap = 8 + e.radius * 0.9;
-      e.leafEnergy = Math.min(leafCap, e.leafEnergy + dt * sun * 0.13);
+      if (e.leafEnergy < leafCap) {
+        const leafRegen = Math.min(leafCap - e.leafEnergy, dt * sun * 0.13);
+        e.leafEnergy += leafRegen;
+        const leafCost = leafRegen * 0.46;
+        e.energy = Math.max(0, e.energy - leafCost);
+      }
       const leafLimit = clamp(Math.floor(2 + e.radius / 6), 2, 14);
       const leafTarget = clamp(Math.floor(e.leafEnergy / 3), 0, leafLimit);
       if (leafTarget > e.leafCount && chance(dt * sun * 0.6)) e.leafCount += 1;
