@@ -1460,6 +1460,7 @@
         const list = li === 0 ? nearby : producerThreats;
         for (let i = 0; i < list.length; i += 1) {
           const c = list[i];
+          if (!canEatArmored(c, e)) continue;
           const tdx = torusDelta(e.x - c.x, WORLD.w);
           const tdy = torusDelta(e.y - c.y, WORLD.h);
           const d2 = tdx * tdx + tdy * tdy;
