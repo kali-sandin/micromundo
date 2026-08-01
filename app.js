@@ -400,7 +400,7 @@
 
   function inheritAsexual(e, key, min, max, integer = false) {
     const value = Number(e[key] ?? 0);
-    const margin = Math.max(Math.abs(value) * 0.06, 0.02);
+    const margin = Math.max(Math.abs(value) * 0.06, Math.abs(min) * 0.08);
     const out = clamp(rand(value - margin, value + margin), min, max);
     return integer ? Math.round(out) : out;
   }
@@ -465,6 +465,7 @@
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   }
 
+  const LOG_EVENTS = false;
   function logEvent() {
     // El log visual se retiró: mantener esta función como no-op evita ramas calientes extra.
   }
@@ -968,7 +969,7 @@
       });
     }
 
-    if (reason && sim.deaths % 20 === 0) logEvent(`${reason}. Muertes acumuladas: ${fmt.format(sim.deaths)}`, 'death');
+    if (LOG_EVENTS && reason && sim.deaths % 20 === 0) logEvent(`${reason}. Muertes acumuladas: ${fmt.format(sim.deaths)}`, 'death');
   }
 
   function spawnProducer(opts = {}) {
@@ -1428,6 +1429,7 @@
       e.x += lutCos(e.angle) * e.speed * panic * moveScale * dt;
       e.y += lutSin(e.angle) * e.speed * panic * moveScale * dt;
       const crowdFactor = producerCCrowdFactor(e);
+      e._crowdFactor = crowdFactor;
       const sensoryCost = (Number(e.chemosense || 0) * 0.003 + Math.max(0, Number(e.perception || 0) - 40) * 0.000012) * dt * (resting ? 0.42 : 1);
       const crowdStress = (1 - crowdFactor) * dt * 0.12;
       const speedCost = Math.pow(Math.max(0, e.speed) / 42, 1.42) * 0.011; // speed metabolism for mobile ProducerC (half of consumer rate)
@@ -1527,7 +1529,7 @@
     }
 
     if (isMobileProducer(e)) {
-      if (producerCCrowdFactor(e) < 0.85 || e.energy < e.maxEnergy * 0.58) return;
+      if ((e._crowdFactor !== undefined ? e._crowdFactor : producerCCrowdFactor(e)) < 0.85 || e.energy < e.maxEnergy * 0.58) return;
     }
     const childEnergy = isMobileProducer(e) ? Math.min(8, e.energy * 0.32) : undefined;
     const spread = rand(70, 180);
@@ -1736,7 +1738,7 @@
     e.cooldown = rand(18, 55) / e.fertility;
     mate.cooldown = rand(18, 55) / mate.fertility;
     if (sim.births % 12 === 0) {
-      logEvent(`${type === TYPE.PREDATOR ? 'Depredador' : 'Consumidor'} nace por recombinación: tamaño ${child.size.toFixed(1)}, flagelos ${child.flagella}, cilios ${child.cilia}`, 'birth');
+      if (LOG_EVENTS) logEvent(`${type === TYPE.PREDATOR ? 'Depredador' : 'Consumidor'} nace por recombinación: tamaño ${child.size.toFixed(1)}, flagelos ${child.flagella}, cilios ${child.cilia}`, 'birth');
     }
   }
 
@@ -2039,7 +2041,7 @@
       sim.births += 1;
     }
     var label = isPredator ? 'depredadores' : type === 'consumers' ? 'consumidores' : isProducerB ? 'productores B' : 'productores C';
-    logEvent('Migración: ' + n + ' ' + label + ' recoloniaron desde los bordes (pop. previa: ' + count + ')', 'birth');
+    if (LOG_EVENTS) logEvent('Migración: ' + n + ' ' + label + ' recoloniaron desde los bordes (pop. previa: ' + count + ')', 'birth');
   }
 
   function simulate(dt) {
@@ -2653,7 +2655,7 @@
       ctx.beginPath();
       ctx.arc(p.x - r * 0.25, p.y - r * 0.25, r * 0.42, 0, Math.PI * 2);
       ctx.fill();
-      if (isSelectedCreature(e)) {
+      if (e._selected) {
         drawSelectionRing(p, r, colorForCreature(e));
         drawMapEnergyBar(p, r, e);
       }
@@ -2667,7 +2669,7 @@
       ctx.lineTo(p.x + lutCos(e.angle - 2.45) * r * 1.35, p.y + lutSin(e.angle - 2.45) * r * 1.35);
       ctx.closePath();
       ctx.fill();
-      if (isSelectedCreature(e)) {
+      if (e._selected) {
         drawSelectionRing(p, r, '#f05b50');
         drawMapEnergyBar(p, r, e);
       }
@@ -2686,7 +2688,7 @@
       ctx.lineTo(p.x - lutCos(e.angle) * r * (1.6 + e.flagella * 0.5), p.y - lutSin(e.angle) * r * (1.6 + e.flagella * 0.5));
       ctx.stroke();
     }
-    if (isSelectedCreature(e)) {
+    if (e._selected) {
       drawSelectionRing(p, r, e.type === TYPE.PRODUCER ? colorForCreature(e) : '#54b7f1');
       drawMapEnergyBar(p, r, e);
     }
@@ -2786,10 +2788,13 @@
     const vwMaxX = camera.x + window.innerWidth / (2 * camera.zoom) + wEps;
     const vwMinY = camera.y - window.innerHeight / (2 * camera.zoom) - wEps;
     const vwMaxY = camera.y + window.innerHeight / (2 * camera.zoom) + wEps;
+    // Pre-compute selected set once per frame (avoids O(n) includes per drawCreature call)
+    const _selectedKeys = new Set(sim.selectedCreatureIds);
     for (let i = 0; i < sim.creatures.length; i += 1) {
       const e = sim.creatures[i];
       if (!e || !e.alive) continue;
       const er = e.radius || 2;
+      e._selected = _selectedKeys.has(creatureKey(e));
       for (let o = 0; o < offsets.length; o += 1) {
         const ox = offsets[o].ox;
         const oy = offsets[o].oy;
@@ -3184,7 +3189,7 @@
     });
     seedWorld();
     recordGeneHistory();
-    logEvent('Ecosistema reiniciado', 'info');
+    if (LOG_EVENTS) logEvent('Ecosistema reiniciado', 'info');
     updateStats(true);
   }
 
@@ -3194,7 +3199,7 @@
     for (let i = 0; i < Math.round(38 * areaFactor); i += 1) spawnProducer(lightningProducerOptions(PRODUCER.C, i));
     for (let i = 0; i < Math.round(120 * areaFactor); i += 1) spawnConsumer(lightningMobileOptions('consumer', i));
     for (let i = 0; i < Math.round(18 * areaFactor); i += 1) spawnPredator(lightningMobileOptions('predator', i));
-    logEvent('Seed inicial: biomasa base, consumidores y depredadores');
+    if (LOG_EVENTS) logEvent('Seed inicial: biomasa base, consumidores y depredadores');
   }
 
   function vary(value, ratio = 0.18, min = -Infinity, max = Infinity) {
@@ -3617,7 +3622,7 @@
     updateWorldReadout();
     centerCamera({ fit: true });
     resetWorld();
-    logEvent(`Tamaño del ecosistema: ${fmt.format(WORLD.w)} x ${fmt.format(WORLD.h)}`);
+    if (LOG_EVENTS) logEvent(`Tamaño del ecosistema: ${fmt.format(WORLD.w)} x ${fmt.format(WORLD.h)}`);
   }
 
   function addFromForm() {
@@ -3647,7 +3652,7 @@
       sim.births += created;
       const label = sim.selectedAddKind === 'consumer' ? 'consumidores' : 'depredadores';
       const producerLabel = sim.selectedAddKind === 'producer' ? 'productores' : label;
-      logEvent(`Añadidos ${fmt.format(created)} ${producerLabel} desde el popup`, 'birth');
+      if (LOG_EVENTS) logEvent(`Añadidos ${fmt.format(created)} ${producerLabel} desde el popup`, 'birth');
     }
     if (amount === 1 && lastCreated) selectCreature(lastCreated);
     updateStats(true);
