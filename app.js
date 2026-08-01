@@ -1554,8 +1554,10 @@
         if (p !== e && isColonyProducer(p)) { hasLargeMate = true; break; }
       }
       if (!hasLargeMate || !chance(0.58)) return;
-      e.leafCount = Math.max(0, e.leafCount - COLONY_MIN_LEAVES_TO_REPRODUCE);
-      e.leafEnergy = Math.max(0, e.leafEnergy - COLONY_MIN_LEAVES_TO_REPRODUCE * 3.4);
+      const childLeafEnergy = Math.min(e.leafEnergy, COLONY_MIN_LEAVES_TO_REPRODUCE * 3.4);
+      const childLeafCount = Math.min(e.leafCount, COLONY_MIN_LEAVES_TO_REPRODUCE);
+      e.leafCount = Math.max(0, e.leafCount - childLeafCount);
+      e.leafEnergy = Math.max(0, e.leafEnergy - childLeafEnergy);
       const childEnergyB = e.energy * 0.28;
       e.energy *= 0.72;
       const childB = spawnProducer({
@@ -1568,8 +1570,8 @@
         armor: inheritAsexual(e, 'armor', 1.2, 7),
         fertility: inheritAsexual(e, 'fertility', 0.012, 0.085),
         maxAge: inheritAsexual(e, 'maxAge', 7500, 21500),
-        leafEnergy: inheritAsexual(e, 'leafEnergy', 4, 22),
-        leafCount: inheritAsexual(e, 'leafCount', 2, 9, true)
+        leafEnergy: childLeafEnergy,
+        leafCount: childLeafCount
       });
       // growthCost asexual: si hijo crece radius/armor sobre padre, paga coste
       if (childB) {
