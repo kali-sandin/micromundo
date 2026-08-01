@@ -1683,7 +1683,15 @@
           ? target.energy * 0.5  // intraguild: max 0.5x (50% loss, canibalismo costoso)
           : target.energy * 1.3   // predator->consumer: max 1.3x (30% ecological loss)
       : target.energy * 1.8;    // consumer->ProducerC already capped above
-    const gain = Math.min(rawGain, maxTransfer) * gapeFactor;
+    // Type III functional response: hunting efficiency cae cuando presas escasean.
+    // huntingEff = density^2 / (density^2 + halfSat^2). halfSat=6 => 50% efficiency a 6 presas.
+    // Refugio de baja densidad: presas raras sobreviven mejor, estabiliza boom-bust.
+    let typeIII = 1;
+    if (e.type === TYPE.PREDATOR && target.type === TYPE.CONSUMER) {
+      const density = e._localPreyDensity || 6;
+      typeIII = (density * density) / (density * density + 36); // halfSat=6
+    }
+    const gain = Math.min(rawGain, maxTransfer) * gapeFactor * typeIII;
 
     // Descuento gain de target ANTES de kill para evitar doble conteo energetico
     // (sin esto, kill lee target.energy intacta y crea carcass con energy ya consumida)
@@ -1847,6 +1855,7 @@
       queryNearby(e.x, e.y, e.perception, TYPE.CONSUMER, nearby);
       // Prey-switching: si <3 consumers cerca, priorizar carrion antes que cazar vivos
       const consumerCount = nearby.length;
+      e._localPreyDensity = consumerCount; // cache para Type III functional response en feedConsumer
       food = consumerCount >= 3 ? nearestFood(e, nearby) : null;
       if (!food) {
         const carrion = nearestCarcassFood(e, e.perception * 0.85);
