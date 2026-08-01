@@ -574,9 +574,13 @@
     return a;
   }
 
+  // Conditional wrap: avoids double-modulo overhead for the common case
+  // where coordinates are already within bounds (movement < world size).
   function wrapInsideWorld(e) {
-    e.x = mod(e.x, WORLD.w);
-    e.y = mod(e.y, WORLD.h);
+    if (e.x < 0) e.x += WORLD.w;
+    else if (e.x >= WORLD.w) e.x -= WORLD.w;
+    if (e.y < 0) e.y += WORLD.h;
+    else if (e.y >= WORLD.h) e.y -= WORLD.h;
   }
 
   function updateWorldReadout() {
