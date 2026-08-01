@@ -587,6 +587,7 @@ function runFunctionalTests() {
     const eater = api.spawnConsumer({ x: 100, y: 100, energy: 5 });
     const dead = api.spawnConsumer({ x: 101, y: 101, energy: 80 });
     api.kill(dead, 'test-carcass-food');
+    api.rebuildGrid();
     const car = api.nearestCarcassFood(eater, 40);
     expectOk(car, 'no encontro carcass cercano');
     const energyBefore = eater.energy;

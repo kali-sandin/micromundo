@@ -21,12 +21,12 @@
     // Reciclar buckets existentes al pool
     for (let i = 0; i < oldGrid.length; i += 1) {
       const b = oldGrid[i];
-      if (b) { b[0].length = 0; b[1].length = 0; b[2].length = 0; pool.push(b); }
+      if (b) { b[0].length = 0; b[1].length = 0; b[2].length = 0; b[3].length = 0; pool.push(b); }
     }
     sim.grid = new Array(n);
     for (let i = 0; i < n; i += 1) {
-      const b = pool.pop() || [[], [], []];
-      b[0].length = 0; b[1].length = 0; b[2].length = 0;
+      const b = pool.pop() || [[], [], [], []];
+      b[0].length = 0; b[1].length = 0; b[2].length = 0; b[3].length = 0;
       sim.grid[i] = b;
     }
     sim.gridDirtyCells = [];
@@ -41,7 +41,7 @@
   // Solo hay perdida en lag spikes (elapsed alto + speed alto), donde es
   // preferible mantener dt estable que simular tiempo extra con dt inestable.
 
-  const TYPE = { PRODUCER: 0, CONSUMER: 1, PREDATOR: 2 };
+  const TYPE = { PRODUCER: 0, CONSUMER: 1, PREDATOR: 2, CARCASS: 3 };
   const PRODUCER = { A: 0, B: 1, C: 2 };
   const FEEDING = ['grazer', 'filter', 'phagocyte', 'cytostome'];
   const MOVE = ['run-tumble', 'chemotaxis', 'drift', 'spiral', 'pause', 'burst'];
@@ -844,15 +844,33 @@
   function nearestCarcassFood(e, radius) {
     let best = null;
     let bestD2 = Infinity;
-    for (let i = 0; i < sim.carcasses.length; i += 1) {
-      const car = sim.carcasses[i];
-      if (!car || !car.alive || car.energy <= 0) continue;
-      const dx = torusDelta(car.x - e.x, WORLD.w);
-      const dy = torusDelta(car.y - e.y, WORLD.h);
-      const d2 = dx * dx + dy * dy;
-      if (d2 <= radius * radius && d2 < bestD2) {
-        best = car;
-        bestD2 = d2;
+    const grid = sim.grid;
+    const minX = Math.floor((e.x - radius) / CELL);
+    const maxX = Math.floor((e.x + radius) / CELL);
+    const minY = Math.floor((e.y - radius) / CELL);
+    const maxY = Math.floor((e.y + radius) / CELL);
+    const r2 = radius * radius;
+    for (let cy = minY; cy <= maxY; cy += 1) {
+      let wy = cy;
+      if (wy < 0) wy += GRID_ROWS;
+      else if (wy >= GRID_ROWS) wy -= GRID_ROWS;
+      const rowBase = wy * GRID_COLS;
+      for (let cx = minX; cx <= maxX; cx += 1) {
+        let wx = cx;
+        if (wx < 0) wx += GRID_COLS;
+        else if (wx >= GRID_COLS) wx -= GRID_COLS;
+        const list = grid[rowBase + wx][TYPE.CARCASS];
+        for (let i = 0; i < list.length; i += 1) {
+          const car = list[i];
+          if (!car || !car.alive || car.energy <= 0) continue;
+          const dx = torusDelta(car.x - e.x, WORLD.w);
+          const dy = torusDelta(car.y - e.y, WORLD.h);
+          const d2 = dx * dx + dy * dy;
+          if (d2 <= r2 && d2 < bestD2) {
+            best = car;
+            bestD2 = d2;
+          }
+        }
       }
     }
     return best;
@@ -1171,6 +1189,7 @@
       bucket[0].length = 0;
       bucket[1].length = 0;
       bucket[2].length = 0;
+      bucket[3].length = 0;
     }
     dirty.length = 0;
     const seen = sim.gridDirtySeen;
@@ -1180,6 +1199,14 @@
       if (!e || !e.alive) continue;
       const key = cellKeyInt(e.x, e.y);
       grid[key][e.type].push(e);
+      if (!seen[key]) { seen[key] = 1; dirty.push(key); }
+    }
+    // Insert carcasses into spatial grid (bucket[3])
+    for (let i = 0; i < sim.carcasses.length; i += 1) {
+      const car = sim.carcasses[i];
+      if (!car || !car.alive || car.energy <= 0) continue;
+      const key = cellKeyInt(car.x, car.y);
+      grid[key][TYPE.CARCASS].push(car);
       if (!seen[key]) { seen[key] = 1; dirty.push(key); }
     }
   }
