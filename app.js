@@ -1885,6 +1885,8 @@
     const metabCost = e.metabolism * dt * metabFactor;
     e.energy -= metabCost;
     sim.mobileEnergySum -= metabCost;
+    // DOC excretion: recicla 15% del metabCost al producerField (microbial loop)
+    if (metabCost > 0.01) addProducerDensity(e.x, e.y, metabCost * 0.003, 60);
     // Thermal entropy: disipacion adaptativa si el sistema tiene inflacion energetica
     if (sim.thermalDecayRate > 0 && (e.type === TYPE.CONSUMER || e.type === TYPE.PREDATOR)) {
       const thermalLoss = e.energy * sim.thermalDecayRate * dt;
