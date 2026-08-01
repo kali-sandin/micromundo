@@ -36,6 +36,7 @@
   const BASE_DT = 1 / 30;
   const MAX_SIM_CHUNKS = 60;
   const MAX_DT = BASE_DT * 3; // 0.1s - clamp anti-inestabilidad a alta velocidad
+  const GRID_REFRESH_INTERVAL = 5; // rebuild grid cada N chunks para reducir stale queries
   // Cap efectivo: MAX_SIM_CHUNKS * MAX_DT = 6.0s simulados por frame maximo.
   // A speed=100 y 60fps reales (elapsed=0.016): scaled=1.6, sin perdida.
   // Solo hay perdida en lag spikes (elapsed alto + speed alto), donde es
@@ -3175,7 +3176,11 @@
       const remainder = scaled - simTime;
       compactIfNeeded();
       rebuildGrid();
-      for (let i = 0; i < chunks; i += 1) simulate(dt);
+      for (let i = 0; i < chunks; i += 1) {
+        simulate(dt);
+        // Refresh grid cada GRID_REFRESH_INTERVAL chunks para mantener queries espaciales frescas
+        if ((i + 1) % GRID_REFRESH_INTERVAL === 0 && i + 1 < chunks) rebuildGrid();
+      }
       if (remainder > 0 && chunks < MAX_SIM_CHUNKS) simulate(Math.min(remainder, MAX_DT));
     }
 
