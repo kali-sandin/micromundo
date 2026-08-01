@@ -2056,8 +2056,7 @@
       else if (isPredator) spawnPredator(opts);
       sim.births += 1;
     }
-    var label = isPredator ? 'depredadores' : type === 'consumers' ? 'consumidores' : isProducerB ? 'productores B' : 'productores C';
-    if (LOG_EVENTS) logEvent('Migración: ' + n + ' ' + label + ' recoloniaron desde los bordes (pop. previa: ' + count + ')', 'birth');
+    if (LOG_EVENTS) { var label = isPredator ? 'depredadores' : type === 'consumers' ? 'consumidores' : isProducerB ? 'productores B' : 'productores C'; logEvent('Migración: ' + n + ' ' + label + ' recoloniaron desde los bordes (pop. previa: ' + count + ')', 'birth'); }
   }
 
   function simulate(dt) {
