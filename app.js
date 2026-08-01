@@ -1129,7 +1129,10 @@
       movementMask: inheritMovementMask(a, b),
       fertility: inheritGene(a, b, 'fertility', 0.2, 3, false, stressFactor),
       maxAge: inheritGene(a, b, 'maxAge', type === TYPE.PREDATOR ? 5000 : 1800, type === TYPE.PREDATOR ? 15000 : 8000, false, stressFactor),
-      energy: type === TYPE.PREDATOR ? 160 : 26
+      // childEnergy derivado de parents, no flat: previene creacion energetica
+      // parents pierden 42%+38% de su energia; child recibe 55% de esa perdida
+      // resto se pierde como coste reproductivo. Consumer: fraccion menor
+      energy: type === TYPE.PREDATOR ? (a.energy * 0.42 + b.energy * 0.38) * 0.55 : 26
     };
     const child = type === TYPE.PREDATOR ? spawnPredator(opts) : spawnConsumer(opts);
     // growthCost: el crecimiento de size encima de la media parental tiene coste energetico inmediato
