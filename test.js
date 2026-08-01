@@ -500,6 +500,46 @@ function runFunctionalTests() {
     }
   });
 
+  assert('consumer exhausto sin comida no aplica fear scan', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.sim.liveProducerBCount = 0;
+    api.sim.liveProducerCCount = 0;
+    api.sim.liveConsumerCount = 0;
+    api.sim.predatorCount = 0;
+    api.initProducerField();
+    api.sim.producerField.mass.fill(0);
+    api.sim.producerField.total = 0;
+    const c = api.spawnConsumer({ x: 100, y: 100, energy: 1, maxAge: 9999 });
+    api.spawnPredator({ x: 115, y: 100, energy: 80, maxAge: 9999 });
+    c.energy = c.maxEnergy * 0.04;
+    api.rebuildGrid();
+    api.stepMobile(c, 1 / 30);
+    expectEq(c.starved, 2, 'consumer no entro en inanicion severa');
+    expectEq(c.fearFactor, 1, 'consumer exhausto sin comida no debe escanear amenazas');
+  });
+
+  assert('consumer con energia suficiente mantiene fear scan', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.sim.liveProducerBCount = 0;
+    api.sim.liveProducerCCount = 0;
+    api.sim.liveConsumerCount = 0;
+    api.sim.predatorCount = 0;
+    api.initProducerField();
+    api.sim.producerField.mass.fill(0);
+    api.sim.producerField.total = 0;
+    const c = api.spawnConsumer({ x: 100, y: 100, energy: 50, maxAge: 9999 });
+    api.spawnPredator({ x: 115, y: 100, energy: 80, maxAge: 9999 });
+    c.energy = c.maxEnergy * 0.2;
+    api.rebuildGrid();
+    api.stepMobile(c, 1 / 30);
+    expectEq(c.starved, 0, 'consumer no deberia estar en inanicion severa');
+    expectEq(c.fearFactor, 0.6, 'consumer sano debe seguir detectando amenazas');
+  });
+
   assert('seedWorld pobla el ecosistema', () => {
     api.resetWorld();
     api.seedWorld();

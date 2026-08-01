@@ -1973,10 +1973,6 @@
       }
       steeringTarget = food || (cachedMate = findMateTarget(e, TYPE.PREDATOR));
     } else {
-      queryNearby(e.x, e.y, consumerThreatRange(e), TYPE.PREDATOR, consumerThreats);
-      threat = nearestThreat(e, consumerThreats);
-      // Fear ecology (NCE): consumers grazan 40% menos cuando detectan predator cercano
-      e.fearFactor = threat ? 0.6 : 1;
       queryNearby(e.x, e.y, e.perception, TYPE.PRODUCER, nearby);
       const entityFood = nearestFood(e, nearby);
       const fieldFood = (e.grazeCooldown || 0) > 0 ? null : bestProducerDensityTarget(e.x, e.y, e.perception);
@@ -1992,6 +1988,12 @@
         }
       }
       if (!food && e.energy < e.maxEnergy * 0.42) food = nearestCarcassFood(e, e.perception * 0.65);
+      if (e.starved !== 2 || food) {
+        queryNearby(e.x, e.y, consumerThreatRange(e), TYPE.PREDATOR, consumerThreats);
+        threat = nearestThreat(e, consumerThreats);
+      }
+      // Fear ecology (NCE): consumers grazan 40% menos cuando detectan predator cercano
+      e.fearFactor = threat ? 0.6 : 1;
       steeringTarget = food;
     }
     steerCreature(e, dt, steeringTarget, threat);
