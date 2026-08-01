@@ -1959,7 +1959,7 @@
       e.fearFactor = threat ? 0.6 : 1;
       queryNearby(e.x, e.y, e.perception, TYPE.PRODUCER, nearby);
       const entityFood = nearestFood(e, nearby);
-      const fieldFood = bestProducerDensityTarget(e.x, e.y, e.perception);
+      const fieldFood = (e.grazeCooldown || 0) > 0 ? null : bestProducerDensityTarget(e.x, e.y, e.perception);
       food = entityFood;
       if (fieldFood) {
         if (!entityFood) food = fieldFood;
