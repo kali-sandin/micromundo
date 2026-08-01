@@ -29,6 +29,8 @@
       b[0].length = 0; b[1].length = 0; b[2].length = 0;
       sim.grid[i] = b;
     }
+    sim.gridDirtyCells = [];
+    sim.gridDirtySeen = new Uint8Array(n);
   }
   const MAX_DEBUG_RANGES = 700;
   const BASE_DT = 1 / 30;
@@ -1152,16 +1154,23 @@
 
   function rebuildGrid() {
     const grid = sim.grid;
-    for (let i = 0; i < grid.length; i += 1) {
-      grid[i][0].length = 0;
-      grid[i][1].length = 0;
-      grid[i][2].length = 0;
+    // Dirty-cell tracking: only clear cells that had creatures last frame
+    const dirty = sim.gridDirtyCells;
+    for (let d = 0; d < dirty.length; d += 1) {
+      const bucket = grid[dirty[d]];
+      bucket[0].length = 0;
+      bucket[1].length = 0;
+      bucket[2].length = 0;
     }
+    dirty.length = 0;
+    const seen = sim.gridDirtySeen;
+    seen.fill(0);
     for (let i = 0; i < sim.creatures.length; i += 1) {
       const e = sim.creatures[i];
       if (!e || !e.alive) continue;
       const key = cellKeyInt(e.x, e.y);
       grid[key][e.type].push(e);
+      if (!seen[key]) { seen[key] = 1; dirty.push(key); }
     }
   }
 
