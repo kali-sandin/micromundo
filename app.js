@@ -836,8 +836,11 @@
 
   function returnCarcassEnergyToField(car) {
     if (!car || !sim.producerField.mass.length || car.energy <= 0) return;
-    const depositRadius = Math.max(90, Math.min(240, car.radius * 12));
-    addProducerDensity(car.x, car.y, Math.max(0.18, car.energy * 0.15), depositRadius);
+    // Scale deposit radius with energy so large carcasses spread over more cells
+    // instead of saturating the 1.5 clamp on a few central cells.
+    const energyAmount = Math.max(0.18, car.energy * 0.15);
+    const depositRadius = Math.max(90, Math.min(240, car.radius * 12 + Math.sqrt(car.energy) * 6));
+    addProducerDensity(car.x, car.y, energyAmount, depositRadius);
     car.energy = 0;
     car.alive = false;
   }
