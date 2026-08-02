@@ -1352,6 +1352,7 @@
     for (let i = 0; i < candidates.length; i += 1) {
       const t = candidates[i];
       if (!t.alive) continue;
+      if (t.dormant) continue; // ProducerC dormante es invisible a depredadores
       if (e.type === TYPE.PREDATOR && isColonyProducer(t)) continue;
       if (isColonyProducer(t) && ((t.leafCount || 0) <= 0 || t.leafEnergy <= 0.35)) continue;
       if (t.type === TYPE.PRODUCER && t.sub !== PRODUCER.A && !canEatArmored(e, t)) continue;
@@ -1471,6 +1472,35 @@
     e.cooldown -= dt * e.fertility * clamp(sim.solarEnergy, 0.1, 6) * 5;
 
     if (isMobileProducer(e)) {
+      // --- Dormancy (cryptobiosis): ProducerC en escasez severa prolongada ---
+      if (e.dormant) {
+        // Metabolismo mínimo durante dormancia
+        e.energy -= dt * 0.001;
+        e.dormantTimer += dt;
+        // Check revival: field mass local suficiente tras 15s mínimo
+        if (e.dormantTimer > 15) {
+          const ci = fieldIndex(fieldCellX(e.x), fieldCellY(e.y));
+          if (sim.producerField.mass[ci] > 0.15) {
+            e.dormant = false;
+            e.dormantTimer = 0;
+          }
+        }
+        // Skip threat scan, movement, feeding
+        wrapInsideWorld(e);
+        return;
+      }
+      // Entrar dormancia si energía crítica por >12s acumulados
+      if (e.energy < e.maxEnergy * 0.03) {
+        e._starveTimer = (e._starveTimer || 0) + dt;
+        if (e._starveTimer > 12) {
+          e.dormant = true;
+          e.dormantTimer = 0;
+          wrapInsideWorld(e);
+          return;
+        }
+      } else {
+        e._starveTimer = 0;
+      }
       queryNearby2(e.x, e.y, e.perception || 105, TYPE.CONSUMER, TYPE.PREDATOR, nearby, producerThreats);
       let threatDx = 0, threatDy = 0;
       let threatD2 = Infinity;
@@ -1689,6 +1719,7 @@
     if (!target) return false;
     if (target.virtualCarcass) return eatCarcass(e, target, dt);
     if (!target.alive) return false;
+    if (target.dormant) return false;
     if (target.virtualA) return grazeProducerDensity(e, dt);
     const dx = torusDelta(target.x - e.x, WORLD.w);
     const dy = torusDelta(target.y - e.y, WORLD.h);
