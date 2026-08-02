@@ -2895,14 +2895,7 @@
     ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
     ctx.fill();
 
-    if (e.type === TYPE.CONSUMER && camera.zoom > 0.05) {
-      ctx.strokeStyle = 'rgba(255,255,255,0.35)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(p.x, p.y);
-      ctx.lineTo(p.x - lutCos(e.angle) * r * (1.6 + e.flagella * 0.5), p.y - lutSin(e.angle) * r * (1.6 + e.flagella * 0.5));
-      ctx.stroke();
-    }
+    // Flagella drawn in batch by drawFlagellaBatch for performance
     if (e._selected) {
       drawSelectionRing(p, r, e.type === TYPE.PRODUCER ? colorForCreature(e) : '#54b7f1');
       drawMapEnergyBar(p, r, e);
@@ -2998,6 +2991,36 @@
     ctx.restore();
   }
 
+  // Batch flagella rendering: acumula todos los segmentos de consumers visibles
+  // en un unico beginPath+stroke. Elimina cientos de state changes por frame.
+  function drawFlagellaBatch(offsets, vwMinX, vwMaxX, vwMinY, vwMaxY) {
+    if (camera.zoom <= 0.05) return;
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    let hasSegments = false;
+    for (let i = 0; i < sim.creatures.length; i += 1) {
+      const e = sim.creatures[i];
+      if (!e || !e.alive || e.type !== TYPE.CONSUMER) continue;
+      const er = e.radius || 2;
+      for (let o = 0; o < offsets.length; o += 1) {
+        const ox = offsets[o].ox;
+        const oy = offsets[o].oy;
+        const wx = e.x + ox;
+        const wy = e.y + oy;
+        if (wx - er > vwMaxX || wx + er < vwMinX) continue;
+        if (wy - er > vwMaxY || wy + er < vwMinY) continue;
+        const p = worldToScreen(wx, wy);
+        const r = Math.max(3, er * camera.zoom);
+        if (r <= 2.2) continue; // flagella invisible en zoom muy bajo
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p.x - lutCos(e.angle) * r * (1.6 + e.flagella * 0.5), p.y - lutSin(e.angle) * r * (1.6 + e.flagella * 0.5));
+        hasSegments = true;
+      }
+    }
+    if (hasSegments) ctx.stroke();
+  }
+
   function render() {
     resize();
     clampCamera();
@@ -3036,6 +3059,9 @@
         drawCreature(e, ox, oy);
       }
     }
+
+    // Batch flagella: un solo beginPath+stroke para todos los consumers visibles
+    drawFlagellaBatch(offsets, vwMinX, vwMaxX, vwMinY, vwMaxY);
 
     // Overlay dia/noche: tinta oscuro cuando solarEnergy < base (noche)
     if (sim.dayNightEnabled) {
