@@ -823,12 +823,13 @@
     field.mass[idx] = mass - bite;
     field.total -= bite;
     // Density-dependent grazing efficiency: celdas pobres rinden menos energia por bite.
-    // densityFactor: 0.3 (celdas muy pobres) a 1.2 (celdas ricas). mass tipica ~0.5-1.3.
+    // densityFactor: 0.4 (celdas muy pobres) a 1.0 (celdas ricas). mass tipica ~0.5-1.3.
     // Esto frena overgrazing en zonas degradadas y estabiliza boom-bust.
-    const densityFactor = Math.max(0.3, Math.min(1.2, mass / 0.5));
-    // Mult 22 (antes 55): field genera ~0.015/s por celda. Bite tipico 0.024 cada ~0.55s.
-    // gain=0.024*22*densityFactor ~= 0.53/evento. Rentable pero no buffet infinito.
-    const gain = bite * 22 * densityFactor;
+    const densityFactor = Math.max(0.4, Math.min(1.0, mass / 0.8));
+    // Mult 16 (antes 55->22->16): field genera ~0.015/s por celda. Bite tipico 0.047 cada ~0.55s.
+    // gain=0.047*16*densityFactor ~= 0.75/evento en zona rica, 0.30 en zona pobre.
+    // Ratio gain:metab ~4.5x (antes 12.8x). Eficiencia trofica ~22%.
+    const gain = bite * 16 * densityFactor;
     const newEnergy = Math.min(e.maxEnergy, e.energy + gain);
     sim.mobileEnergySum += newEnergy - e.energy;
     e.energy = newEnergy;
