@@ -2058,7 +2058,7 @@
 
   function compactIfNeeded() {
     const aliveCount = sim.creatures.length - sim.freeIds.length;
-    if (sim.freeIds.length < 200 || sim.freeIds.length < aliveCount * 0.5) return;
+    if (sim.freeIds.length < 100 || sim.freeIds.length < aliveCount * 0.3) return;
     const alive = [];
     const selected = sim.selectedCreatureIds.map((key) => creatureByKey(key)).filter((e) => e && e.alive);
     for (let i = 0; i < sim.creatures.length; i += 1) {
