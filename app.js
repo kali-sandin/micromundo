@@ -705,6 +705,7 @@
     let total = 0;
     const sunlight = clamp(sim.solarEnergy, 0.1, 6);
     const growth = 0.015 * sunlight * t;
+    const baselineGrowth = 0.001 * sunlight * t; // evita frontera absorbente en m~0
     const diffusion = 0.028 * t;
 
     for (let y = 0; y < rows; y += 1) {
@@ -723,7 +724,7 @@
         const up = src[ycU];
         const down = src[ycD];
         const avg = (left + right + up + down) * 0.25;
-        const grown = m + m * (1.0 - m) * growth;
+        const grown = m + (m * (1.0 - m) * growth + baselineGrowth);
         const next = clamp(grown + (avg - m) * diffusion, 0, 1.5);
         dst[idx] = next;
         total += next;
@@ -738,7 +739,7 @@
         const up = src[ycU + x];
         const down = src[ycD + x];
         const avg = (left + right + up + down) * 0.25;
-        const grown = m + m * (1.0 - m) * growth;
+        const grown = m + (m * (1.0 - m) * growth + baselineGrowth);
         const next = clamp(grown + (avg - m) * diffusion, 0, 1.5);
         dst[idx] = next;
         total += next;
@@ -753,7 +754,7 @@
         const up = src[ycU + cols - 1];
         const down = src[ycD + cols - 1];
         const avg = (left + right + up + down) * 0.25;
-        const grown = m + m * (1.0 - m) * growth;
+        const grown = m + (m * (1.0 - m) * growth + baselineGrowth);
         const next = clamp(grown + (avg - m) * diffusion, 0, 1.5);
         dst[idx] = next;
         total += next;
