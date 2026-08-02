@@ -1609,7 +1609,8 @@
     if (e.cooldown > 0) return;
     e.cooldown = isColonyProducer(e) ? rand(40, 100) : rand(30, 70);
 
-    if (sim.creatures.length - sim.freeIds.length > 50000 && !chance(0.2)) return;
+    // Cap unificado: 10000 producers (antes 50000, causaba爆炸 de colonies sin limitante).
+    if (sim.creatures.length - sim.freeIds.length > 10000 && !chance(0.2)) return;
 
     if (isColonyProducer(e)) {
       if (e.leafCount < COLONY_MIN_LEAVES_TO_REPRODUCE || e.energy < e.maxEnergy * 0.42) return;
