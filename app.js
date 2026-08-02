@@ -1015,7 +1015,7 @@
         energy: storedEnergy,
         maxEnergy: storedEnergy,
         life: 0,
-        maxLife: 8
+        maxLife: 20
       });
     } else {
       // Cap lleno: redirigir energia al producerField directamente (no deletarla)
@@ -3041,8 +3041,8 @@
   function render() {
     resize();
     clampCamera();
-    // Single visibleTileOffsets call per frame - margin 900 covers all use cases
-    const offsets = visibleTileOffsets(900);
+    // Single visibleTileOffsets call per frame - margin 180 covers largest creatures (radius ~34px)
+    const offsets = visibleTileOffsets(180);
     drawBackground(offsets);
     drawProducerField(offsets);
     drawCarcasses(offsets);
