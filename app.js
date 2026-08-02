@@ -1072,7 +1072,7 @@
     const massDrag = 1 + bodyMass * 0.2 + e.reserves * 0.08 + flagellaLoad * 0.055;
     e.radius = clamp(3.5 + e.size * 1.72 + e.reserves * 0.34, 3, 19);
     e.speed = locomotion / massDrag;
-    const speedCost = Math.pow(Math.max(0, e.speed) / 42, 1.42) * 0.022;
+    const speedCost = Math.pow(Math.max(0, e.speed) / 42, 1.65) * 0.022;
     const tissueCost = e.size * 0.010 + e.reserves * 0.004 + e.armor * 0.007;
     const appendageCost = flagellaLoad * 0.014 + e.cilia * 0.004 + e.pseudopodia * 0.006;
     if (!Number.isFinite(Number(e.perception)) || e.perception <= 0) e.perception = DEFAULT_INITIAL_PERCEPTION;
@@ -1112,9 +1112,9 @@
     const out = derivedConsumerStats(e);
     if (!opts.keepConsumerSpeed) {
       // Recalcular speedCost con la velocidad reducida para que metabolism sea consistente
-      const oldSpeedCost = Math.pow(Math.max(0, out.speed) / 42, 1.42) * 0.022;
+      const oldSpeedCost = Math.pow(Math.max(0, out.speed) / 42, 1.65) * 0.022;
       out.speed *= 0.88;
-      const newSpeedCost = Math.pow(Math.max(0, out.speed) / 42, 1.42) * 0.022;
+      const newSpeedCost = Math.pow(Math.max(0, out.speed) / 42, 1.65) * 0.022;
       out.metabolism += (newSpeedCost - oldSpeedCost);
     }
     if (!opts.keepConsumerMetabolism) out.metabolism *= 0.9;
@@ -1547,7 +1547,7 @@
       e._crowdFactor = crowdFactor;
       const sensoryCost = (Number(e.chemosense || 0) * 0.003 + Math.max(0, Number(e.perception || 0) - 40) * 0.000012) * dt * (resting ? 0.42 : 1);
       const crowdStress = (1 - crowdFactor) * dt * 0.12;
-      const speedCost = Math.pow(Math.max(0, e.speed) / 42, 1.42) * 0.011; // speed metabolism for mobile ProducerC (half of consumer rate)
+      const speedCost = Math.pow(Math.max(0, e.speed) / 42, 1.65) * 0.011; // speed metabolism for mobile ProducerC (half of consumer rate)
       const respCost = dt * (0.008 + speedCost + (e.armor || 0) * 0.003); // basal + speed + armor cost
       e.energy = Math.min(e.maxEnergy, e.energy + dt * sim.solarEnergy * 0.12 * crowdFactor - sensoryCost - crowdStress - respCost);
       if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / 120)) {
