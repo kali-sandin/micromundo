@@ -243,7 +243,8 @@
       mass: new Float32Array(0),
       scratch: new Float32Array(0),
       total: 0,
-      accumulator: 0
+      accumulator: 0,
+      dirty: true
     },
     graph: new RingBuffer(HISTORY_MAX_POINTS),
     geneHistory: new RingBuffer(HISTORY_MAX_POINTS),
@@ -764,6 +765,7 @@
     field.mass = field.scratch;
     field.scratch = tmp;
     field.total = total;
+    field.dirty = true;
   }
 
   function bestProducerDensityTarget(x, y, radius) {
@@ -2668,42 +2670,83 @@
     return lut;
   })();
 
+  // Offscreen canvas for cached producer field rendering.
+  // The field changes every ~0.45s but is drawn every frame.
+  // Instead of fillRect per visible cell per frame, we render the full field
+  // to a tiny offscreen canvas (cols×rows pixels) only when dirty,
+  // then drawImage it scaled to the viewport.
+  let _fieldCanvas = null;
+  let _fieldImageData = null;
+  let _fieldPrevCols = 0;
+  let _fieldPrevRows = 0;
+
+  function ensureFieldCanvas(cols, rows) {
+    if (_fieldCanvas && _fieldPrevCols === cols && _fieldPrevRows === rows) return;
+    _fieldCanvas = document.createElement('canvas');
+    _fieldCanvas.width = cols;
+    _fieldCanvas.height = rows;
+    _fieldImageData = new ImageData(cols, rows);
+    _fieldPrevCols = cols;
+    _fieldPrevRows = rows;
+  }
+
+  function updateFieldCanvas() {
+    const field = sim.producerField;
+    const cols = field.cols;
+    const rows = field.rows;
+    if (!cols || !rows) return;
+    ensureFieldCanvas(cols, rows);
+    const data = _fieldImageData.data;
+    const mass = field.mass;
+    const n = cols * rows;
+    for (let i = 0; i < n; i += 1) {
+      const m = mass[i];
+      if (m < 0.035) {
+        data[i * 4 + 3] = 0; // transparent
+      } else {
+        // Match the LUT color: rgba(118, 210, 93, alpha)
+        // alpha = 0.035 + clamp(m*0.16, 0, 1) * 0.205
+        let a = _PFIELD_ALPHA_MIN + m * 0.16;
+        if (a > _PFIELD_ALPHA_MAX) a = _PFIELD_ALPHA_MAX;
+        const a255 = (a * 255) | 0;
+        data[i * 4]     = 118; // R
+        data[i * 4 + 1] = 210; // G
+        data[i * 4 + 2] = 93;  // B
+        data[i * 4 + 3] = a255;
+      }
+    }
+    _fieldCanvas.getContext('2d').putImageData(_fieldImageData, 0, 0);
+    field.dirty = false;
+  }
+
   function drawProducerField(offsets) {
     const field = sim.producerField;
     if (!field.mass.length) return;
-    const cols = field.cols;
-    const rows = field.rows;
+    if (field.dirty) updateFieldCanvas();
+    if (!_fieldCanvas) return;
+
     const cellW = field.cellW;
     const cellH = field.cellH;
-    // offsets passed from render() (cached)
+    const cols = field.cols;
+    const rows = field.rows;
+    const worldW = cols * cellW;
+    const worldH = rows * cellH;
+
+    // Enable smoothing for nice gradient-like appearance when zoomed in
+    const prevSmoothing = ctx.imageSmoothingEnabled;
+    ctx.imageSmoothingEnabled = true;
 
     for (let o = 0; o < offsets.length; o += 1) {
       const { ox, oy } = offsets[o];
-      const start = screenToWorld(-cellW, -cellH);
-      const sX = start.x, sY = start.y;
-      const end = screenToWorld(window.innerWidth + cellW, window.innerHeight + cellH);
-      const minX = clamp(Math.floor((sX - ox) / cellW), 0, cols - 1);
-      const maxX = clamp(Math.ceil((end.x - ox) / cellW), 0, cols - 1);
-      const minY = clamp(Math.floor((sY - oy) / cellH), 0, rows - 1);
-      const maxY = clamp(Math.ceil((end.y - oy) / cellH), 0, rows - 1);
-
-      const cellScreenW = cellW * camera.zoom;
-      const cellScreenH = cellH * camera.zoom;
-      for (let y = minY; y <= maxY; y += 1) {
-        for (let x = minX; x <= maxX; x += 1) {
-          const mass = field.mass[fieldIndex(x, y)];
-          if (mass < 0.035) continue;
-          const p0 = worldToScreen(x * cellW + ox, y * cellH + oy);
-          const sx = Math.round(p0.x);
-          const sy = Math.round(p0.y);
-          const sw = Math.max(1, Math.round(p0.x + cellScreenW) - sx);
-          const sh = Math.max(1, Math.round(p0.y + cellScreenH) - sy);
-          const lutIdx = Math.min((mass * _PFIELD_MASS_TO_LUT) | 0, _PFIELD_LUT_SIZE - 1);
-          ctx.fillStyle = producerFieldFillLUT[lutIdx];
-          ctx.fillRect(sx, sy, sw, sh);
-        }
-      }
+      const p0 = worldToScreen(ox, oy);
+      const sw = worldW * camera.zoom;
+      const sh = worldH * camera.zoom;
+      // Cull tiles entirely off-screen
+      if (p0.x + sw < 0 || p0.y + sh < 0 || p0.x > window.innerWidth || p0.y > window.innerHeight) continue;
+      ctx.drawImage(_fieldCanvas, 0, 0, _fieldCanvas.width, _fieldCanvas.height, p0.x, p0.y, sw, sh);
     }
+
+    ctx.imageSmoothingEnabled = prevSmoothing;
   }
 
   function drawDebugRange(e, ox = 0, oy = 0) {
