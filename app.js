@@ -888,7 +888,7 @@
     if ((e.grazeCooldown || 0) > 0) return false;
     const dx = torusDelta(car.x - e.x, WORLD.w);
     const dy = torusDelta(car.y - e.y, WORLD.h);
-    const eatRange = e.radius + car.radius + (e.feeding === 1 ? e.cilia * 2.2 : 4);
+    const eatRange = e.radius + car.radius + (e.feeding === 1 ? e.cilia * 2.2 : 3);
     if (dx * dx + dy * dy > eatRange * eatRange) return false;
     const bite = Math.min(car.energy, 0.9 + e.size * 0.58 + e.pseudopodia * 0.38 + (e.feeding === 2 ? 0.8 : 0) + (e.feeding === 3 ? 0.6 : 0));
     car.energy -= bite;
