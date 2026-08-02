@@ -1691,8 +1691,10 @@
       e.grazeCooldown = rand(0.3, 0.8);
       target.leafEnergy -= bite;
       target.leafCount = Math.max(0, (target.leafCount || 0) - 1);
+      // Colony energy drain: directo (0.30) + indirecto via leafEnergy regen (0.46)
+      // Coste total colonia = bite * 0.76. Gain capado a 3.0x bite (ratio ~4:1, eficiencia trofica ~25%)
       target.energy = Math.max(0, target.energy - bite * 0.30);
-      const gainCol = bite * 4.5;
+      const gainCol = Math.min(bite * 3.0, 18);
       const newEng = Math.min(e.maxEnergy, e.energy + gainCol);
       sim.mobileEnergySum += newEng - e.energy;
       e.energy = newEng;
