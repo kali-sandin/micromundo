@@ -3418,7 +3418,7 @@
     for (let i = 0; i < Math.round(12 * areaFactor); i += 1) spawnProducer(lightningProducerOptions(PRODUCER.B, i));
     for (let i = 0; i < Math.round(38 * areaFactor); i += 1) spawnProducer(lightningProducerOptions(PRODUCER.C, i));
     for (let i = 0; i < Math.round(120 * areaFactor); i += 1) spawnConsumer(lightningMobileOptions('consumer', i));
-    for (let i = 0; i < Math.round(18 * areaFactor); i += 1) spawnPredator(lightningMobileOptions('predator', i));
+    for (let i = 0; i < Math.round(5 * areaFactor); i += 1) spawnPredator(lightningMobileOptions('predator', i));
     if (LOG_EVENTS) logEvent('Seed inicial: biomasa base, consumidores y depredadores');
   }
 
