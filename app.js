@@ -2910,16 +2910,28 @@
     if (!sim.carcasses.length) return;
     ctx.fillStyle = '#1a1a1a';
     ctx.lineWidth = 1;
+    // World-space viewport bounds (same pattern as render)
+    const wEps = 50 / camera.zoom;
+    const vwMinX = camera.x - window.innerWidth / (2 * camera.zoom) - wEps;
+    const vwMaxX = camera.x + window.innerWidth / (2 * camera.zoom) + wEps;
+    const vwMinY = camera.y - window.innerHeight / (2 * camera.zoom) - wEps;
+    const vwMaxY = camera.y + window.innerHeight / (2 * camera.zoom) + wEps;
     for (let c = 0; c < sim.carcasses.length; c += 1) {
       const car = sim.carcasses[c];
       const t = car.life / car.maxLife;
       if (t > 0.92) continue; // skip nearly invisible
       const alpha = (1 - t) * 0.6;
-      const r = Math.max(1, car.radius * (1 + t * 0.5) * camera.zoom);
+      const carR = car.radius || 2;
+      const r = Math.max(1, carR * (1 + t * 0.5) * camera.zoom);
       for (let o = 0; o < offsets.length; o += 1) {
-        const { ox, oy } = offsets[o];
-        const p = worldToScreen(car.x + ox, car.y + oy);
-        if (p.x < -20 || p.y < -20 || p.x > window.innerWidth + 20 || p.y > window.innerHeight + 20) continue;
+        const ox = offsets[o].ox;
+        const oy = offsets[o].oy;
+        const wx = car.x + ox;
+        const wy = car.y + oy;
+        // World-space cull before worldToScreen
+        if (wx - carR > vwMaxX || wx + carR < vwMinX) continue;
+        if (wy - carR > vwMaxY || wy + carR < vwMinY) continue;
+        const p = worldToScreen(wx, wy);
         ctx.globalAlpha = alpha;
         ctx.beginPath();
         ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
