@@ -199,6 +199,7 @@
     statDeaths: document.getElementById('statDeaths'),
     statTime: document.getElementById('statTime'),
     statFps: document.getElementById('statFps'),
+    statFlow: document.getElementById('statFlow'),
     legendProducerA: document.getElementById('legendProducerA'),
     legendProducerB: document.getElementById('legendProducerB'),
     legendProducerC: document.getElementById('legendProducerC'),
@@ -281,7 +282,11 @@
     thermalAccumulator: 0,
     thermalEnergyHistory: [],     // ultimas N muestras de energia total
     thermalDecayRate: 0,           // rate actual de disipacion (0 = inactivo)
-    mobileEnergySum: 0             // running sum de energy de consumers+predators vivos
+    mobileEnergySum: 0,             // running sum de energy de consumers+predators vivos
+    // Energy flow audit: acumuladores de transferencias energeticas
+    flowAccum: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0 },
+    flowAccumPrev: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0 },
+    flowRate: { in: 0, out: 0, balance: 0 }
   };
 
   const fmt = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 });
@@ -832,10 +837,12 @@
     // gain=0.047*16*densityFactor ~= 0.75/evento en zona rica, 0.30 en zona pobre.
     // Ratio gain:metab ~4.5x (antes 12.8x). Eficiencia trofica ~22%.
     const gain = bite * 16 * densityFactor;
-    const newEnergy = Math.min(e.maxEnergy, e.energy + gain);
-    sim.mobileEnergySum += newEnergy - e.energy;
+    const actualGain = Math.min(gain, e.maxEnergy - e.energy);
+    const newEnergy = e.energy + actualGain;
+    sim.mobileEnergySum += actualGain;
     e.energy = newEnergy;
     e.grazeCooldown = rand(0.3, 0.8);
+    sim.flowAccum.graze += actualGain;
     return true;
   }
 
@@ -846,6 +853,7 @@
     const energyAmount = Math.max(0.18, car.energy * 0.15);
     const depositRadius = Math.max(90, Math.min(240, car.radius * 12 + Math.sqrt(car.energy) * 6));
     addProducerDensity(car.x, car.y, energyAmount, depositRadius);
+    sim.flowAccum.carcassToField += energyAmount;
     car.energy = 0;
     car.alive = false;
   }
@@ -894,9 +902,11 @@
     if (dx * dx + dy * dy > eatRange * eatRange) return false;
     const bite = Math.min(car.energy, 0.9 + e.size * 0.58 + e.pseudopodia * 0.38 + (e.feeding === 2 ? 0.8 : 0) + (e.feeding === 3 ? 0.6 : 0));
     car.energy -= bite;
-    const newEng = Math.min(e.maxEnergy, e.energy + bite);
-    sim.mobileEnergySum += newEng - e.energy;
+    const actualGainCar = Math.min(bite, e.maxEnergy - e.energy);
+    const newEng = e.energy + actualGainCar;
+    sim.mobileEnergySum += actualGainCar;
     e.energy = newEng;
+    sim.flowAccum.carcassEat += actualGainCar;
     if (car.energy <= 0.2) {
       car.energy = 0;
       car.alive = false;
@@ -1751,9 +1761,11 @@
       // Coste total colonia = bite * 0.76. Gain capado a 3.0x bite (ratio ~4:1, eficiencia trofica ~25%)
       target.energy = Math.max(0, target.energy - bite * 0.30);
       const gainCol = Math.min(bite * 3.0, 18);
-      const newEng = Math.min(e.maxEnergy, e.energy + gainCol);
-      sim.mobileEnergySum += newEng - e.energy;
+      const actualGainCol = Math.min(gainCol, e.maxEnergy - e.energy);
+      const newEng = e.energy + actualGainCol;
+      sim.mobileEnergySum += actualGainCol;
       e.energy = newEng;
+      sim.flowAccum.colonyFeed += actualGainCol;
       return true;
     }
 
@@ -1836,9 +1848,12 @@
     // (sin esto, kill lee target.energy intacta y crea carcass con energy ya consumida)
     target.energy = Math.max(0, target.energy - gain);
     // Si target es mobile, su energy ya se resto del sum via kill(). Si es producer, no esta en el sum.
-    const newEng = Math.min(e.maxEnergy, e.energy + gain);
-    sim.mobileEnergySum += newEng - e.energy;
+    const actualGainPred = Math.min(gain, e.maxEnergy - e.energy);
+    const newEng = e.energy + actualGainPred;
+    sim.mobileEnergySum += actualGainPred;
     e.energy = newEng;
+    if (e.type === TYPE.PREDATOR) sim.flowAccum.predation += actualGainPred;
+    else sim.flowAccum.prodCGraze += actualGainPred;
     // Holling Type II handling time: el predator pierde tiempo procesando la presa.
     // Escala con el tamano de la presa: presas grandes = mas handling.
     // Consumer->ProducerC: handling corto (1.5-2.5s). Predator->Consumer/Producer: mas largo.
@@ -1900,6 +1915,7 @@
     e.energy *= 0.58;
     mate.energy *= 0.62;
     sim.mobileEnergySum -= parentLoss;
+    sim.flowAccum.reproduction += parentLoss;
     e.cooldown = rand(18, 55) / e.fertility;
     mate.cooldown = rand(18, 55) / mate.fertility;
     if (sim.births % 12 === 0) {
@@ -1990,8 +2006,13 @@
     const metabCost = e.metabolism * dt * smoothFactor;
     e.energy -= metabCost;
     sim.mobileEnergySum -= metabCost;
+    sim.flowAccum.metabolism += metabCost;
     // DOC excretion: recicla 15% del metabCost al producerField (microbial loop)
-    if (metabCost > 0.01) addProducerDensity(e.x, e.y, metabCost * 0.003, 60);
+    if (metabCost > 0.01) {
+      const excretion = metabCost * 0.003;
+      addProducerDensity(e.x, e.y, excretion, 60);
+      sim.flowAccum.excretion += excretion;
+    }
     // Thermal entropy: disipacion adaptativa si el sistema tiene inflacion energetica
     if (sim.thermalDecayRate > 0 && (e.type === TYPE.CONSUMER || e.type === TYPE.PREDATOR)) {
       const thermalLoss = e.energy * sim.thermalDecayRate * dt;
@@ -3158,6 +3179,25 @@
     if (!force && sim.time - sim.lastStatsAt < 0.35) return;
     const dtStats = sim.time - sim.lastStatsAt;
     sim.lastStatsAt = sim.time;
+    // Energy flow rate: calcular delta de acumuladores desde ultima muestra
+    if (dtStats > 0) {
+      const fa = sim.flowAccum, fp = sim.flowAccumPrev;
+      const dGraze = fa.graze - fp.graze;
+      const dColony = fa.colonyFeed - fp.colonyFeed;
+      const dProdC = fa.prodCGraze - fp.prodCGraze;
+      const dPred = fa.predation - fp.predation;
+      const dCarcassEat = fa.carcassEat - fp.carcassEat;
+      const dCarcassField = fa.carcassToField - fp.carcassToField;
+      const dMetab = fa.metabolism - fp.metabolism;
+      const dRepro = fa.reproduction - fp.reproduction;
+      const dExcret = fa.excretion - fp.excretion;
+      const energyIn = dGraze + dColony + dProdC + dPred + dCarcassEat + dExcret;
+      const energyOut = dMetab + dRepro;
+      sim.flowRate.in = energyIn / dtStats;
+      sim.flowRate.out = energyOut / dtStats;
+      sim.flowRate.balance = (energyIn - energyOut) / dtStats;
+      Object.assign(fp, fa);
+    }
     // Re-sync mobileEnergySum cada ~60s para corregir drift acumulado
     sim.energyResyncAccum = (sim.energyResyncAccum || 0) + dtStats;
     if (sim.energyResyncAccum >= 60) {
@@ -3194,6 +3234,10 @@
     els.statDeaths.textContent = fmt.format(sim.deaths);
     els.statTime.textContent = `${String(Math.floor(sim.time / 60)).padStart(3, '0')}m ${String(Math.floor(sim.time % 60)).padStart(2, '0')}s`;
     els.statFps.textContent = String(Math.round(sim.fps));
+    // Energy flow balance: verde si positivo, rojo si negativo
+    const fr = sim.flowRate;
+    els.statFlow.textContent = `${fr.balance >= 0 ? '+' : ''}${fr.balance.toFixed(1)}`;
+    els.statFlow.style.color = fr.balance >= 0 ? '#5fd97a' : '#ff6b6b';
     els.legendProducerA.textContent = c.producerDensity.toFixed(3);
     els.legendProducerB.textContent = fmt.format(c.producerB);
     els.legendProducerC.textContent = fmt.format(c.producerC);
