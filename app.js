@@ -1363,6 +1363,11 @@
       if (e.type === TYPE.PREDATOR && isColonyProducer(t)) continue;
       if (isColonyProducer(t) && ((t.leafCount || 0) <= 0 || t.leafEnergy <= 0.35)) continue;
       if (t.type === TYPE.PRODUCER && t.sub !== PRODUCER.A && !canEatArmored(e, t)) continue;
+      // Gape limitation: predators skip consumers demasiado grandes para comer
+      if (e.type === TYPE.PREDATOR && t.type === TYPE.CONSUMER) {
+        const sizeRatio = t.size / Math.max(1, e.size);
+        if (sizeRatio > 0.85) continue;
+      }
       const dx = torusDelta(t.x - e.x, WORLD.w);
       const dy = torusDelta(t.y - e.y, WORLD.h);
       const d2 = dx * dx + dy * dy;
