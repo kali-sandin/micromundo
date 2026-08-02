@@ -1927,6 +1927,21 @@
       metabFactor *= 1 + (e._hadPanic - 1) * (e._hadPanic - 1) * 3;
       e._hadPanic = 0;
     }
+    // Crowding stress (anti boom-bust): consumers en alta densidad local pagan mas metabolismo.
+    // Throttled cada 3s para evitar coste de queryNearby cada step.
+    // >8 vecinos en 120px: +3% metab por vecino extra. Simula competencia y stress por densidad.
+    if (e.type === TYPE.CONSUMER) {
+      e._crowdCheckTimer = (e._crowdCheckTimer || 0) + dt;
+      if (e._crowdCheckTimer >= 3) {
+        e._crowdCheckTimer = 0;
+        queryNearby(e.x, e.y, 120, TYPE.CONSUMER, nearby);
+        const neighbors = nearby.length;
+        e._crowdDensity = neighbors > 8 ? neighbors : 0;
+      }
+      if (e._crowdDensity > 8) {
+        metabFactor *= 1 + (e._crowdDensity - 8) * 0.03;
+      }
+    }
     const metabCost = e.metabolism * dt * metabFactor;
     e.energy -= metabCost;
     sim.mobileEnergySum -= metabCost;
