@@ -1831,6 +1831,11 @@
     e.huntCooldown = e.type === TYPE.PREDATOR
       ? 1.8 + preySize + rand(0, 0.8)   // 1.8-3.5s para predators
       : 1.2 + rand(0, 0.5);              // 1.2-1.7s para consumers (ProducerC)
+    // Sloppy feeding (microbial loop): 12% de energia de presa se pierde al producerField.
+    // Simula DOC leakage durante predacion. Cria hotspots de fertilidad en zonas de caza.
+    if (e.type === TYPE.PREDATOR && !target.virtualA) {
+      addProducerDensity(target.x, target.y, gain * 0.12 * 0.02, 50);
+    }
     kill(target, e.type === TYPE.PREDATOR ? (target.type === TYPE.PRODUCER ? 'Depredador consume productor' : 'Depredador consume consumidor') : null);
     return true;
   }
