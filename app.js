@@ -156,6 +156,7 @@
   const PRODUCER_C_DEFAULT_FERTILITY = 0.026;
   const PRODUCER_C_CROWD_RADIUS = 320;
   const PRODUCER_C_CROWD_LIMIT = 2;
+  const COLONY_MATE_RANGE = 400;
 
   const canvas = document.getElementById('world');
   const ctx = canvas.getContext('2d', { alpha: false });
@@ -1624,11 +1625,11 @@
 
     if (isColonyProducer(e)) {
       if (e.leafCount < COLONY_MIN_LEAVES_TO_REPRODUCE || e.energy < e.maxEnergy * 0.42) return;
-      queryNearby(e.x, e.y, 400, TYPE.PRODUCER, nearby);
+      queryNearby(e.x, e.y, COLONY_MATE_RANGE, TYPE.PRODUCER, nearby);
       let hasLargeMate = false;
       for (let ni = 0; ni < nearby.length; ni += 1) {
         const p = nearby[ni];
-        if (p !== e && isColonyProducer(p)) { hasLargeMate = true; break; }
+        if (p !== e && p.sub === PRODUCER.B) { hasLargeMate = true; break; }
       }
       if (!hasLargeMate || !chance(0.58)) return;
       const childLeafEnergy = Math.min(e.leafEnergy, COLONY_MIN_LEAVES_TO_REPRODUCE * 3.4);
