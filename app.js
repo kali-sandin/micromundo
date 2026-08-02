@@ -1942,6 +1942,10 @@
         metabFactor *= 1 + (e._crowdDensity - 8) * 0.03;
       }
     }
+    // Reduccion metabolica nocturna: de noche el metabolismo baja (ritmos circadianos)
+    if (sim.dayNightEnabled) {
+      metabFactor *= 0.75 + 0.25 * clamp(sim.solarEnergy / sim.solarEnergyBase, 0, 1);
+    }
     const metabCost = e.metabolism * dt * metabFactor;
     e.energy -= metabCost;
     sim.mobileEnergySum -= metabCost;
