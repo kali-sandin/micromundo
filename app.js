@@ -2041,7 +2041,13 @@
         }
         if (bestPrey) food = bestPrey;
       }
-      steeringTarget = food || (cachedMate = findMateTarget(e, TYPE.PREDATOR));
+      // Si el predator tiene energia alta y no hay threat, prioriza reproducir sobre cazar
+      if (food && e.energy > e.maxEnergy * 0.8 && !threat) {
+        cachedMate = findMateTarget(e, TYPE.PREDATOR);
+        steeringTarget = cachedMate || food;
+      } else {
+        steeringTarget = food || (cachedMate = findMateTarget(e, TYPE.PREDATOR));
+      }
     } else {
       queryNearby(e.x, e.y, e.perception, TYPE.PRODUCER, nearby);
       const entityFood = nearestFood(e, nearby);
@@ -2054,7 +2060,8 @@
           const fdx = torusDelta(fieldFood.x - e.x, WORLD.w);
           const fdy = torusDelta(fieldFood.y - e.y, WORLD.h);
           const edx = torusDelta(entityFood.x - e.x, WORLD.w);
-          if ((fdx * fdx + fdy * fdy) * 0.75 < edx * edx + edy * edy) food = fieldFood;
+          const fieldBias = 0.55 + e.feeding * 0.10; // grazers prefieren campo, phagocytes entity
+          if ((fdx * fdx + fdy * fdy) * fieldBias < edx * edx + edy * edy) food = fieldFood;
         }
       }
       if (!food && e.energy < e.maxEnergy * 0.42) food = nearestCarcassFood(e, e.perception * 0.65);
