@@ -273,7 +273,6 @@
     geneSeriesHidden: {},
     carcasses: [],
     predatorCount: 0,
-    predatorCountTimer: 0,
     migrationTimer: 0,
     liveConsumerCount: 0,
     liveProducerBCount: 0,
@@ -1009,6 +1008,7 @@
         y: e.y,
         radius: Math.max(2, e.radius * 0.9),
         sourceType: e.type,
+        color: e.color || (e.type === TYPE.PREDATOR ? '#f05b50' : e.type === TYPE.CONSUMER ? '#54b7f1' : '#76d25d'),
         energy: storedEnergy,
         maxEnergy: storedEnergy,
         life: 0,
@@ -2839,8 +2839,6 @@
     // Minimum visible size: mobile creatures need to be visible at any zoom
     const minR = e.type === TYPE.CONSUMER || e.type === TYPE.PREDATOR ? 3 : 1;
     const r = Math.max(minR, e.radius * camera.zoom);
-    if (p.x < -20 || p.y < -20 || p.x > window.innerWidth + 20 || p.y > window.innerHeight + 20) return;
-
     ctx.fillStyle = e.color;
     if (e.starved === 2) ctx.fillStyle = '#e8d44a';
     else if (e.starved === 1) ctx.fillStyle = '#b8a842';
