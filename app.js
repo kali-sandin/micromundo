@@ -2063,17 +2063,24 @@
     var needC = sim.liveProducerCCount < THRESHOLD;
     var needM = sim.liveConsumerCount < THRESHOLD;
     var needP = sim.predatorCount < THRESHOLD;
+    // Live counters ya disponibles: usarlos para skip del scan completo
+    var cB = sim.liveProducerBCount, cC = sim.liveProducerCCount;
+    var cM = sim.liveConsumerCount, cP = sim.predatorCount;
+    // Refinar needs con counts exactos
+    needB = needB && cB < THRESHOLD;
+    needC = needC && cC < THRESHOLD;
+    needM = needM && cM < THRESHOLD;
+    needP = needP && cP < THRESHOLD;
     if (!needB && !needC && !needM && !needP) return;
-    // Count-first: only build arrays for types that need rescue
-    var cB = 0, cC = 0, cM = 0, cP = 0;
+    // Solo construir survivors arrays para tipos que necesitan rescue
     var sB = needB ? [] : null, sC = needC ? [] : null, sM = needM ? [] : null, sP = needP ? [] : null;
     for (var i = 0; i < sim.creatures.length; i += 1) {
       var e = sim.creatures[i];
       if (!e || !e.alive) continue;
-      if (e.type === TYPE.PRODUCER && e.sub === PRODUCER.B) { cB++; if (sB) sB.push(e); }
-      else if (e.type === TYPE.PRODUCER && e.sub === PRODUCER.C) { cC++; if (sC) sC.push(e); }
-      else if (e.type === TYPE.CONSUMER) { cM++; if (sM) sM.push(e); }
-      else if (e.type === TYPE.PREDATOR) { cP++; if (sP) sP.push(e); }
+      if (e.type === TYPE.PRODUCER && e.sub === PRODUCER.B) { if (sB) sB.push(e); }
+      else if (e.type === TYPE.PRODUCER && e.sub === PRODUCER.C) { if (sC) sC.push(e); }
+      else if (e.type === TYPE.CONSUMER) { if (sM) sM.push(e); }
+      else if (e.type === TYPE.PREDATOR) { if (sP) sP.push(e); }
     }
     var baseProb = 0.005 * (5 / 60);
     // Prob escalada inversa: menor poblacion = mayor chance de rescue
