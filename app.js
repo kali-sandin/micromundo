@@ -703,8 +703,10 @@
     const dst = field.scratch;
     let total = 0;
     const sunlight = clamp(sim.solarEnergy, 0.1, 6);
-    const growth = 0.015 * sunlight * t;
-    const baselineGrowth = 0.001 * sunlight * t; // evita frontera absorbente en m~0
+    // Holling II: saturar growth con sunlight para evitar paradoja del enriquecimiento
+    const sunEff = sunlight / (1 + sunlight * 0.15); // sun=1->0.87, sun=3->2.22, sun=6->4.0
+    const growth = 0.015 * sunEff * t;
+    const baselineGrowth = 0.001 * sunEff * t; // evita frontera absorbente en m~0
     const diffusion = 0.028 * t;
 
     for (let y = 0; y < rows; y += 1) {
