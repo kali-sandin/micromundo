@@ -2942,21 +2942,28 @@
     ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
   }
 
+  // Bucket arrays for batched carcass rendering (8 alpha levels)
+  // Elimina cientos de globalAlpha + strokeStyle changes por frame
+  const _carcBuckets = [];
+  for (let i = 0; i < 8; i++) _carcBuckets.push({ fill: [], stroke: [] });
+
   function drawCarcasses(offsets) {
     if (!sim.carcasses.length) return;
-    ctx.fillStyle = '#1a1a1a';
-    ctx.lineWidth = 1;
     // World-space viewport bounds (same pattern as render)
     const wEps = 50 / camera.zoom;
     const vwMinX = camera.x - window.innerWidth / (2 * camera.zoom) - wEps;
     const vwMaxX = camera.x + window.innerWidth / (2 * camera.zoom) + wEps;
     const vwMinY = camera.y - window.innerHeight / (2 * camera.zoom) - wEps;
     const vwMaxY = camera.y + window.innerHeight / (2 * camera.zoom) + wEps;
+
+    // Reset buckets
+    for (let b = 0; b < 8; b++) { _carcBuckets[b].fill.length = 0; _carcBuckets[b].stroke.length = 0; }
+
+    // Sort visible carcasses into alpha buckets
     for (let c = 0; c < sim.carcasses.length; c += 1) {
       const car = sim.carcasses[c];
       const t = car.life / car.maxLife;
-      if (t > 0.92) continue; // skip nearly invisible
-      const alpha = (1 - t) * 0.6;
+      if (t > 0.92) continue;
       const carR = car.radius || 2;
       const r = Math.max(1, carR * (1 + t * 0.5) * camera.zoom);
       for (let o = 0; o < offsets.length; o += 1) {
@@ -2964,21 +2971,52 @@
         const oy = offsets[o].oy;
         const wx = car.x + ox;
         const wy = car.y + oy;
-        // World-space cull before worldToScreen
         if (wx - carR > vwMaxX || wx + carR < vwMinX) continue;
         if (wy - carR > vwMaxY || wy + carR < vwMinY) continue;
         const p = worldToScreen(wx, wy);
-        ctx.globalAlpha = alpha;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalAlpha = alpha * 0.5;
-        ctx.strokeStyle = car.color || '#444';
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, r * 1.4, 0, Math.PI * 2);
-        ctx.stroke();
+        const alpha = (1 - t) * 0.6;
+        const bucketIdx = Math.min(7, (alpha * 13.33) | 0); // 8 buckets, step ~0.075
+        const bucket = _carcBuckets[bucketIdx];
+        bucket.fill.push(p.x, p.y, r);
+        bucket.stroke.push(p.x, p.y, r * 1.4, car.color || '#444');
       }
     }
+
+    // Render fills batched (1 style change per bucket instead of per carcass)
+    ctx.fillStyle = '#1a1a1a';
+    for (let b = 0; b < 8; b++) {
+      const fill = _carcBuckets[b].fill;
+      if (!fill.length) continue;
+      ctx.globalAlpha = (b + 0.5) / 8 * 0.6;
+      ctx.beginPath();
+      for (let i = 0; i < fill.length; i += 3) {
+        ctx.moveTo(fill[i], fill[i + 1]);
+        ctx.arc(fill[i], fill[i + 1], fill[i + 2], 0, Math.PI * 2);
+      }
+      ctx.fill();
+    }
+
+    // Render strokes batched, sub-grouped by color within each alpha bucket
+    ctx.lineWidth = 1;
+    for (let b = 0; b < 8; b++) {
+      const stroke = _carcBuckets[b].stroke;
+      if (!stroke.length) continue;
+      ctx.globalAlpha = (b + 0.5) / 8 * 0.3;
+      let curColor = null;
+      ctx.beginPath();
+      for (let i = 0; i < stroke.length; i += 4) {
+        const col = stroke[i + 3];
+        if (col !== curColor) {
+          if (curColor !== null) { ctx.stroke(); ctx.beginPath(); }
+          curColor = col;
+          ctx.strokeStyle = col;
+        }
+        ctx.moveTo(stroke[i], stroke[i + 1]);
+        ctx.arc(stroke[i], stroke[i + 1], stroke[i + 2], 0, Math.PI * 2);
+      }
+      if (curColor !== null) ctx.stroke();
+    }
+
     ctx.globalAlpha = 1;
   }
 
