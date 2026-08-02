@@ -1134,11 +1134,10 @@
     // para que speedCost y metabolism reflejen la masa y velocidad reales
     derivedConsumerStats(e);
     e.radius += 1.5;
-    e.maxEnergy *= 2.0;
+    e.maxEnergy *= 1.5;
     const oldEnergy = e.energy;
     if (opts.energy == null) e.energy = rand(e.maxEnergy * 0.38, e.maxEnergy * 0.62);
     else e.energy = clamp(opts.energy, 1, e.maxEnergy);
-    e.metabolism *= 0.92;
     e.maxAge = Number(opts.maxAge ?? rand(7200, 11700));
     sim.mobileEnergySum += e.energy - oldEnergy;
     sim.liveConsumerCount--;
