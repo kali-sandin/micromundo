@@ -3405,21 +3405,31 @@
     sim.lastFrame = ts;
 
     if (!sim.paused) {
-      const scaled = elapsed * sim.speed;
-      const chunks = Math.max(1, Math.min(MAX_SIM_CHUNKS, Math.ceil(scaled / MAX_DT)));
-      const dt = Math.min(scaled / chunks, MAX_DT);
-      // Cuando scaled > chunks*MAX_DT (cap hit), simular chunks*MAX_DT y usar
-      // el remainder como un paso extra si hay margen de chunks disponibles.
-      const simTime = chunks * dt;
-      const remainder = scaled - simTime;
-      compactIfNeeded();
-      rebuildGrid();
-      for (let i = 0; i < chunks; i += 1) {
-        simulate(dt);
-        // Refresh grid cada GRID_REFRESH_INTERVAL chunks para mantener queries espaciales frescas
-        if ((i + 1) % GRID_REFRESH_INTERVAL === 0 && i + 1 < chunks) rebuildGrid();
+      // Fixed timestep accumulator: desacopla sim de framerate del monitor.
+      // En 144Hz, la mitad de frames solo renderizan (sin rebuildGrid/simulate).
+      // SIM_FRAME = 1/60s; sim corre a ~60Hz fijo independientemente del refresh rate.
+      const SIM_FRAME = 1 / 60;
+      if (sim.simAccum == null) sim.simAccum = 0;
+      sim.simAccum += elapsed * sim.speed;
+      // Cap anti-spiral: si acumula demasiado (tab inactivo, lag), descargar exceso
+      // Permite hasta MAX_SIM_CHUNKS steps por frame para no perder velocidad de sim
+      const SIM_ACCUM_CAP = SIM_FRAME * MAX_SIM_CHUNKS;
+      if (sim.simAccum > SIM_ACCUM_CAP) sim.simAccum = SIM_ACCUM_CAP;
+      while (sim.simAccum >= SIM_FRAME) {
+        const scaled = SIM_FRAME;
+        const chunks = Math.max(1, Math.min(MAX_SIM_CHUNKS, Math.ceil(scaled / MAX_DT)));
+        const dt = Math.min(scaled / chunks, MAX_DT);
+        const simTime = chunks * dt;
+        const remainder = scaled - simTime;
+        compactIfNeeded();
+        rebuildGrid();
+        for (let i = 0; i < chunks; i += 1) {
+          simulate(dt);
+          if ((i + 1) % GRID_REFRESH_INTERVAL === 0 && i + 1 < chunks) rebuildGrid();
+        }
+        if (remainder > 0 && chunks < MAX_SIM_CHUNKS) simulate(Math.min(remainder, MAX_DT));
+        sim.simAccum -= scaled;
       }
-      if (remainder > 0 && chunks < MAX_SIM_CHUNKS) simulate(Math.min(remainder, MAX_DT));
     }
 
     updateCameraFollow();
