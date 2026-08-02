@@ -962,6 +962,16 @@
     e._birthStep = sim.time;
     sim.creatures[id] = e;
     sim.creatureIndex.set(e.uid, e);
+    // Insert into spatial grid immediately so other creatures can detect newborns
+    // as food/mate/threat within the same frame (before next rebuildGrid).
+    if (sim.grid) {
+      const key = cellKeyInt(e.x, e.y);
+      const bucket = sim.grid[key];
+      if (bucket) {
+        bucket[e.type].push(e);
+        if (!sim.gridDirtySeen[key]) { sim.gridDirtySeen[key] = 1; sim.gridDirtyCells.push(key); }
+      }
+    }
     return e;
   }
 
