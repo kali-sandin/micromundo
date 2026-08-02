@@ -1946,7 +1946,12 @@
     if (sim.dayNightEnabled) {
       metabFactor *= 0.75 + 0.25 * clamp(sim.solarEnergy / sim.solarEnergyBase, 0, 1);
     }
-    const metabCost = e.metabolism * dt * metabFactor;
+    // Momentum metabolico (EMA): suaviza transiciones de metabFactor
+    // 70% valor actual + 30% valor anterior. Evita saltos instantaneos.
+    if (!e._metabFactorSmooth) e._metabFactorSmooth = metabFactor;
+    e._metabFactorSmooth = e._metabFactorSmooth * 0.3 + metabFactor * 0.7;
+    const smoothFactor = e._metabFactorSmooth;
+    const metabCost = e.metabolism * dt * smoothFactor;
     e.energy -= metabCost;
     sim.mobileEnergySum -= metabCost;
     // DOC excretion: recicla 15% del metabCost al producerField (microbial loop)
