@@ -2163,22 +2163,24 @@
     var isProducerC = type === 'producerC';
     // Si no hay survivors (especie extinguida), usar genes base aleatorios para recolonizacion
     var hasSurvivors = survivors && survivors.length > 0;
-    var fallbackDonor = hasSurvivors ? null : {
-      size: isPredator ? rand(4, 7) : rand(1, 3),
-      reserves: rand(2, 8),
-      flagella: Math.floor(rand(1, 4)),
-      cilia: Math.floor(rand(0, 3)),
-      chemosense: rand(0.5, 2),
-      pseudopodia: rand(0, 2),
-      armor: rand(0, 2),
-      vacuole: rand(0, 2),
-      feeding: Math.floor(rand(0, 3)),
-      movementMask: 1 << Math.floor(rand(0, 3)),
-      fertility: rand(0.4, 0.7),
-      maxAge: isPredator ? rand(6000, 10000) : rand(2000, 5000)
-    };
+    function makeFallbackDonor() {
+      return {
+        size: isPredator ? rand(4, 7) : rand(1, 3),
+        reserves: rand(2, 8),
+        flagella: Math.floor(rand(1, 4)),
+        cilia: Math.floor(rand(0, 3)),
+        chemosense: rand(0.5, 2),
+        pseudopodia: rand(0, 2),
+        armor: rand(0, 2),
+        vacuole: rand(0, 2),
+        feeding: Math.floor(rand(0, 3)),
+        movementMask: 1 << Math.floor(rand(0, 3)),
+        fertility: rand(0.4, 0.7),
+        maxAge: isPredator ? rand(6000, 10000) : rand(2000, 5000)
+      };
+    }
     for (var i = 0; i < n; i++) {
-      var donor = hasSurvivors ? survivors[Math.floor(rand(0, survivors.length))] : fallbackDonor;
+      var donor = hasSurvivors ? survivors[Math.floor(rand(0, survivors.length))] : makeFallbackDonor();
       var edge = Math.floor(rand(0, 4));
       var margin = 80;
       var x, y;
