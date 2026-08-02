@@ -1770,6 +1770,22 @@
     if (e.type === TYPE.PREDATOR && e.energy > e.maxEnergy * 0.95) return false;
     if (e.type === TYPE.PREDATOR && e.energy > e.maxEnergy * 0.85 && chance(0.5)) return false;
 
+    // Chase success: depredadores no siempre matan al contacto.
+    // Presas rapidas y pequenas escapan mas. Presas lentas y grandes casi siempre caen.
+    // speedRatio = predator speed vs prey speed. sizeAdv = ventaja de talla del predator.
+    if (e.type === TYPE.PREDATOR && target.type === TYPE.CONSUMER) {
+      const predSpeed = Math.sqrt(e.vx * e.vx + e.vy * e.vy);
+      const preySpeed = Math.sqrt(target.vx * target.vx + target.vy * target.vy);
+      const speedRatio = predSpeed / Math.max(0.1, preySpeed);
+      const sizeAdv = clamp(e.size / Math.max(1, target.size) - 1, 0, 2);
+      const chaseSuccess = clamp(speedRatio * 0.25 + sizeAdv * 0.2 + 0.35, 0.25, 0.92);
+      if (!chance(chaseSuccess)) {
+        // Presa escapa: predator pierde tiempo de persecucion fallida
+        e.huntCooldown = 0.5 + rand(0, 0.3);
+        return false;
+      }
+    }
+
     // Gape-limitation: depredadores no pueden comer presas mucho mas grandes
     let gapeFactor = 1;
     if (e.type === TYPE.PREDATOR && target.type === TYPE.CONSUMER) {
