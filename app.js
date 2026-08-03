@@ -1612,7 +1612,7 @@
       }
       const leafLimit = clamp(Math.floor(2 + e.radius / 6), 2, 14);
       const leafTarget = clamp(Math.floor(e.leafEnergy / 3), 0, leafLimit);
-      if (leafTarget > e.leafCount && chance(dt * sun * 0.6)) e.leafCount += 1;
+      if (leafTarget > e.leafCount && chance(Math.min(1, dt * sun * 0.6))) e.leafCount += 1;
 
       if (sim.time >= e.competitionAt) {
         e.competitionAt = sim.time + rand(2.5, 6);
