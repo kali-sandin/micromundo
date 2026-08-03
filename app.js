@@ -719,7 +719,12 @@
     const sunEff = sunlight / (1 + sunlight * 0.15); // sun=1->0.87, sun=3->2.22, sun=6->4.0
     const growth = 0.015 * sunEff * t;
     const baselineGrowth = 0.001 * sunEff * t; // evita frontera absorbente en m~0
-    const diffusion = 0.028 * t;
+    // Diffusion adaptativo: reducir cuando campo critico para proteger patches locales.
+    // Campo sano (avg>0.3): diffusion normal. Campo critico (avg<0.1): diffusion x0.3.
+    // Evita que少量 biomasa se dispersa y se pierda tras crashes.
+    const fieldAvg = field.total / (cols * rows);
+    const diffScale = clamp(fieldAvg / 0.3, 0.3, 1);
+    const diffusion = 0.028 * t * diffScale;
 
     for (let y = 0; y < rows; y += 1) {
       const yc = y * cols;
