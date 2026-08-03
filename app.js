@@ -2993,6 +2993,9 @@
     ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
   }
 
+  // Pre-allocated scratch array for batched flagella rendering (x, y, angle, r, flagella per segment)
+  const _flagellaBatch = [];
+
   // Bucket arrays for batched carcass rendering (8 alpha levels)
   // Elimina cientos de globalAlpha + strokeStyle changes por frame
   const _carcBuckets = [];
@@ -3097,36 +3100,6 @@
     ctx.restore();
   }
 
-  // Batch flagella rendering: acumula todos los segmentos de consumers visibles
-  // en un unico beginPath+stroke. Elimina cientos de state changes por frame.
-  function drawFlagellaBatch(offsets, vwMinX, vwMaxX, vwMinY, vwMaxY) {
-    if (camera.zoom <= 0.05) return;
-    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    let hasSegments = false;
-    for (let i = 0; i < sim.creatures.length; i += 1) {
-      const e = sim.creatures[i];
-      if (!e || !e.alive || e.type !== TYPE.CONSUMER) continue;
-      const er = e.radius || 2;
-      for (let o = 0; o < offsets.length; o += 1) {
-        const ox = offsets[o].ox;
-        const oy = offsets[o].oy;
-        const wx = e.x + ox;
-        const wy = e.y + oy;
-        if (wx - er > vwMaxX || wx + er < vwMinX) continue;
-        if (wy - er > vwMaxY || wy + er < vwMinY) continue;
-        const p = worldToScreen(wx, wy);
-        const r = Math.max(3, er * camera.zoom);
-        if (r <= 2.2) continue; // flagella invisible en zoom muy bajo
-        ctx.moveTo(p.x, p.y);
-        ctx.lineTo(p.x - lutCos(e.angle) * r * (1.6 + e.flagella * 0.5), p.y - lutSin(e.angle) * r * (1.6 + e.flagella * 0.5));
-        hasSegments = true;
-      }
-    }
-    if (hasSegments) ctx.stroke();
-  }
-
   function render() {
     resize();
     clampCamera();
@@ -3147,6 +3120,9 @@
     // Cached selected set: only rebuild when selection changes (invalidates _selectedKeysCache)
     if (!sim._selectedKeysCache) sim._selectedKeysCache = new Set(sim.selectedCreatureIds);
     const _selectedKeys = sim._selectedKeysCache;
+    // Flagella batch: acumular segmentos durante el loop principal para un unico stroke
+    _flagellaBatch.length = 0;
+    const canDrawFlagella = camera.zoom > 0.05;
     for (let i = 0; i < sim.creatures.length; i += 1) {
       const e = sim.creatures[i];
       if (!e || !e.alive) continue;
@@ -3164,11 +3140,29 @@
           debugDrawn += 1;
         }
         drawCreature(e, ox, oy);
+        // Acumular flagella segmentos para consumers visibles
+        if (canDrawFlagella && e.type === TYPE.CONSUMER) {
+          const p = worldToScreen(wx, wy);
+          const fr = Math.max(3, er * camera.zoom);
+          if (fr > 2.2) {
+            _flagellaBatch.push(p.x, p.y, e.angle, fr, e.flagella);
+          }
+        }
       }
     }
 
     // Batch flagella: un solo beginPath+stroke para todos los consumers visibles
-    drawFlagellaBatch(offsets, vwMinX, vwMaxX, vwMinY, vwMaxY);
+    if (_flagellaBatch.length) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let fi = 0; fi < _flagellaBatch.length; fi += 5) {
+        const fpx = _flagellaBatch[fi], fpy = _flagellaBatch[fi + 1], fang = _flagellaBatch[fi + 2], frr = _flagellaBatch[fi + 3], ffl = _flagellaBatch[fi + 4];
+        ctx.moveTo(fpx, fpy);
+        ctx.lineTo(fpx - lutCos(fang) * frr * (1.6 + ffl * 0.5), fpy - lutSin(fang) * frr * (1.6 + ffl * 0.5));
+      }
+      ctx.stroke();
+    }
 
     // Overlay dia/noche: tinta oscuro cuando solarEnergy < base (noche)
     if (sim.dayNightEnabled) {
