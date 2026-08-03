@@ -1388,6 +1388,7 @@
     for (let i = 0; i < candidates.length; i += 1) {
       const t = candidates[i];
       if (!t.alive) continue;
+      if (t.virtualA) continue; // campo virtual nunca es entidad fisica
       if (t.dormant) continue; // ProducerC dormante es invisible a depredadores
       if (e.type === TYPE.PREDATOR && isColonyProducer(t)) continue;
       if (isColonyProducer(t) && ((t.leafCount || 0) <= 0 || t.leafEnergy <= 0.35)) continue;
