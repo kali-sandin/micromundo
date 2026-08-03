@@ -1606,7 +1606,7 @@
       e.radius = Math.min(e.maxRadius, e.radius + dt * sun * 0.018);
       const leafCap = 8 + e.radius * 0.9;
       if (e.leafEnergy < leafCap) {
-        const leafRegen = Math.min(leafCap - e.leafEnergy, dt * sun * 0.13);
+        const leafRegen = Math.min(leafCap - e.leafEnergy, dt * sun * 0.25);
         e.leafEnergy += leafRegen;
         const leafCost = leafRegen * 0.46;
         e.energy = Math.max(0, e.energy - leafCost);
@@ -1773,7 +1773,8 @@
       if (e.type === TYPE.PREDATOR) return false;
       if ((e.grazeCooldown || 0) > 0) return false;
       if ((target.leafCount || 0) <= 0 || target.leafEnergy <= 0.35 || !canEatArmored(e, target)) return false;
-      const bite = Math.min(target.leafEnergy, 1.0 + e.size * 0.48 + e.pseudopodia * 0.32 + (e.feeding === 2 ? 0.7 : 0) + (e.feeding === 3 ? 0.5 : 0));
+      const maxBite = 1.0 + e.size * 0.48 + e.pseudopodia * 0.32 + (e.feeding === 2 ? 0.7 : 0) + (e.feeding === 3 ? 0.5 : 0);
+      const bite = Math.min(target.leafEnergy * 0.4, maxBite);
       e.grazeCooldown = rand(0.3, 0.8);
       target.leafEnergy -= bite;
       target.leafCount = Math.max(0, (target.leafCount || 0) - 1);
