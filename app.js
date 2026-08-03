@@ -21,7 +21,14 @@
     // Reciclar buckets existentes al pool
     for (let i = 0; i < oldGrid.length; i += 1) {
       const b = oldGrid[i];
-      if (b) { b[0].length = 0; b[1].length = 0; b[2].length = 0; b[3].length = 0; pool.push(b); }
+      if (b) {
+        // Trim arrays que crecieron demasiado durante boom: liberar backing array
+        for (let t = 0; t < 4; t += 1) {
+          if (b[t].length > 64) b[t] = [];
+          else b[t].length = 0;
+        }
+        pool.push(b);
+      }
     }
     sim.grid = new Array(n);
     for (let i = 0; i < n; i += 1) {
