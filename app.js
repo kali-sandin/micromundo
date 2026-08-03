@@ -1603,7 +1603,9 @@
         kill(e, 'Productor B muere por inanición');
         return;
       }
-      e.radius = Math.min(e.maxRadius, e.radius + dt * sun * 0.018);
+      // Growth denso-dependiente: mas grande mas lento crece (self-limiting + competicion implicita)
+      const growthRate = 0.018 * (1 - (e.radius / e.maxRadius) * 0.5);
+      e.radius = Math.min(e.maxRadius, e.radius + dt * sun * growthRate);
       const leafCap = 8 + e.radius * 0.9;
       if (e.leafEnergy < leafCap) {
         const healthFactor = clamp(e.energy / e.maxEnergy, 0.2, 1);
