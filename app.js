@@ -1566,13 +1566,20 @@
       } else {
         e._starveTimer = 0;
       }
-      queryNearby2(e.x, e.y, e.perception || 105, TYPE.CONSUMER, TYPE.PREDATOR, nearby, producerThreats);
+      // Throttled threat scan: full scan every 1.5s, reuse cached results between scans
+      if (sim.time - (e._threatScanAt || 0) > 1.5) {
+        e._threatScanAt = sim.time;
+        if (!e._threatBuf) { e._threatBuf = []; e._threatBufB = []; }
+        queryNearby2(e.x, e.y, e.perception || 105, TYPE.CONSUMER, TYPE.PREDATOR, e._threatBuf, e._threatBufB);
+      }
       let threatDx = 0, threatDy = 0;
       let threatD2 = Infinity;
       for (let li = 0; li < 2; li += 1) {
-        const list = li === 0 ? nearby : producerThreats;
+        const list = li === 0 ? e._threatBuf : e._threatBufB;
+        if (!list) continue;
         for (let i = 0; i < list.length; i += 1) {
           const c = list[i];
+          if (!c || !c.alive) continue;
           if (!canEatArmored(c, e)) continue;
           const tdx = torusDelta(e.x - c.x, WORLD.w);
           const tdy = torusDelta(e.y - c.y, WORLD.h);
