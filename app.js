@@ -286,8 +286,8 @@
     thermalDecayRate: 0,           // rate actual de disipacion (0 = inactivo)
     mobileEnergySum: 0,             // running sum de energy de consumers+predators vivos
     // Energy flow audit: acumuladores de transferencias energeticas
-    flowAccum: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0 },
-    flowAccumPrev: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0 },
+    flowAccum: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0 },
+    flowAccumPrev: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0 },
     flowRate: { in: 0, out: 0, balance: 0 }
   };
 
@@ -856,6 +856,7 @@
     const depositRadius = Math.max(90, Math.min(240, car.radius * 12 + Math.sqrt(car.energy) * 6));
     addProducerDensity(car.x, car.y, energyAmount, depositRadius);
     sim.flowAccum.carcassToField += energyAmount;
+    sim.flowAccum.carcassExpire += Math.max(0, car.energy - energyAmount);
     car.energy = 0;
     car.alive = false;
   }
@@ -2020,6 +2021,7 @@
       const thermalLoss = e.energy * sim.thermalDecayRate * dt;
       e.energy -= thermalLoss;
       sim.mobileEnergySum -= thermalLoss;
+      sim.flowAccum.thermal += thermalLoss;
     }
     if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / (e.type === TYPE.PREDATOR ? 150 : 95))) {
       kill(e, e.type === TYPE.PREDATOR ? 'Depredador muere por senescencia' : 'Consumidor muere por senescencia');
@@ -3192,8 +3194,10 @@
       const dMetab = fa.metabolism - fp.metabolism;
       const dRepro = fa.reproduction - fp.reproduction;
       const dExcret = fa.excretion - fp.excretion;
+      const dThermal = fa.thermal - fp.thermal;
+      const dCarcassExp = fa.carcassExpire - fp.carcassExpire;
       const energyIn = dGraze + dColony + dProdC + dPred + dCarcassEat + dExcret;
-      const energyOut = dMetab + dRepro;
+      const energyOut = dMetab + dRepro + dThermal + dCarcassExp;
       sim.flowRate.in = energyIn / dtStats;
       sim.flowRate.out = energyOut / dtStats;
       sim.flowRate.balance = (energyIn - energyOut) / dtStats;
