@@ -1028,9 +1028,10 @@
     }
 
     // El retorno al campo ocurre al descomponerse; mientras tanto el cadaver se puede comer.
-    const storedEnergy = Math.max(1.5, Number(e.energy || 0) * 0.55);
+    // Sin floor: criatura con energy=0 no genera carcass con energia fantasma.
+    const storedEnergy = Math.max(0, Number(e.energy || 0) * 0.55);
     e.energy = 0;
-    if (sim.carcasses.length < 400) {
+    if (storedEnergy > 0.5 && sim.carcasses.length < 400) {
 
       sim.carcasses.push({
         alive: true,
@@ -1045,7 +1046,7 @@
         life: 0,
         maxLife: 20
       });
-    } else {
+    } else if (storedEnergy > 0.5) {
       // Cap lleno: redirigir energia al producerField directamente (no deletarla)
       addProducerDensity(e.x, e.y, Math.max(0.18, storedEnergy * 0.15), Math.max(90, Math.min(240, Math.max(2, (e.radius||5) * 0.9) * 12 + Math.sqrt(storedEnergy) * 6)));
     }
