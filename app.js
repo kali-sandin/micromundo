@@ -4181,6 +4181,19 @@
   }
 
   function bindEvents() {
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        sim._wasPausedByUser = sim.paused;
+        if (!sim.paused) setPaused(true);
+      } else if (sim._wasPausedByUser === false) {
+        sim._wasPausedByUser = undefined;
+        setPaused(false);
+        sim.lastFrame = 0;
+      } else {
+        sim._wasPausedByUser = undefined;
+        sim.lastFrame = 0;
+      }
+    });
     window.addEventListener('resize', resize);
     window.addEventListener('resize', () => {
       drawGraph();
