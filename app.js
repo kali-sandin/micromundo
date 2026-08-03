@@ -4269,11 +4269,19 @@
     makePanelDraggable(els.statsPanel);
     graphCanvas.addEventListener('wheel', stretchTimeAxis, { passive: false });
     geneCanvas.addEventListener('wheel', stretchTimeAxis, { passive: false });
-    new ResizeObserver(() => {
-      drawGraph();
-      drawGeneHistory();
-    }).observe(els.graphPanel);
-    new ResizeObserver(() => drawGeneHistory()).observe(els.genePanel);
+    if (!els._graphRO) {
+      els._graphRO = new ResizeObserver(() => {
+        if (!els.graphPanel.classList.contains('hidden')) drawGraph();
+        if (!els.genePanel.classList.contains('hidden')) drawGeneHistory();
+      });
+      els._graphRO.observe(els.graphPanel);
+    }
+    if (!els._geneRO) {
+      els._geneRO = new ResizeObserver(() => {
+        if (!els.genePanel.classList.contains('hidden')) drawGeneHistory();
+      });
+      els._geneRO.observe(els.genePanel);
+    }
 
     document.querySelectorAll('[data-add]').forEach((btn) => {
       btn.addEventListener('click', () => openAddDialog(btn.dataset.add));
