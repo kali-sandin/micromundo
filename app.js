@@ -1902,14 +1902,20 @@
       if (!chance(fertilityFactor)) return;
     }
     // Umbral reproductivo: depredadores mas bajo (0.60 base, 0.50 en crisis)
+    // Allee effect: umbral reproductivo mas bajo en baja densidad para ambos tipos.
+    // Consumers: <30 pop -> 0.65 vs 0.78 normal. Predators: <40 -> 0.50 vs 0.60.
+    const lowPop = type === TYPE.PREDATOR ? sim.predatorCount < 40 : sim.liveConsumerCount < 30;
     const reproThreshold = type === TYPE.PREDATOR
-      ? (sim.predatorCount < 40 ? 0.50 : 0.60)
-      : 0.78;
+      ? (lowPop ? 0.50 : 0.60)
+      : (lowPop ? 0.65 : 0.78);
     if (e.energy < e.maxEnergy * reproThreshold || e.cooldown > 0) return;
     // Reproductive senescence: fertility declines con edad (Gompertz reproductivo)
     const ageFactor = clamp(1 - (e.age / e.maxAge) * 0.6, 0.2, 1);
     if (!chance(ageFactor)) return;
-    const mateRange = type === TYPE.PREDATOR ? Math.min(450, e.perception * 1.2) : e.perception * 0.8;
+    // Allee effect: ampliar rango de mate search en baja densidad.
+    // Consumers: <30 pop -> 1.5x range. Predators: <40 -> 1.5x range.
+    const alleeBoost = lowPop ? 1.5 : 1;
+    const mateRange = type === TYPE.PREDATOR ? Math.min(450, e.perception * 1.2 * alleeBoost) : e.perception * 0.8 * alleeBoost;
     let mate = null;
     if (cachedMate && cachedMate.alive && cachedMate.energy > cachedMate.maxEnergy * 0.55 && cachedMate.cooldown <= 0) {
       mate = cachedMate;
@@ -1938,12 +1944,14 @@
   }
 
   function findMateTarget(e, type) {
-    // Busqueda de pareja: depredadores mas agresivos (0.55 base, 0.45 en crisis)
+    // Busqueda de pareja: Allee effect en baja densidad para ambos tipos.
+    const lowPopFind = type === TYPE.PREDATOR ? sim.predatorCount < 40 : sim.liveConsumerCount < 30;
     const mateSearchThreshold = type === TYPE.PREDATOR
-      ? (sim.predatorCount < 40 ? 0.45 : 0.55)
-      : 0.68;
+      ? (lowPopFind ? 0.45 : 0.55)
+      : (lowPopFind ? 0.55 : 0.68);
     if (e.energy < e.maxEnergy * mateSearchThreshold || e.cooldown > 0) return null;
-    const radius = type === TYPE.PREDATOR ? Math.min(550, e.perception * 1.55) : e.perception * 0.9;
+    const alleeR = lowPopFind ? 1.5 : 1;
+    const radius = type === TYPE.PREDATOR ? Math.min(550, e.perception * 1.55 * alleeR) : e.perception * 0.9 * alleeR;
     queryNearby(e.x, e.y, radius, type, mateSeekCandidates);
     let best = null;
     let bestD2 = Infinity;
