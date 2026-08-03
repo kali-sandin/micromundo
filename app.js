@@ -1469,7 +1469,7 @@
     if (sim.time < e.restUntil) return true;
     if (pressure || sim.time < e.restCooldown) return false;
     const restChance = e.energy < e.maxEnergy * 0.38 ? 0.34 : 0.16;
-    if (chance(dt * restChance)) {
+    if (chance(Math.min(1, dt * restChance))) {
       e.restUntil = sim.time + rand(1.8, 4.6);
       e.restCooldown = e.restUntil + rand(4, 10);
       return true;
@@ -1480,7 +1480,7 @@
   function burstMultiplier(e, dt, pressure = false) {
     if (!hasMove(e, 5) || sim.time < e.burstCooldown || e.energy < e.maxEnergy * 0.18) return 1;
     const p = pressure ? 0.035 : 0.007;
-    if (!chance(dt * p)) return 1;
+    if (!chance(Math.min(1, dt * p))) return 1;
     e.burstCooldown = sim.time + rand(18, 42);
     e.energy = Math.max(0, e.energy - Math.max(3, e.maxEnergy * 0.045));
     return rand(2.6, 4.2);
