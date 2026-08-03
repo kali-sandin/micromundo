@@ -534,8 +534,13 @@
 
   function lifeBarHtml(e) {
     if (!e || !Number.isFinite(Number(e.age)) || !Number.isFinite(Number(e.maxAge)) || e.maxAge <= 0) return '';
-    const ratio = clamp(Number(e.age || 0) / Number(e.maxAge), 0, 1);
-    return `<div class="life-bar" title="Vida ${escapeHtml(formatValue(e.age))} / ${escapeHtml(formatValue(e.maxAge))}"><i style="width:${(ratio * 100).toFixed(1)}%"></i></div>`;
+    const ox = Math.min(0.5, Number(e.oxidativeDamage || 0));
+    const effMax = e.maxAge * (1 - ox);
+    const ratio = clamp(Number(e.age || 0) / effMax, 0, 1);
+    const tip = ox > 0.01
+      ? `Vida ${escapeHtml(formatValue(e.age))} / ${escapeHtml(formatValue(effMax.toFixed(0)))} (daño oxidativo ${Math.round(ox*100)}%)`
+      : `Vida ${escapeHtml(formatValue(e.age))} / ${escapeHtml(formatValue(e.maxAge))}`;
+    return `<div class="life-bar" title="${tip}"><i style="width:${(ratio * 100).toFixed(1)}%"></i></div>`;
   }
 
   function previewHtml(data) {
@@ -974,6 +979,7 @@
       starved: 0,
       grazeCooldown: 0,
       huntCooldown: 0,
+      oxidativeDamage: 0,
       _birthStep: -1
     };
     const e = Object.assign(base, partial);
@@ -2010,6 +2016,10 @@
     e.energy -= metabCost;
     sim.mobileEnergySum -= metabCost;
     sim.flowAccum.metabolism += metabCost;
+    // Oxidative damage (Rate of Living Theory): metabolism acumula ROS damage.
+    // Reduce effective maxAge hasta -50%. Criaturas high-performance viven menos.
+    // Reset en offspring (nacen limpios). Press towards metabolic efficiency.
+    e.oxidativeDamage = Math.min(0.5, e.oxidativeDamage + metabCost * 0.0002);
     // DOC excretion: recicla 15% del metabCost al producerField (microbial loop)
     if (metabCost > 0.01) {
       const excretion = metabCost * 0.003;
@@ -2023,7 +2033,8 @@
       sim.mobileEnergySum -= thermalLoss;
       sim.flowAccum.thermal += thermalLoss;
     }
-    if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / (e.type === TYPE.PREDATOR ? 150 : 95))) {
+    const effMaxAge = e.maxAge * (1 - e.oxidativeDamage);
+    if (Number.isFinite(effMaxAge) && e.age > effMaxAge && chance(dt / (e.type === TYPE.PREDATOR ? 150 : 95))) {
       kill(e, e.type === TYPE.PREDATOR ? 'Depredador muere por senescencia' : 'Consumidor muere por senescencia');
       return;
     }
