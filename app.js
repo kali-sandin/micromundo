@@ -834,10 +834,14 @@
     const idx = fieldIndex(cx, cy);
     const mass = field.mass[idx];
     if (mass < 0.035) return false;
+    // Type III grazing: consumers reducen bite en celdas pobres (refugio de productores).
+    // Similar a Type III de predators: la eficiencia cae cuando el recurso escasea.
+    // mass < 0.4: biteRate se reduce progresivamente hasta x0.35. Protege patches agotados.
+    const grazingEff = mass < 0.4 ? Math.max(0.35, mass / 0.4) : 1;
     // Bite constante: el cooldown regula la frecuencia en tiempo de sim.
     // Sin dtScale: throughput independiente de framerate/speed.
     const feedBonus = e.feeding === 1 ? 0.014 : e.feeding === 0 ? 0.010 : 0;
-    const biteRate = (0.018 + e.size * 0.006 + e.cilia * 0.003 + feedBonus) * (e.fearFactor || 1);
+    const biteRate = (0.018 + e.size * 0.006 + e.cilia * 0.003 + feedBonus) * (e.fearFactor || 1) * grazingEff;
     const bite = Math.min(mass, biteRate);
     field.mass[idx] = mass - bite;
     field.total -= bite;
