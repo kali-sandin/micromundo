@@ -260,6 +260,7 @@
     selectedAddKind: 'producer',
     selectedCreatureId: null,
     selectedCreatureIds: [],
+    _selectedKeysCache: null,
     selectedTrails: new Map(),
     followCreatureId: null,
     lastCenteredCreatureId: null,
@@ -2159,6 +2160,7 @@
     sim.creatures = alive;
     sim.freeIds = [];
     sim.selectedCreatureIds = selected.filter((e) => e.alive).map((e) => creatureKey(e));
+    sim._selectedKeysCache = null;
     // Trails se clave por uid (estable durante compaction), solo limpiar seleccionados muertos
     for (let i = sim.selectedCreatureIds.length - 1; i >= 0; i--) {
       if (!creatureByKey(sim.selectedCreatureIds[i])) sim.selectedTrails.delete(sim.selectedCreatureIds[i]);
@@ -2438,6 +2440,7 @@
 
   function removeInspectorPanel(key) {
     sim.selectedCreatureIds = sim.selectedCreatureIds.filter((selectedKey) => selectedKey !== key);
+    sim._selectedKeysCache = null;
     sim.selectedCreatureId = sim.selectedCreatureIds[sim.selectedCreatureIds.length - 1] ?? null;
     sim.selectedTrails.delete(key);
     if (sim.followCreatureId === key) setFollowCreature(key, false);
@@ -2535,6 +2538,7 @@
       return selected && selected.alive && selectedKey !== key;
     });
     sim.selectedCreatureIds.push(key);
+    sim._selectedKeysCache = null;
     sim.selectedCreatureId = key;
     sim.selectedTrails.set(key, [{ x: e.x, y: e.y }]);
     updateInspectors();
@@ -2611,6 +2615,7 @@
       const e = creatureByKey(key);
       return e && e.alive;
     });
+    sim._selectedKeysCache = null;
     sim.selectedCreatureId = sim.selectedCreatureIds[sim.selectedCreatureIds.length - 1] ?? null;
     const primaryId = sim.selectedCreatureIds[0];
     document.querySelectorAll('.inspect-panel[data-inspect-uid]').forEach((panel) => {
@@ -3139,8 +3144,9 @@
     const vwMaxX = camera.x + window.innerWidth / (2 * camera.zoom) + wEps;
     const vwMinY = camera.y - window.innerHeight / (2 * camera.zoom) - wEps;
     const vwMaxY = camera.y + window.innerHeight / (2 * camera.zoom) + wEps;
-    // Pre-compute selected set once per frame (avoids O(n) includes per drawCreature call)
-    const _selectedKeys = new Set(sim.selectedCreatureIds);
+    // Cached selected set: only rebuild when selection changes (invalidates _selectedKeysCache)
+    if (!sim._selectedKeysCache) sim._selectedKeysCache = new Set(sim.selectedCreatureIds);
+    const _selectedKeys = sim._selectedKeysCache;
     for (let i = 0; i < sim.creatures.length; i += 1) {
       const e = sim.creatures[i];
       if (!e || !e.alive) continue;
@@ -3566,6 +3572,7 @@
     sim.lastStatsAt = -Infinity;
     sim.selectedCreatureId = null;
     sim.selectedCreatureIds = [];
+    sim._selectedKeysCache = null;
     sim.selectedTrails.clear();
     sim.followCreatureId = null;
     sim.lastCenteredCreatureId = null;
