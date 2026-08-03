@@ -2249,7 +2249,7 @@
       else if (e.type === TYPE.CONSUMER) { if (sM) sM.push(e); }
       else if (e.type === TYPE.PREDATOR) { if (sP) sP.push(e); }
     }
-    var baseProb = 0.005 * (5 / 60);
+    var baseProb = 0.03; // per checkMigration call (every 5s). Counts 4-14 get scaled rescue chance.
     // Prob escalada inversa: menor poblacion = mayor chance de rescue
     // count<=3: rescue garantizado (prob>=1). count=THRESHOLD-1: prob base.
     // Ademas: count=0 permite recolonizacion (antes bloqueada por cB>0)
