@@ -2040,9 +2040,9 @@
     // Reduce effective maxAge hasta -50%. Criaturas high-performance viven menos.
     // Reset en offspring (nacen limpios). Press towards metabolic efficiency.
     e.oxidativeDamage = Math.min(0.5, e.oxidativeDamage + metabCost * 0.0002);
-    // DOC excretion: recicla 15% del metabCost al producerField (microbial loop)
+    // DOC excretion: recicla 2.5% del metabCost al producerField (microbial loop)
     if (metabCost > 0.01) {
-      const excretion = metabCost * 0.003;
+      const excretion = metabCost * 0.025;
       addProducerDensity(e.x, e.y, excretion, 60);
       sim.flowAccum.excretion += excretion;
     }
