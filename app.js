@@ -1977,9 +1977,10 @@
     if (e.energy < e.maxEnergy * 0.03) metabFactor *= 0.25;
     else if (e.energy < e.maxEnergy * 0.08) metabFactor *= 0.45;
     // Senescence cost (Gompertz): criaturas viejas pagan mas metabolismo.
-    // >60% maxAge: hasta +50% metab. Acelera turnover, previene inmortales.
-    if (e.maxAge > 0 && e.age > e.maxAge * 0.6) {
-      metabFactor *= 1 + ((e.age - e.maxAge * 0.6) / (e.maxAge * 0.4)) * 0.5;
+    // >60% effMaxAge: hasta +50% metab. Acelera turnover, previene inmortales.
+    const gompertzAge = e.maxAge * (1 - (e.oxidativeDamage || 0));
+    if (gompertzAge > 0 && e.age > gompertzAge * 0.6) {
+      metabFactor *= 1 + ((e.age - gompertzAge * 0.6) / (gompertzAge * 0.4)) * 0.5;
     }
     // Panic metabolism: huida tiene coste energetico extra (sprint anaerobico).
     // Usa flag del step anterior (e._hadPanic) porque threat aun no se ha calculado aqui.
