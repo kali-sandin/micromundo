@@ -1010,7 +1010,7 @@
 
   function kill(e, reason) {
     if (!e || !e.alive) return;
-    if (e.type === TYPE.CONSUMER || e.type === TYPE.PREDATOR) sim.mobileEnergySum -= e.energy;
+    if (e.type === TYPE.CONSUMER || e.type === TYPE.PREDATOR) sim.mobileEnergySum -= Math.max(0, e.energy);
     e.alive = false;
     sim.creatureIndex.delete(e.uid);
     sim.selectedTrails.delete(creatureKey(e));
