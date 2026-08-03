@@ -3244,8 +3244,10 @@
       if (sinPhase < 0) {
         const darkness = (-sinPhase) * 0.35; // 0 a 0.35
         ctx.setTransform(mainCanvasDpr, 0, 0, mainCanvasDpr, 0, 0);
-        ctx.fillStyle = `rgba(5, 8, 20, ${darkness})`;
+        ctx.globalAlpha = darkness;
+        ctx.fillStyle = '#050814';
         ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+        ctx.globalAlpha = 1;
       }
     }
   }
