@@ -2222,6 +2222,25 @@
     sim.selectedCreatureId = sim.selectedCreatureIds[sim.selectedCreatureIds.length - 1] ?? null;
   }
 
+  function createTrail(x, y) {
+    const xs = new Float32Array(TRAIL_MAX_POINTS);
+    const ys = new Float32Array(TRAIL_MAX_POINTS);
+    xs[0] = x; ys[0] = y;
+    return { xs, ys, head: 1, count: 1 };
+  }
+
+  function trailPush(trail, x, y) {
+    trail.xs[trail.head] = x;
+    trail.ys[trail.head] = y;
+    trail.head = (trail.head + 1) % TRAIL_MAX_POINTS;
+    if (trail.count < TRAIL_MAX_POINTS) trail.count++;
+  }
+
+  function trailLast(trail) {
+    const i = (trail.head - 1 + TRAIL_MAX_POINTS) % TRAIL_MAX_POINTS;
+    return { x: trail.xs[i], y: trail.ys[i] };
+  }
+
   function updateSelectedTrails() {
     for (const key of sim.selectedCreatureIds) {
       const e = creatureByKey(key);
@@ -2231,16 +2250,15 @@
       }
       let trail = sim.selectedTrails.get(key);
       if (!trail) {
-        trail = [{ x: e.x, y: e.y }];
+        trail = createTrail(e.x, e.y);
         sim.selectedTrails.set(key, trail);
         continue;
       }
-      const prev = trail[trail.length - 1];
+      const prev = trailLast(trail);
       const dx = torusDelta(e.x - mod(prev.x, WORLD.w), WORLD.w);
       const dy = torusDelta(e.y - mod(prev.y, WORLD.h), WORLD.h);
       if (dx * dx + dy * dy < TRAIL_MIN_STEP * TRAIL_MIN_STEP) continue;
-      trail.push({ x: prev.x + dx, y: prev.y + dy });
-      if (trail.length > TRAIL_MAX_POINTS) trail.splice(0, trail.length - TRAIL_MAX_POINTS);
+      trailPush(trail, prev.x + dx, prev.y + dy);
     }
   }
 
@@ -2594,7 +2612,7 @@
     sim.selectedCreatureIds.push(key);
     sim._selectedKeysCache = null;
     sim.selectedCreatureId = key;
-    sim.selectedTrails.set(key, [{ x: e.x, y: e.y }]);
+    sim.selectedTrails.set(key, createTrail(e.x, e.y));
     updateInspectors();
     const panel = document.querySelector(`.inspect-panel[data-inspect-uid="${key}"]`);
     if (panel) placeInspectorPanel(panel, screenX, screenY, sim.selectedCreatureIds.length - 1);
@@ -3135,16 +3153,18 @@
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
     for (const [key, trail] of sim.selectedTrails) {
-      if (!trail || trail.length < 2) continue;
+      if (!trail || trail.count < 2) continue;
       const e = creatureByKey(key);
       const color = e ? colorForCreature(e) : '#9fda69';
       ctx.strokeStyle = color;
       ctx.globalAlpha = 0.48;
+      const start = (trail.head - trail.count + TRAIL_MAX_POINTS) % TRAIL_MAX_POINTS;
       for (let o = 0; o < offsets.length; o += 1) {
         const { ox, oy } = offsets[o];
         ctx.beginPath();
-        for (let i = 0; i < trail.length; i += 1) {
-          const p = worldToScreen(trail[i].x + ox, trail[i].y + oy);
+        for (let i = 0; i < trail.count; i += 1) {
+          const idx = (start + i) % TRAIL_MAX_POINTS;
+          const p = worldToScreen(trail.xs[idx] + ox, trail.ys[idx] + oy);
           if (i === 0) ctx.moveTo(p.x, p.y);
           else ctx.lineTo(p.x, p.y);
         }
