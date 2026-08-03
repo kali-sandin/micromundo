@@ -1606,7 +1606,8 @@
       e.radius = Math.min(e.maxRadius, e.radius + dt * sun * 0.018);
       const leafCap = 8 + e.radius * 0.9;
       if (e.leafEnergy < leafCap) {
-        const leafRegen = Math.min(leafCap - e.leafEnergy, dt * sun * 0.25);
+        const healthFactor = clamp(e.energy / e.maxEnergy, 0.2, 1);
+        const leafRegen = Math.min(leafCap - e.leafEnergy, dt * sun * 0.25 * healthFactor);
         e.leafEnergy += leafRegen;
         const leafCost = leafRegen * 0.46;
         e.energy = Math.max(0, e.energy - leafCost);
