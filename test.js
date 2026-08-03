@@ -69,7 +69,7 @@ function createDomMock() {
   const fakeEl = {
     textContent: '', innerHTML: '', value: '50', style: {},
     classList: { add() {}, remove() {}, toggle() {}, contains: () => false },
-    appendChild() {}, removeChild() {}, querySelectorAll: () => [],
+    appendChild() {}, removeChild() {}, querySelectorAll: () => [], querySelector: () => null,
     addEventListener() {}, removeEventListener() {},
     setAttribute() {}, getAttribute: () => null, removeAttribute() {},
     scrollWidth: 0, scrollHeight: 0, clientWidth: 800, clientHeight: 600,

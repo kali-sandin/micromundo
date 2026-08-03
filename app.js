@@ -23,17 +23,17 @@
       const b = oldGrid[i];
       if (b) {
         // Trim arrays que crecieron demasiado durante boom: liberar backing array
-        for (let t = 0; t < 4; t += 1) {
-          if (b[t].length > 64) b[t] = [];
-          else b[t].length = 0;
+        for (let t = 0; t < GB_COUNT; t += 1) {
+          if (b[t] && b[t].length > 64) b[t] = [];
+          else if (b[t]) b[t].length = 0;
         }
         pool.push(b);
       }
     }
     sim.grid = new Array(n);
     for (let i = 0; i < n; i += 1) {
-      const b = pool.pop() || [[], [], [], []];
-      b[0].length = 0; b[1].length = 0; b[2].length = 0; b[3].length = 0;
+      const b = pool.pop() || [[], [], [], [], []];
+      for (let t = 0; t < GB_COUNT; t += 1) { if (!b[t]) b[t] = []; else b[t].length = 0; }
       sim.grid[i] = b;
     }
     sim.gridDirtyCells = [];
@@ -50,6 +50,13 @@
   // preferible mantener dt estable que simular tiempo extra con dt inestable.
 
   const TYPE = { PRODUCER: 0, CONSUMER: 1, PREDATOR: 2, CARCASS: 3 };
+  // Grid bucket indices: split ProducerB (colony) and ProducerC (mobile) for perf.
+  const GB_COLONY = 0;   // ProducerA (virtual field) + ProducerB (colony) — entities with e.type===TYPE.PRODUCER && !mobile
+  const GB_CONSUMER = 1; // same as TYPE.CONSUMER
+  const GB_PREDATOR = 2; // same as TYPE.PREDATOR
+  const GB_CARCASS = 3;  // same as TYPE.CARCASS
+  const GB_MOBILE  = 4;  // ProducerC (mobile) — separated from colony bucket
+  const GB_COUNT = 5;
   const PRODUCER = { A: 0, B: 1, C: 2 };
   const FEEDING = ['grazer', 'filter', 'phagocyte', 'cytostome'];
   const MOVE = ['run-tumble', 'chemotaxis', 'drift', 'spiral', 'pause', 'burst'];
@@ -344,6 +351,13 @@
   function isMobileProducer(eOrSub) {
     const sub = typeof eOrSub === 'number' ? eOrSub : eOrSub?.sub;
     return sub === PRODUCER.C;
+  }
+
+  // Maps a creature/carcass to its grid bucket index.
+  // ProducerC (mobile) gets its own bucket to avoid mixing with colonies.
+  function gridType(e) {
+    if (e.type === TYPE.PRODUCER && isMobileProducer(e)) return GB_MOBILE;
+    return e.type; // PRODUCER(0)->colony, CONSUMER(1), PREDATOR(2), CARCASS(3)
   }
 
   function colorForGroup(group) {
@@ -1008,7 +1022,7 @@
       const key = cellKeyInt(e.x, e.y);
       const bucket = sim.grid[key];
       if (bucket) {
-        bucket[e.type].push(e);
+        bucket[gridType(e)].push(e);
         if (!sim.gridDirtySeen[key]) { sim.gridDirtySeen[key] = 1; sim.gridDirtyCells.push(key); }
       }
     }
@@ -1255,10 +1269,7 @@
     const dirty = sim.gridDirtyCells;
     for (let d = 0; d < dirty.length; d += 1) {
       const bucket = grid[dirty[d]];
-      bucket[0].length = 0;
-      bucket[1].length = 0;
-      bucket[2].length = 0;
-      bucket[3].length = 0;
+      for (let t = 0; t < GB_COUNT; t += 1) bucket[t].length = 0;
     }
     dirty.length = 0;
     const seen = sim.gridDirtySeen;
@@ -1267,15 +1278,15 @@
       const e = sim.creatures[i];
       if (!e || !e.alive) continue;
       const key = cellKeyInt(e.x, e.y);
-      grid[key][e.type].push(e);
+      grid[key][gridType(e)].push(e);
       if (!seen[key]) { seen[key] = 1; dirty.push(key); }
     }
-    // Insert carcasses into spatial grid (bucket[3])
+    // Insert carcasses into spatial grid (bucket[GB_CARCASS])
     for (let i = 0; i < sim.carcasses.length; i += 1) {
       const car = sim.carcasses[i];
       if (!car || !car.alive || car.energy <= 0) continue;
       const key = cellKeyInt(car.x, car.y);
-      grid[key][TYPE.CARCASS].push(car);
+      grid[key][GB_CARCASS].push(car);
       if (!seen[key]) { seen[key] = 1; dirty.push(key); }
     }
   }
@@ -1389,29 +1400,33 @@
     }
   }
 
-  function nearestFood(e, candidates) {
+  function nearestFood(e, candidates, extra) {
     let best = null;
     let bestD2 = Infinity;
-    for (let i = 0; i < candidates.length; i += 1) {
-      const t = candidates[i];
-      if (!t.alive) continue;
-      if (t.virtualA) continue; // campo virtual nunca es entidad fisica
-      if (t.dormant) continue; // ProducerC dormante es invisible a depredadores
-      if (e.type === TYPE.PREDATOR && isColonyProducer(t)) continue;
-      if (isColonyProducer(t) && ((t.leafCount || 0) <= 0 || t.leafEnergy <= 0.35)) continue;
-      if (t.type === TYPE.PRODUCER && t.sub !== PRODUCER.A && !canEatArmored(e, t)) continue;
-      // Gape limitation: predators skip consumers demasiado grandes para comer
-      if (e.type === TYPE.PREDATOR && t.type === TYPE.CONSUMER) {
-        const sizeRatio = t.size / Math.max(1, e.size);
-        if (sizeRatio > 0.85) continue;
-      }
-      const dx = torusDelta(t.x - e.x, WORLD.w);
-      const dy = torusDelta(t.y - e.y, WORLD.h);
-      const d2 = dx * dx + dy * dy;
-      if (d2 < bestD2) {
-        best = t;
-        bestD2 = d2;
-        if (bestD2 < 4) break; // early-exit: presa adyacente
+    // Itera candidates; si extra se proporciona, tambien lo recorre sin merge
+    for (let pass = 0; pass < 2; pass += 1) {
+      const arr = pass === 0 ? candidates : extra;
+      if (!arr) continue;
+      for (let i = 0; i < arr.length; i += 1) {
+        const t = arr[i];
+        if (!t.alive) continue;
+        if (t.virtualA) continue;
+        if (t.dormant) continue;
+        if (e.type === TYPE.PREDATOR && isColonyProducer(t)) continue;
+        if (isColonyProducer(t) && ((t.leafCount || 0) <= 0 || t.leafEnergy <= 0.35)) continue;
+        if (t.type === TYPE.PRODUCER && t.sub !== PRODUCER.A && !canEatArmored(e, t)) continue;
+        if (e.type === TYPE.PREDATOR && t.type === TYPE.CONSUMER) {
+          const sizeRatio = t.size / Math.max(1, e.size);
+          if (sizeRatio > 0.85) continue;
+        }
+        const dx = torusDelta(t.x - e.x, WORLD.w);
+        const dy = torusDelta(t.y - e.y, WORLD.h);
+        const d2 = dx * dx + dy * dy;
+        if (d2 < bestD2) {
+          best = t;
+          bestD2 = d2;
+          if (bestD2 < 4) return best;
+        }
       }
     }
     return best;
@@ -1448,6 +1463,7 @@
   }
 
   const nearby = [];
+  const nearbyMobile = [];
   const mateCandidates = [];
   const mateSeekCandidates = [];
   const producerThreats = [];
@@ -1456,7 +1472,7 @@
 
   function producerCCrowdFactor(e) {
     if (!e || !isMobileProducer(e)) return 1;
-    queryNearby(e.x, e.y, PRODUCER_C_CROWD_RADIUS, TYPE.PRODUCER, producerCrowd);
+    queryNearby(e.x, e.y, PRODUCER_C_CROWD_RADIUS, GB_MOBILE, producerCrowd);
     let close = 0;
     for (let i = 0; i < producerCrowd.length; i += 1) {
       const other = producerCrowd[i];
@@ -2113,7 +2129,7 @@
         }
       }
       if (!food) {
-        queryNearby(e.x, e.y, e.perception * 0.72, TYPE.PRODUCER, nearby);
+        queryNearby(e.x, e.y, e.perception * 0.72, GB_MOBILE, nearby);
         let bestPlant = null;
         let bestD2 = Infinity;
         for (let i = 0; i < nearby.length; i += 1) {
@@ -2153,8 +2169,8 @@
         steeringTarget = food || (cachedMate = findMateTarget(e, TYPE.PREDATOR));
       }
     } else {
-      queryNearby(e.x, e.y, e.perception, TYPE.PRODUCER, nearby);
-      const entityFood = nearestFood(e, nearby);
+      queryNearby2(e.x, e.y, e.perception, GB_COLONY, GB_MOBILE, nearby, nearbyMobile);
+      const entityFood = nearestFood(e, nearby, nearbyMobile);
       const fieldFood = (e.grazeCooldown || 0) > 0 ? null : bestProducerDensityTarget(e.x, e.y, e.perception);
       food = entityFood;
       if (fieldFood) {
@@ -3551,11 +3567,28 @@
       if (p[group] && p[group].n > 0) { latest = p[group]; break; }
     }
     if (!latest) { els.geneSummary.textContent = 'Sin histórico.'; return; }
-    const labels = allKeys.map((key, idx) => {
-      const disabled = hidden.has(key) ? ' disabled' : '';
-      return `<button class="gene-toggle${disabled}" type="button" data-gene-key="${escapeHtml(key)}" style="--gene-color:${GENE_COLORS[idx % GENE_COLORS.length]}">${escapeHtml(key)} <b>${formatValue(latest.avg[key])}</b></button>`;
-    });
-    els.geneSummary.innerHTML = `<strong>${GROUP_LABELS[group]}: <b style="color:${GROUP_COLORS[group]}">${fmt.format(latest.n)}</b></strong>${labels.join('')}`;
+    // Perf: solo reconstruir innerHTML cuando cambia grupo, hidden set o count.
+    // En updates normales (~1s), solo actualizar los valores <b> y el header count.
+    const hiddenKey = hidden.size ? Array.from(hidden).sort().join('|') : '';
+    const structKey = group + ':' + hiddenKey;
+    if (els._geneLastStruct !== structKey) {
+      els._geneLastStruct = structKey;
+      const labels = allKeys.map((key, idx) => {
+        const disabled = hidden.has(key) ? ' disabled' : '';
+        return `<button class="gene-toggle${disabled}" type="button" data-gene-key="${escapeHtml(key)}" style="--gene-color:${GENE_COLORS[idx % GENE_COLORS.length]}">${escapeHtml(key)} <b>${formatValue(latest.avg[key])}</b></button>`;
+      });
+      els.geneSummary.innerHTML = `<strong>${GROUP_LABELS[group]}: <b style="color:${GROUP_COLORS[group]}">${fmt.format(latest.n)}</b></strong>${labels.join('')}`;
+    } else {
+      // Update solo valores: header count + cada boton <b>
+      const strong = els.geneSummary.querySelector('strong > b');
+      if (strong) strong.textContent = fmt.format(latest.n);
+      const btns = els.geneSummary.querySelectorAll('[data-gene-key]');
+      for (let bi = 0; bi < btns.length; bi += 1) {
+        const b = btns[bi];
+        const valEl = b.querySelector('b');
+        if (valEl) valEl.textContent = formatValue(latest.avg[b.dataset.geneKey]);
+      }
+    }
   }
 
   function animationLoop(ts) {
@@ -4220,6 +4253,7 @@
     const hidden = geneHiddenSet(sim.geneHistoryGroup);
     if (hidden.has(key)) hidden.delete(key);
     else hidden.add(key);
+    els._geneLastStruct = null; // forzar reconstruccion estructural
     drawGeneHistory();
   }
 
@@ -4264,6 +4298,7 @@
     document.querySelectorAll('[data-gene-tab]').forEach((btn) => {
       btn.addEventListener('click', () => {
         sim.geneHistoryGroup = btn.dataset.geneTab;
+        els._geneLastStruct = null; // forzar reconstruccion al cambiar grupo
         document.querySelectorAll('[data-gene-tab]').forEach((tab) => tab.classList.toggle('active', tab === btn));
         drawGeneHistory();
       });
