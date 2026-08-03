@@ -338,6 +338,7 @@ select {
   display: block;
   cursor: grab;
   background: #050607;
+  will-change: transform;
 }
 
 #world.dragging {
@@ -347,6 +348,7 @@ select {
 .hud {
   position: fixed;
   z-index: 12;
+  contain: content;
 }
 
 .panel {
@@ -355,6 +357,7 @@ select {
   background: var(--panel);
   box-shadow: 0 18px 42px var(--shadow);
   backdrop-filter: blur(10px);
+  contain: content;
 }
 
 .panel h2 {
