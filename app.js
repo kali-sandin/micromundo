@@ -2153,12 +2153,27 @@
       if (fieldFood) {
         if (!entityFood) food = fieldFood;
         else {
+          // ROI-based foraging: elegir comida por retorno energetico/distancia, no solo distancia.
+          // Estima gain one-shot del entity vs gain rate sostenido del campo.
+          const edx = torusDelta(entityFood.x - e.x, WORLD.w);
           const edy = torusDelta(entityFood.y - e.y, WORLD.h);
           const fdx = torusDelta(fieldFood.x - e.x, WORLD.w);
           const fdy = torusDelta(fieldFood.y - e.y, WORLD.h);
-          const edx = torusDelta(entityFood.x - e.x, WORLD.w);
-          const fieldBias = 0.55 + e.feeding * 0.20; // grazers prefieren campo (0.55), phagocytes casi neutro (0.95)
-          if ((fdx * fdx + fdy * fdy) * fieldBias < edx * edx + edy * edy) food = fieldFood;
+          const eDist = Math.sqrt(edx * edx + edy * edy) + 1;
+          const fDist = Math.sqrt(fdx * fdx + fdy * fdy) + 1;
+          // Gain estimado del entity: ProducerC ~energy*1.8, colony/ProducerA ~7.5-18
+          const entityGain = entityFood.sub === PRODUCER.C
+            ? Math.min(entityFood.energy * 1.8, 36)
+            : isColonyProducer(entityFood) ? 12 : 7.5;
+          // Gain rate del campo: ~1.1/s en zona rica. score = gain*tiempoHorizonte.
+          // Horizonte 8s: cuanto tardaria en encontrar otra comida si ignora esta.
+          const fieldGainRate = 1.1;
+          const fieldHorizon = 8;
+          // feeding bias: grazers (0) prefieren campo, phagocytes (2) prefieren presas
+          const feedingPref = e.feeding === 0 ? 1.4 : e.feeding === 2 ? 0.6 : 1.0;
+          const entityScore = entityGain / eDist;
+          const fieldScore = (fieldGainRate * fieldHorizon * feedingPref) / fDist;
+          if (fieldScore > entityScore) food = fieldFood;
         }
       }
       if (!food && e.energy < e.maxEnergy * 0.42) food = nearestCarcassFood(e, e.perception * 0.65);
