@@ -2151,7 +2151,7 @@
           const fdx = torusDelta(fieldFood.x - e.x, WORLD.w);
           const fdy = torusDelta(fieldFood.y - e.y, WORLD.h);
           const edx = torusDelta(entityFood.x - e.x, WORLD.w);
-          const fieldBias = 0.55 + e.feeding * 0.10; // grazers prefieren campo, phagocytes entity
+          const fieldBias = 0.55 + e.feeding * 0.20; // grazers prefieren campo (0.55), phagocytes casi neutro (0.95)
           if ((fdx * fdx + fdy * fdy) * fieldBias < edx * edx + edy * edy) food = fieldFood;
         }
       }
