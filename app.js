@@ -2720,18 +2720,38 @@
     updateClickOffset(raw.x, raw.y);
     let best = null;
     let bestScreenD2 = Infinity;
-    for (let type = 0; type <= 2; type += 1) {
-      queryNearby(pos.x, pos.y, worldRadius, type, nearby);
-      for (let i = 0; i < nearby.length; i += 1) {
-        const e = nearby[i];
-        const p = nearestScreenPosition(e.x, e.y, screenX, screenY);
-        const dx = p.x - screenX;
-        const dy = p.y - screenY;
-        const hit = Math.max(8, e.radius * camera.zoom + 6);
-        const d2 = dx * dx + dy * dy;
-        if (d2 <= hit * hit && d2 < bestScreenD2) {
-          best = e;
-          bestScreenD2 = d2;
+    // Single grid scan: iterate all 3 type lists per cell in one pass
+    const grid = sim.grid;
+    const minX = Math.floor((pos.x - worldRadius) / CELL);
+    const maxX = Math.floor((pos.x + worldRadius) / CELL);
+    const minY = Math.floor((pos.y - worldRadius) / CELL);
+    const maxY = Math.floor((pos.y + worldRadius) / CELL);
+    const r2 = worldRadius * worldRadius;
+    for (let cy = minY; cy <= maxY; cy += 1) {
+      let wy = cy;
+      if (wy < 0) wy += GRID_ROWS; else if (wy >= GRID_ROWS) wy -= GRID_ROWS;
+      const rowBase = wy * GRID_COLS;
+      for (let cx = minX; cx <= maxX; cx += 1) {
+        let wx = cx;
+        if (wx < 0) wx += GRID_COLS; else if (wx >= GRID_COLS) wx -= GRID_COLS;
+        const bucket = grid[rowBase + wx];
+        for (let type = 0; type <= 2; type += 1) {
+          const list = bucket[type];
+          for (let i = 0; i < list.length; i += 1) {
+            const e = list[i];
+            const ddx = torusDelta(e.x - pos.x, WORLD.w);
+            const ddy = torusDelta(e.y - pos.y, WORLD.h);
+            if (ddx * ddx + ddy * ddy > r2) continue;
+            const p = nearestScreenPosition(e.x, e.y, screenX, screenY);
+            const dx = p.x - screenX;
+            const dy = p.y - screenY;
+            const hit = Math.max(8, e.radius * camera.zoom + 6);
+            const d2 = dx * dx + dy * dy;
+            if (d2 <= hit * hit && d2 < bestScreenD2) {
+              best = e;
+              bestScreenD2 = d2;
+            }
+          }
         }
       }
     }
