@@ -714,7 +714,7 @@
         const idx = wy * field.cols + wx;
         const before = field.mass[idx];
         const falloff = 1 - d2 / (r2 + 1);
-        let add = gain * falloff * 0.18; // 0.18 per-cell density factor; aggregate deposit varies by radius (r=1: ~54%, r=2: ~133%, r=3: ~277%)
+        let add = gain * falloff * 0.08; // 0.08 per-cell density factor; ~neutral aggregate (was 0.18 = x2.25 amplification)
         if (before > 1.2) add *= (1.5 - before) / 0.3;
         const next = clamp(before + add, 0, 1.5);
         field.mass[idx] = next;
