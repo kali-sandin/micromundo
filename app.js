@@ -429,9 +429,10 @@
     return child || (chance(0.5) ? ma : mb) || 2;
   }
 
-  function inheritAsexual(e, key, min, max, integer = false) {
+  function inheritAsexual(e, key, min, max, integer = false, stressFactor = 1) {
     const value = Number(e[key] ?? 0);
-    const margin = Math.max(Math.abs(value) * 0.06, Math.abs(min) * 0.08);
+    const baseMargin = Math.max(Math.abs(value) * 0.06, Math.abs(min) * 0.08);
+    const margin = baseMargin * stressFactor;
     const out = clamp(rand(value - margin, value + margin), min, max);
     return integer ? Math.round(out) : out;
   }
@@ -1714,16 +1715,18 @@
       e.leafEnergy = Math.max(0, e.leafEnergy - childLeafEnergy);
       const childEnergyB = e.energy * 0.28;
       e.energy *= 0.72;
+      // Stress-induced mutagenesis for asexual colony producers
+      const bStress = e.energy < e.maxEnergy * 0.35 ? 2.5 : 1;
       const childB = spawnProducer({
         sub: PRODUCER.B,
         x: mod(e.x + rand(-720, 720), WORLD.w),
         y: mod(e.y + rand(-720, 720), WORLD.h),
         energy: childEnergyB,
-        radius: inheritAsexual(e, 'radius', 14, 40),
-        maxRadius: inheritAsexual(e, 'maxRadius', 28, 72),
-        armor: inheritAsexual(e, 'armor', 1.2, 7),
-        fertility: inheritAsexual(e, 'fertility', 0.012, 0.085),
-        maxAge: inheritAsexual(e, 'maxAge', 7500, 21500),
+        radius: inheritAsexual(e, 'radius', 14, 40, false, bStress),
+        maxRadius: inheritAsexual(e, 'maxRadius', 28, 72, false, bStress),
+        armor: inheritAsexual(e, 'armor', 1.2, 7, false, bStress),
+        fertility: inheritAsexual(e, 'fertility', 0.012, 0.085, false, bStress),
+        maxAge: inheritAsexual(e, 'maxAge', 7500, 21500, false, bStress),
         leafEnergy: childLeafEnergy,
         leafCount: childLeafCount
       });
@@ -1743,18 +1746,20 @@
     }
     const childEnergy = isMobileProducer(e) ? Math.min(8, e.energy * 0.32) : undefined;
     const spread = rand(70, 180);
+    // Stress-induced mutagenesis for asexual mobile producers
+    const pStress = e.energy < e.maxEnergy * 0.35 ? 2.5 : 1;
     const childP = spawnProducer({
       sub: e.sub,
       x: mod(e.x + Math.cos(rand(-Math.PI, Math.PI)) * spread, WORLD.w),
       y: mod(e.y + Math.sin(rand(-Math.PI, Math.PI)) * spread, WORLD.h),
-      radius: inheritAsexual(e, 'radius', 3, 10),
-      armor: inheritAsexual(e, 'armor', 0, 4),
-      speed: e.speed ? inheritAsexual(e, 'speed', 8, 62) : 0,
-      perception: inheritAsexual(e, 'perception', 45, PRODUCER_C_MAX_PERCEPTION),
-      chemosense: inheritAsexual(e, 'chemosense', 0, 5),
+      radius: inheritAsexual(e, 'radius', 3, 10, false, pStress),
+      armor: inheritAsexual(e, 'armor', 0, 4, false, pStress),
+      speed: e.speed ? inheritAsexual(e, 'speed', 8, 62, false, pStress) : 0,
+      perception: inheritAsexual(e, 'perception', 45, PRODUCER_C_MAX_PERCEPTION, false, pStress),
+      chemosense: inheritAsexual(e, 'chemosense', 0, 5, false, pStress),
       movementMask: chance(0.04) ? inheritMovementMask(e, { movementMask: 1 << Math.floor(rand(0, MOVE.length)) }) : movementMaskFromLegacy(e),
-      fertility: inheritAsexual(e, 'fertility', 0.006, 0.075),
-      maxAge: inheritAsexual(e, 'maxAge', 3500, 12000),
+      fertility: inheritAsexual(e, 'fertility', 0.006, 0.075, false, pStress),
+      maxAge: inheritAsexual(e, 'maxAge', 3500, 12000, false, pStress),
       ...(childEnergy != null ? { energy: childEnergy } : {})
     });
     // growthCost asexual: si hijo crece radius/armor sobre padre, paga coste
