@@ -4321,10 +4321,16 @@
         sim.lastFrame = 0;
       }
     });
-    window.addEventListener('resize', resize);
+    // Debounced resize: un solo listener con rAF evita 60-120 layouts durante drag-resize
+    let _resizeRaf = 0;
     window.addEventListener('resize', () => {
-      drawGraph();
-      drawGeneHistory();
+      if (_resizeRaf) return;
+      _resizeRaf = requestAnimationFrame(() => {
+        _resizeRaf = 0;
+        resize();
+        drawGraph();
+        drawGeneHistory();
+      });
     });
     els.speed.addEventListener('input', setSpeed);
     els.systemEnergy.addEventListener('input', setSystemEnergy);
