@@ -3042,6 +3042,10 @@
     else if (e.starved === 1) ctx.fillStyle = '#b8a842';
     if (r <= 2.2) {
       ctx.fillRect(p.x - r, p.y - r, r * 2, r * 2);
+      if (e._selected) {
+        drawSelectionRing(p, r, e.type === TYPE.PREDATOR ? '#f05b50' : e.type === TYPE.PRODUCER ? colorForCreature(e) : '#54b7f1');
+        drawMapEnergyBar(p, r, e);
+      }
       return;
     }
 
