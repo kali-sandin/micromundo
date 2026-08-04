@@ -1749,6 +1749,7 @@
   function steerCreature(e, dt, food, threat = null) {
     const pressure = Boolean(threat || (food && e.type === TYPE.PREDATOR));
     const resting = updateResting(e, dt, pressure);
+    e._resting = resting;
     const turnNoise = hasMove(e, 0) ? 2.5 : hasMove(e, 2) ? 1.2 : 0.8;
     e.angle += rand(-turnNoise, turnNoise) * Math.sqrt(dt * BASE_DT);
 
@@ -2014,7 +2015,10 @@
     e.cooldown -= dt;
     if (e.grazeCooldown > 0) e.grazeCooldown -= dt;
     if (e.huntCooldown > 0) e.huntCooldown -= dt;
-    const resting = hasMove(e, 4) && sim.time < e.restUntil;
+    // resting: usar valor del step anterior (post-updateResting). Siempre correcto
+    // porque updateResting corre al final de steerCreature del step previo.
+    // Mismo patron que _hadPanic. Primer step: _resting undefined -> false -> 7.5 (correcto).
+    const resting = e._resting || false;
     // Metabolismo adaptativo: reduccion gradual para depredadores en baja cuenta
     // Antes era *=0.5 binario que hacia preds inmortales (84min sin comer)
     let metabFactor = resting ? 1.5 : 7.5;
