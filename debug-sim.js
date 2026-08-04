@@ -85,7 +85,7 @@ function createDomMock() {
     appendChild: () => {},
     removeChild: () => {},
     querySelectorAll: () => [],
-    addEventListener: () => {},
+    querySelector: () => fakeElement,
     removeEventListener: () => {},
     setAttribute: () => {},
     getAttribute: () => null,
@@ -141,6 +141,7 @@ function loadSim() {
       seedWorld,
       resetWorld,
       initProducerField,
+      initGrid,
       recordGeneHistory,
       spawnProducer,
       spawnConsumer,
@@ -179,6 +180,7 @@ function loadSim() {
     Uint8ClampedArray,
     Map,
     Set,
+    ResizeObserver: class { observe() {} unobserve() {} disconnect() {} },
     Array,
     Object,
     String,
@@ -202,6 +204,7 @@ function runSimulation(durationSec) {
   const api = loadSim();
 
   // Init sin rendering ni animationLoop
+  api.initGrid();
   api.initProducerField();
   api.seedWorld();
   api.recordGeneHistory();
