@@ -1664,7 +1664,7 @@
           loser.energy -= drain;
           loser.leafEnergy = Math.max(0, loser.leafEnergy - drain * 0.18);
           loser.leafCount = Math.max(0, loser.leafCount - (drain > 1.6 ? 1 : 0));
-          winner.energy = Math.min(winner.maxEnergy, winner.energy + drain * 0.35);
+          winner.energy = Math.min(winner.maxEnergy, winner.energy + drain * 0.55);
           if (loser.energy <= 0.15) kill(loser, 'Productor B pierde competencia por sol');
           if (!e.alive) return;
         }
