@@ -1138,13 +1138,15 @@
     e.radius = clamp(3.5 + e.size * 1.72 + e.reserves * 0.34, 3, 19);
     e.speed = locomotion / massDrag;
     const speedCost = Math.pow(Math.max(0, e.speed) / 42, 1.65) * 0.022;
-    const tissueCost = e.size * 0.010 + e.reserves * 0.004 + e.armor * 0.007;
+    // Kleiber's law: metabolism scales as bodyMass^0.75 instead of linear sum.
+    // kJ coefficient calibrated so typical consumer (mass~5.8) gets basal ~0.05.
+    const kleiberBase = 0.013 * Math.pow(Math.max(0.5, bodyMass), 0.75);
     const appendageCost = flagellaLoad * 0.014 + e.cilia * 0.004 + e.pseudopodia * 0.006;
     if (!Number.isFinite(Number(e.perception)) || e.perception <= 0) e.perception = DEFAULT_INITIAL_PERCEPTION;
     const sensoryCost = e.chemosense * 0.010 + Math.max(0, e.perception - DEFAULT_INITIAL_PERCEPTION) * 0.000075;
     const motionCost = (hasMove(e, 4) ? -0.004 : 0) + (hasMove(e, 5) ? 0.010 : 0);
     const vacuoleEfficiency = Math.max(0.82, 1 - e.vacuole * 0.035);
-    e.metabolism = (0.014 + speedCost + tissueCost + appendageCost + sensoryCost + motionCost) * vacuoleEfficiency;
+    e.metabolism = (kleiberBase + speedCost + appendageCost + sensoryCost + motionCost) * vacuoleEfficiency;
     e.maxEnergy = 30 + e.reserves * 16 + e.size * 6.5 + e.vacuole * 3.5;
     return e;
   }
