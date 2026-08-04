@@ -1925,7 +1925,12 @@
     if (e.type === TYPE.PREDATOR && !target.virtualA) {
       addProducerDensity(target.x, target.y, gain * 0.12 * 0.02, 50);
     }
-    kill(target, e.type === TYPE.PREDATOR ? (target.type === TYPE.PRODUCER ? 'Depredador consume productor' : 'Depredador consume consumidor') : null);
+    // ProducerC supervivencia al grazing: como ProducerB (leaves), ProducerC no muere
+    // al ser comido por consumers si le queda energia. Solo predators kill siempre.
+    // Esto convierte ProducerC en recurso renovable, no kill-on-contact.
+    if (e.type === TYPE.PREDATOR || target.type !== TYPE.PRODUCER || target.sub !== PRODUCER.C || target.energy <= 0) {
+      kill(target, e.type === TYPE.PREDATOR ? (target.type === TYPE.PRODUCER ? 'Depredador consume productor' : 'Depredador consume consumidor') : null);
+    }
     return true;
   }
 
