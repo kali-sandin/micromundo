@@ -738,12 +738,15 @@
     const sunlight = clamp(sim.solarEnergy, 0.1, 6);
     // Holling II: saturar growth con sunlight para evitar paradoja del enriquecimiento
     const sunEff = sunlight / (1 + sunlight * 0.15); // sun=1->0.87, sun=3->2.22, sun=6->4.0
-    const growth = 0.020 * sunEff * t;
+    let growth = 0.020 * sunEff * t;
+    // Resilience boost: cuando el campo esta bajo deficit (avg<0.15), aumentar growth.
+    // Factor hasta x1.5 cuando avg->0. Previene colapso total, auto-recuperacion.
+    const fieldAvg = field.total / (cols * rows);
+    if (fieldAvg < 0.15) growth *= 1 + 0.5 * (0.15 - fieldAvg) / 0.15;
     const baselineGrowth = 0.001 * sunEff * t; // evita frontera absorbente en m~0
     // Diffusion adaptativo: reducir cuando campo critico para proteger patches locales.
     // Campo sano (avg>0.3): diffusion normal. Campo critico (avg<0.1): diffusion x0.3.
     // Evita que少量 biomasa se dispersa y se pierda tras crashes.
-    const fieldAvg = field.total / (cols * rows);
     const diffScale = clamp(fieldAvg / 0.3, 0.3, 1);
     const diffusion = 0.028 * t * diffScale;
 
