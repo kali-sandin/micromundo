@@ -713,7 +713,7 @@
         const idx = wy * field.cols + wx;
         const before = field.mass[idx];
         const falloff = 1 - d2 / (r2 + 1);
-        let add = gain * falloff * 0.18;
+        let add = gain * falloff * 0.18; // 0.18 per-cell density factor; aggregate deposit varies by radius (r=1: ~54%, r=2: ~133%, r=3: ~277%)
         if (before > 1.2) add *= (1.5 - before) / 0.3;
         const next = clamp(before + add, 0, 1.5);
         field.mass[idx] = next;
@@ -1638,7 +1638,15 @@
       }
       // Growth denso-dependiente: mas grande mas lento crece (self-limiting + competicion implicita)
       const growthRate = 0.018 * (1 - (e.radius / e.maxRadius) * 0.5);
-      e.radius = Math.min(e.maxRadius, e.radius + dt * sun * growthRate);
+      const radiusGrowth = Math.min(e.maxRadius - e.radius, dt * sun * growthRate);
+      if (radiusGrowth > 0) {
+        // Coste energetico por crecimiento: proportional al volumen ganado (radio^2)
+        const growthCost = radiusGrowth * e.radius * 0.015;
+        if (e.energy > growthCost) {
+          e.radius += radiusGrowth;
+          e.energy -= growthCost;
+        }
+      }
       const leafCap = 8 + e.radius * 0.9;
       if (e.leafEnergy < leafCap) {
         const healthFactor = clamp(e.energy / e.maxEnergy, 0.2, 1);
