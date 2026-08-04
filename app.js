@@ -2490,7 +2490,20 @@
   function counts() {
     const energyN = sim.liveConsumerCount + sim.predatorCount;
     const producerDensity = sim.producerField.mass.length ? sim.producerField.total / sim.producerField.mass.length : 0;
-    return { producerDensity, producerB: sim.liveProducerBCount, producerC: sim.liveProducerCCount, consumers: sim.liveConsumerCount, predators: sim.predatorCount, energyAvg: energyN ? sim.mobileEnergySum / energyN : 0 };
+    // Include producer B/C energy in avg so the stat reflects the whole ecosystem.
+    // mobileEnergySum only tracks consumers+predators; producers are summed here (cheap, ~3/s).
+    let producerEnergy = 0;
+    if (sim.liveProducerBCount + sim.liveProducerCCount > 0) {
+      const creatures = sim.creatures;
+      for (let i = 0; i < creatures.length; i += 1) {
+        const e = creatures[i];
+        if (!e || !e.alive) continue;
+        if (e.type === TYPE.PRODUCER) producerEnergy += e.energy || 0;
+      }
+    }
+    const totalN = energyN + sim.liveProducerBCount + sim.liveProducerCCount;
+    const totalEnergy = sim.mobileEnergySum + producerEnergy;
+    return { producerDensity, producerB: sim.liveProducerBCount, producerC: sim.liveProducerCCount, consumers: sim.liveConsumerCount, predators: sim.predatorCount, energyAvg: totalN ? totalEnergy / totalN : 0 };
   }
 
   // Pre-allocated scratch for recordGeneHistory (avoids Object.fromEntries allocs each call)
