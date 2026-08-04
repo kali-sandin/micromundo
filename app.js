@@ -874,10 +874,10 @@
     // densityFactor: 0.4 (celdas muy pobres) a 1.0 (celdas ricas). mass tipica ~0.5-1.3.
     // Esto frena overgrazing en zonas degradadas y estabiliza boom-bust.
     const densityFactor = Math.max(0.4, Math.min(1.0, mass / 0.8));
-    // Mult 16 (antes 55->22->16): field genera ~0.015/s por celda. Bite tipico 0.047 cada ~0.55s.
-    // gain=0.047*16*densityFactor ~= 0.75/evento en zona rica, 0.30 en zona pobre.
-    // Ratio gain:metab ~4.5x (antes 12.8x). Eficiencia trofica ~22%.
-    const gain = bite * 16 * densityFactor;
+    // Mult 18 (antes 55->22->16->18): field genera ~0.015/s por celda. Bite tipico 0.047 cada ~0.55s.
+    // gain=0.047*18*densityFactor ~= 0.85/evento en zona rica, 0.34 en zona pobre.
+    // Ratio gain:metab ~5.2x. Eficiencia trofica ~24%.
+    const gain = bite * 18 * densityFactor;
     const actualGain = Math.min(gain, e.maxEnergy - e.energy);
     const newEnergy = e.energy + actualGain;
     sim.mobileEnergySum += actualGain;
@@ -1995,11 +1995,11 @@
     }
     // Umbral reproductivo: depredadores mas bajo (0.60 base, 0.50 en crisis)
     // Allee effect: umbral reproductivo mas bajo en baja densidad para ambos tipos.
-    // Consumers: <30 pop -> 0.65 vs 0.78 normal. Predators: <40 -> 0.50 vs 0.60.
+    // Consumers: <30 pop -> 0.55 vs 0.72 normal. Predators: <40 -> 0.50 vs 0.60.
     const lowPop = type === TYPE.PREDATOR ? sim.predatorCount < 40 : sim.liveConsumerCount < 30;
     const reproThreshold = type === TYPE.PREDATOR
       ? (lowPop ? 0.50 : 0.60)
-      : (lowPop ? 0.65 : 0.78);
+      : (lowPop ? 0.55 : 0.72);
     if (e.energy < e.maxEnergy * reproThreshold || e.cooldown > 0) return;
     // Reproductive senescence: sin penalty primera mitad de vida,
     // penalty progresivo (hasta -60%) en segunda mitad. task_031
@@ -2072,7 +2072,7 @@
     const resting = e._resting || false;
     // Metabolismo adaptativo: reduccion gradual para depredadores en baja cuenta
     // Antes era *=0.5 binario que hacia preds inmortales (84min sin comer)
-    let metabFactor = resting ? 1.5 : 7.5;
+    let metabFactor = resting ? 1.5 : 6.5;
     if (e.type === TYPE.PREDATOR) {
       metabFactor *= 0.85 + 0.15 * clamp(sim.predatorCount / 60, 0, 1);
     }
@@ -2325,7 +2325,7 @@
     // Restaurar tras uso temporal (fertility despues de reproduceMobile)
     e.speed = origSpeed;
     e.perception = origPerception;
-    if (canReproduce && e.energy >= e.maxEnergy * (e.type === TYPE.PREDATOR ? 0.50 : 0.65)) reproduceMobile(e, e.type, cachedMate);
+    if (canReproduce && e.energy >= e.maxEnergy * (e.type === TYPE.PREDATOR ? 0.50 : 0.55)) reproduceMobile(e, e.type, cachedMate);
     e.fertility = origFertility;
   }
 
