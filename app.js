@@ -2068,6 +2068,10 @@
         metabFactor *= 1 + (e._crowdDensity - 8) * 0.03;
       }
     }
+    // Food-stress metabolism damping (Lotka-Volterra negative feedback):
+    // Criaturas que fallan >=10 intentos consecutivos de comida reducen metab 15%.
+    // Previene oscilaciones extremas: poblacion alta -> menos comida -> metab bajo -> menos muertes.
+    if ((e._foodFailCount || 0) >= 10) metabFactor *= 0.85;
     // Reduccion metabolica nocturna: de noche el metabolismo baja (ritmos circadianos)
     if (sim.dayNightEnabled) {
       metabFactor *= 0.75 + 0.25 * clamp(sim.solarEnergy / sim.solarEnergyBase, 0, 1);
@@ -2228,7 +2232,12 @@
       steeringTarget = food;
     }
     steerCreature(e, dt, steeringTarget, threat);
+    // Food-stress tracking: medir si consiguio energia neta este step
+    const _energyBeforeFeed = e.energy;
     if (food) feedConsumer(e, food, dt);
+    // Actualizar contador de fallos consecutivos de alimentacion
+    if (e.energy > _energyBeforeFeed) e._foodFailCount = 0;
+    else e._foodFailCount = (e._foodFailCount || 0) + 1;
     // Check de muerte por energia despues de comer: da oportunidad a criaturas
     // que estan junto a comida sobrevivir un chunk mas
     if (e.energy <= 0) {
