@@ -2126,10 +2126,11 @@
     let threat = null;
     let cachedMate = null; // reuso de findMateTarget para reproduceMobile
     if (e.type === TYPE.PREDATOR) {
-      queryNearby(e.x, e.y, e.perception, TYPE.CONSUMER, nearby);
-      // Prey-switching: si <3 consumers cerca, priorizar carrion antes que cazar vivos
+      // queryNearby2: 1 sola pasada de grid para CONSUMER + GB_MOBILE (task_890).
+      // Antes eran 2 queries separadas con radii distintos. Ahora 1 pasada + filtrado por r2.
+      queryNearby2(e.x, e.y, e.perception, TYPE.CONSUMER, GB_MOBILE, nearby, nearbyMobile);
       const consumerCount = nearby.length;
-      e._localPreyDensity = consumerCount; // cache para Type III functional response en feedConsumer
+      e._localPreyDensity = consumerCount;
       food = consumerCount >= 3 ? nearestFood(e, nearby) : null;
       if (!food) {
         const carrion = nearestCarcassFood(e, e.perception * 0.85);
@@ -2140,14 +2141,16 @@
         }
       }
       if (!food) {
-        queryNearby(e.x, e.y, e.perception * 0.72, GB_MOBILE, nearby);
+        // Buscar ProducerC en nearbyMobile (ya poblado por queryNearby2).
+        // Filtrar por radio reducido (perception*0.72) para mantener comportamiento.
+        const plantR2 = (e.perception * 0.72) * (e.perception * 0.72);
         let bestPlant = null;
         let bestD2 = Infinity;
-        for (let i = 0; i < nearby.length; i += 1) {
-          const p = nearby[i];
+        for (let i = 0; i < nearbyMobile.length; i += 1) {
+          const p = nearbyMobile[i];
           if (!p.alive || p.sub === PRODUCER.A || isColonyProducer(p) || !canEatArmored(e, p)) continue;
           const d2 = torusDistance2(e, p);
-          if (d2 < bestD2) {
+          if (d2 < bestD2 && d2 <= plantR2) {
             bestPlant = p;
             bestD2 = d2;
           }
