@@ -170,7 +170,7 @@
   const PRODUCER_C_DEFAULT_FERTILITY = 0.026;
   const PRODUCER_C_CROWD_RADIUS = 320;
   const PRODUCER_C_CROWD_LIMIT = 2;
-  const COLONY_MATE_RANGE = 400;
+  const COLONY_MATE_RANGE = 800;
 
   const canvas = document.getElementById('world');
   const ctx = canvas.getContext('2d', { alpha: false });
