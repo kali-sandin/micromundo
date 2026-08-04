@@ -1698,6 +1698,11 @@
     }
 
     if (e.cooldown > 0) return;
+    // Reproductive senescence for producers: sin penalty primera mitad,
+    // hasta -60% en segunda mitad. task_031
+    const prodLifeFraction = e.age / e.maxAge;
+    const prodSenescence = prodLifeFraction < 0.5 ? 1 : clamp(1 - (prodLifeFraction - 0.5) * 1.2, 0.4, 1);
+    if (!chance(prodSenescence)) return;
     e.cooldown = isColonyProducer(e) ? rand(40, 100) : rand(30, 70);
 
     // Cap unificado: 10000 producers (antes 50000, causaba爆炸 de colonies sin limitante).
@@ -1996,9 +2001,11 @@
       ? (lowPop ? 0.50 : 0.60)
       : (lowPop ? 0.65 : 0.78);
     if (e.energy < e.maxEnergy * reproThreshold || e.cooldown > 0) return;
-    // Reproductive senescence: fertility declines con edad (Gompertz reproductivo)
-    const ageFactor = clamp(1 - (e.age / e.maxAge) * 0.6, 0.2, 1);
-    if (!chance(ageFactor)) return;
+    // Reproductive senescence: sin penalty primera mitad de vida,
+    // penalty progresivo (hasta -60%) en segunda mitad. task_031
+    const lifeFraction = e.age / e.maxAge;
+    const senescenceFactor = lifeFraction < 0.5 ? 1 : clamp(1 - (lifeFraction - 0.5) * 1.2, 0.4, 1);
+    if (!chance(senescenceFactor)) return;
     // Allee effect: ampliar rango de mate search en baja densidad.
     // Consumers: <30 pop -> 1.5x range. Predators: <40 -> 1.5x range.
     const alleeBoost = lowPop ? 1.5 : 1;
