@@ -627,12 +627,12 @@
 
   function fieldCellX(x) {
     const field = sim.producerField;
-    return mod(Math.floor(mod(x, WORLD.w) / field.cellW), field.cols);
+    return Math.floor(x / field.cellW) % field.cols;
   }
 
   function fieldCellY(y) {
     const field = sim.producerField;
-    return mod(Math.floor(mod(y, WORLD.h) / field.cellH), field.rows);
+    return Math.floor(y / field.cellH) % field.rows;
   }
 
   function fieldCellRadius(radius) {
