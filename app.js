@@ -887,7 +887,7 @@
     if (!car || !sim.producerField.mass.length || car.energy <= 0) return;
     // Scale deposit radius with energy so large carcasses spread over more cells
     // instead of saturating the 1.5 clamp on a few central cells.
-    const energyAmount = Math.max(0.18, car.energy * 0.15);
+    const energyAmount = Math.max(0.18, car.energy * 0.25);
     const depositRadius = Math.max(90, Math.min(240, car.radius * 12 + Math.sqrt(car.energy) * 6));
     addProducerDensity(car.x, car.y, energyAmount, depositRadius);
     sim.flowAccum.carcassToField += energyAmount;
@@ -1069,7 +1069,7 @@
       });
     } else if (storedEnergy > 0.5) {
       // Cap lleno: redirigir energia al producerField directamente (no deletarla)
-      addProducerDensity(e.x, e.y, Math.max(0.18, storedEnergy * 0.15), Math.max(90, Math.min(240, Math.max(2, (e.radius||5) * 0.9) * 12 + Math.sqrt(storedEnergy) * 6)));
+      addProducerDensity(e.x, e.y, Math.max(0.18, storedEnergy * 0.25), Math.max(90, Math.min(240, Math.max(2, (e.radius||5) * 0.9) * 12 + Math.sqrt(storedEnergy) * 6)));
     }
 
     if (LOG_EVENTS && reason && sim.deaths % 20 === 0) logEvent(`${reason}. Muertes acumuladas: ${fmt.format(sim.deaths)}`, 'death');
