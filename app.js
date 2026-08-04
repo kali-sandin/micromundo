@@ -2049,8 +2049,10 @@
     // Metabolic depression anti-extincion: organismos en inanicion reducen metabolismo.
     // Coma metabolico a <3% energy (x0.25), depression severa a <8% (x0.45).
     // Extiende supervivencia 2-4x en famine, permite recovery si encuentra comida.
-    if (e.energy < e.maxEnergy * 0.03) metabFactor *= 0.25;
-    else if (e.energy < e.maxEnergy * 0.08) metabFactor *= 0.45;
+    // Reserves (fat stores) mejoran depression: hasta -20% extra metabFactor.
+    const reserveBonus = 1 - Math.min(0.20, (e.reserves || 0) * 0.012);
+    if (e.energy < e.maxEnergy * 0.03) metabFactor *= 0.25 * reserveBonus;
+    else if (e.energy < e.maxEnergy * 0.08) metabFactor *= 0.45 * reserveBonus;
     // Senescence cost (Gompertz): criaturas viejas pagan mas metabolismo.
     // >60% effMaxAge: hasta +50% metab. Acelera turnover, previene inmortales.
     const gompertzAge = e.maxAge * (1 - (e.oxidativeDamage || 0));
