@@ -960,6 +960,17 @@
     for (let ci = sim.carcasses.length - 1; ci >= 0; ci -= 1) {
       const car = sim.carcasses[ci];
       car.life += dt;
+      // Gradual decay: en el ultimo 25% de vida, soltar energia al campo poco a poco.
+      // Evita cliff dump y distribuye nutrientes mas uniformemente.
+      const lifeFrac = car.life / car.maxLife;
+      if (lifeFrac > 0.75 && car.energy > 0.5) {
+        const decayRate = car.energy * 0.02 * dt; // ~2%/s de la energia restante
+        const decayed = Math.min(car.energy, decayRate);
+        car.energy -= decayed;
+        addProducerDensity(car.x, car.y, decayed * 0.25, Math.max(90, car.radius * 10));
+        sim.flowAccum.carcassToField += decayed * 0.25;
+        sim.flowAccum.carcassExpire += decayed * 0.75;
+      }
       if (car.life >= car.maxLife) returnCarcassEnergyToField(car);
       if (!car.alive || car.energy <= 0) {
         sim.carcasses[ci] = sim.carcasses[sim.carcasses.length - 1];
