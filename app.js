@@ -673,7 +673,7 @@
     if (src !== field.mass) field.mass.set(src);
   }
 
-  function initProducerField(seed = 0.18) {
+  function initProducerField(seed = 0.30) {
     const cols = Math.max(4, Math.ceil(WORLD.w / FIELD_CELL));
     const rows = Math.max(4, Math.ceil(WORLD.h / FIELD_CELL));
     sim.producerField.cols = cols;
@@ -738,7 +738,7 @@
     const sunlight = clamp(sim.solarEnergy, 0.1, 6);
     // Holling II: saturar growth con sunlight para evitar paradoja del enriquecimiento
     const sunEff = sunlight / (1 + sunlight * 0.15); // sun=1->0.87, sun=3->2.22, sun=6->4.0
-    const growth = 0.015 * sunEff * t;
+    const growth = 0.020 * sunEff * t;
     const baselineGrowth = 0.001 * sunEff * t; // evita frontera absorbente en m~0
     // Diffusion adaptativo: reducir cuando campo critico para proteger patches locales.
     // Campo sano (avg>0.3): diffusion normal. Campo critico (avg<0.1): diffusion x0.3.
