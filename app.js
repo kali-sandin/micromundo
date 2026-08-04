@@ -2233,7 +2233,7 @@
     // Restaurar tras uso temporal (fertility despues de reproduceMobile)
     e.speed = origSpeed;
     e.perception = origPerception;
-    if (canReproduce) reproduceMobile(e, e.type, cachedMate);
+    if (canReproduce && e.energy >= e.maxEnergy * (e.type === TYPE.PREDATOR ? 0.50 : 0.65)) reproduceMobile(e, e.type, cachedMate);
     e.fertility = origFertility;
   }
 
