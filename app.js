@@ -1772,7 +1772,11 @@
     const pressure = Boolean(threat || (food && e.type === TYPE.PREDATOR));
     const resting = updateResting(e, dt, pressure);
     e._resting = resting;
-    const turnNoise = hasMove(e, 0) ? 2.5 : hasMove(e, 2) ? 1.2 : 0.8;
+    let turnNoise = hasMove(e, 0) ? 2.5 : hasMove(e, 2) ? 1.2 : 0.8;
+    // Dispersion density-dependent: alta densidad local aumenta wander para redistribuir.
+    if (e.type === TYPE.CONSUMER && (e._crowdDensity || 0) > 8) {
+      turnNoise *= 1 + Math.min((e._crowdDensity - 8) * 0.12, 1.5);
+    }
     e.angle += rand(-turnNoise, turnNoise) * Math.sqrt(dt * BASE_DT);
 
     if (threat) {
@@ -1811,8 +1815,13 @@
         vegFactor = e.type === TYPE.PREDATOR ? 0.6 : 0.85;
       }
     }
-    e.x += lutCos(e.angle) * e.speed * ciliaPulse * burst * panic * vegFactor * dt;
-    e.y += lutSin(e.angle) * e.speed * ciliaPulse * burst * panic * vegFactor * dt;
+    // Dispersion density-dependent: ligero speed boost cuando alta densidad local.
+    let dispersionFactor = 1;
+    if (e.type === TYPE.CONSUMER && (e._crowdDensity || 0) > 8 && !threat) {
+      dispersionFactor = 1 + Math.min((e._crowdDensity - 8) * 0.02, 0.3);
+    }
+    e.x += lutCos(e.angle) * e.speed * ciliaPulse * burst * panic * vegFactor * dispersionFactor * dt;
+    e.y += lutSin(e.angle) * e.speed * ciliaPulse * burst * panic * vegFactor * dispersionFactor * dt;
     wrapInsideWorld(e);
   }
 
