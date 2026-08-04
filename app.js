@@ -165,7 +165,7 @@
   const TRAIL_MIN_STEP = 10;
   const HISTORY_MAX_POINTS = 21600;
   const DEFAULT_HISTORY_PX_PER_SECOND = 0.45;
-  const DEFAULT_INITIAL_PERCEPTION = 120;
+  const DEFAULT_INITIAL_PERCEPTION = 150;
   const PRODUCER_C_MAX_PERCEPTION = 180;
   const PRODUCER_C_DEFAULT_FERTILITY = 0.026;
   const PRODUCER_C_CROWD_RADIUS = 320;
@@ -1543,7 +1543,7 @@
   }
 
   function consumerThreatRange(e) {
-    return Math.min(230, Math.max(55, e.perception * 0.675 + e.chemosense * 13.75 + e.cilia * 3));
+    return Math.min(260, Math.max(65, e.perception * 0.7 + e.chemosense * 17.5 + e.cilia * 3));
   }
 
   function stepProducer(e, dt) {
