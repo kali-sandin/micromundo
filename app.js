@@ -2113,6 +2113,36 @@
     // Reduce effective maxAge hasta -50%. Criaturas high-performance viven menos.
     // Reset en offspring (nacen limpios). Press towards metabolic efficiency.
     e.oxidativeDamage = Math.min(0.5, e.oxidativeDamage + metabCost * 0.0002);
+    // --- Consumer dormancy (diapausa): anti-extincion en crisis severa prolongada ---
+    // Consumer a <2% energy por >20s entra dormancia. Metabolismo minimo, sin movimiento.
+    // Despierta cuando hay campo denso cerca. Protege population bottleneck.
+    if (e.type === TYPE.CONSUMER) {
+      if (e.dormant) {
+        e.energy -= dt * 0.002; // metabolism minimo
+        sim.mobileEnergySum -= dt * 0.002;
+        e.dormantTimer += dt;
+        if (e.dormantTimer > 15) {
+          const ci = fieldIndex(fieldCellX(e.x), fieldCellY(e.y));
+          if (sim.producerField.mass[ci] > 0.2) {
+            e.dormant = false;
+            e.dormantTimer = 0;
+          }
+        }
+        wrapInsideWorld(e);
+        return; // skip comportamiento, movimiento, reproduccion
+      }
+      if (e.energy < e.maxEnergy * 0.02) {
+        e._starveTimer = (e._starveTimer || 0) + dt;
+        if (e._starveTimer > 20) {
+          e.dormant = true;
+          e.dormantTimer = 0;
+          wrapInsideWorld(e);
+          return;
+        }
+      } else {
+        e._starveTimer = 0;
+      }
+    }
     // DOC excretion: recicla 2.5% del metabCost al producerField (microbial loop)
     if (metabCost > 0.01) {
       const excretion = metabCost * 0.025;
