@@ -3104,11 +3104,20 @@
   }
 
   function drawSelectionRing(p, r, color) {
+    const ringR = Math.max(r + 5, 14);
+    const lw = r < 4 ? 3 : 2;
     ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = lw;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, r + 5, 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, ringR, 0, Math.PI * 2);
     ctx.stroke();
+    // At very low zoom, add center dot so selection is always visible
+    if (r < 3) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 
   function drawMapEnergyBar(p, r, e) {
