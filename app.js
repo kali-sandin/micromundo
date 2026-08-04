@@ -1209,7 +1209,8 @@
     // para que speedCost y metabolism reflejen la masa y velocidad reales
     derivedConsumerStats(e);
     e.radius += 1.5;
-    e.maxEnergy *= 1.5;
+    // maxEnergy ya refleja genes de predator (size alto + reserves alto).
+    // El *= 1.5 anterior inflaba reservas ~50% y amplificaba boom-bust.
     const oldEnergy = e.energy;
     if (opts.energy == null) e.energy = rand(e.maxEnergy * 0.38, e.maxEnergy * 0.62);
     else e.energy = clamp(opts.energy, 1, e.maxEnergy);
