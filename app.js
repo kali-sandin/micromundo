@@ -423,9 +423,9 @@
     let child = 0;
     for (let i = 0; i < MOVE.length; i += 1) {
       const bit = 1 << i;
-      if (union & bit && chance((ma & bit) && (mb & bit) ? 0.82 : 0.48)) child |= bit;
+      if (union & bit && chance((ma & bit) && (mb & bit) ? 0.68 : 0.42)) child |= bit;
     }
-    if (chance(0.04)) child ^= 1 << Math.floor(rand(0, MOVE.length));
+    if (chance(0.08)) child ^= 1 << Math.floor(rand(0, MOVE.length));
     return child || (chance(0.5) ? ma : mb) || 2;
   }
 
@@ -1760,7 +1760,7 @@
       speed: e.speed ? inheritAsexual(e, 'speed', 8, 62, false, pStress) : 0,
       perception: inheritAsexual(e, 'perception', 45, PRODUCER_C_MAX_PERCEPTION, false, pStress),
       chemosense: inheritAsexual(e, 'chemosense', 0, 5, false, pStress),
-      movementMask: chance(0.04) ? inheritMovementMask(e, { movementMask: 1 << Math.floor(rand(0, MOVE.length)) }) : movementMaskFromLegacy(e),
+      movementMask: chance(0.08) ? inheritMovementMask(e, { movementMask: 1 << Math.floor(rand(0, MOVE.length)) }) : movementMaskFromLegacy(e),
       fertility: inheritAsexual(e, 'fertility', 0.006, 0.075, false, pStress),
       maxAge: inheritAsexual(e, 'maxAge', 3500, 12000, false, pStress),
       ...(childEnergy != null ? { energy: childEnergy } : {})
