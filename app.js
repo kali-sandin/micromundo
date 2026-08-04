@@ -1025,6 +1025,9 @@
       grazeCooldown: 0,
       huntCooldown: 0,
       oxidativeDamage: 0,
+      feedHotspotX: -1,
+      feedHotspotY: -1,
+      feedHotspotTTL: 0,
       _birthStep: -1
     };
     const e = Object.assign(base, partial);
@@ -2066,6 +2069,7 @@
     e.cooldown -= dt;
     if (e.grazeCooldown > 0) e.grazeCooldown -= dt;
     if (e.huntCooldown > 0) e.huntCooldown -= dt;
+    if (e.feedHotspotTTL > 0) e.feedHotspotTTL -= dt;
     // resting: usar valor del step anterior (post-updateResting). Siempre correcto
     // porque updateResting corre al final de steerCreature del step previo.
     // Mismo patron que _hadPanic. Primer step: _resting undefined -> false -> 7.5 (correcto).
@@ -2272,7 +2276,29 @@
     } else {
       queryNearby2(e.x, e.y, e.perception, GB_COLONY, GB_MOBILE, nearby, nearbyMobile);
       const entityFood = nearestFood(e, nearby, nearbyMobile);
-      const fieldFood = (e.grazeCooldown || 0) > 0 ? null : bestProducerDensityTarget(e.x, e.y, e.perception);
+      // Spatial memory: cache bestProducerDensityTarget result to avoid scanning
+      // the field grid every frame. TTL-based; rescan when expired or energy low.
+      let fieldFood = null;
+      if ((e.grazeCooldown || 0) <= 0) {
+        if (e.feedHotspotTTL > 0 && e.energy > e.maxEnergy * 0.25) {
+          // Use cached hotspot — skip expensive grid scan
+          _scratchFieldFood.sub = PRODUCER.A;
+          _scratchFieldFood.radius = Math.max(sim.producerField.cellW, sim.producerField.cellH) * 0.45;
+          _scratchFieldFood.x = e.feedHotspotX;
+          _scratchFieldFood.y = e.feedHotspotY;
+          _scratchFieldFood.density = 0.5; // approximate; refreshed on next scan
+          fieldFood = _scratchFieldFood;
+        } else {
+          fieldFood = bestProducerDensityTarget(e.x, e.y, e.perception);
+          if (fieldFood) {
+            e.feedHotspotX = fieldFood.x;
+            e.feedHotspotY = fieldFood.y;
+            e.feedHotspotTTL = rand(2.5, 5.0); // cache 2.5-5s
+          } else {
+            e.feedHotspotTTL = 0;
+          }
+        }
+      }
       food = entityFood;
       if (fieldFood) {
         if (!entityFood) food = fieldFood;
