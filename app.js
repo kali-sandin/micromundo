@@ -1846,6 +1846,8 @@
     if (target.virtualCarcass) return eatCarcass(e, target, dt);
     if (!target.alive) return false;
     if (target.dormant) return false;
+    // Digestion (task_300): predator digiriendo no puede cazar
+    if (e.type === TYPE.PREDATOR && (e.digestTimer || 0) > 0) return false;
     if (target.virtualA) return grazeProducerDensity(e, dt);
     const dx = torusDelta(target.x - e.x, WORLD.w);
     const dy = torusDelta(target.y - e.y, WORLD.h);
@@ -1967,6 +1969,11 @@
     e.huntCooldown = e.type === TYPE.PREDATOR
       ? 1.8 + preySize + rand(0, 0.8)   // 1.8-3.5s para predators
       : 1.2 + rand(0, 0.5);              // 1.2-1.7s para consumers (ProducerC)
+    // Digestion timer (task_300): predator entra en digestion 8-15s tras kill.
+    // Speed reducida, metab aumentada, no busca comida. Estabiliza dinamicas depredador-presa.
+    if (e.type === TYPE.PREDATOR) {
+      e.digestTimer = 8 + rand(0, 7);
+    }
     // Sloppy feeding (microbial loop): 12% de energia de presa se pierde al producerField.
     // Simula DOC leakage durante predacion. Cria hotspots de fertilidad en zonas de caza.
     if (e.type === TYPE.PREDATOR && !target.virtualA) {
@@ -2070,6 +2077,7 @@
     if (e.grazeCooldown > 0) e.grazeCooldown -= dt;
     if (e.huntCooldown > 0) e.huntCooldown -= dt;
     if (e.feedHotspotTTL > 0) e.feedHotspotTTL -= dt;
+    if (e.digestTimer > 0) e.digestTimer -= dt;
     // resting: usar valor del step anterior (post-updateResting). Siempre correcto
     // porque updateResting corre al final de steerCreature del step previo.
     // Mismo patron que _hadPanic. Primer step: _resting undefined -> false -> 7.5 (correcto).
@@ -2127,6 +2135,10 @@
     // Reduccion metabolica nocturna: de noche el metabolismo baja (ritmos circadianos)
     if (sim.dayNightEnabled) {
       metabFactor *= 0.75 + 0.25 * clamp(sim.solarEnergy / sim.solarEnergyBase, 0, 1);
+    }
+    // Digestion surcharge (task_300): predator digiriendo paga +30% metabolism
+    if ((e.digestTimer || 0) > 0 && e.type === TYPE.PREDATOR) {
+      metabFactor *= 1.3;
     }
     // Momentum metabolico (EMA): suaviza transiciones de metabFactor
     // 70% valor actual + 30% valor anterior. Evita saltos instantaneos.
@@ -2216,12 +2228,17 @@
     let steeringTarget = null;
     let threat = null;
     let cachedMate = null; // reuso de findMateTarget para reproduceMobile
+    // Digestion (task_300): predator digiriendo no busca comida. Speed ya reducida abajo.
+    const digesting = (e.digestTimer || 0) > 0 && e.type === TYPE.PREDATOR;
+    if (digesting) e.speed *= 0.7;
     if (e.type === TYPE.PREDATOR) {
       // queryNearby2: 1 sola pasada de grid para CONSUMER + GB_MOBILE (task_890).
       // Antes eran 2 queries separadas con radii distintos. Ahora 1 pasada + filtrado por r2.
       queryNearby2(e.x, e.y, e.perception, TYPE.CONSUMER, GB_MOBILE, nearby, nearbyMobile);
       const consumerCount = nearby.length;
       e._localPreyDensity = consumerCount;
+      // Digestion (task_300): predator digiriendo no busca comida
+      if (!digesting) {
       food = consumerCount >= 3 ? nearestFood(e, nearby) : null;
       if (!food) {
         const carrion = nearestCarcassFood(e, e.perception * 0.85);
@@ -2266,6 +2283,7 @@
         }
         if (bestPrey) food = bestPrey;
       }
+      } // end if (!digesting)
       // Si el predator tiene energia alta y no hay threat, prioriza reproducir sobre cazar
       if (food && e.energy > e.maxEnergy * 0.8 && !threat) {
         cachedMate = findMateTarget(e, TYPE.PREDATOR);
