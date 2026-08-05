@@ -110,6 +110,7 @@ function loadApp() {
       producerCCrowdFactor, grazeProducerDensity, reproduceMobile,
       stepProducerField, fieldCellX, fieldCellY, fieldIndex,
       setSeed,
+      saveSnapshot, saveSnapshotJSON, loadSnapshot, loadSnapshotJSON,
       applyWorldSizeFromForm,
       GROUPS, GROUP_KEYS, GROUP_LABELS, TYPE, PRODUCER,
       WORLD, CELL, FIELD_CELL,
@@ -1028,6 +1029,66 @@ function runFunctionalTests() {
     api.setSeed(222);
     const a2 = api.rand(0, 100);
     expectOk(a1 !== a2, 'Seeds distintos dieron mismo valor');
+  });
+
+  // ═══ TASK_060: SAVE/LOAD SNAPSHOT ═══
+  suite('Task_060: save/load');
+
+  assert('saveSnapshot produce estructura valida', () => {
+    api.resetWorld();
+    const snap = api.saveSnapshot();
+    expectEq(snap.version, 1, 'Version de snapshot incorrecta');
+    expectOk(snap.sim.time === 0, 'Snapshot no arranca en t=0');
+    expectOk(snap.creatures.length > 0, 'Snapshot sin criaturas');
+    expectOk(snap.field.mass.length > 0, 'Snapshot sin field mass');
+    expectOk(typeof snap.sim.seed === 'number', 'Snapshot sin seed');
+  });
+
+  assert('loadSnapshot restaura estado correctamente', () => {
+    api.resetWorld();
+    for (let i = 0; i < 20; i++) api.simulate(0.5);
+    const snap = api.saveSnapshot();
+    const countsBefore = api.counts();
+    const timeBefore = api.sim.time;
+    // Reset y cargar
+    api.resetWorld();
+    expectOk(api.sim.time === 0, 'resetWorld no reinicio time');
+    const ok = api.loadSnapshot(snap);
+    expectEq(ok, true, 'loadSnapshot devolvio false');
+    const countsAfter = api.counts();
+    expectEq(countsAfter.consumers, countsBefore.consumers, 'Consumers no restaurados');
+    expectEq(countsAfter.predators, countsBefore.predators, 'Predators no restaurados');
+    expectEq(api.sim.time, timeBefore, 'time no restaurado');
+  });
+
+  assert('save/load JSON roundtrip preserva estado', () => {
+    api.resetWorld();
+    for (let i = 0; i < 10; i++) api.simulate(0.5);
+    const json = api.saveSnapshotJSON();
+    const countsBefore = api.counts();
+    api.resetWorld();
+    api.loadSnapshotJSON(json);
+    const countsAfter = api.counts();
+    expectEq(countsAfter.consumers, countsBefore.consumers, 'JSON roundtrip: consumers distintos');
+    expectEq(countsAfter.predators, countsBefore.predators, 'JSON roundtrip: predators distintos');
+  });
+
+  assert('loadSnapshot con seed restaurado es determinista', () => {
+    api.sim.seed = 42;
+    api.resetWorld();
+    for (let i = 0; i < 10; i++) api.simulate(0.5);
+    const counts1 = api.counts();
+    const snap = api.saveSnapshot();
+    // Cargar snapshot y seguir simulando
+    api.loadSnapshot(snap);
+    for (let i = 0; i < 10; i++) api.simulate(0.5);
+    const counts2 = api.counts();
+    // Debe ser identico a simular 20 pasos desde el mismo punto
+    api.sim.seed = 42;
+    api.resetWorld();
+    for (let i = 0; i < 20; i++) api.simulate(0.5);
+    const counts3 = api.counts();
+    expectEq(counts2.consumers, counts3.consumers, 'Snapshot+sim no es determinista vs sim continua');
   });
 }
 

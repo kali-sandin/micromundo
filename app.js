@@ -4684,6 +4684,139 @@
     }, { passive: false });
   }
 
+  // ─── Save/Load snapshot (task_060) ──────────────────────────
+  const SNAPSHOT_VERSION = 1;
+  const CREATURE_KEYS = [
+    'id', 'uid', 'alive', 'type', 'sub', 'x', 'y', 'angle', 'radius', 'speed',
+    'energy', 'age', 'cooldown', 'color', 'size', 'reserves', 'flagella', 'cilia',
+    'chemosense', 'pseudopodia', 'armor', 'vacuole', 'feeding', 'movement',
+    'movementMask', 'perception', 'fertility', 'maxEnergy', 'metabolism',
+    'restUntil', 'restCooldown', 'burstCooldown', 'leafEnergy', 'leafCount',
+    'maxRadius', 'maxAge', 'competitionAt', 'starved', 'grazeCooldown',
+    'huntCooldown', 'oxidativeDamage', 'feedHotspotX', 'feedHotspotY',
+    'feedHotspotTTL', '_birthStep', 'vx', 'vy', 'fearFactor', 'digestTimer'
+  ];
+
+  function saveSnapshot() {
+    const field = sim.producerField;
+    const aliveCreatures = sim.creatures.filter(e => e && e.alive);
+    const snapshot = {
+      version: SNAPSHOT_VERSION,
+      timestamp: Date.now(),
+      sim: {
+        time: sim.time,
+        births: sim.births,
+        deaths: sim.deaths,
+        seed: sim.seed || 0,
+        solarEnergy: sim.solarEnergy,
+        solarEnergyBase: sim.solarEnergyBase,
+        dayNightEnabled: sim.dayNightEnabled,
+        dayNightPeriod: sim.dayNightPeriod,
+        dayNightPhase: sim.dayNightPhase,
+        predatorCount: sim.predatorCount,
+        liveConsumerCount: sim.liveConsumerCount,
+        liveProducerBCount: sim.liveProducerBCount,
+        liveProducerCCount: sim.liveProducerCCount,
+        mobileEnergySum: sim.mobileEnergySum,
+        nextCreatureUid: sim.nextCreatureUid,
+        migrationTimer: sim.migrationTimer
+      },
+      world: { w: WORLD.w, h: WORLD.h },
+      field: {
+        cols: field.cols,
+        rows: field.rows,
+        cellW: field.cellW,
+        cellH: field.cellH,
+        total: field.total,
+        mass: Array.from(field.mass)
+      },
+      creatures: aliveCreatures.map(e => {
+        const o = {};
+        for (const k of CREATURE_KEYS) if (k in e) o[k] = e[k];
+        return o;
+      }),
+      carcasses: sim.carcasses.map(c => ({ x: c.x, y: c.y, energy: c.energy, age: c.age, radius: c.radius }))
+    };
+    return snapshot;
+  }
+
+  function saveSnapshotJSON() {
+    return JSON.stringify(saveSnapshot());
+  }
+
+  function loadSnapshot(snap) {
+    if (!snap || snap.version !== SNAPSHOT_VERSION) return false;
+    // Restaurar mundo si cambia de tamano
+    if (snap.world && (snap.world.w !== WORLD.w || snap.world.h !== WORLD.h)) {
+      applyWorldSizeFromForm(snap.world.w, snap.world.h);
+    }
+    // Limpiar estado
+    sim.creatures = [];
+    sim.creatureIndex.clear();
+    sim.freeIds = [];
+    sim.carcasses.length = 0;
+    initGrid();
+    initProducerField();
+    // Restaurar PRNG seed
+    sim.seed = snap.sim.seed >>> 0;
+    setSeed(sim.seed);
+    // Restaurar producerField
+    if (snap.field) {
+      const f = snap.field;
+      sim.producerField.total = f.total;
+      if (f.mass && f.mass.length === sim.producerField.mass.length) {
+        sim.producerField.mass.set(f.mass);
+      }
+      sim.producerField.dirty = true;
+    }
+    // Restaurar sim state
+    sim.time = snap.sim.time || 0;
+    sim.births = snap.sim.births || 0;
+    sim.deaths = snap.sim.deaths || 0;
+    sim.solarEnergy = snap.sim.solarEnergy ?? 1;
+    sim.solarEnergyBase = snap.sim.solarEnergyBase ?? 1;
+    sim.dayNightEnabled = snap.sim.dayNightEnabled ?? false;
+    sim.dayNightPeriod = snap.sim.dayNightPeriod ?? 600;
+    sim.dayNightPhase = snap.sim.dayNightPhase ?? 0;
+    sim.predatorCount = snap.sim.predatorCount || 0;
+    sim.liveConsumerCount = snap.sim.liveConsumerCount || 0;
+    sim.liveProducerBCount = snap.sim.liveProducerBCount || 0;
+    sim.liveProducerCCount = snap.sim.liveProducerCCount || 0;
+    sim.mobileEnergySum = snap.sim.mobileEnergySum || 0;
+    sim.nextCreatureUid = snap.sim.nextCreatureUid || 1;
+    sim.migrationTimer = snap.sim.migrationTimer || 0;
+    // Restaurar criaturas
+    for (const c of snap.creatures) {
+      const e = Object.assign({}, c);
+      sim.creatures[e.id] = e;
+      sim.creatureIndex.set(e.uid, e);
+    }
+    // Restaurar carcasses
+    if (snap.carcasses) {
+      for (const c of snap.carcasses) sim.carcasses.push(Object.assign({}, c));
+    }
+    // Refrescar grid, graficas y UI
+    rebuildGrid();
+    sim.graph.clear();
+    sim.geneHistory.clear();
+    sim.lastGraphAt = -Infinity;
+    sim.lastStatsAt = -Infinity;
+    recordGeneHistory();
+    updateStats(true);
+    if (LOG_EVENTS) logEvent('Snapshot cargado: ' + snap.creatures.length + ' criaturas');
+    return true;
+  }
+
+  function loadSnapshotJSON(jsonStr) {
+    try {
+      const snap = JSON.parse(jsonStr);
+      return loadSnapshot(snap);
+    } catch (e) {
+      console.error('loadSnapshotJSON:', e);
+      return false;
+    }
+  }
+
   function init() {
     setSpeed();
     setSystemEnergy();
