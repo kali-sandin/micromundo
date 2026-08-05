@@ -261,7 +261,10 @@
       scratch: new Float32Array(0),
       total: 0,
       accumulator: 0,
-      dirty: true
+      dirty: true,
+      // Dirty rect tracking (cell coords). null = no partial dirty.
+      dirtyMinX: null, dirtyMinY: null,
+      dirtyMaxX: null, dirtyMaxY: null
     },
     graph: new RingBuffer(HISTORY_MAX_POINTS),
     geneHistory: new RingBuffer(HISTORY_MAX_POINTS),
@@ -700,6 +703,10 @@
     sim.producerField.scratch = new Float32Array(cols * rows);
     sim.producerField.total = 0;
     sim.producerField.accumulator = 0;
+    sim.producerField.dirtyMinX = null;
+    sim.producerField.dirtyMinY = null;
+    sim.producerField.dirtyMaxX = null;
+    sim.producerField.dirtyMaxY = null;
 
     for (let i = 0; i < sim.producerField.mass.length; i += 1) {
       const value = _rng() < seed ? rand(0.14, 0.52) : rand(0.025, 0.10);
@@ -709,12 +716,28 @@
     smoothProducerFieldSeed(7);
   }
 
+  function markFieldDirty(cx, cy, r) {
+    const f = sim.producerField;
+    const x0 = cx - r, x1 = cx + r, y0 = cy - r, y1 = cy + r;
+    if (f.dirtyMinX === null) {
+      f.dirtyMinX = x0; f.dirtyMaxX = x1;
+      f.dirtyMinY = y0; f.dirtyMaxY = y1;
+    } else {
+      if (x0 < f.dirtyMinX) f.dirtyMinX = x0;
+      if (x1 > f.dirtyMaxX) f.dirtyMaxX = x1;
+      if (y0 < f.dirtyMinY) f.dirtyMinY = y0;
+      if (y1 > f.dirtyMaxY) f.dirtyMaxY = y1;
+    }
+    f.dirty = true;
+  }
+
   function addProducerDensity(x, y, amount = 1, radius = 90) {
     const field = sim.producerField;
     if (!field.mass.length) return;
     const cx = fieldCellX(x);
     const cy = fieldCellY(y);
     const r = fieldCellRadius(radius);
+    markFieldDirty(cx, cy, r);
     const gain = Math.max(0.05, amount);
     const r2 = r * r;
     for (let yy = cy - r; yy <= cy + r; yy += 1) {
@@ -824,6 +847,9 @@
     field.mass = field.scratch;
     field.scratch = tmp;
     field.total = total;
+    // stepProducerField hace growth+diffusion en todas las celdas: dirty global
+    field.dirtyMinX = null; field.dirtyMinY = null;
+    field.dirtyMaxX = null; field.dirtyMaxY = null;
     field.dirty = true;
   }
 
@@ -884,6 +910,7 @@
     const biteRate = (0.018 + e.size * 0.006 + e.cilia * 0.003 + feedBonus) * (e.fearFactor || 1) * grazingEff;
     const bite = Math.min(mass, biteRate);
     field.mass[idx] = mass - bite;
+    markFieldDirty(cx, cy, 1);
     field.total -= bite;
     // Density-dependent grazing efficiency: celdas pobres rinden menos energia por bite.
     // densityFactor: 0.4 (celdas muy pobres) a 1.0 (celdas ricas). mass tipica ~0.5-1.3.
@@ -3118,25 +3145,47 @@
     ensureFieldCanvas(cols, rows);
     const data = _fieldImageData.data;
     const mass = field.mass;
-    const n = cols * rows;
-    for (let i = 0; i < n; i += 1) {
-      const m = mass[i];
-      if (m < 0.035) {
-        data[i * 4 + 3] = 0; // transparent
-      } else {
-        // Match the LUT color: rgba(118, 210, 93, alpha)
-        // alpha = 0.035 + clamp(m*0.16, 0, 1) * 0.205
-        let a = _PFIELD_ALPHA_MIN + m * 0.16;
-        if (a > _PFIELD_ALPHA_MAX) a = _PFIELD_ALPHA_MAX;
-        const a255 = (a * 255) | 0;
-        data[i * 4]     = 118; // R
-        data[i * 4 + 1] = 210; // G
-        data[i * 4 + 2] = 93;  // B
-        data[i * 4 + 3] = a255;
+
+    // Determine update region. If dirty rect is null (global) or covers >80% of field, full scan.
+    let x0 = 0, y0 = 0, x1 = cols - 1, y1 = rows - 1;
+    let partial = false;
+    if (field.dirtyMinX !== null) {
+      const dw = field.dirtyMaxX - field.dirtyMinX + 1;
+      const dh = field.dirtyMaxY - field.dirtyMinY + 1;
+      const coverage = (dw * dh) / (cols * rows);
+      if (coverage < 0.8) {
+        // Clamp dirty rect to field bounds and add 1-cell diffusion margin
+        x0 = Math.max(0, field.dirtyMinX - 1);
+        y0 = Math.max(0, field.dirtyMinY - 1);
+        x1 = Math.min(cols - 1, field.dirtyMaxX + 1);
+        y1 = Math.min(rows - 1, field.dirtyMaxY + 1);
+        partial = true;
       }
     }
+
+    for (let y = y0; y <= y1; y += 1) {
+      const rowBase = y * cols;
+      for (let x = x0; x <= x1; x += 1) {
+        const i = rowBase + x;
+        const m = mass[i];
+        if (m < 0.035) {
+          data[i * 4 + 3] = 0; // transparent
+        } else {
+          let a = _PFIELD_ALPHA_MIN + m * 0.16;
+          if (a > _PFIELD_ALPHA_MAX) a = _PFIELD_ALPHA_MAX;
+          const a255 = (a * 255) | 0;
+          data[i * 4]     = 118; // R
+          data[i * 4 + 1] = 210; // G
+          data[i * 4 + 2] = 93;  // B
+          data[i * 4 + 3] = a255;
+        }
+      }
+    }
+
     _fieldCanvas.getContext('2d').putImageData(_fieldImageData, 0, 0);
     field.dirty = false;
+    field.dirtyMinX = null; field.dirtyMinY = null;
+    field.dirtyMaxX = null; field.dirtyMaxY = null;
   }
 
   function drawProducerField(offsets) {
