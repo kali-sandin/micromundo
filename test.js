@@ -109,6 +109,7 @@ function loadApp() {
       nearestCarcassFood, returnCarcassEnergyToField,
       producerCCrowdFactor, grazeProducerDensity, reproduceMobile,
       stepProducerField, fieldCellX, fieldCellY, fieldIndex,
+      setSeed,
       applyWorldSizeFromForm,
       GROUPS, GROUP_KEYS, GROUP_LABELS, TYPE, PRODUCER,
       WORLD, CELL, FIELD_CELL,
@@ -986,6 +987,47 @@ function runFunctionalTests() {
     for (let i = 0; i < 10; i++) api.stepProducerField(0.5);
     const centerAfter = api.sim.producerField.mass[centerIdx];
     expectOk(centerAfter < 1.5, 'Diffusion no redujo el pico central');
+  });
+
+  // ═══ TASK_061: PRNG SEED REPRODUCIBLE ═══
+  suite('Task_061: PRNG seed');
+
+  assert('setSeed produce secuencia determinista', () => {
+    api.setSeed(12345);
+    const v1 = api.rand(0, 1);
+    const v2 = api.rand(0, 1);
+    const v3 = api.rand(0, 1);
+    api.setSeed(12345);
+    const w1 = api.rand(0, 1);
+    const w2 = api.rand(0, 1);
+    const w3 = api.rand(0, 1);
+    expectEq(v1, w1, 'PRNG no es determinista (v1)');
+    expectEq(v2, w2, 'PRNG no es determinista (v2)');
+    expectEq(v3, w3, 'PRNG no es determinista (v3)');
+  });
+
+  assert('resetWorld con seed fija es reproducible', () => {
+    api.sim.seed = 999;
+    api.resetWorld();
+    const counts1 = api.counts();
+    const time1 = api.sim.time;
+    // Segunda pasada con mismo seed
+    api.sim.seed = 999;
+    api.resetWorld();
+    const counts2 = api.counts();
+    const time2 = api.sim.time;
+    expectEq(counts1.consumers, counts2.consumers, 'Consumers distintos con mismo seed');
+    expectEq(counts1.predators, counts2.predators, 'Predators distintos con mismo seed');
+    expectEq(counts1.producerB, counts2.producerB, 'ProducerB distintos con mismo seed');
+    expectEq(counts1.producerC, counts2.producerC, 'ProducerC distintos con mismo seed');
+  });
+
+  assert('PRNG diferente seed da diferente secuencia', () => {
+    api.setSeed(111);
+    const a1 = api.rand(0, 100);
+    api.setSeed(222);
+    const a2 = api.rand(0, 100);
+    expectOk(a1 !== a2, 'Seeds distintos dieron mismo valor');
   });
 }
 

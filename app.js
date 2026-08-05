@@ -245,6 +245,7 @@
     dayNightPhase: 0,
     births: 0,
     deaths: 0,
+    seed: 0,
     fps: 0,
     creatures: [],
     creatureIndex: new Map(),
@@ -437,8 +438,22 @@
     return integer ? Math.round(out) : out;
   }
 
+  // ─── PRNG: mulberry32 para reproducibilidad ──────────────────
+  // Reemplaza Math.random en toda la lógica de simulación.
+  // Permite reproducir simulaciones con seed conocido (task_061).
+  let _prngState = 0;
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  let _rng = mulberry32((Date.now() ^ 0x9E3779B9) >>> 0);
+
   function rand(min, max) {
-    return min + Math.random() * (max - min);
+    return min + _rng() * (max - min);
   }
 
   function clamp(v, min, max) {
@@ -488,7 +503,7 @@
   }
 
   function chance(p) {
-    return Math.random() < p;
+    return _rng() < p;
   }
 
   function nowText() {
@@ -687,7 +702,7 @@
     sim.producerField.accumulator = 0;
 
     for (let i = 0; i < sim.producerField.mass.length; i += 1) {
-      const value = Math.random() < seed ? rand(0.14, 0.52) : rand(0.025, 0.10);
+      const value = _rng() < seed ? rand(0.14, 0.52) : rand(0.025, 0.10);
       sim.producerField.mass[i] = value;
       sim.producerField.total += value;
     }
@@ -3858,7 +3873,15 @@
     els.playPause.classList.toggle('active', paused);
   }
 
+  function setSeed(seed) {
+    sim.seed = seed >>> 0;
+    _rng = mulberry32(sim.seed);
+  }
+
   function resetWorld() {
+    // Inicializar PRNG con seed aleatorio si no hay seed explicito
+    if (!sim.seed) sim.seed = (Math.random() * 4294967296) >>> 0;
+    setSeed(sim.seed);
     sim.creatures = [];
     sim.creatureIndex.clear();
     sim.freeIds = [];
