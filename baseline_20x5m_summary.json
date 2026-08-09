@@ -1,0 +1,648 @@
+{
+  "meta": {
+    "tool": "sim-harness.js",
+    "version": "1.0",
+    "git_commit": "91f160f",
+    "timestamp": "2026-08-09T04:39:50.749Z",
+    "config": {
+      "duration_min": 5,
+      "duration_sec": 300,
+      "seeds": [
+        12345,
+        20264,
+        28183,
+        36102,
+        44021,
+        51940,
+        59859,
+        67778,
+        75697,
+        83616,
+        91535,
+        99454,
+        107373,
+        115292,
+        123211,
+        131130,
+        139049,
+        146968,
+        154887,
+        162806
+      ],
+      "seed_count": 20,
+      "dt": 0.016666666666666666,
+      "interval_sec": 10,
+      "migration": true
+    }
+  },
+  "verdict_evaluated": {
+    "all_pass": false,
+    "checks": [
+      {
+        "name": "Survival >= 18/20",
+        "pass": true,
+        "detail": "19/20"
+      },
+      {
+        "name": "CV consumers <= 0.25",
+        "pass": true,
+        "detail": "0.106"
+      },
+      {
+        "name": "CV predators <= 0.25",
+        "pass": false,
+        "detail": "0.343"
+      },
+      {
+        "name": "Energy drift <= 10%",
+        "pass": false,
+        "detail": "91.7% (boom)"
+      },
+      {
+        "name": "Extinctions = 0",
+        "pass": false,
+        "detail": "1 producer-c en seed 115292"
+      },
+      {
+        "name": "No guild lost",
+        "pass": false,
+        "detail": "producer-c perdido 1/20"
+      },
+      {
+        "name": "Diversity gene CV >= 20%",
+        "pass": true,
+        "detail": "2.108"
+      },
+      {
+        "name": "Pop decline <= 5%/10min",
+        "pass": false,
+        "detail": "-173% (crecimiento 5x)"
+      }
+    ]
+  },
+  "aggregate": {
+    "seeds": 20,
+    "populations": {
+      "producerA_density": {
+        "mean": 1.0503649999999998,
+        "stdev": 0.023281994652520614,
+        "min": 1.0061,
+        "max": 1.1078
+      },
+      "producerB": {
+        "mean": 71.85,
+        "stdev": 0.35707142142714254,
+        "min": 71,
+        "max": 72
+      },
+      "producerC": {
+        "mean": 4.3,
+        "stdev": 1.676305461424021,
+        "min": 0,
+        "max": 8
+      },
+      "consumers": {
+        "mean": 3779.4,
+        "stdev": 402.0215665856746,
+        "min": 2892,
+        "max": 4720
+      },
+      "predators": {
+        "mean": 6.85,
+        "stdev": 2.3510635891017495,
+        "min": 4,
+        "max": 12
+      }
+    },
+    "energy": {
+      "producer": {
+        "mean": 1884.7499999999995,
+        "stdev": 44.68146707528748
+      },
+      "consumer": {
+        "mean": 262997.21,
+        "stdev": 24729.361061719723
+      },
+      "predator": {
+        "mean": 115.905,
+        "stdev": 86.1407132255126
+      },
+      "field": {
+        "mean": 18696.57,
+        "stdev": 414.6666626339763
+      },
+      "carcass": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "avg": {
+        "mean": 69.0865,
+        "stdev": 1.5759577246868028
+      }
+    },
+    "percentiles": {
+      "populations": {
+        "producerB": {
+          "p50_mean": 71.85,
+          "p50_stdev": 0.35707142142714254,
+          "p95_mean": 72,
+          "p95_stdev": 0
+        },
+        "producerC": {
+          "p50_mean": 7.9,
+          "p50_stdev": 1.9467922333931784,
+          "p95_mean": 136.2,
+          "p95_stdev": 9.693296652842108
+        },
+        "consumers": {
+          "p50_mean": 1265.05,
+          "p50_stdev": 69.11618840763718,
+          "p95_mean": 3499.15,
+          "p95_stdev": 364.00731792094507
+        },
+        "predators": {
+          "p50_mean": 25.9,
+          "p50_stdev": 3.031501278244824,
+          "p95_mean": 30,
+          "p95_stdev": 0
+        }
+      },
+      "energy": {
+        "producer": {
+          "p50_mean": 1812.0350000000003,
+          "p50_stdev": 53.4302000276997,
+          "p95_mean": 2479.425,
+          "p95_stdev": 87.85071357137623
+        },
+        "consumer": {
+          "p50_mean": 90378.285,
+          "p50_stdev": 4158.875432526802,
+          "p95_mean": 244492.98000000004,
+          "p95_stdev": 21919.79444432817
+        },
+        "predator": {
+          "p50_mean": 467.05000000000007,
+          "p50_stdev": 163.30243568299892,
+          "p95_mean": 3633.1600000000008,
+          "p95_stdev": 318.1046799404246
+        },
+        "field": {
+          "p50_mean": 16039.055000000002,
+          "p50_stdev": 188.09126368600954,
+          "p95_mean": 18639.295000000002,
+          "p95_stdev": 381.87367214171735
+        },
+        "avg": {
+          "p50_mean": 67.8635,
+          "p50_stdev": 1.6984677653697184,
+          "p95_mean": 70.19200000000001,
+          "p95_stdev": 1.9193035195090957
+        }
+      }
+    },
+    "rates": {
+      "births_per_sec": {
+        "mean": 29.003400000000006,
+        "stdev": 4.0142930436130335
+      },
+      "deaths_per_sec": {
+        "mean": 0.3781500000000001,
+        "stdev": 0.2628734058439537
+      },
+      "total_births": {
+        "mean": 3103.35,
+        "stdev": 403.3860774741736
+      },
+      "total_deaths": {
+        "mean": 290.95,
+        "stdev": 12.94787627373694
+      }
+    },
+    "flows": {
+      "graze": {
+        "mean": 4953.327299999999,
+        "stdev": 660.5567605627165
+      },
+      "colonyFeed": {
+        "mean": 20.794999999999998,
+        "stdev": 4.429198392485936
+      },
+      "prodCGraze": {
+        "mean": 4.719200000000001,
+        "stdev": 4.016373869549497
+      },
+      "predation": {
+        "mean": 0.09035,
+        "stdev": 0.2717696221066659
+      },
+      "carcassEat": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "metabolism": {
+        "mean": 1875.4627500000001,
+        "stdev": 226.79627024068873
+      },
+      "reproduction": {
+        "mean": 2136.47745,
+        "stdev": 272.2821073150924
+      },
+      "excretion": {
+        "mean": 14.959399999999999,
+        "stdev": 3.358709520038909
+      },
+      "thermal": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "carcassExpire": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "balance_in": {
+        "mean": 4993.8913999999995,
+        "stdev": 664.9375657161655
+      },
+      "balance_out": {
+        "mean": 4011.940449999999,
+        "stdev": 494.47940855514656
+      },
+      "net": {
+        "mean": 981.9509500000004,
+        "stdev": 194.55457724542867
+      }
+    },
+    "extinctions": {
+      "total": 1,
+      "per_run": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "mean": 0.05
+    },
+    "survival": {
+      "groups_alive_mean": 4.9,
+      "all_survived": false,
+      "any_extinction": true
+    },
+    "stability": {
+      "cv_consumers": 0.106,
+      "cv_predators": 0.343
+    },
+    "performance": {
+      "wall_time_ms": {
+        "mean": 450179.05,
+        "stdev": 38657.27818079669
+      },
+      "speed_factor": {
+        "mean": 0.6599999999999999,
+        "stdev": 0.058309518948453
+      }
+    }
+  },
+  "per_seed_summary": [
+    {
+      "seed": 12345,
+      "final": {
+        "producerA_density": 1.0426,
+        "producerB": 72,
+        "producerC": 4,
+        "consumers": 3738,
+        "predators": 6,
+        "total_creatures": 3820
+      },
+      "energy_avg": 69.48,
+      "births": 3061,
+      "deaths": 291,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 20264,
+      "final": {
+        "producerA_density": 1.0509,
+        "producerB": 71,
+        "producerC": 3,
+        "consumers": 3474,
+        "predators": 6,
+        "total_creatures": 3554
+      },
+      "energy_avg": 72.13,
+      "births": 2783,
+      "deaths": 279,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 28183,
+      "final": {
+        "producerA_density": 1.0278,
+        "producerB": 72,
+        "producerC": 6,
+        "consumers": 3866,
+        "predators": 5,
+        "total_creatures": 3949
+      },
+      "energy_avg": 66.35,
+      "births": 3178,
+      "deaths": 279,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 36102,
+      "final": {
+        "producerA_density": 1.0194,
+        "producerB": 72,
+        "producerC": 6,
+        "consumers": 3395,
+        "predators": 8,
+        "total_creatures": 3481
+      },
+      "energy_avg": 70.75,
+      "births": 2716,
+      "deaths": 285,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 44021,
+      "final": {
+        "producerA_density": 1.0446,
+        "producerB": 72,
+        "producerC": 4,
+        "consumers": 3310,
+        "predators": 6,
+        "total_creatures": 3392
+      },
+      "energy_avg": 69.9,
+      "births": 2636,
+      "deaths": 294,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 51940,
+      "final": {
+        "producerA_density": 1.0175,
+        "producerB": 72,
+        "producerC": 4,
+        "consumers": 3446,
+        "predators": 6,
+        "total_creatures": 3528
+      },
+      "energy_avg": 68.35,
+      "births": 2794,
+      "deaths": 316,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 59859,
+      "final": {
+        "producerA_density": 1.053,
+        "producerB": 72,
+        "producerC": 6,
+        "consumers": 3686,
+        "predators": 5,
+        "total_creatures": 3769
+      },
+      "energy_avg": 69.24,
+      "births": 3002,
+      "deaths": 283,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 67778,
+      "final": {
+        "producerA_density": 1.0462,
+        "producerB": 72,
+        "producerC": 4,
+        "consumers": 3790,
+        "predators": 4,
+        "total_creatures": 3870
+      },
+      "energy_avg": 68.38,
+      "births": 3149,
+      "deaths": 329,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 75697,
+      "final": {
+        "producerA_density": 1.0602,
+        "producerB": 72,
+        "producerC": 4,
+        "consumers": 4235,
+        "predators": 8,
+        "total_creatures": 4319
+      },
+      "energy_avg": 66.34,
+      "births": 3556,
+      "deaths": 287,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 83616,
+      "final": {
+        "producerA_density": 1.0668,
+        "producerB": 72,
+        "producerC": 3,
+        "consumers": 4149,
+        "predators": 12,
+        "total_creatures": 4236
+      },
+      "energy_avg": 69.79,
+      "births": 3481,
+      "deaths": 295,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 91535,
+      "final": {
+        "producerA_density": 1.0498,
+        "producerB": 72,
+        "producerC": 5,
+        "consumers": 3926,
+        "predators": 8,
+        "total_creatures": 4011
+      },
+      "energy_avg": 68.78,
+      "births": 3244,
+      "deaths": 283,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 99454,
+      "final": {
+        "producerA_density": 1.0608,
+        "producerB": 72,
+        "producerC": 8,
+        "consumers": 3903,
+        "predators": 5,
+        "total_creatures": 3988
+      },
+      "energy_avg": 67.53,
+      "births": 3214,
+      "deaths": 276,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 107373,
+      "final": {
+        "producerA_density": 1.1078,
+        "producerB": 71,
+        "producerC": 4,
+        "consumers": 4720,
+        "predators": 5,
+        "total_creatures": 4800
+      },
+      "energy_avg": 68.19,
+      "births": 4035,
+      "deaths": 285,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 115292,
+      "final": {
+        "producerA_density": 1.0061,
+        "producerB": 72,
+        "producerC": 0,
+        "consumers": 3553,
+        "predators": 4,
+        "total_creatures": 3629
+      },
+      "energy_avg": 67.88,
+      "births": 2860,
+      "deaths": 281,
+      "survival": false,
+      "extinctions": [
+        {
+          "t": 270.2,
+          "group": "producer-c"
+        }
+      ]
+    },
+    {
+      "seed": 123211,
+      "final": {
+        "producerA_density": 1.0384,
+        "producerB": 72,
+        "producerC": 6,
+        "consumers": 2892,
+        "predators": 9,
+        "total_creatures": 2979
+      },
+      "energy_avg": 71.4,
+      "births": 2210,
+      "deaths": 281,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 131130,
+      "final": {
+        "producerA_density": 1.0557,
+        "producerB": 72,
+        "producerC": 5,
+        "consumers": 4097,
+        "predators": 11,
+        "total_creatures": 4185
+      },
+      "energy_avg": 68.74,
+      "births": 3428,
+      "deaths": 293,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 139049,
+      "final": {
+        "producerA_density": 1.06,
+        "producerB": 71,
+        "producerC": 2,
+        "consumers": 4097,
+        "predators": 7,
+        "total_creatures": 4177
+      },
+      "energy_avg": 67.52,
+      "births": 3434,
+      "deaths": 307,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 146968,
+      "final": {
+        "producerA_density": 1.0444,
+        "producerB": 72,
+        "producerC": 4,
+        "consumers": 3521,
+        "predators": 4,
+        "total_creatures": 3601
+      },
+      "energy_avg": 71.34,
+      "births": 2845,
+      "deaths": 294,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 154887,
+      "final": {
+        "producerA_density": 1.0957,
+        "producerB": 72,
+        "producerC": 5,
+        "consumers": 4243,
+        "predators": 11,
+        "total_creatures": 4331
+      },
+      "energy_avg": 68.99,
+      "births": 3577,
+      "deaths": 296,
+      "survival": true,
+      "extinctions": []
+    },
+    {
+      "seed": 162806,
+      "final": {
+        "producerA_density": 1.0596,
+        "producerB": 72,
+        "producerC": 3,
+        "consumers": 3547,
+        "predators": 7,
+        "total_creatures": 3629
+      },
+      "energy_avg": 70.65,
+      "births": 2864,
+      "deaths": 285,
+      "survival": true,
+      "extinctions": []
+    }
+  ]
+}

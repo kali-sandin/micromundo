@@ -1,0 +1,119 @@
+
+🧬 sim-harness: 20 seed(s) × 5 min, dt=0.0167s
+
+  Run 1/20 (seed=12345)... done in 434.2s
+  Run 2/20 (seed=20264)... done in 421.6s
+  Run 3/20 (seed=28183)... done in 470.7s
+  Run 4/20 (seed=36102)... done in 411.2s
+  Run 5/20 (seed=44021)... done in 403.1s
+  Run 6/20 (seed=51940)... done in 422.1s
+  Run 7/20 (seed=59859)... done in 435.2s
+  Run 8/20 (seed=67778)... done in 474.9s
+  Run 9/20 (seed=75697)... done in 515.1s
+  Run 10/20 (seed=83616)... done in 474.3s
+  Run 11/20 (seed=91535)... done in 450.2s
+  Run 12/20 (seed=99454)... done in 491.2s
+  Run 13/20 (seed=107373)... done in 535.8s
+  Run 14/20 (seed=115292)... done in 422.7s
+  Run 15/20 (seed=123211)... done in 382.4s
+  Run 16/20 (seed=131130)... done in 467.3s
+  Run 17/20 (seed=139049)... done in 491.6s
+  Run 18/20 (seed=146968)... done in 428.4s
+  Run 19/20 (seed=154887)... done in 475.4s
+  Run 20/20 (seed=162806)... done in 421.6s
+
+  JSON written to /tmp/baseline_final.json
+
+═══════════════════════════════════════════════════════════════
+  🧬 SIM-HARNESS — Multi-seed Ecosystem Analysis
+═══════════════════════════════════════════════════════════════
+
+  Commit:     91f160f
+  Seeds:      20 (12345, 20264, 28183, 36102, 44021, 51940, 59859, 67778, 75697, 83616, 91535, 99454, 107373, 115292, 123211, 131130, 139049, 146968, 154887, 162806)
+  Duration:   05:00 (300s per run)
+  dt:         0.0167s (eff: 0.0167s, chunks: 1)
+  Interval:   10s
+  Migration:  ON
+  Timestamp:  2026-08-09T04:39:50.783Z
+
+── POPULATIONS (mean ± σ across seeds) ────────────────────────
+  Group                Mean         σ          Min          Max
+  ──────────────────────────────────────────────────────────────
+  Prod A (dens.)            1.05       0.02       1.01       1.11
+  Prod B (colonia)         71.85       0.36      71.00      72.00
+  Prod C (móvil)            4.30       1.68       0.00       8.00
+  Consumidores              3779        402       2892       4720
+  Depredadores              6.85       2.35       4.00      12.00
+
+── PERCENTILES p50/p95 (mean across seeds) ────────────────────
+  Group                p50         p95
+  ──────────────────────────────────────────────────────────────
+  Prod B                    71.8       72.0
+  Prod C                     7.9        136
+  Consumers                 1265       3499
+  Predators                 25.9       30.0
+
+── ENERGY (mean ± σ) ──────────────────────────────────────────
+  Productores               1885       44.7
+  Consumidores            262997      24729
+  Depredadores               116       86.1
+  Campo                    18697        415
+  Carcasses                  0.0        0.0
+  Promedio                  69.1        1.6
+
+── ENERGY FLOWS (mean ± σ, energy/s) ─────────────────────────
+  Grazing                   4953        661
+  Colonia feed             20.79       4.43
+  ProdC grazing             4.72       4.02
+  Predación                 0.09       0.27
+  Carcass eat               0.00       0.00
+  Metabolismo               1875        227
+  Reproducción              2136        272
+  Excretion                14.96       3.36
+  Thermal                   0.00       0.00
+  Carcass expire            0.00       0.00
+  NET BALANCE                982        195
+
+── EVENTOS (mean ± σ) ────────────────────────────────────────
+  Births/s:    29.003 ± 4.014
+  Deaths/s:    0.378 ± 0.263
+  Total births: 3103 ± 403
+  Total deaths: 291 ± 13
+
+── ⚠ EXTINCIONES ─────────────────────────────────────────────
+  Total: 1 | Por run: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+  Seed 115292: 04:30 — producer-c
+
+── SUPERVIVENCIA ─────────────────────────────────────────────
+  Todos sobrevivieron: ❌ No
+  Grupos vivos promedio: 4.9/5
+  CV consumers: 0.106 | CV predators: 0.343
+
+── RENDIMIENTO ───────────────────────────────────────────────
+  Wall time: 450s ± 38.7s
+  Speed:     0.7x ± 0.1x
+
+── DETALLE POR SEMILLA ───────────────────────────────────────
+  Seed 12345: P:72/4 C:3738 X:6 | E:69.5 | B:3061 D:291 | ✅
+  Seed 20264: P:71/3 C:3474 X:6 | E:72.1 | B:2783 D:279 | ✅
+  Seed 28183: P:72/6 C:3866 X:5 | E:66.3 | B:3178 D:279 | ✅
+  Seed 36102: P:72/6 C:3395 X:8 | E:70.8 | B:2716 D:285 | ✅
+  Seed 44021: P:72/4 C:3310 X:6 | E:69.9 | B:2636 D:294 | ✅
+  Seed 51940: P:72/4 C:3446 X:6 | E:68.3 | B:2794 D:316 | ✅
+  Seed 59859: P:72/6 C:3686 X:5 | E:69.2 | B:3002 D:283 | ✅
+  Seed 67778: P:72/4 C:3790 X:4 | E:68.4 | B:3149 D:329 | ✅
+  Seed 75697: P:72/4 C:4235 X:8 | E:66.3 | B:3556 D:287 | ✅
+  Seed 83616: P:72/3 C:4149 X:12 | E:69.8 | B:3481 D:295 | ✅
+  Seed 91535: P:72/5 C:3926 X:8 | E:68.8 | B:3244 D:283 | ✅
+  Seed 99454: P:72/8 C:3903 X:5 | E:67.5 | B:3214 D:276 | ✅
+  Seed 107373: P:71/4 C:4720 X:5 | E:68.2 | B:4035 D:285 | ✅
+  Seed 115292: P:72/0 C:3553 X:4 | E:67.9 | B:2860 D:281 | ❌
+  Seed 123211: P:72/6 C:2892 X:9 | E:71.4 | B:2210 D:281 | ✅
+  Seed 131130: P:72/5 C:4097 X:11 | E:68.7 | B:3428 D:293 | ✅
+  Seed 139049: P:71/2 C:4097 X:7 | E:67.5 | B:3434 D:307 | ✅
+  Seed 146968: P:72/4 C:3521 X:4 | E:71.3 | B:2845 D:294 | ✅
+  Seed 154887: P:72/5 C:4243 X:11 | E:69.0 | B:3577 D:296 | ✅
+  Seed 162806: P:72/3 C:3547 X:7 | E:70.7 | B:2864 D:285 | ✅
+
+═══════════════════════════════════════════════════════════════
+
