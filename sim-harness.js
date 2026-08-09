@@ -785,6 +785,54 @@ function evaluateTask908Verdict(agg, runs) {
   const rescuePass = !runs.some(r => r.extinctions.length > 0);
   checks.push({ name: `No guild lost in any run`, pass: rescuePass });
 
+  // 7. Diversity: gene variance averaged across groups >= 20% of mean
+  let divPass = true;
+  let divRatio = 0;
+  for (const r of runs) {
+    const lastM = r.metrics[r.metrics.length - 1];
+    if (!lastM || !lastM.genes) continue;
+    for (const group of Object.keys(lastM.genes)) {
+      const g = lastM.genes[group];
+      if (!g || g.n < 2) continue;
+      for (const gk of Object.keys(g.avg)) {
+        const mean = g.avg[gk];
+        const variance = g.variance[gk];
+        if (mean > 0.01) {
+          const cv = Math.sqrt(variance) / mean;
+          if (cv > divRatio) divRatio = cv;
+        }
+      }
+    }
+  }
+  // At least one gene in one group should show CV >= 0.20
+  divPass = divRatio >= 0.20;
+  checks.push({ name: `Diversity gene CV >= 20% (max ${divRatio.toFixed(3)})`, pass: divPass });
+
+  // 8. Population trend: no decline > 5% per 10 min
+  let trendPass = true;
+  let maxDecline = 0;
+  for (const r of runs) {
+    if (r.metrics.length < 4) continue;
+    const m0 = r.metrics[0];
+    const mEnd = r.metrics[r.metrics.length - 1];
+    const durMin = (mEnd.t - m0.t) / 60;
+    if (durMin < 1) continue;
+    // Check consumers: decline rate per 10 min
+    if (m0.consumers > 10) {
+      const decline = (m0.consumers - mEnd.consumers) / m0.consumers;
+      const declinePer10 = decline / durMin * 10;
+      if (declinePer10 > maxDecline) maxDecline = declinePer10;
+    }
+    // Check predators
+    if (m0.predators > 5) {
+      const decline = (m0.predators - mEnd.predators) / m0.predators;
+      const declinePer10 = decline / durMin * 10;
+      if (declinePer10 > maxDecline) maxDecline = declinePer10;
+    }
+  }
+  trendPass = maxDecline <= 0.05;
+  checks.push({ name: `Population decline <= 5%/10min (max ${(maxDecline*100).toFixed(1)}%)`, pass: trendPass });
+
   const allPass = checks.every(c => c.pass);
 
   lines.push('── VEREDICTO TASK_908 ────────────────────────────────────────');
