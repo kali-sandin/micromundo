@@ -19,7 +19,7 @@
  *   --seeds=N           Number of seeds to run (default: 3)
  *   --seed=N            Fixed seed (single run or all runs use variations)
  *   --interval=N        Metrics recording interval in seconds (default: 10)
- *   --dt=N              Simulation timestep override (default: 1/30)
+ *   --dt=N              Simulation timestep override (default: 1/60 = browser SIM_FRAME)
  *   --out=FILE          Write JSON output to file (default: stdout)
  *   --quiet             Suppress human-readable stderr summary
  *
@@ -42,7 +42,7 @@ function parseArgs() {
     seeds: 3,
     seed: null,
     intervalSec: 10,
-    dt: 1 / 30,
+    dt: 1 / 60,  // Match browser animationLoop SIM_FRAME exactly
     outFile: null,
     quiet: false,
     migration: true,
@@ -381,6 +381,14 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     // high so it never fires.
     if (!migrationEnabled) {
       api.sim.migrationTimer = 1e9;
+    }
+
+    // Thermal decay: browser calls applyThermalDecay() every ~5s from updateStats().
+    // Mirror that here to keep energy dynamics faithful.
+    api.sim.thermalAccumulator = (api.sim.thermalAccumulator || 0) + effectiveDt * chunksPerStep;
+    if (api.sim.thermalAccumulator >= 5) {
+      api.sim.thermalAccumulator = 0;
+      api.applyThermalDecay();
     }
 
     // Record gene history at intervals
