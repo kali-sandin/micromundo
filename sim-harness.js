@@ -184,6 +184,11 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
   api.resetWorld();
   api.recordGeneHistory();
 
+  // When migration is disabled, pin timer high so simulate() never fires checkMigration
+  if (!migrationEnabled) {
+    api.sim.migrationTimer = 1e9;
+  }
+
   // Determine chunking: if dt > MAX_DT, split into chunks of <= MAX_DT
   const MAX_DT = api.MAX_DT || 0.1;
   const GRID_REFRESH_INTERVAL = api.GRID_REFRESH_INTERVAL || 5;
@@ -371,13 +376,11 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
       }
     }
 
-    // Migration check (toggleable)
-    if (migrationEnabled) {
-      api.sim.migrationTimer -= dt;
-      if (api.sim.migrationTimer <= 0) {
-        // checkMigration is called inside simulate; but we also need to ensure
-        // the timer reset happens. It's already handled in simulate's migration block.
-      }
+    // Migration: simulate() already decrements migrationTimer and calls
+    // checkMigration() internally. When migration is disabled, pin timer
+    // high so it never fires.
+    if (!migrationEnabled) {
+      api.sim.migrationTimer = 1e9;
     }
 
     // Record gene history at intervals
