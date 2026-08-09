@@ -742,6 +742,62 @@ function printHumanReport(runs, agg) {
   return lines.join('\n');
 }
 
+// ─── Task 908 verdict ────────────────────────────────────────
+function evaluateTask908Verdict(agg, runs) {
+  const n = runs.length;
+  const lines = [];
+  const checks = [];
+
+  // 1. Survival: >= 18/20 runs with all 5 guilds alive
+  const fullSurvival = runs.filter(r => r.final_state.survival.all_alive).length;
+  const survivalPass = fullSurvival >= Math.ceil(n * 0.9);
+  checks.push({ name: `Survival >= ${Math.ceil(n*0.9)}/${n} (got ${fullSurvival})`, pass: survivalPass });
+
+  // 2. CV consumers <= 0.25
+  const cvConsPass = agg.stability.cv_consumers <= 0.25;
+  checks.push({ name: `CV consumers <= 0.25 (got ${agg.stability.cv_consumers.toFixed(3)})`, pass: cvConsPass });
+
+  // 3. CV predators <= 0.25
+  const cvPredPass = agg.stability.cv_predators <= 0.25;
+  checks.push({ name: `CV predators <= 0.25 (got ${agg.stability.cv_predators.toFixed(3)})`, pass: cvPredPass });
+
+  // 4. Energy drift: compare first vs last sample avg energy, drift <= 10%
+  let driftPass = true;
+  let driftMax = 0;
+  for (const r of runs) {
+    if (r.metrics.length < 2) continue;
+    const e0 = r.metrics[0].energy.avg;
+    const eEnd = r.metrics[r.metrics.length - 1].energy.avg;
+    if (e0 > 0) {
+      const drift = Math.abs(eEnd - e0) / e0;
+      if (drift > driftMax) driftMax = drift;
+    }
+  }
+  driftPass = driftMax <= 0.10;
+  checks.push({ name: `Energy drift <= 10% (max ${driftMax.toFixed(3)})`, pass: driftPass });
+
+  // 5. Extinctions: 0 total
+  const extPass = agg.extinctions.total === 0;
+  checks.push({ name: `Extinctions = 0 (got ${agg.extinctions.total})`, pass: extPass });
+
+  // 6. No rescue needed
+  // (check if migration rescued any species - approximate via survival)
+  const rescuePass = !runs.some(r => r.extinctions.length > 0);
+  checks.push({ name: `No guild lost in any run`, pass: rescuePass });
+
+  const allPass = checks.every(c => c.pass);
+
+  lines.push('── VEREDICTO TASK_908 ────────────────────────────────────────');
+  for (const c of checks) {
+    lines.push(`  ${c.pass ? '✅' : '❌'} ${c.name}`);
+  }
+  lines.push(`  ─────────────────────────────────────────────`);
+  lines.push(`  RESULTADO: ${allPass ? '✅ APROBADO' : '❌ FALLO'}`);
+  lines.push('');
+
+  return { allPass, checks, text: lines.join('\n') };
+}
+
 // ─── Main ────────────────────────────────────────────────────
 function main() {
   if (!OPTS.quiet) {
@@ -763,6 +819,7 @@ function main() {
   }
 
   const agg = aggregateRuns(runs);
+  const verdict = evaluateTask908Verdict(agg, runs);
 
   const report = {
     meta: {
@@ -781,6 +838,7 @@ function main() {
       },
     },
     aggregate: agg,
+    verdict: { all_pass: verdict.allPass, checks: verdict.checks },
     runs,
   };
 
@@ -799,7 +857,8 @@ function main() {
   if (!OPTS.quiet) {
     process.stderr.write('\n');
     process.stderr.write(printHumanReport(runs, agg));
-    process.stderr.write('\n\n');
+    process.stderr.write('\n');
+    process.stderr.write(verdict.text + '\n');
   }
 }
 
