@@ -391,6 +391,21 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
       api.applyThermalDecay();
     }
 
+    // Energy resync every ~60s: browser's updateStats() recalculates mobileEnergySum
+    // from scratch to correct drift from incremental updates.
+    api.sim.energyResyncAccum = (api.sim.energyResyncAccum || 0) + effectiveDt * chunksPerStep;
+    if (api.sim.energyResyncAccum >= 60) {
+      api.sim.energyResyncAccum = 0;
+      let rs = 0;
+      const creatures = api.sim.creatures;
+      for (let i = 0; i < creatures.length; i++) {
+        const e = creatures[i];
+        if (!e || !e.alive) continue;
+        if (e.type === api.TYPE.CONSUMER || e.type === api.TYPE.PREDATOR) rs += e.energy;
+      }
+      api.sim.mobileEnergySum = rs;
+    }
+
     // Record gene history at intervals
     const lastGH = api.sim.geneHistory.length > 0
       ? api.sim.geneHistory.at(api.sim.geneHistory.length - 1).t
