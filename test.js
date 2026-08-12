@@ -780,6 +780,38 @@ function runFunctionalTests() {
     expectOk(massAfter < massBefore, 'Field mass no disminuyo tras graze');
   });
 
+  assert('grazeProducerDensity: gain = bite * 18 * densityFactor (documenta amplificacion)', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.sim.liveProducerBCount = 0;
+    api.sim.liveProducerCCount = 0;
+    api.sim.liveConsumerCount = 0;
+    api.sim.predatorCount = 0;
+    api.sim.mobileEnergySum = 0;
+    api.sim.flowAccum.graze = 0;
+    api.initProducerField();
+    api.sim.producerField.mass.fill(1.0);
+    api.sim.producerField.total = api.sim.producerField.mass.length * 1.0;
+    const c = api.spawnConsumer({ x: 100, y: 100 });
+    c.energy = c.maxEnergy * 0.1;
+    c.grazeCooldown = 0;
+    const cellIdx = api.fieldIndex(api.fieldCellX(c.x), api.fieldCellY(c.y));
+    const massBefore = api.sim.producerField.mass[cellIdx];
+    const eBefore = c.energy;
+    api.rebuildGrid();
+    const grazed = api.grazeProducerDensity(c, 1 / 30);
+    expectEq(grazed, true, 'graze devolvio false');
+    const massAfter = api.sim.producerField.mass[cellIdx];
+    const bite = massBefore - massAfter;
+    const gain = c.energy - eBefore;
+    expectOk(bite > 0, 'bite<=0');
+    expectOk(gain > 0, 'gain<=0');
+    // Documentar: gain es ~18x bite (con densityFactor). No es conservacion 1:1.
+    const ratio = gain / bite;
+    expectOk(ratio > 5, 'ratio gain:bite=' + ratio.toFixed(1) + ' (esperado ~18x con mult=18). La energia NO se conserva 1:1.');
+  });
+
   assert('grazeProducerDensity: respeta cooldown', () => {
     api.sim.creatures = [];
     api.sim.freeIds = [];
