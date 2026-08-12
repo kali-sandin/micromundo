@@ -293,10 +293,24 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
       flows[k] = (curFlow[k] - prevFlowAccum[k]) / dt_real;
     }
     prevFlowAccum = curFlow;
-    const energyIn = (flows.graze || 0) + (flows.colonyFeed || 0) + (flows.prodCGraze || 0)
-      + (flows.predation || 0) + (flows.carcassEat || 0) + (flows.excretion || 0);
-    const energyOut = (flows.metabolism || 0) + (flows.reproduction || 0)
-      + (flows.thermal || 0) + (flows.carcassExpire || 0);
+    // Dimensional ledger: separate true system inputs, internal transfers, and destruction
+    // Field/colony → mobile pool (true inputs)
+    const fieldInput = (flows.graze || 0) + (flows.colonyFeed || 0) + (flows.prodCGraze || 0);
+    // Mobile → destroyed (true outputs/losses)
+    const mobileLoss = (flows.metabolism || 0) + (flows.thermal || 0);
+    // Carcass → destroyed (true losses from carcass pool)
+    const carcassLoss = (flows.carcassExpire || 0);
+    // Mobile → field (recirculation back to field)
+    const mobileToField = (flows.excretion || 0) + (flows.carcassToField || 0);
+    // Internal transfers within mobile pool (do NOT affect total)
+    // predation: consumer→predator, reproduction: parent→child, carcassEat: carcass→mobile
+    const internalTransfer = (flows.predation || 0) + (flows.reproduction || 0) + (flows.carcassEat || 0);
+    // NET mobile energy change = fieldInput - mobileLoss - mobileToField + carcassEat
+    // (carcassEat returns carcass energy to mobile pool)
+    const energyIn = fieldInput + (flows.carcassEat || 0);
+    const energyOut = mobileLoss + carcassLoss + mobileToField;
+    // True system NET (field + mobile + carcass): only solar input via photosynthesis vs destruction
+    const systemNet = fieldInput - mobileLoss - carcassLoss;
 
     // Detect extinctions
     const countMap = {
@@ -351,6 +365,12 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
         carcassExpire: parseFloat((flows.carcassExpire || 0).toFixed(3)),
         balance_in: parseFloat(energyIn.toFixed(3)),
         balance_out: parseFloat(energyOut.toFixed(3)),
+        system_net: parseFloat(systemNet.toFixed(3)),
+        field_input: parseFloat(fieldInput.toFixed(3)),
+        mobile_loss: parseFloat(mobileLoss.toFixed(3)),
+        carcass_loss: parseFloat(carcassLoss.toFixed(3)),
+        mobile_to_field: parseFloat(mobileToField.toFixed(3)),
+        internal_transfer: parseFloat(internalTransfer.toFixed(3)),
       },
       genes,
     });
@@ -562,6 +582,15 @@ function aggregateRuns(runs) {
   flowStats.balance_in = { mean: mean(balanceIn), stdev: stdev(balanceIn) };
   flowStats.balance_out = { mean: mean(balanceOut), stdev: stdev(balanceOut) };
   flowStats.net = { mean: mean(balanceIn) - mean(balanceOut), stdev: stdev(balanceIn.map((v, i) => v - balanceOut[i])) };
+  // System net: true energy creation vs destruction (field input - losses)
+  const systemNets = lastMetrics.map(m => m.flows ? m.flows.system_net || 0 : 0);
+  flowStats.system_net = { mean: mean(systemNets), stdev: stdev(systemNets) };
+  const fieldInputs = lastMetrics.map(m => m.flows ? m.flows.field_input || 0 : 0);
+  flowStats.field_input = { mean: mean(fieldInputs), stdev: stdev(fieldInputs) };
+  const mobileLosses = lastMetrics.map(m => m.flows ? m.flows.mobile_loss || 0 : 0);
+  flowStats.mobile_loss = { mean: mean(mobileLosses), stdev: stdev(mobileLosses) };
+  const internalTransfers = lastMetrics.map(m => m.flows ? m.flows.internal_transfer || 0 : 0);
+  flowStats.internal_transfer = { mean: mean(internalTransfers), stdev: stdev(internalTransfers) };
 
   const extinctions = runs.map(r => r.extinctions.length);
   const survivalCounts = finals.map(f => Object.values(f.survival).filter(Boolean).length - 1);
@@ -685,7 +714,13 @@ function printHumanReport(runs, agg) {
       if (s) lines.push(`  ${label.padEnd(19)} ${fmt(s.mean, 2).padStart(10)} ${fmt(s.stdev, 2).padStart(10)}`);
     }
     if (agg.flows.net) {
-      lines.push(`  ${'NET BALANCE'.padEnd(19)} ${fmt(agg.flows.net.mean, 2).padStart(10)} ${fmt(agg.flows.net.stdev, 2).padStart(10)}`);
+      lines.push(`  ${'NET MOBILE'.padEnd(19)} ${fmt(agg.flows.net.mean, 2).padStart(10)} ${fmt(agg.flows.net.stdev, 2).padStart(10)}`);
+    }
+    if (agg.flows.system_net) {
+      lines.push(`  ${'SYSTEM NET'.padEnd(19)} ${fmt(agg.flows.system_net.mean, 2).padStart(10)} ${fmt(agg.flows.system_net.stdev, 2).padStart(10)}`);
+      lines.push(`  ${'(field→mobile)'.padEnd(19)} ${fmt(agg.flows.field_input.mean, 2).padStart(10)} ${fmt(agg.flows.field_input.stdev, 2).padStart(10)}`);
+      lines.push(`  ${'(mobile loss)'.padEnd(19)} ${fmt(agg.flows.mobile_loss.mean, 2).padStart(10)} ${fmt(agg.flows.mobile_loss.stdev, 2).padStart(10)}`);
+      lines.push(`  ${'(internal xfer)'.padEnd(19)} ${fmt(agg.flows.internal_transfer.mean, 2).padStart(10)} ${fmt(agg.flows.internal_transfer.stdev, 2).padStart(10)}`);
     }
     lines.push('');
   }
