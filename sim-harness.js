@@ -796,20 +796,31 @@ function evaluateTask908Verdict(agg, runs) {
   const cvPredPass = agg.stability.cv_predators <= 0.25;
   checks.push({ name: `CV predators <= 0.25 (got ${agg.stability.cv_predators.toFixed(3)})`, pass: cvPredPass });
 
-  // 4. Energy drift: compare first vs last sample avg energy, drift <= 10%
+  // 4. Energy drift: compare first vs last sample TOTAL energy pool, drift <= 10%
+  // Total pool = mobile_sum + field + carcass (true conservation metric)
   let driftPass = true;
   let driftMax = 0;
+  let systemNetAvg = 0;
+  let sysNetCount = 0;
   for (const r of runs) {
     if (r.metrics.length < 2) continue;
-    const e0 = r.metrics[0].energy.avg;
-    const eEnd = r.metrics[r.metrics.length - 1].energy.avg;
-    if (e0 > 0) {
-      const drift = Math.abs(eEnd - e0) / e0;
+    const m0 = r.metrics[0];
+    const mEnd = r.metrics[r.metrics.length - 1];
+    const pool0 = m0.energy.mobile_sum + m0.energy.field + m0.energy.carcass;
+    const poolEnd = mEnd.energy.mobile_sum + mEnd.energy.field + mEnd.energy.carcass;
+    if (pool0 > 0) {
+      const drift = Math.abs(poolEnd - pool0) / pool0;
       if (drift > driftMax) driftMax = drift;
     }
+    // Average system_net from all metric points (skip first = 0)
+    for (let i = 1; i < r.metrics.length; i++) {
+      systemNetAvg += r.metrics[i].flows.system_net || 0;
+      sysNetCount++;
+    }
   }
+  const avgNet = sysNetCount > 0 ? systemNetAvg / sysNetCount : 0;
   driftPass = driftMax <= 0.10;
-  checks.push({ name: `Energy drift <= 10% (max ${driftMax.toFixed(3)})`, pass: driftPass });
+  checks.push({ name: `Energy pool drift <= 10% (max ${driftMax.toFixed(3)}, avg NET ${avgNet.toFixed(1)} E/s)`, pass: driftPass });
 
   // 5. Extinctions: 0 total
   const extPass = agg.extinctions.total === 0;
