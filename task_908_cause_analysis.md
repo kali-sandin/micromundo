@@ -78,6 +78,26 @@ Tratar field.mass como energía real. Restar del pool energético global la masa
 
 bf54ccd — sin cambios de código en este turno. Solo análisis.
 
+## Verificación de viabilidad de alternativas (turno 03:45)
+
+Input fotosintético del campo: ~308 E/s (0.0078/celda/step × 17800 celdas / 0.45s).
+
+| Alternativa | Gain/s (1000 consumers) | Metab/s (activo) | Viabilidad |
+|---|---|---|---|
+| Actual (mult=18) | 1,231 | 375 | ❌ Crea 856 E/s fantasma |
+| D (mult=1) | 68 | 375 | ❌ Insuficiente, consumers mueren |
+| B (eff 15%) | 13 | 375 | ❌ Mucho peor |
+
+**Conclusión:** No existe un valor de mult que sea conservativo (1:1) y sostenga el metabolismo actual. El mult=18 compensa un déficit estructural: el metabolismo consume más energía de la que el sistema puede aportar con conversión neutra.
+
+El ajuste correcto requiere decisión de Richard sobre coordenadas múltiples:
+- metabolism base / metabFactor
+- gain mult
+- biteRate
+- fotosíntesis (growth rate)
+
+O redefinir dimensionalmente: tratar field.mass como energía real y asegurar que fotosíntesis (input solar) = metabolismo + pérdidas térmicas en equilibrio.
+
 ## Pendiente de decisión
 
 Jared/Richard deben decidir qué alternativa aplicar. Bruce Lee no hace tuning sin autorización.
