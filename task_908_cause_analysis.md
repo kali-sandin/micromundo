@@ -98,6 +98,61 @@ El ajuste correcto requiere decisión de Richard sobre coordenadas múltiples:
 
 O redefinir dimensionalmente: tratar field.mass como energía real y asegurar que fotosíntesis (input solar) = metabolismo + pérdidas térmicas en equilibrio.
 
+## Análisis cuantitativo de balance (turno 04:25 CET)
+
+Parámetros extraídos del código (app.js + constantes):
+
+| Parámetro | Valor | Fuente |
+|---|---|---|
+| Field growth rate | 0.020 × sunEff(0.87) per step | app.js:780 |
+| Cell count | ~17,800 | field init |
+| Field photosynthesis total | **325 mass/s** | growth × cells × 60 |
+| Bite rate (consumer típico) | 0.034 mass/evento | app.js:910 |
+| Events por consumer/s | 1.82 (cooldown 0.55s) | app.js:923 |
+| Mass extraída total (720 consumers) | **44.6 mass/s** | bite × events × N |
+| Metabolism base | 0.038 | derivedConsumerStats |
+| metabFactor efectivo | 6.5 (activo) | app.js:2129 |
+| Metabolismo total (720 consumers) | **178 E/s** | metab × factor × N |
+
+### El problema dimensional completo
+
+El desequilibrio es **estructural**, no solo `mult=18`:
+
+```
+Fotosíntesis crea:  325 mass/s  (GRATIS - energía solar)
+Grazing extrae:      44.6 mass/s (14% de la producción)
+Field acumula:      281 mass/s   (86% sin usar)
+
+En mult=18:  44.6 × 18 × 0.85 = 681 E/s  →  metab 178  →  SUPERÁVIT +503 E/s → BOOM
+En mult=5:   44.6 × 5  × 0.85 = 190 E/s  →  metab 178  →  SUPERÁVIT +12 E/s  → estable?
+En mult=4:   44.6 × 4  × 0.85 = 152 E/s  →  metab 178  →  DÉFICIT -26 E/s   → declive
+En mult=1:   44.6 × 1  × 0.85 =  38 E/s  →  metab 178  →  DÉFICIT -140 E/s  → extinción
+```
+
+### Balance matemático
+
+- `mult_balance` (NET≈0) = **4.70** (gain = metab exactamente)
+- `mult_sostenible` (surplus +0.10 E/s/consumer, tiempo repro ~170s) = **6.60**
+- Con `mult=5`: surplus móvil +12 E/s global → crecimiento lento pero estable
+
+### Espacio de soluciones para decisión
+
+| Opción | Cambio | Pros | Contras |
+|---|---|---|---|
+| **E: mult=5** | 18→5 | Mínimo cambio. Balance cercano. | Punto frágil: small changes in density/competition inclinan a boom o bust |
+| **F: mult=5 + growth 0.012** | mult 18→5, growth 0.020→0.012 | Campo más escaso, balance más robusto | Dos params coordinados |
+| **G: mult=1 + metab reescalado** | mult→1, metab×0.21 | Conservación dimensional pura | Cambio dráfico, requiere reescalar maxEnergy, thresholds, etc |
+| **H: Ledger conservativo** | Añadir photosynthesis al ledger, mantener mult=18 | Sin cambio mecánico | No resuelve el boom, solo lo explica |
+
+### Recomendación técnica (no ejecutiva)
+
+**Opción E (mult=5)** es el cambio mínimo que acerca el sistema al balance sin reescribir derivados.
+Riesgo: poca margen. Si la población sube a 1000+, el surplus se amplifica.
+Necesita verificación con 5x30m multi-semilla antes de aceptar.
+
+Si Richard prefiere conservación dimensional estricta, **Opción G** es correcta pero requiere un sprint de reescalado metabólico completo.
+
 ## Pendiente de decisión
 
-Jared/Richard deben decidir qué alternativa aplicar. Bruce Lee no hace tuning sin autorización.
+Jared/Richard deben decidir qué alternativa (A-H) aplicar. Bruce Lee no hace tuning sin autorización.
+Datos cuantitativos disponibles en `task_908_viability_analysis.js` y `task_908_viability_2.js`.
