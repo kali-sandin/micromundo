@@ -1,0 +1,8 @@
+{
+  "mult_18": [
+    {
+      "seed": 12345,
+      "error": "Assignment to constant variable."
+    }
+  ]
+}

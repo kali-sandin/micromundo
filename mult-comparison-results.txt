@@ -1,0 +1,23 @@
+=== COMPARATIVA GAIN MULT ===
+Duration: 3min x 3 seeds, migration ON
+Git: 21af65d
+
+mult=18
+--------------
+  seed=12345: {"seed":12345,"pop_init":{"C":720,"P":30,"prodC":228},"pop_final":{"C":1531,"P":22,"prodC":7},"energy_init":"42106","energy_final":"129798","drift_pct":208.3,"avg_net":1093.4,"extinctions":0,"births":822,"deaths":240,"speed":1,"survival":{"producer-a":true,"producer-b":true,"producer-c":true,"consumer":true,"predator":true,"all_alive":true}}
+  seed=12345: {"seed":12345,"pop_init":{"C":720,"P":30,"prodC":228},"pop_final":{"C":3738,"P":6,"prodC":4},"energy_init":"42106","energy_final":"282530","drift_pct":571,"avg_net":2816.8,"extinctions":0,"births":3061,"deaths":291,"speed":0.7,"survival":{"producer-a":true,"producer-b":true,"producer-c":true,"consumer":true,"predator":true,"all_alive":true}}
+  seed=54321: {"seed":54321,"pop_init":{"C":720,"P":30,"prodC":228},"pop_final":{"C":1700,"P":20,"prodC":6},"energy_init":"41936","energy_final":"133377","drift_pct":218,"avg_net":1195.1,"extinctions":0,"births":1000,"deaths":252,"speed":0.9,"survival":{"producer-a":true,"producer-b":true,"producer-c":true,"consumer":true,"predator":true,"all_alive":true}}
+
+mult=5
+--------------
+  seed=12345: {"seed":12345,"pop_init":{"C":720,"P":30,"prodC":228},"pop_final":{"C":721,"P":22,"prodC":6},"energy_init":"42106","energy_final":"34484","drift_pct":-18.1,"avg_net":-52.5,"extinctions":0,"births":10,"deaths":239,"speed":1.2,"survival":{"producer-a":true,"producer-b":true,"producer-c":true,"consumer":true,"predator":true,"all_alive":true}}
+  seed=54321: {"seed":54321,"pop_init":{"C":720,"P":30,"prodC":228},"pop_final":{"C":722,"P":19,"prodC":9},"energy_init":"41936","energy_final":"33691","drift_pct":-19.7,"avg_net":-54.6,"extinctions":0,"births":13,"deaths":241,"speed":1.1,"survival":{"producer-a":true,"producer-b":true,"producer-c":true,"consumer":true,"predator":true,"all_alive":true}}
+
+mult=6.6
+--------------
+  seed=54321: {"seed":54321,"pop_init":{"C":720,"P":30,"prodC":228},"pop_final":{"C":4284,"P":8,"prodC":5},"energy_init":"41936","energy_final":"303773","drift_pct":624.4,"avg_net":3176.8,"extinctions":1,"births":3610,"deaths":291,"speed":0.6,"survival":{"producer-a":true,"producer-b":true,"producer-c":true,"consumer":true,"predator":true,"all_alive":true}}
+  seed=12345: {"seed":12345,"pop_init":{"C":720,"P":30,"prodC":228},"pop_final":{"C":725,"P":22,"prodC":8},"energy_init":"42106","energy_final":"44321","drift_pct":5.3,"avg_net":7.5,"extinctions":0,"births":13,"deaths":236,"speed":1,"survival":{"producer-a":true,"producer-b":true,"producer-c":true,"consumer":true,"predator":true,"all_alive":true}}
+  seed=54321: {"seed":54321,"pop_init":{"C":720,"P":30,"prodC":228},"pop_final":{"C":726,"P":18,"prodC":8},"energy_init":"41936","energy_final":"43796","drift_pct":4.4,"avg_net":-0.8,"extinctions":0,"births":13,"deaths":239,"speed":1,"survival":{"producer-a":true,"producer-b":true,"producer-c":true,"consumer":true,"predator":true,"all_alive":true}}
+
+  seed=98765: {"seed":98765,"pop_init":{"C":720,"P":30,"prodC":228},"pop_final":{"C":734,"P":3,"prodC":12},"energy_init":"41979","energy_final":"48213","drift_pct":14.9,"avg_net":25.1,"extinctions":0,"births":42,"deaths":271,"speed":1,"survival":{"producer-a":true,"producer-b":true,"producer-c":true,"consumer":true,"predator":true,"all_alive":true}}
+
