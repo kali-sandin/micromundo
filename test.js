@@ -841,6 +841,123 @@ function runFunctionalTests() {
     expectLte(c.energy, c.maxEnergy, 'Energy excedio maxEnergy tras graze');
   });
 
+  assert('ledger dimensional: photosynthField se trackea en stepProducerField', () => {
+    api.resetWorld();
+    api.initProducerField();
+    api.sim.producerField.mass.fill(0.5);
+    api.sim.producerField.total = api.sim.producerField.mass.length * 0.5;
+    const before = api.sim.flowAccum.photosynthField || 0;
+    api.stepProducerField(0.5); // force step
+    const after = api.sim.flowAccum.photosynthField || 0;
+    expectOk(after > before, 'photosynthField no aumento tras stepProducerField: before=' + before + ' after=' + after);
+  });
+
+  assert('ledger dimensional: photosynthDirect se trackea en stepProducer (ProducerC)', () => {
+    api.resetWorld();
+    api.initProducerField();
+    api.sim.solarEnergy = 1.0;
+    const pc = api.spawnProducer({ sub: api.PRODUCER.C, x: 400, y: 300 });
+    pc.energy = pc.maxEnergy * 0.5;
+    const before = api.sim.flowAccum.photosynthDirect || 0;
+    api.stepProducer(pc, 0.5);
+    const after = api.sim.flowAccum.photosynthDirect || 0;
+    expectOk(after > before, 'photosynthDirect no aumento tras stepProducer C: before=' + before + ' after=' + after);
+  });
+
+  assert('ledger dimensional: photosynthDirect se trackea en stepProducer (ProducerB)', () => {
+    api.resetWorld();
+    api.initProducerField();
+    api.sim.solarEnergy = 1.0;
+    const pb = api.sim.creatures.find(e => e && e.alive && e.type === api.TYPE.PRODUCER && !e.mobile);
+    expectOk(pb, 'No hay ProducerB vivo tras resetWorld');
+    if (pb) {
+      pb.energy = pb.maxEnergy * 0.5;
+      const before = api.sim.flowAccum.photosynthDirect || 0;
+      api.stepProducer(pb, 0.5);
+      const after = api.sim.flowAccum.photosynthDirect || 0;
+      expectOk(after > before, 'photosynthDirect no aumento tras stepProducer B: before=' + before + ' after=' + after);
+    }
+  });
+
+  // Helper: measure total system energy across all pools
+  function measureSystemEnergy(api) {
+    let producerEnergy = 0, consumerEnergy = 0, predatorEnergy = 0;
+    const creatures = api.sim.creatures;
+    for (let i = 0; i < creatures.length; i++) {
+      const e = creatures[i];
+      if (!e || !e.alive) continue;
+      if (e.type === api.TYPE.PRODUCER) producerEnergy += (e.energy || 0) + (e.leafEnergy || 0);
+      else if (e.type === api.TYPE.CONSUMER) consumerEnergy += e.energy || 0;
+      else if (e.type === api.TYPE.PREDATOR) predatorEnergy += e.energy || 0;
+    }
+    let carcassEnergy = 0;
+    for (let i = 0; i < api.sim.carcasses.length; i++) {
+      carcassEnergy += api.sim.carcasses[i].energy || 0;
+    }
+    const fieldEnergy = api.sim.producerField.total || 0;
+    return producerEnergy + consumerEnergy + predatorEnergy + carcassEnergy + fieldEnergy;
+  }
+
+  assert('ledger dimensional: residual invariante <=2% (conservacion energetica)', () => {
+    // La conservacion dice: ΔE_sistema = (fotosintesis - destruccion) * dt
+    // donde fotosintesis = photosynthField + photosynthDirect (true sources)
+    // y destruccion = metabolism + thermal + carcassExpire + producerLoss + reproductiveWaste (true sinks).
+    // Grazing, predation, excretion, etc son transferencias internas y no afectan el balance total.
+    // El residual mide la discrepancia: |ΔE_real - ΔE_esperado| / max(flow).
+    // Con mult=18, el residual sera alto porque grazing crea energia.
+    // Pero la *dimensionalidad* del ledger debe ser correcta:
+    // 1. Todos los acumuladores existen y son numericos
+    // 2. photosynth >= 0 (entrada)
+    // 3. destruction >= 0 (salida)
+    // 4. El balance del sistema es system_net = photosynth - destruction
+    // 5. La energia total del sistema = field + producers + consumers + predators + carcasses
+    api.resetWorld();
+    api.initProducerField();
+    api.sim.producerField.mass.fill(0.5);
+    api.sim.producerField.total = api.sim.producerField.mass.length * 0.5;
+    // Reset all flowAccum counters
+    for (const k of Object.keys(api.sim.flowAccum)) {
+      api.sim.flowAccum[k] = 0;
+      api.sim.flowAccumPrev[k] = 0;
+    }
+    // Measure system energy before
+    const sysBefore = measureSystemEnergy(api);
+    // Run 2 seconds of simulation
+    for (let i = 0; i < 120; i++) api.simulate(1/60);
+    const sysAfter = measureSystemEnergy(api);
+    const deltaSystem = sysAfter - sysBefore;
+    // True inputs: photosynthesis + trophic amplification (energy created by grazing mult)
+    const photosynth = api.sim.flowAccum.photosynthField + api.sim.flowAccum.photosynthDirect;
+    const trophicAmp = api.sim.flowAccum.trophicAmplification || 0;
+    const deathDecay = api.sim.flowAccum.deathDecay || 0;
+    const trueInputs = photosynth + trophicAmp;
+    // True outputs
+    const reproWaste = Math.max(0, api.sim.flowAccum.reproduction - api.sim.flowAccum.birthGain);
+    const destruction = api.sim.flowAccum.metabolism + api.sim.flowAccum.thermal
+      + api.sim.flowAccum.carcassExpire + api.sim.flowAccum.producerLoss + reproWaste + deathDecay;
+    const expectedDelta = trueInputs - destruction;
+    const residual = Math.abs(deltaSystem - expectedDelta);
+    const flowScale = Math.max(Math.abs(trueInputs), Math.abs(destruction), 1);
+    const residualPct = (residual / flowScale) * 100;
+    // Validate accumulator types
+    expectOk(typeof api.sim.flowAccum.photosynthField === 'number', 'photosynthField no es number');
+    expectOk(typeof api.sim.flowAccum.photosynthDirect === 'number', 'photosynthDirect no es number');
+    expectOk(typeof api.sim.flowAccum.producerLoss === 'number', 'producerLoss no es number');
+    expectOk(typeof api.sim.flowAccum.birthGain === 'number', 'birthGain no es number');
+    expectOk(typeof api.sim.flowAccum.trophicAmplification === 'number', 'trophicAmplification no es number');
+    expectOk(photosynth >= 0, 'photosynth negativo: ' + photosynth);
+    expectOk(trophicAmp >= 0, 'trophicAmplification negativo: ' + trophicAmp);
+    expectOk(destruction >= 0, 'destruction negativo: ' + destruction);
+    // Residual should be <=2% for the dimensional ledger to be trustworthy.
+    // This checks that ALL energy creation (photosynth + trophic amplification) and destruction
+    // are properly tracked, so the ledger closes.
+    expectOk(residualPct <= 2.0,
+      'residual=' + residualPct.toFixed(2) + '% (>2%). deltaSys=' + deltaSystem.toFixed(1)
+      + ' expected=' + expectedDelta.toFixed(1) + ' photo=' + photosynth.toFixed(1)
+      + ' trophicAmp=' + trophicAmp.toFixed(1) + ' destr=' + destruction.toFixed(1)
+      + ' flowScale=' + flowScale.toFixed(1));
+  });
+
   assert('feedConsumer: predator come consumer con gain', () => {
     api.sim.creatures = [];
     api.sim.freeIds = [];

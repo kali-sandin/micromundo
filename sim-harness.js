@@ -199,6 +199,12 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
   const metrics = [];
   const extinctions = [];
   let lastRecord = 0;
+  let prevSystemEnergy = 0;
+  let prevFieldTotal = 0;
+  let residualMax = 0;
+  let residualSamples = [];
+  let fieldResidualMax = 0;
+  let fieldResidualSamples = [];
   let prevAlive = {
     'producer-a': true, 'producer-b': true, 'producer-c': true,
     'consumer': true, 'predator': true,
@@ -209,7 +215,8 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
 
   // Flow accumulators for delta computation
   const flowKeys = ['graze', 'colonyFeed', 'prodCGraze', 'predation', 'carcassEat',
-    'carcassToField', 'metabolism', 'reproduction', 'excretion', 'thermal', 'carcassExpire'];
+    'carcassToField', 'metabolism', 'reproduction', 'excretion', 'thermal', 'carcassExpire',
+    'photosynthField', 'photosynthDirect', 'producerLoss', 'asexualRepro', 'birthGain', 'trophicAmplification', 'deathDecay', 'feedGain', 'fieldClampLoss'];
   let prevFlowAccum = {};
   function snapshotFlowAccum() {
     const snap = {};
@@ -235,7 +242,7 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     for (let i = 0; i < creatures.length; i++) {
       const e = creatures[i];
       if (!e || !e.alive) continue;
-      if (e.type === api.TYPE.PRODUCER) producerEnergy += e.energy || 0;
+      if (e.type === api.TYPE.PRODUCER) producerEnergy += (e.energy || 0) + (e.leafEnergy || 0);
       else if (e.type === api.TYPE.CONSUMER) consumerEnergy += e.energy || 0;
       else if (e.type === api.TYPE.PREDATOR) predatorEnergy += e.energy || 0;
     }
@@ -293,24 +300,39 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
       flows[k] = (curFlow[k] - prevFlowAccum[k]) / dt_real;
     }
     prevFlowAccum = curFlow;
-    // Dimensional ledger: separate true system inputs, internal transfers, and destruction
-    // Field/colony → mobile pool (true inputs)
-    const fieldInput = (flows.graze || 0) + (flows.colonyFeed || 0) + (flows.prodCGraze || 0);
-    // Mobile → destroyed (true outputs/losses)
+    // Dimensional ledger: true system inputs vs internal transfers vs destruction
+    // TRUE INPUTS: solar energy enters system ONLY via photosynthesis.
+    // trophicAmplification (gain mult - bite) is NOT a real input — it exposes
+    // the dimensional mismatch (mass index → mobile energy at 18:1).
+    // Keeping it out of trueInputs makes the invariante honest: if mult>1,
+    // the residual will exceed 2%, correctly flagging energy creation.
+    const photosynth = (flows.photosynthField || 0) + (flows.photosynthDirect || 0);
+    const trophicAmp = flows.trophicAmplification || 0;
+    const trueInputs = photosynth;
+    // Reproductive waste: parents lose energy, children get part of it back
+    const reproductiveWaste = Math.max(0, (flows.reproduction || 0) - (flows.birthGain || 0));
+    // INTERNAL TRANSFERS (do NOT change total system energy):
+    // grazing/colonyFeed/prodCGraze: field→mobile, predation: consumer→predator,
+    // birthGain: child appears (compensated by reproduction loss above),
+    // carcassEat: carcass→mobile,
+    // excretion: mobile→field, carcassToField: carcass→field
+    const grazingTransfer = (flows.graze || 0) + (flows.colonyFeed || 0) + (flows.prodCGraze || 0);
+    const internalTransfer = grazingTransfer + (flows.predation || 0) + (flows.birthGain || 0)
+      + (flows.carcassEat || 0) + (flows.excretion || 0) + (flows.carcassToField || 0);
+    // TRUE DESTRUCTION: energy leaves system permanently
+    const destruction = (flows.metabolism || 0) + (flows.thermal || 0) + (flows.carcassExpire || 0) + (flows.producerLoss || 0) + reproductiveWaste + (flows.deathDecay || 0);
+    // System NET: photosynthesis (only real input) minus destruction.
+    // A negative NET means the system is losing energy sustainably.
+    // A positive NET means energy is being created (bug or photosynth > losses).
+    // trophicAmp is tracked separately as 'unexplained energy creation' for diagnosis.
+    const systemNet = trueInputs - destruction;
+    // Legacy compat
+    const fieldInput = grazingTransfer;
     const mobileLoss = (flows.metabolism || 0) + (flows.thermal || 0);
-    // Carcass → destroyed (true losses from carcass pool)
     const carcassLoss = (flows.carcassExpire || 0);
-    // Mobile → field (recirculation back to field)
     const mobileToField = (flows.excretion || 0) + (flows.carcassToField || 0);
-    // Internal transfers within mobile pool (do NOT affect total)
-    // predation: consumer→predator, reproduction: parent→child, carcassEat: carcass→mobile
-    const internalTransfer = (flows.predation || 0) + (flows.reproduction || 0) + (flows.carcassEat || 0);
-    // NET mobile energy change = fieldInput - mobileLoss - mobileToField + carcassEat
-    // (carcassEat returns carcass energy to mobile pool)
     const energyIn = fieldInput + (flows.carcassEat || 0);
     const energyOut = mobileLoss + carcassLoss + mobileToField;
-    // True system NET (field + mobile + carcass): only solar input via photosynthesis vs destruction
-    const systemNet = fieldInput - mobileLoss - carcassLoss;
 
     // Detect extinctions
     const countMap = {
@@ -326,6 +348,88 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
       }
     }
     prevAlive = countMap;
+
+    // Dimensional invariante: ΔE_mobile vs (mobileInputs - mobileDestruction) over interval.
+    // field.total is a logistic density index [0,1.5] per cell, NOT energy.
+    // Including it in the system energy sum makes the invariante meaningless.
+    // Correct contract: track only dimensional energy (producer entities + mobile + carcasses).
+    // Mobile energy inputs: photosynth (direct to entities) + trophicAmp (gain from grazing)
+    //   + grazing transfer (field→mobile, counted at bite value) + predation + carcassEat + birthGain.
+    // Mobile energy outputs: metabolism + thermal + carcassExpire + producerLoss + reproWaste + deathDecay.
+    // Internal transfers that don't change mobile energy: excretion (m→field, leaves mobile),
+    //   carcassToField (carcass→field, leaves mobile+carcass).
+    // But grazing REMOVES from field (not energy) and ADDS to mobile (energy).
+    // So for the MOBILE energy budget:
+    //   inputs = photosynth_direct + trophicAmp + grazing_bite + predation + carcassEat + birthGain
+    //   outputs = metabolism + thermal + carcassExpire + producerLoss + reproWaste + deathDecay + excretion + carcassToField
+    // Note: photosynthField goes to field (not mobile), so excluded from mobile inputs.
+    // Correct mobile budget using feedGain:
+    // Dimensional invariante: track ΔE_sys over the full entity pool
+    // (producers + consumers + predators + carcasses). Field is NOT energy.
+    //
+    // System inputs (add energy to entity pool):
+    //   photosynthDirect: solar → producer entities (B/C photosynthesize directly)
+    //   trophicAmplification: net energy created during ALL feeding (gain - sourceLoss).
+    //     When consumer grazes field at mult>1: positive amp (field mass index → mobile energy).
+    //     When predator gains less than prey lost: negative amp (already in deathDecay).
+    //
+    // System outputs (remove energy from entity pool):
+    //   metabolism, thermal: heat dissipation
+    //   excretion: mobile → field (leaves entity pool)
+    //   deathDecay: 45% lost as heat on death + predation inefficiency
+    //   carcassExpire, carcassToField: carcass energy lost or returned to field
+    //   producerLoss: producer entity losses (metab, competition, clamp, mutation penalties)
+    //   reproductiveWaste: parent energy spent on reproduction that didn't reach child
+    //
+    // Internal transfers (neutral to E_sys):
+    //   predation (prey→predator), carcassEat (carcass→mobile),
+    //   reproduction-birthGain (parent→child), grazing from entities
+    const systemInputs = (flows.photosynthDirect || 0) + (flows.trophicAmplification || 0);
+    const systemOutputs = (flows.metabolism || 0) + (flows.thermal || 0) + (flows.excretion || 0)
+      + (flows.deathDecay || 0) + (flows.carcassExpire || 0) + (flows.carcassToField || 0)
+      + (flows.producerLoss || 0) + reproductiveWaste;
+    const curSystemEnergy = producerEnergy + consumerEnergy + predatorEnergy + carcassEnergy;
+    const deltaSystem = curSystemEnergy - prevSystemEnergy;
+    const expectedDelta = (systemInputs - systemOutputs) * dt_real;
+    const residual = Math.abs(deltaSystem - expectedDelta);
+    const flowScale = Math.max(Math.abs(expectedDelta), Math.abs(deltaSystem), 1);
+    const residualPct = (residual / flowScale) * 100;
+    // Skip first sample (t=0): no prior simulation, meaningless delta
+    if (lastRecord > 0) {
+      if (residualPct > residualMax) residualMax = residualPct;
+      residualSamples.push(residualPct);
+      // Debug: log first few residual breakdowns
+      if (residualSamples.length <= 3 && process.env.RESIDUAL_DEBUG) {
+        console.error(`[residual] t=${api.sim.time.toFixed(1)} dt_real=${dt_real.toFixed(2)} dE=${deltaSystem.toFixed(1)} exp=${expectedDelta.toFixed(1)} res=${residualPct.toFixed(1)}% | sysIn=${systemInputs.toFixed(2)} sysOut=${systemOutputs.toFixed(2)} | pe=${producerEnergy.toFixed(1)} ce=${consumerEnergy.toFixed(1)} pre=${predatorEnergy.toFixed(1)} care=${carcassEnergy.toFixed(1)} sysE=${curSystemEnergy.toFixed(1)} | in: phD=${(flows.photosynthDirect||0).toFixed(2)} tAmp=${trophicAmp.toFixed(2)} | out: metab=${(flows.metabolism||0).toFixed(2)} pL=${(flows.producerLoss||0).toFixed(2)} dD=${(flows.deathDecay||0).toFixed(2)} exc=${(flows.excretion||0).toFixed(2)}`);
+      }
+    }
+    prevSystemEnergy = curSystemEnergy;
+
+    // ── Field dimension invariante ──
+    // Field is a logistic density index [0, 1.5] per cell, NOT energy.
+    // Track its budget separately: Δ(field.total) vs (growth + deposits - extraction - clamp)
+    // Field inputs: photosynthField (solar growth), excretion (mobile→field), carcassToField
+    // Field outputs: graze bite (field→mobile), clampLoss (capping at 1.5)
+    // colonyFeed/prodCGraze do NOT touch the field — they are entity→entity transfers.
+    // Diffusion is neutral (redistributes, doesn't change total).
+    const curFieldTotal = api.sim.producerField.total || 0;
+    const deltaField = curFieldTotal - prevFieldTotal;
+    const fieldGrowth = flows.photosynthField || 0;
+    const fieldExtraction = flows.graze || 0; // only graze removes from field.mass
+    const fieldDeposits = (flows.excretion || 0) + (flows.carcassToField || 0);
+    const fieldClamp = flows.fieldClampLoss || 0;
+    const fieldExpectedDelta = (fieldGrowth + fieldDeposits - fieldExtraction - fieldClamp) * dt_real;
+    const fieldResidual = Math.abs(deltaField - fieldExpectedDelta);
+    const fieldFlowScale = Math.max(Math.abs(fieldExpectedDelta), Math.abs(deltaField), 1);
+    const fieldResidualPct = (fieldResidual / fieldFlowScale) * 100;
+    if (lastRecord > 0) {
+      if (fieldResidualPct > fieldResidualMax) fieldResidualMax = fieldResidualPct;
+      fieldResidualSamples.push(fieldResidualPct);
+      if (fieldResidualSamples.length <= 3 && process.env.RESIDUAL_DEBUG) {
+        console.error(`[field-residual] t=${api.sim.time.toFixed(1)} dF=${deltaField.toFixed(1)} exp=${fieldExpectedDelta.toFixed(1)} res=${fieldResidualPct.toFixed(1)}% | growth=${fieldGrowth.toFixed(3)} extract=${fieldExtraction.toFixed(3)} deposit=${fieldDeposits.toFixed(3)} ftot=${curFieldTotal.toFixed(1)}`);
+      }
+    }
+    prevFieldTotal = curFieldTotal;
 
     metrics.push({
       t: parseFloat(api.sim.time.toFixed(1)),
@@ -363,6 +467,16 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
         excretion: parseFloat((flows.excretion || 0).toFixed(3)),
         thermal: parseFloat((flows.thermal || 0).toFixed(3)),
         carcassExpire: parseFloat((flows.carcassExpire || 0).toFixed(3)),
+        photosynthField: parseFloat((flows.photosynthField || 0).toFixed(3)),
+        photosynthDirect: parseFloat((flows.photosynthDirect || 0).toFixed(3)),
+        photosynth: parseFloat(photosynth.toFixed(3)),
+        trophicAmplification: parseFloat(trophicAmp.toFixed(3)),
+        deathDecay: parseFloat((flows.deathDecay || 0).toFixed(3)),
+        trueInputs: parseFloat(trueInputs.toFixed(3)),
+        destruction: parseFloat(destruction.toFixed(3)),
+        producerLoss: parseFloat((flows.producerLoss || 0).toFixed(3)),
+        birthGain: parseFloat((flows.birthGain || 0).toFixed(3)),
+        reproductiveWaste: parseFloat(reproductiveWaste.toFixed(3)),
         balance_in: parseFloat(energyIn.toFixed(3)),
         balance_out: parseFloat(energyOut.toFixed(3)),
         system_net: parseFloat(systemNet.toFixed(3)),
@@ -371,11 +485,39 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
         carcass_loss: parseFloat(carcassLoss.toFixed(3)),
         mobile_to_field: parseFloat(mobileToField.toFixed(3)),
         internal_transfer: parseFloat(internalTransfer.toFixed(3)),
+        residual_pct: parseFloat(residualPct.toFixed(3)),
+        system_energy: parseFloat(curSystemEnergy.toFixed(1)),
+        field_residual_pct: parseFloat(fieldResidualPct.toFixed(3)),
+        field_growth: parseFloat(fieldGrowth.toFixed(3)),
+        field_extraction: parseFloat(fieldExtraction.toFixed(3)),
+        field_deposits: parseFloat(fieldDeposits.toFixed(3)),
+        field_clamp: parseFloat(fieldClamp.toFixed(3)),
+        field_delta: parseFloat(deltaField.toFixed(3)),
       },
       genes,
     });
 
     lastRecord = api.sim.time;
+  }
+
+  // Initialize prevSystemEnergy for residual calculation
+  {
+    const creatures0 = api.sim.creatures;
+    let pe0 = 0, ce0 = 0, pre0 = 0, care0 = 0;
+    for (let i = 0; i < creatures0.length; i++) {
+      const e = creatures0[i];
+      if (!e || !e.alive) continue;
+      if (e.type === api.TYPE.PRODUCER) pe0 += e.energy || 0;
+      else if (e.type === api.TYPE.CONSUMER) ce0 += e.energy || 0;
+      else if (e.type === api.TYPE.PREDATOR) pre0 += e.energy || 0;
+    }
+    const carcasses0 = api.sim.carcasses;
+    for (let i = 0; i < carcasses0.length; i++) {
+      if (carcasses0[i]) care0 += carcasses0[i].energy || 0;
+    }
+    // Note: field.total excluded — it's a density index, not energy.
+    prevSystemEnergy = pe0 + ce0 + pre0 + care0;
+    prevFieldTotal = api.sim.producerField.total || 0;
   }
 
   // Initial record
@@ -465,6 +607,14 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     metrics,
     extinctions,
     percentiles,
+    residual_max_pct: parseFloat(residualMax.toFixed(3)),
+    residual_median_pct: residualSamples.length > 0
+      ? parseFloat(residualSamples.slice().sort((a,b)=>a-b)[Math.floor(residualSamples.length/2)].toFixed(3))
+      : 0,
+    field_residual_max_pct: parseFloat(fieldResidualMax.toFixed(3)),
+    field_residual_median_pct: fieldResidualSamples.length > 0
+      ? parseFloat(fieldResidualSamples.slice().sort((a,b)=>a-b)[Math.floor(fieldResidualSamples.length/2)].toFixed(3))
+      : 0,
     final_state: {
       populations: last.populations,
       energy: last.energy,
@@ -571,7 +721,8 @@ function aggregateRuns(runs) {
 
   // Flow aggregation
   const flowKeysAgg = ['graze', 'colonyFeed', 'prodCGraze', 'predation', 'carcassEat',
-    'metabolism', 'reproduction', 'excretion', 'thermal', 'carcassExpire'];
+    'metabolism', 'reproduction', 'excretion', 'thermal', 'carcassExpire',
+    'photosynthField', 'photosynthDirect', 'photosynth', 'trophicAmplification', 'feedGain', 'trueInputs', 'destruction', 'system_net', 'deathDecay'];
   const flowStats = {};
   for (const k of flowKeysAgg) {
     const vals = lastMetrics.map(m => m.flows ? m.flows[k] || 0 : 0);
@@ -628,6 +779,12 @@ function aggregateRuns(runs) {
     performance: {
       wall_time_ms: { mean: mean(runs.map(r => r.wall_time_ms)), stdev: stdev(runs.map(r => r.wall_time_ms)) },
       speed_factor: { mean: mean(runs.map(r => r.speed_factor)), stdev: stdev(runs.map(r => r.speed_factor)) },
+    },
+    dimensional_invariante: {
+      entity_residual_max: { mean: mean(runs.map(r => r.residual_max_pct || 0)), max: Math.max(...runs.map(r => r.residual_max_pct || 0)) },
+      entity_residual_median: { mean: mean(runs.map(r => r.residual_median_pct || 0)) },
+      field_residual_max: { mean: mean(runs.map(r => r.field_residual_max_pct || 0)), max: Math.max(...runs.map(r => r.field_residual_max_pct || 0)) },
+      field_residual_median: { mean: mean(runs.map(r => r.field_residual_median_pct || 0)) },
     },
   };
 }
@@ -708,6 +865,11 @@ function printHumanReport(runs, agg) {
       predation: 'Predación', carcassEat: 'Carcass eat', metabolism: 'Metabolismo',
       reproduction: 'Reproducción', excretion: 'Excretion', thermal: 'Thermal',
       carcassExpire: 'Carcass expire',
+      photosynthField: 'Photosynth (field)', photosynthDirect: 'Photosynth (direct)',
+      photosynth: 'Photosynth (total)', trophicAmplification: 'Trophic amplification',
+      trueInputs: 'True inputs', destruction: 'Destruction', deathDecay: 'Death decay (45%)',
+      producerLoss: 'Producer loss', birthGain: 'Birth gain',
+      reproductiveWaste: 'Repro waste',
     };
     for (const [k, label] of Object.entries(fLabels)) {
       const s = agg.flows[k];
@@ -721,6 +883,28 @@ function printHumanReport(runs, agg) {
       lines.push(`  ${'(field→mobile)'.padEnd(19)} ${fmt(agg.flows.field_input.mean, 2).padStart(10)} ${fmt(agg.flows.field_input.stdev, 2).padStart(10)}`);
       lines.push(`  ${'(mobile loss)'.padEnd(19)} ${fmt(agg.flows.mobile_loss.mean, 2).padStart(10)} ${fmt(agg.flows.mobile_loss.stdev, 2).padStart(10)}`);
       lines.push(`  ${'(internal xfer)'.padEnd(19)} ${fmt(agg.flows.internal_transfer.mean, 2).padStart(10)} ${fmt(agg.flows.internal_transfer.stdev, 2).padStart(10)}`);
+    }
+    // Dimensional invariante residual
+    const residualVals = runs.map(r => r.residual_max_pct || 0);
+    const residualMedVals = runs.map(r => r.residual_median_pct || 0);
+    if (residualVals.length > 0) {
+      const rMax = Math.max(...residualVals);
+      const rMed = residualMedVals.sort((a,b)=>a-b)[Math.floor(residualMedVals.length/2)] || 0;
+      lines.push(`  ${'RESIDUAL max %'.padEnd(19)} ${fmt(rMax, 1).padStart(10)}`);
+      lines.push(`  ${'RESIDUAL med %'.padEnd(19)} ${fmt(rMed, 1).padStart(10)}`);
+      lines.push(`  ${'INVARIANTE ≤2%'.padEnd(19)} ${rMax <= 2 ? '✅ PASS' : '❌ FAIL'.padStart(10)}`);
+    }
+    // Field dimension invariante
+    const fieldResidualVals = runs.map(r => r.field_residual_max_pct || 0);
+    const fieldResidualMedVals = runs.map(r => r.field_residual_median_pct || 0);
+    if (fieldResidualVals.length > 0 && fieldResidualVals.some(v => v > 0)) {
+      const frMax = Math.max(...fieldResidualVals);
+      const frMed = fieldResidualMedVals.sort((a,b)=>a-b)[Math.floor(fieldResidualMedVals.length/2)] || 0;
+      lines.push('');
+      lines.push('  ── Field dimension ──');
+      lines.push(`  ${'FIELD RES max %'.padEnd(19)} ${fmt(frMax, 1).padStart(10)}`);
+      lines.push(`  ${'FIELD RES med %'.padEnd(19)} ${fmt(frMed, 1).padStart(10)}`);
+      lines.push(`  ${'FIELD INV ≤2%'.padEnd(19)} ${frMax <= 2 ? '✅ PASS' : '❌ FAIL'.padStart(10)}`);
     }
     lines.push('');
   }

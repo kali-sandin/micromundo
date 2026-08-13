@@ -304,9 +304,9 @@
     thermalDecayRate: 0,           // rate actual de disipacion (0 = inactivo)
     mobileEnergySum: 0,             // running sum de energy de consumers+predators vivos
     // Energy flow audit: acumuladores de transferencias energeticas
-    flowAccum: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0 },
-    flowAccumPrev: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0 },
-    flowRate: { in: 0, out: 0, balance: 0 }
+    flowAccum: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0, photosynthField: 0, photosynthDirect: 0, producerLoss: 0, asexualRepro: 0, birthGain: 0, trophicAmplification: 0, deathDecay: 0, feedGain: 0, fieldClampLoss: 0 },
+    flowAccumPrev: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0, photosynthField: 0, photosynthDirect: 0, producerLoss: 0, asexualRepro: 0, birthGain: 0, trophicAmplification: 0, deathDecay: 0, feedGain: 0, fieldClampLoss: 0 },
+    flowRate: { in: 0, out: 0, balance: 0, transfer: 0 }
   };
 
   const fmt = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 });
@@ -733,13 +733,14 @@
 
   function addProducerDensity(x, y, amount = 1, radius = 90) {
     const field = sim.producerField;
-    if (!field.mass.length) return;
+    if (!field.mass.length) return 0;
     const cx = fieldCellX(x);
     const cy = fieldCellY(y);
     const r = fieldCellRadius(radius);
     markFieldDirty(cx, cy, r);
-    const gain = Math.max(0.05, amount);
+    const gain = Math.max(0, amount);
     const r2 = r * r;
+    let actualAdded = 0;
     for (let yy = cy - r; yy <= cy + r; yy += 1) {
       const wy = yy < 0 ? yy + field.rows : yy >= field.rows ? yy - field.rows : yy;
       const dy = yy - cy;
@@ -752,13 +753,15 @@
         const idx = wy * field.cols + wx;
         const before = field.mass[idx];
         const falloff = 1 - d2 / (r2 + 1);
-        let add = gain * falloff * 0.08; // 0.08 per-cell density factor; ~neutral aggregate (was 0.18 = x2.25 amplification)
+        let add = gain * falloff * 0.08;
         if (before > 1.2) add *= (1.5 - before) / 0.3;
         const next = clamp(before + add, 0, 1.5);
         field.mass[idx] = next;
         field.total += next - before;
+        actualAdded += next - before;
       }
     }
+    return actualAdded;
   }
 
   function stepProducerField(dt) {
@@ -788,6 +791,8 @@
     // Evita que少量 biomasa se dispersa y se pierda tras crashes.
     const diffScale = clamp(fieldAvg / 0.3, 0.3, 1);
     const diffusion = 0.028 * t * diffScale;
+    let photosynthRaw = 0; // accumulate true photosynthetic growth (pre-diffusion)
+    let clampLoss = 0; // energy lost to clamping at 1.5 cap
 
     for (let y = 0; y < rows; y += 1) {
       const yc = y * cols;
@@ -806,7 +811,10 @@
         const down = src[ycD];
         const avg = (left + right + up + down) * 0.25;
         const grown = m + (m * (1.0 - m) * growth + baselineGrowth);
-        const next = clamp(grown + (avg - m) * diffusion, 0, 1.5);
+        photosynthRaw += m * (1.0 - m) * growth + baselineGrowth;
+        const preClamp = grown + (avg - m) * diffusion;
+        const next = preClamp > 1.5 ? 1.5 : preClamp < 0 ? 0 : preClamp;
+        clampLoss += Math.max(0, preClamp - 1.5);
         dst[idx] = next;
         total += next;
       }
@@ -821,7 +829,10 @@
         const down = src[ycD + x];
         const avg = (left + right + up + down) * 0.25;
         const grown = m + (m * (1.0 - m) * growth + baselineGrowth);
-        const next = clamp(grown + (avg - m) * diffusion, 0, 1.5);
+        photosynthRaw += m * (1.0 - m) * growth + baselineGrowth;
+        const preClamp = grown + (avg - m) * diffusion;
+        const next = preClamp > 1.5 ? 1.5 : preClamp < 0 ? 0 : preClamp;
+        clampLoss += Math.max(0, preClamp - 1.5);
         dst[idx] = next;
         total += next;
       }
@@ -836,7 +847,10 @@
         const down = src[ycD + cols - 1];
         const avg = (left + right + up + down) * 0.25;
         const grown = m + (m * (1.0 - m) * growth + baselineGrowth);
-        const next = clamp(grown + (avg - m) * diffusion, 0, 1.5);
+        photosynthRaw += m * (1.0 - m) * growth + baselineGrowth;
+        const preClamp = grown + (avg - m) * diffusion;
+        const next = preClamp > 1.5 ? 1.5 : preClamp < 0 ? 0 : preClamp;
+        clampLoss += Math.max(0, preClamp - 1.5);
         dst[idx] = next;
         total += next;
       }
@@ -847,6 +861,11 @@
     field.mass = field.scratch;
     field.scratch = tmp;
     field.total = total;
+    // Track photosynthesis input: true solar growth (pre-diffusion, excludes excretion/grazing)
+    if (photosynthRaw > 0) sim.flowAccum.photosynthField += photosynthRaw;
+    // Track clamp loss as destruction (energy capped at 1.5 per cell)
+    sim.flowAccum.producerLoss += clampLoss;
+    sim.flowAccum.fieldClampLoss += clampLoss;
     // stepProducerField hace growth+diffusion en todas las celdas: dirty global
     field.dirtyMinX = null; field.dirtyMinY = null;
     field.dirtyMaxX = null; field.dirtyMaxY = null;
@@ -925,7 +944,12 @@
     sim.mobileEnergySum += actualGain;
     e.energy = newEnergy;
     e.grazeCooldown = rand(0.3, 0.8);
-    sim.flowAccum.graze += actualGain;
+    // Dimensional ledger: graze tracks the transfer (bite from field),
+    // trophicAmplification tracks net energy created (gain - bite).
+    sim.flowAccum.graze += bite;
+    sim.flowAccum.feedGain += actualGain;
+    if (actualGain > bite) sim.flowAccum.trophicAmplification += actualGain - bite;
+    else if (actualGain < bite) sim.flowAccum.producerLoss += bite - actualGain;
     return true;
   }
 
@@ -935,9 +959,9 @@
     // instead of saturating the 1.5 clamp on a few central cells.
     const energyAmount = Math.max(0.18, car.energy * 0.25);
     const depositRadius = Math.max(90, Math.min(240, car.radius * 12 + Math.sqrt(car.energy) * 6));
-    addProducerDensity(car.x, car.y, energyAmount, depositRadius);
-    sim.flowAccum.carcassToField += energyAmount;
-    sim.flowAccum.carcassExpire += Math.max(0, car.energy - energyAmount);
+    const actualDeposited = addProducerDensity(car.x, car.y, energyAmount, depositRadius);
+    sim.flowAccum.carcassToField += actualDeposited;
+    sim.flowAccum.carcassExpire += Math.max(0, car.energy - actualDeposited);
     car.energy = 0;
     car.alive = false;
   }
@@ -991,6 +1015,8 @@
     sim.mobileEnergySum += actualGainCar;
     e.energy = newEng;
     sim.flowAccum.carcassEat += actualGainCar;
+    sim.flowAccum.feedGain += actualGainCar;
+    if (bite > actualGainCar) sim.flowAccum.carcassExpire += bite - actualGainCar;
     if (car.energy <= 0.2) {
       car.energy = 0;
       car.alive = false;
@@ -1010,9 +1036,9 @@
         const decayRate = car.energy * 0.02 * dt; // ~2%/s de la energia restante
         const decayed = Math.min(car.energy, decayRate);
         car.energy -= decayed;
-        addProducerDensity(car.x, car.y, decayed * 0.25, Math.max(90, car.radius * 10));
-        sim.flowAccum.carcassToField += decayed * 0.25;
-        sim.flowAccum.carcassExpire += decayed * 0.75;
+        const actualDecayed = addProducerDensity(car.x, car.y, decayed * 0.25, Math.max(90, car.radius * 10));
+        sim.flowAccum.carcassToField += actualDecayed;
+        sim.flowAccum.carcassExpire += decayed - actualDecayed;
       }
       if (car.life >= car.maxLife) returnCarcassEnergyToField(car);
       if (!car.alive || car.energy <= 0) {
@@ -1110,7 +1136,10 @@
 
     // El retorno al campo ocurre al descomponerse; mientras tanto el cadaver se puede comer.
     // Sin floor: criatura con energy=0 no genera carcass con energia fantasma.
-    const storedEnergy = Math.max(0, Number(e.energy || 0) * 0.55);
+    const deathEnergy = Math.max(0, Number(e.energy || 0));
+    const storedEnergy = deathEnergy * 0.55;
+    const decayLoss = deathEnergy - storedEnergy; // 45% lost as heat/decomposition
+    sim.flowAccum.deathDecay += decayLoss;
     e.energy = 0;
     if (storedEnergy > 0.5 && sim.carcasses.length < 400) {
 
@@ -1128,8 +1157,10 @@
         maxLife: 20
       });
     } else if (storedEnergy > 0.5) {
-      // Cap lleno: redirigir energia al producerField directamente (no deletarla)
-      addProducerDensity(e.x, e.y, Math.max(0.18, storedEnergy * 0.25), Math.max(90, Math.min(240, Math.max(2, (e.radius||5) * 0.9) * 12 + Math.sqrt(storedEnergy) * 6)));
+      // Cap lleno: redirigir energia al producerField directamente (no deletela)
+      const actualRedirected = addProducerDensity(e.x, e.y, Math.max(0.18, storedEnergy * 0.25), Math.max(90, Math.min(240, Math.max(2, (e.radius||5) * 0.9) * 12 + Math.sqrt(storedEnergy) * 6)));
+      sim.flowAccum.carcassToField += actualRedirected;
+      sim.flowAccum.carcassExpire += Math.max(0, storedEnergy - actualRedirected);
     }
 
     if (LOG_EVENTS && reason && sim.deaths % 20 === 0) logEvent(`${reason}. Muertes acumuladas: ${fmt.format(sim.deaths)}`, 'death');
@@ -1305,6 +1336,7 @@
       const excess = child.energy - child.maxEnergy;
       child.energy = child.maxEnergy;
       sim.mobileEnergySum -= excess;
+      sim.flowAccum.reproduction += excess;
     }
     // growthCost: el crecimiento de size encima de la media parental tiene coste energetico inmediato
     const parentAvgSize = (a.size + b.size) * 0.5;
@@ -1313,8 +1345,10 @@
       const actualCost = Math.min(growthCost, child.energy - 1);
       child.energy -= actualCost;
       sim.mobileEnergySum -= actualCost;
+      sim.flowAccum.reproduction += actualCost;
     }
     sim.births += 1;
+    sim.flowAccum.birthGain += child.energy;
     return child;
   }
 
@@ -1568,7 +1602,9 @@
     const p = pressure ? 0.035 : 0.007;
     if (!chance(Math.min(1, dt * p))) return 1;
     e.burstCooldown = sim.time + rand(18, 42);
-    e.energy = Math.max(0, e.energy - Math.max(3, e.maxEnergy * 0.045));
+    const burstCost = Math.max(3, e.maxEnergy * 0.045);
+    e.energy = Math.max(0, e.energy - burstCost);
+    sim.flowAccum.producerLoss += burstCost;
     return rand(2.6, 4.2);
   }
 
@@ -1603,7 +1639,9 @@
       // --- Dormancy (cryptobiosis): ProducerC en escasez severa prolongada ---
       if (e.dormant) {
         // Metabolismo mínimo durante dormancia
-        e.energy -= dt * 0.001;
+        const dormancyCost = dt * 0.001;
+        e.energy -= dormancyCost;
+        sim.flowAccum.producerLoss += dormancyCost;
         e.dormantTimer += dt;
         // Check revival: field mass local suficiente tras 15s mínimo
         if (e.dormantTimer > 15) {
@@ -1672,7 +1710,17 @@
       const crowdStress = (1 - crowdFactor) * dt * 0.12;
       const speedCost = Math.pow(Math.max(0, e.speed) / 42, 1.65) * 0.011; // speed metabolism for mobile ProducerC (half of consumer rate)
       const respCost = dt * (0.008 + speedCost + (e.armor || 0) * 0.003); // basal + speed + armor cost
-      e.energy = Math.min(e.maxEnergy, e.energy + dt * sim.solarEnergy * 0.12 * crowdFactor - sensoryCost - crowdStress - respCost);
+      const photosynthC = dt * sim.solarEnergy * 0.12 * crowdFactor;
+      sim.flowAccum.photosynthDirect += photosynthC;
+      const prodCLoss = sensoryCost + crowdStress + respCost;
+      sim.flowAccum.producerLoss += prodCLoss;
+      {
+        const before = e.energy;
+        e.energy = Math.min(e.maxEnergy, e.energy + photosynthC - prodCLoss);
+        const actualPhotosynth = e.energy - before + prodCLoss;
+        const clampLoss = photosynthC - Math.max(0, actualPhotosynth);
+        if (clampLoss > 0) sim.flowAccum.producerLoss += clampLoss;
+      }
       if (Number.isFinite(Number(e.maxAge)) && e.age > e.maxAge && chance(dt / 120)) {
         kill(e, 'Productor C móvil muere por senescencia');
         return;
@@ -1691,7 +1739,16 @@
         return;
       }
       const respCost = dt * (0.015 + e.radius * 0.0005 + (e.armor || 0) * 0.004);
-      e.energy = Math.min(e.maxEnergy, e.energy + dt * sun * 0.12 - respCost);
+      const photosynthB = dt * sun * 0.12;
+      sim.flowAccum.photosynthDirect += photosynthB;
+      sim.flowAccum.producerLoss += respCost;
+      {
+        const before = e.energy;
+        e.energy = Math.min(e.maxEnergy, e.energy + photosynthB - respCost);
+        const actualPhotosynth = e.energy - before + respCost;
+        const clampLoss = photosynthB - Math.max(0, actualPhotosynth);
+        if (clampLoss > 0) sim.flowAccum.producerLoss += clampLoss;
+      }
       if (e.energy <= 0) {
         kill(e, 'Productor B muere por inanición');
         return;
@@ -1705,6 +1762,7 @@
         if (e.energy > growthCost) {
           e.radius += radiusGrowth;
           e.energy -= growthCost;
+          sim.flowAccum.producerLoss += growthCost;
         }
       }
       const leafCap = 8 + e.radius * 0.9;
@@ -1713,6 +1771,8 @@
         const leafRegen = Math.min(leafCap - e.leafEnergy, dt * sun * 0.25 * healthFactor);
         e.leafEnergy += leafRegen;
         const leafCost = leafRegen * 0.46;
+        sim.flowAccum.producerLoss += leafCost;
+        sim.flowAccum.photosynthDirect += leafRegen;
         e.energy = Math.max(0, e.energy - leafCost);
       }
       const leafLimit = clamp(Math.floor(2 + e.radius / 6), 2, 14);
@@ -1732,10 +1792,13 @@
           const winner = e.energy + e.radius >= other.energy + other.radius ? e : other;
           const loser = winner === e ? other : e;
           const drain = Math.min(loser.energy, 1.2 + winner.radius * 0.08);
+          const leafDrain = drain * 0.18;
+          const competitionLoss = drain * 0.45 + leafDrain; // net energy destroyed (drain minus what winner gains)
           loser.energy -= drain;
-          loser.leafEnergy = Math.max(0, loser.leafEnergy - drain * 0.18);
+          loser.leafEnergy = Math.max(0, loser.leafEnergy - leafDrain);
           loser.leafCount = Math.max(0, loser.leafCount - (drain > 1.6 ? 1 : 0));
           winner.energy = Math.min(winner.maxEnergy, winner.energy + drain * 0.55);
+          sim.flowAccum.producerLoss += competitionLoss;
           if (loser.energy <= 0.15) kill(loser, 'Productor B pierde competencia por sol');
           if (!e.alive) return;
         }
@@ -1767,7 +1830,9 @@
       e.leafCount = Math.max(0, e.leafCount - childLeafCount);
       e.leafEnergy = Math.max(0, e.leafEnergy - childLeafEnergy);
       const childEnergyB = e.energy * 0.28;
+      const parentLossB = e.energy * 0.28;
       e.energy *= 0.72;
+      sim.flowAccum.reproduction += parentLossB;
       // Stress-induced mutagenesis for asexual colony producers
       const bStress = e.energy < e.maxEnergy * 0.35 ? 2.5 : 1;
       const childB = spawnProducer({
@@ -1787,10 +1852,11 @@
       if (childB) {
         const dRadius = childB.radius - e.radius;
         const dArmor = (childB.armor || 0) - (e.armor || 0);
-        if (dRadius > 0) childB.energy = Math.max(1, childB.energy - dRadius * 0.8);
-        if (dArmor > 0) childB.energy = Math.max(1, childB.energy - dArmor * 2.5);
+        if (dRadius > 0) { const before = childB.energy; childB.energy = Math.max(1, childB.energy - dRadius * 0.8); sim.flowAccum.producerLoss += before - childB.energy; }
+        if (dArmor > 0) { const before = childB.energy; childB.energy = Math.max(1, childB.energy - dArmor * 2.5); sim.flowAccum.producerLoss += before - childB.energy; }
       }
       sim.births += 1;
+      if (childB) sim.flowAccum.birthGain += childB.energy;
       return;
     }
 
@@ -1819,11 +1885,14 @@
     if (childP && isMobileProducer(e)) {
       const dRadius = childP.radius - e.radius;
       const dArmor = (childP.armor || 0) - (e.armor || 0);
-      if (dRadius > 0) childP.energy = Math.max(0.5, childP.energy - dRadius * 0.6);
-      if (dArmor > 0) childP.energy = Math.max(0.5, childP.energy - dArmor * 1.5);
+      if (dRadius > 0) { const before = childP.energy; childP.energy = Math.max(0.5, childP.energy - dRadius * 0.6); sim.flowAccum.producerLoss += before - childP.energy; }
+      if (dArmor > 0) { const before = childP.energy; childP.energy = Math.max(0.5, childP.energy - dArmor * 1.5); sim.flowAccum.producerLoss += before - childP.energy; }
     }
+    const parentLossC = isMobileProducer(e) ? e.energy * 0.32 : 0;
     e.energy *= 0.68;
+    if (parentLossC > 0) sim.flowAccum.reproduction += parentLossC;
     sim.births += 1;
+    if (childP) sim.flowAccum.birthGain += childP.energy;
   }
 
   function steerCreature(e, dt, food, threat = null) {
@@ -1913,7 +1982,13 @@
       const newEng = e.energy + actualGainCol;
       sim.mobileEnergySum += actualGainCol;
       e.energy = newEng;
-      sim.flowAccum.colonyFeed += actualGainCol;
+      // Dimensional ledger: colonyFeed tracks transfer (energy removed from target),
+      // trophicAmplification tracks net energy created.
+      const targetLoss = bite + bite * 0.30; // leafEnergy + energy drain
+      sim.flowAccum.colonyFeed += targetLoss;
+      sim.flowAccum.feedGain += actualGainCol;
+      if (actualGainCol > targetLoss) sim.flowAccum.trophicAmplification += actualGainCol - targetLoss;
+      else if (actualGainCol < targetLoss) sim.flowAccum.producerLoss += targetLoss - actualGainCol;
       return true;
     }
 
@@ -1992,16 +2067,24 @@
       : 1;
     const gain = Math.min(rawGain, maxTransfer) * gapeFactor * typeIII * bdaInterference;
 
+    // Dimensional ledger: capture target energy before transfer
+    const targetEnergyBefore = target.energy;
     // Descuento gain de target ANTES de kill para evitar doble conteo energetico
     // (sin esto, kill lee target.energy intacta y crea carcass con energy ya consumida)
     target.energy = Math.max(0, target.energy - gain);
+    const targetLoss = targetEnergyBefore - target.energy; // actual energy removed
     // Si target es mobile, su energy ya se resto del sum via kill(). Si es producer, no esta en el sum.
     const actualGainPred = Math.min(gain, e.maxEnergy - e.energy);
     const newEng = e.energy + actualGainPred;
     sim.mobileEnergySum += actualGainPred;
     e.energy = newEng;
-    if (e.type === TYPE.PREDATOR) sim.flowAccum.predation += actualGainPred;
-    else sim.flowAccum.prodCGraze += actualGainPred;
+    // Dimensional ledger: predation/prodCGraze tracks transfer (target energy lost),
+    // trophicAmplification tracks net energy created.
+    if (e.type === TYPE.PREDATOR) sim.flowAccum.predation += targetLoss;
+    else sim.flowAccum.prodCGraze += targetLoss;
+    sim.flowAccum.feedGain += actualGainPred;
+    if (actualGainPred > targetLoss) sim.flowAccum.trophicAmplification += actualGainPred - targetLoss;
+    else if (actualGainPred < targetLoss) sim.flowAccum.deathDecay += targetLoss - actualGainPred;
     // Holling Type II handling time: el predator pierde tiempo procesando la presa.
     // Escala con el tamano de la presa: presas grandes = mas handling.
     // Consumer->ProducerC: handling corto (1.5-2.5s). Predator->Consumer/Producer: mas largo.
@@ -2019,7 +2102,9 @@
     // Sloppy feeding (microbial loop): 12% de energia de presa se pierde al producerField.
     // Simula DOC leakage durante predacion. Cria hotspots de fertilidad en zonas de caza.
     if (e.type === TYPE.PREDATOR && !target.virtualA) {
-      addProducerDensity(target.x, target.y, gain * 0.12 * 0.02, 50);
+      const sloppyLeak = gain * 0.12 * 0.02;
+      const actualSloppy = addProducerDensity(target.x, target.y, sloppyLeak, 50);
+      sim.flowAccum.carcassToField += actualSloppy; // sloppy feeding leaks to field, not entity pool
     }
     // ProducerC supervivencia al grazing: como ProducerB (leaves), ProducerC no muere
     // al ser comido por consumers si le queda energia. Solo predators kill siempre.
@@ -2202,6 +2287,7 @@
       if (e.dormant) {
         e.energy -= dt * 0.002; // metabolism minimo
         sim.mobileEnergySum -= dt * 0.002;
+        sim.flowAccum.metabolism += dt * 0.002;
         e.dormantTimer += dt;
         if (e.dormantTimer > 15) {
           const ci = fieldIndex(fieldCellX(e.x), fieldCellY(e.y));
@@ -2228,8 +2314,9 @@
     // DOC excretion: recicla 2.5% del metabCost al producerField (microbial loop)
     if (metabCost > 0.01) {
       const excretion = metabCost * 0.025;
-      addProducerDensity(e.x, e.y, excretion, 60);
-      sim.flowAccum.excretion += excretion;
+      const actualExcretion = addProducerDensity(e.x, e.y, excretion, 60);
+      sim.flowAccum.excretion += actualExcretion;
+      sim.flowAccum.metabolism -= actualExcretion; // corregir: excretion no se destruye, se transfiere
     }
     // Thermal entropy: disipacion adaptativa si el sistema tiene inflacion energetica
     if (sim.thermalDecayRate > 0 && (e.type === TYPE.CONSUMER || e.type === TYPE.PREDATOR)) {
@@ -2566,10 +2653,10 @@
         fertility: mutate(Number(donor.fertility), 0.1, 0.22, 3),
         maxAge: mutate(Number(donor.maxAge), Number(donor.maxAge) * 0.15, isPredator ? 5000 : 1800, isPredator ? 15000 : 8000)
       };
-      if (isProducerB) { opts.sub = PRODUCER.B; spawnProducer(opts); }
-      else if (isProducerC) { opts.sub = PRODUCER.C; spawnProducer(opts); }
-      else if (type === 'consumers') { opts.energy = rand(10, 15); spawnConsumer(opts); }
-      else if (isPredator) { opts.energy = rand(30, 50); spawnPredator(opts); }
+      if (isProducerB) { opts.sub = PRODUCER.B; const m = spawnProducer(opts); if (m) sim.flowAccum.birthGain += m.energy; }
+      else if (isProducerC) { opts.sub = PRODUCER.C; const m = spawnProducer(opts); if (m) sim.flowAccum.birthGain += m.energy; }
+      else if (type === 'consumers') { opts.energy = rand(10, 15); const m = spawnConsumer(opts); if (m) sim.flowAccum.birthGain += m.energy; }
+      else if (isPredator) { opts.energy = rand(30, 50); const m = spawnPredator(opts); if (m) sim.flowAccum.birthGain += m.energy; }
       sim.births += 1;
     }
     if (LOG_EVENTS) { var label = isPredator ? 'depredadores' : type === 'consumers' ? 'consumidores' : isProducerB ? 'productores B' : 'productores C'; logEvent('Migración: ' + n + ' ' + label + ' recoloniaron desde los bordes (pop. previa: ' + count + ')', 'birth'); }
@@ -2651,7 +2738,7 @@
       for (let i = 0; i < creatures.length; i += 1) {
         const e = creatures[i];
         if (!e || !e.alive) continue;
-        if (e.type === TYPE.PRODUCER) producerEnergy += e.energy || 0;
+        if (e.type === TYPE.PRODUCER) producerEnergy += (e.energy || 0) + (e.leafEnergy || 0);
       }
     }
     const totalN = energyN + sim.liveProducerBCount + sim.liveProducerCCount;
@@ -3553,11 +3640,24 @@
       const dExcret = fa.excretion - fp.excretion;
       const dThermal = fa.thermal - fp.thermal;
       const dCarcassExp = fa.carcassExpire - fp.carcassExpire;
-      const energyIn = dGraze + dColony + dProdC + dPred + dCarcassEat + dExcret;
-      const energyOut = dMetab + dRepro + dThermal + dCarcassExp;
-      sim.flowRate.in = energyIn / dtStats;
-      sim.flowRate.out = energyOut / dtStats;
-      sim.flowRate.balance = (energyIn - energyOut) / dtStats;
+      const dPhotoField = fa.photosynthField - fp.photosynthField;
+      const dPhotoDirect = fa.photosynthDirect - fp.photosynthDirect;
+      const dProducerLoss = fa.producerLoss - fp.producerLoss;
+      const dBirthGain = fa.birthGain - fp.birthGain;
+      const dTrophicAmp = fa.trophicAmplification - fp.trophicAmplification;
+      const dDeathDecay = fa.deathDecay - fp.deathDecay;
+      // Dimensional ledger: separate true energy sources/sinks from internal transfers.
+      // TRUE INPUTS: photosynthesis creates energy from solar input + trophic amplification (grazing mult).
+      // TRUE DESTRUCTION: metabolism, thermal, carcass expiry, producer losses, reproductive waste, death decay.
+      // TRANSFERS (grazing, predation, etc) move energy between pools without creating/destroying it.
+      const dPhoto = dPhotoField + dPhotoDirect + dTrophicAmp;
+      const dReproWaste = Math.max(0, dRepro - dBirthGain);
+      const destruction = dMetab + dThermal + dCarcassExp + dProducerLoss + dReproWaste + dDeathDecay;
+      sim.flowRate.in = dPhoto / dtStats;
+      sim.flowRate.out = destruction / dtStats;
+      sim.flowRate.balance = (dPhoto - destruction) / dtStats;
+      // Track internal transfer magnitude for diagnostics (not part of balance)
+      sim.flowRate.transfer = (dGraze + dColony + dProdC + dPred + dCarcassEat + dExcret + dBirthGain) / dtStats;
       Object.assign(fp, fa);
     }
     // Re-sync mobileEnergySum cada ~60s para corregir drift acumulado
