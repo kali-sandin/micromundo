@@ -946,10 +946,12 @@
     e.grazeCooldown = rand(0.3, 0.8);
     // Dimensional ledger: graze tracks the transfer (bite from field),
     // trophicAmplification tracks net energy created (gain - bite).
+    // Field is OUTSIDE the entity energy pool: system-level input per event is
+    // actualGain itself = (actualGain - bite) tAmp + bite elsewhere. Signed tAmp
+    // covers mobile-saturated bites (gain < bite); never producerLoss for field.
     sim.flowAccum.graze += bite;
     sim.flowAccum.feedGain += actualGain;
-    if (actualGain > bite) sim.flowAccum.trophicAmplification += actualGain - bite;
-    else if (actualGain < bite) sim.flowAccum.producerLoss += bite - actualGain;
+    sim.flowAccum.trophicAmplification += actualGain - bite;
     return true;
   }
 
@@ -1137,8 +1139,10 @@
     // El retorno al campo ocurre al descomponerse; mientras tanto el cadaver se puede comer.
     // Sin floor: criatura con energy=0 no genera carcass con energia fantasma.
     const deathEnergy = Math.max(0, Number(e.energy || 0));
-    const storedEnergy = deathEnergy * 0.55;
-    const decayLoss = deathEnergy - storedEnergy; // 45% lost as heat/decomposition
+    const leafEnergyAtDeath = Math.max(0, Number(e.leafEnergy || 0));
+    const totalDeathEnergy = deathEnergy + leafEnergyAtDeath;
+    const storedEnergy = totalDeathEnergy * 0.55;
+    const decayLoss = totalDeathEnergy - storedEnergy; // 45% lost as heat/decomposition
     sim.flowAccum.deathDecay += decayLoss;
     e.energy = 0;
     if (storedEnergy > 0.5 && sim.carcasses.length < 400) {

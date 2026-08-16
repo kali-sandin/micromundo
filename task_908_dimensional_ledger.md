@@ -82,3 +82,50 @@ El residual crece cuando hay muertes masivas o extinciones. La system energy **s
 El ledger dimensional **expone claramente** que el problema está en la conversión field→mobile y en los flujos de muerte. La field dimension cierra perfectamente, lo que valida que el campo se trackea bien. El entity residual requiere más investigación para encontrar el flujo faltante (~20 E/s en condiciones normales, más durante extinciones).
 
 **No recomiendo escalar a 20x5m hasta que el entity residual se estabilice bajo 5%.**
+
+## 2026-08-16: CAUSA RAIZ ENCONTRADA Y CERRADA — entity residual 0.01%
+
+### Diagnóstico con RESIDUAL_DEBUG (seed 4242, 60s, migración OFF)
+
+El residual entity coincidía **exactamente** con el flujo `graz` en cada muestra:
+
+| t | diff (exp−dE) E/s | graz E/s |
+|---|---|---|
+| 20 | 19.65 | 19.65 |
+| 30 | 21.76 | 21.72 |
+| 40 | 23.66 | 23.61 |
+| 50 | 25.75 | 25.71 |
+| 60 | 27.59 | 27.69 |
+
+### Explicación dimensional
+
+`systemInputs = photosynthDirect + trophicAmplification` restaba el bite del campo
+como salida del sistema de entidades, pero el campo **no está** en E_sys. Para un
+evento de grazing de campo, la entrada real al sistema es la ganancia completa:
+`g_f = (g_f − bite) [tAmp] + bite [graz]`. Faltaba sumar `graz` como input.
+
+Además, en el edge case mobile-saturado (actualGain < bite), la diferencia iba a
+`producerLoss` (output), penalizando dos veces. Ahora tAmp es con signo para fuente
+campo: `tAmp += actualGain − bite`, sin producerLoss.
+
+### Cambios
+
+1. `sim-harness.js`: `systemInputs += flows.graze` (contrato: campo fuera de E_sys)
+2. `app.js` graze path: tAmp firmado, eliminado else→producerLoss para bites de campo
+3. `app.js` kill(): `totalDeathEnergy = energy + leafEnergy` — leafEnergy de ProducerB/C
+   entra en carcass (55%) + deathDecay (45%). Antes vanish sin trackear ( visible en
+   runs largos con senescencia de producers, no en smoke corto con consumers hambrientos)
+
+### Resultado (seed 4242, 60s, migración OFF)
+
+- entity residual: max **0.011%**, mediana **0.0%** (antes 8-15% creciente)
+- field residual: **0.0%**
+- tests: **81/81 OK**
+- smoke 5m x3 seeds: ver smoke5m_908
+
+### Nota ecológica separada
+
+El verdict "Energy pool drift" (SYSTEM NET ~-300 E/s con consumers muriendo de
+hambre, 1 birth/60s) NO es un bug del ledger: es el desbalance ecológico real que
+task_908 debe medir. Ahora que la contabilidad cierra a 0.01%, el NET es trustworthy
+para decisiones de balance (opciones E-H del análisis de viabilidad).

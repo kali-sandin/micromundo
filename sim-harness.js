@@ -369,6 +369,8 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     //
     // System inputs (add energy to entity pool):
     //   photosynthDirect: solar → producer entities (B/C photosynthesize directly)
+    //   graze: bite extracted from producerField. Field is NOT in E_sys, so the
+    //     full bite is a system-level input; trophicAmp only nets gain-bite.
     //   trophicAmplification: net energy created during ALL feeding (gain - sourceLoss).
     //     When consumer grazes field at mult>1: positive amp (field mass index → mobile energy).
     //     When predator gains less than prey lost: negative amp (already in deathDecay).
@@ -384,7 +386,7 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     // Internal transfers (neutral to E_sys):
     //   predation (prey→predator), carcassEat (carcass→mobile),
     //   reproduction-birthGain (parent→child), grazing from entities
-    const systemInputs = (flows.photosynthDirect || 0) + (flows.trophicAmplification || 0);
+    const systemInputs = (flows.photosynthDirect || 0) + (flows.trophicAmplification || 0) + (flows.graze || 0);
     const systemOutputs = (flows.metabolism || 0) + (flows.thermal || 0) + (flows.excretion || 0)
       + (flows.deathDecay || 0) + (flows.carcassExpire || 0) + (flows.carcassToField || 0)
       + (flows.producerLoss || 0) + reproductiveWaste;
@@ -399,8 +401,16 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
       if (residualPct > residualMax) residualMax = residualPct;
       residualSamples.push(residualPct);
       // Debug: log first few residual breakdowns
-      if (residualSamples.length <= 3 && process.env.RESIDUAL_DEBUG) {
-        console.error(`[residual] t=${api.sim.time.toFixed(1)} dt_real=${dt_real.toFixed(2)} dE=${deltaSystem.toFixed(1)} exp=${expectedDelta.toFixed(1)} res=${residualPct.toFixed(1)}% | sysIn=${systemInputs.toFixed(2)} sysOut=${systemOutputs.toFixed(2)} | pe=${producerEnergy.toFixed(1)} ce=${consumerEnergy.toFixed(1)} pre=${predatorEnergy.toFixed(1)} care=${carcassEnergy.toFixed(1)} sysE=${curSystemEnergy.toFixed(1)} | in: phD=${(flows.photosynthDirect||0).toFixed(2)} tAmp=${trophicAmp.toFixed(2)} | out: metab=${(flows.metabolism||0).toFixed(2)} pL=${(flows.producerLoss||0).toFixed(2)} dD=${(flows.deathDecay||0).toFixed(2)} exc=${(flows.excretion||0).toFixed(2)}`);
+      if (residualSamples.length <= 5 && process.env.RESIDUAL_DEBUG) {
+        const feedG = flows.feedGain || 0;
+        const graz = flows.graze || 0;
+        const colF = flows.colonyFeed || 0;
+        const pred = flows.predation || 0;
+        const prodCG = flows.prodCGraze || 0;
+        const carcE = flows.carcassEat || 0;
+        const bGain = flows.birthGain || 0;
+        const repro = flows.reproduction || 0;
+        console.error(`[residual] t=${api.sim.time.toFixed(1)} dt_real=${dt_real.toFixed(2)} dE=${deltaSystem.toFixed(1)} exp=${expectedDelta.toFixed(1)} res=${residualPct.toFixed(1)}% | sysIn=${systemInputs.toFixed(2)} sysOut=${systemOutputs.toFixed(2)} | pe=${producerEnergy.toFixed(1)} ce=${consumerEnergy.toFixed(1)} pre=${predatorEnergy.toFixed(1)} care=${carcassEnergy.toFixed(1)} sysE=${curSystemEnergy.toFixed(1)} | in: phD=${(flows.photosynthDirect||0).toFixed(2)} tAmp=${trophicAmp.toFixed(2)} | out: metab=${(flows.metabolism||0).toFixed(2)} pL=${(flows.producerLoss||0).toFixed(2)} dD=${(flows.deathDecay||0).toFixed(2)} exc=${(flows.excretion||0).toFixed(2)} | feedG=${feedG.toFixed(2)} graz=${graz.toFixed(2)} colF=${colF.toFixed(2)} pred=${pred.toFixed(2)} prodCG=${prodCG.toFixed(2)} carcE=${carcE.toFixed(2)} bGain=${bGain.toFixed(2)} repro=${repro.toFixed(2)} reproW=${reproductiveWaste.toFixed(2)}`);
       }
     }
     prevSystemEnergy = curSystemEnergy;
