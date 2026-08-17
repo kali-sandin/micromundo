@@ -304,8 +304,13 @@
     thermalDecayRate: 0,           // rate actual de disipacion (0 = inactivo)
     mobileEnergySum: 0,             // running sum de energy de consumers+predators vivos
     // Energy flow audit: acumuladores de transferencias energeticas
-    flowAccum: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0, photosynthField: 0, photosynthDirect: 0, producerLoss: 0, asexualRepro: 0, birthGain: 0, trophicAmplification: 0, deathDecay: 0, feedGain: 0, fieldClampLoss: 0 },
-    flowAccumPrev: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0, photosynthField: 0, photosynthDirect: 0, producerLoss: 0, asexualRepro: 0, birthGain: 0, trophicAmplification: 0, deathDecay: 0, feedGain: 0, fieldClampLoss: 0 },
+    flowAccum: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0, photosynthField: 0, photosynthDirect: 0, producerLoss: 0, asexualRepro: 0, birthGain: 0, trophicAmplification: 0, deathDecay: 0, feedGain: 0, fieldClampLoss: 0,
+      // task_908 funnel depredacion predator->consumer: etapas y rechazos (pasos-depredador acumulados)
+      fnlPreyNear: 0, fnlPreyNear3: 0, fnlContact: 0, fnlRejCooldown: 0, fnlRejSatiety: 0,
+      fnlChase: 0, fnlRejChase: 0, fnlRejGape: 0, fnlCapture: 0 },
+    flowAccumPrev: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0, photosynthField: 0, photosynthDirect: 0, producerLoss: 0, asexualRepro: 0, birthGain: 0, trophicAmplification: 0, deathDecay: 0, feedGain: 0, fieldClampLoss: 0,
+      fnlPreyNear: 0, fnlPreyNear3: 0, fnlContact: 0, fnlRejCooldown: 0, fnlRejSatiety: 0,
+      fnlChase: 0, fnlRejChase: 0, fnlRejGape: 0, fnlCapture: 0 },
     flowRate: { in: 0, out: 0, balance: 0, transfer: 0 }
   };
 
@@ -1998,29 +2003,48 @@
 
     if (!canEatArmored(e, target)) return false;
 
+    // task_908 funnel: contacto = predator->consumer dentro de eatRange iniciando intento
+    const fnlPredHunt = e.type === TYPE.PREDATOR && target.type === TYPE.CONSUMER;
+    if (fnlPredHunt) sim.flowAccum.fnlContact += 1;
+
     // Holling Type II: handling time tras kill exitoso limita throughput maximo.
     // Un predator no puede encadenar kills sin tiempo de procesado.
     // Esto satura la tasa de consumo cuando la densidad de presas es alta.
-    if (e.huntCooldown > 0) return false;
+    if (e.huntCooldown > 0) {
+      if (fnlPredHunt) sim.flowAccum.fnlRejCooldown += 1;
+      return false;
+    }
 
     // Predator satiation: depredadores saciados no cazan.
     // >95% energy: ignoran presas (saciados). 85-95%: fallan 50% capturas.
     // Reduce overpredacion y sumidero energetico en boom phases.
-    if (e.type === TYPE.PREDATOR && e.energy > e.maxEnergy * 0.95) return false;
-    if (e.type === TYPE.PREDATOR && e.energy > e.maxEnergy * 0.85 && chance(0.5)) return false;
+    if (e.type === TYPE.PREDATOR && e.energy > e.maxEnergy * 0.95) {
+      if (fnlPredHunt) sim.flowAccum.fnlRejSatiety += 1;
+      return false;
+    }
+    if (e.type === TYPE.PREDATOR && e.energy > e.maxEnergy * 0.85 && chance(0.5)) {
+      if (fnlPredHunt) sim.flowAccum.fnlRejSatiety += 1;
+      return false;
+    }
 
     // Chase success: depredadores no siempre matan al contacto.
     // Presas rapidas y pequenas escapan mas. Presas lentas y grandes casi siempre caen.
     // speedRatio = predator speed vs prey speed. sizeAdv = ventaja de talla del predator.
+    // task_908 FIX: el modelo de movimiento es angle+speed (no hay vx/vy en criaturas).
+    // La version anterior leia e.vx/e.vy inexistentes -> NaN -> chance(NaN)=false
+    // -> 0% capturas de consumers (causa raiz de predation~0 en el baseline).
+    // Velocidades reales: e.speed (locomotion/massDrag, con modificadores del turno actual).
     if (e.type === TYPE.PREDATOR && target.type === TYPE.CONSUMER) {
-      const predSpeed = Math.sqrt(e.vx * e.vx + e.vy * e.vy);
-      const preySpeed = Math.sqrt(target.vx * target.vx + target.vy * target.vy);
-      const speedRatio = predSpeed / Math.max(0.1, preySpeed);
+      const predSpeed = Math.max(0.1, e.speed || 0);
+      const preySpeed = Math.max(0.1, target.speed || 0);
+      const speedRatio = predSpeed / preySpeed;
       const sizeAdv = clamp(e.size / Math.max(1, target.size) - 1, 0, 2);
       const chaseSuccess = clamp(speedRatio * 0.25 + sizeAdv * 0.2 + 0.35, 0.25, 0.92);
+      sim.flowAccum.fnlChase += 1;
       if (!chance(chaseSuccess)) {
         // Presa escapa: predator pierde tiempo de persecucion fallida
         e.huntCooldown = 0.5 + rand(0, 0.3);
+        sim.flowAccum.fnlRejChase += 1;
         return false;
       }
     }
@@ -2029,7 +2053,7 @@
     let gapeFactor = 1;
     if (e.type === TYPE.PREDATOR && target.type === TYPE.CONSUMER) {
       const sizeRatio = target.size / Math.max(1, e.size);
-      if (sizeRatio > 0.85) return false; // presa demasiado grande
+      if (sizeRatio > 0.85) { sim.flowAccum.fnlRejGape += 1; return false; } // presa demasiado grande
       if (sizeRatio > 0.5) gapeFactor = Math.min(1.0, 0.85 / sizeRatio); // penalty progresivo, nunca bonus
     } else if (e.type === TYPE.PREDATOR && target.type === TYPE.PREDATOR) {
       // Intraguild predation: solo presas claramente mas pequeñas, gain reducido
@@ -2086,6 +2110,7 @@
     // trophicAmplification tracks net energy created.
     if (e.type === TYPE.PREDATOR) sim.flowAccum.predation += targetLoss;
     else sim.flowAccum.prodCGraze += targetLoss;
+    if (fnlPredHunt) sim.flowAccum.fnlCapture += 1;
     sim.flowAccum.feedGain += actualGainPred;
     if (actualGainPred > targetLoss) sim.flowAccum.trophicAmplification += actualGainPred - targetLoss;
     else if (actualGainPred < targetLoss) sim.flowAccum.deathDecay += targetLoss - actualGainPred;
@@ -2370,6 +2395,9 @@
       queryNearby2(e.x, e.y, e.perception, TYPE.CONSUMER, GB_MOBILE, nearby, nearbyMobile);
       const consumerCount = nearby.length;
       e._localPreyDensity = consumerCount;
+      // task_908 funnel: deteccion (pasos-depredador con presas en perception)
+      if (consumerCount > 0) sim.flowAccum.fnlPreyNear += 1;
+      if (consumerCount >= 3) sim.flowAccum.fnlPreyNear3 += 1;
       // Digestion (task_300): predator digiriendo no busca comida
       if (!digesting) {
       food = consumerCount >= 3 ? nearestFood(e, nearby) : null;

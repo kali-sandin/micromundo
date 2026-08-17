@@ -216,7 +216,10 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
   // Flow accumulators for delta computation
   const flowKeys = ['graze', 'colonyFeed', 'prodCGraze', 'predation', 'carcassEat',
     'carcassToField', 'metabolism', 'reproduction', 'excretion', 'thermal', 'carcassExpire',
-    'photosynthField', 'photosynthDirect', 'producerLoss', 'asexualRepro', 'birthGain', 'trophicAmplification', 'deathDecay', 'feedGain', 'fieldClampLoss'];
+    'photosynthField', 'photosynthDirect', 'producerLoss', 'asexualRepro', 'birthGain', 'trophicAmplification', 'deathDecay', 'feedGain', 'fieldClampLoss',
+    // task_908 funnel predacion (pasos-depredador/s)
+    'fnlPreyNear', 'fnlPreyNear3', 'fnlContact', 'fnlRejCooldown', 'fnlRejSatiety',
+    'fnlChase', 'fnlRejChase', 'fnlRejGape', 'fnlCapture'];
   let prevFlowAccum = {};
   function snapshotFlowAccum() {
     const snap = {};
@@ -495,6 +498,16 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
         carcass_loss: parseFloat(carcassLoss.toFixed(3)),
         mobile_to_field: parseFloat(mobileToField.toFixed(3)),
         internal_transfer: parseFloat(internalTransfer.toFixed(3)),
+        // task_908 funnel predacion (pasos-depredador/s)
+        fnlPreyNear: parseFloat((flows.fnlPreyNear || 0).toFixed(2)),
+        fnlPreyNear3: parseFloat((flows.fnlPreyNear3 || 0).toFixed(2)),
+        fnlContact: parseFloat((flows.fnlContact || 0).toFixed(2)),
+        fnlRejCooldown: parseFloat((flows.fnlRejCooldown || 0).toFixed(2)),
+        fnlRejSatiety: parseFloat((flows.fnlRejSatiety || 0).toFixed(2)),
+        fnlChase: parseFloat((flows.fnlChase || 0).toFixed(2)),
+        fnlRejChase: parseFloat((flows.fnlRejChase || 0).toFixed(2)),
+        fnlRejGape: parseFloat((flows.fnlRejGape || 0).toFixed(2)),
+        fnlCapture: parseFloat((flows.fnlCapture || 0).toFixed(2)),
         residual_pct: parseFloat(residualPct.toFixed(3)),
         system_energy: parseFloat(curSystemEnergy.toFixed(1)),
         field_residual_pct: parseFloat(fieldResidualPct.toFixed(3)),
@@ -729,14 +742,49 @@ function aggregateRuns(runs) {
   const birthRates = lastMetrics.map(m => m.rates.births_per_sec);
   const deathRates = lastMetrics.map(m => m.rates.deaths_per_sec);
 
-  // Flow aggregation
+  // Flow aggregation — task_908 fix: media TEMPORAL por run (intervalos t>0),
+  // no solo el ultimo intervalo. El valor del ultimo intervalo es ruido
+  // puntual (p.ej. predation=0 por handling time); la media temporal es la
+  // magnitud fisica honesta. Se conserva flows_last por compat.
   const flowKeysAgg = ['graze', 'colonyFeed', 'prodCGraze', 'predation', 'carcassEat',
     'metabolism', 'reproduction', 'excretion', 'thermal', 'carcassExpire',
-    'photosynthField', 'photosynthDirect', 'photosynth', 'trophicAmplification', 'feedGain', 'trueInputs', 'destruction', 'system_net', 'deathDecay'];
+    'photosynthField', 'photosynthDirect', 'photosynth', 'trophicAmplification', 'feedGain', 'trueInputs', 'destruction', 'system_net', 'deathDecay',
+    'fnlPreyNear', 'fnlPreyNear3', 'fnlContact', 'fnlRejCooldown', 'fnlRejSatiety',
+    'fnlChase', 'fnlRejChase', 'fnlRejGape', 'fnlCapture'];
+  function temporalMeanFlows(run, key) {
+    // media sobre intervalos con t>0 (el intervalo t=0 arranca en 0 y diluiria)
+    let sum = 0, n = 0;
+    for (const m of run.metrics) {
+      if (m.t <= 0) continue;
+      sum += m.flows ? m.flows[key] || 0 : 0;
+      n++;
+    }
+    return n > 0 ? sum / n : 0;
+  }
   const flowStats = {};
   for (const k of flowKeysAgg) {
-    const vals = lastMetrics.map(m => m.flows ? m.flows[k] || 0 : 0);
+    if (k === 'photosynth' || k === 'trueInputs' || k === 'destruction' || k === 'system_net') continue; // derivados abajo
+    const vals = runs.map(r => temporalMeanFlows(r, k));
     flowStats[k] = { mean: mean(vals), stdev: stdev(vals) };
+  }
+  // Derivados con media temporal coherente
+  const photosynthMeans = runs.map(r => temporalMeanFlows(r, 'photosynthField') + temporalMeanFlows(r, 'photosynthDirect'));
+  flowStats.photosynth = { mean: mean(photosynthMeans), stdev: stdev(photosynthMeans) };
+  flowStats.trueInputs = flowStats.photosynth;
+  const destructionMeans = runs.map(r => temporalMeanFlows(r, 'metabolism') + temporalMeanFlows(r, 'thermal')
+    + temporalMeanFlows(r, 'carcassExpire') + temporalMeanFlows(r, 'producerLoss')
+    + temporalMeanFlows(r, 'reproductiveWaste') + temporalMeanFlows(r, 'deathDecay'));
+  flowStats.destruction = { mean: mean(destructionMeans), stdev: stdev(destructionMeans) };
+  const systemNetMeans = runs.map(r => temporalMeanFlows(r, 'photosynthField') + temporalMeanFlows(r, 'photosynthDirect')
+    - temporalMeanFlows(r, 'metabolism') - temporalMeanFlows(r, 'thermal')
+    - temporalMeanFlows(r, 'carcassExpire') - temporalMeanFlows(r, 'producerLoss')
+    - temporalMeanFlows(r, 'reproductiveWaste') - temporalMeanFlows(r, 'deathDecay'));
+  flowStats.system_net = { mean: mean(systemNetMeans), stdev: stdev(systemNetMeans) };
+  // Compat: valores del ultimo intervalo bajo flows_last
+  const flowStatsLast = {};
+  for (const k of ['graze', 'colonyFeed', 'prodCGraze', 'predation', 'carcassEat', 'metabolism', 'reproduction', 'excretion', 'thermal', 'carcassExpire', 'photosynth', 'system_net']) {
+    const vals = lastMetrics.map(m => m.flows ? m.flows[k] || 0 : 0);
+    flowStatsLast[k] = { mean: mean(vals), stdev: stdev(vals) };
   }
   const balanceIn = lastMetrics.map(m => m.flows ? m.flows.balance_in || 0 : 0);
   const balanceOut = lastMetrics.map(m => m.flows ? m.flows.balance_out || 0 : 0);
@@ -745,13 +793,14 @@ function aggregateRuns(runs) {
   flowStats.net = { mean: mean(balanceIn) - mean(balanceOut), stdev: stdev(balanceIn.map((v, i) => v - balanceOut[i])) };
   // System net: true energy creation vs destruction (field input - losses)
   const systemNets = lastMetrics.map(m => m.flows ? m.flows.system_net || 0 : 0);
-  flowStats.system_net = { mean: mean(systemNets), stdev: stdev(systemNets) };
+  flowStats.system_net_last = { mean: mean(systemNets), stdev: stdev(systemNets) };
   const fieldInputs = lastMetrics.map(m => m.flows ? m.flows.field_input || 0 : 0);
   flowStats.field_input = { mean: mean(fieldInputs), stdev: stdev(fieldInputs) };
   const mobileLosses = lastMetrics.map(m => m.flows ? m.flows.mobile_loss || 0 : 0);
   flowStats.mobile_loss = { mean: mean(mobileLosses), stdev: stdev(mobileLosses) };
   const internalTransfers = lastMetrics.map(m => m.flows ? m.flows.internal_transfer || 0 : 0);
   flowStats.internal_transfer = { mean: mean(internalTransfers), stdev: stdev(internalTransfers) };
+  flowStats._last = flowStatsLast;
 
   const extinctions = runs.map(r => r.extinctions.length);
   const survivalCounts = finals.map(f => Object.values(f.survival).filter(Boolean).length - 1);
@@ -869,7 +918,7 @@ function printHumanReport(runs, agg) {
 
   // Energy flows
   if (agg.flows) {
-    lines.push('── ENERGY FLOWS (mean ± σ, energy/s) ─────────────────────────');
+    lines.push('── ENERGY FLOWS (media temporal ± σ, energy/s) ────────────');
     const fLabels = {
       graze: 'Grazing', colonyFeed: 'Colonia feed', prodCGraze: 'ProdC grazing',
       predation: 'Predación', carcassEat: 'Carcass eat', metabolism: 'Metabolismo',
@@ -884,6 +933,30 @@ function printHumanReport(runs, agg) {
     for (const [k, label] of Object.entries(fLabels)) {
       const s = agg.flows[k];
       if (s) lines.push(`  ${label.padEnd(19)} ${fmt(s.mean, 2).padStart(10)} ${fmt(s.stdev, 2).padStart(10)}`);
+    }
+    // task_908 funnel depredacion: deteccion -> contacto -> chase -> captura
+    const fnl = agg.flows;
+    if (fnl && fnl.fnlPreyNear) {
+      lines.push('');
+      lines.push('  ── FUNNEL predación (pasos-depredador/s, media temporal) ──');
+      const fnlLabels = [
+        ['fnlPreyNear', 'Detect (>0 presa)'],
+        ['fnlPreyNear3', 'Detect (≥3 presas)'],
+        ['fnlContact', 'Contacto (eatRange)'],
+        ['fnlRejCooldown', '  rechazo cooldown'],
+        ['fnlRejSatiety', '  rechazo saciedad'],
+        ['fnlChase', 'Chase intentos'],
+        ['fnlRejChase', '  chase fallidos'],
+        ['fnlRejGape', '  rechazo gape'],
+        ['fnlCapture', 'CAPTURAS'],
+      ];
+      for (const [k, label] of fnlLabels) {
+        const s = fnl[k];
+        if (s) lines.push(`  ${label.padEnd(19)} ${fmt(s.mean, 1).padStart(10)} ${fmt(s.stdev, 1).padStart(10)}`);
+      }
+      if (fnl.fnlChase.mean > 0 && fnl.fnlCapture.mean > 0) {
+        lines.push(`  captura/chase: ${((fnl.fnlCapture.mean / fnl.fnlChase.mean) * 100).toFixed(1)}%`);
+      }
     }
     if (agg.flows.net) {
       lines.push(`  ${'NET MOBILE'.padEnd(19)} ${fmt(agg.flows.net.mean, 2).padStart(10)} ${fmt(agg.flows.net.stdev, 2).padStart(10)}`);

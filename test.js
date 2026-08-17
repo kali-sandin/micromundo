@@ -750,6 +750,37 @@ function runFunctionalTests() {
     expectOk(api.sim.births >= birthsBefore, 'births no incremento');
   });
 
+  // ═══ TASK_908: FUNNEL DEPREDACIÓN (regresión NaN chase) ═══
+  // Causa raíz histórica: el check de chase leía e.vx/e.vy inexistentes →
+  // chaseSuccess=NaN → chance(NaN)=false → 0% capturas de consumers SIEMPRE.
+  // Este test guarda que el funnel detección→contacto→chase→captura funcione.
+  suite('Task_908: funnel depredación');
+
+  assert('predator captura consumers con presas adyacentes (fnlCapture>0)', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.initProducerField();
+    const chases0 = api.sim.flowAccum.fnlChase;
+    const captures0 = api.sim.flowAccum.fnlCapture;
+    const preds = [];
+    for (let i = 0; i < 3; i++) {
+      const p = api.spawnPredator({ x: 400 + i * 6, y: 400 + i * 4 });
+      p.energy = p.maxEnergy * 0.5; // sin saciedad
+      preds.push(p);
+    }
+    for (let i = 0; i < 12; i++) {
+      api.spawnConsumer({ x: 402 + (i % 4) * 7, y: 402 + Math.floor(i / 4) * 7 });
+    }
+    api.rebuildGrid();
+    for (let i = 0; i < 60; i++) api.simulate(0.5); // 30s
+    const chases = api.sim.flowAccum.fnlChase - chases0;
+    const captures = api.sim.flowAccum.fnlCapture - captures0;
+    expectOk(chases > 0, `fnlChase=0: no hubo intentos de caza (setup sin contacto, got ${chases})`);
+    expectOk(captures > 0, `fnlCapture=0 con ${chases} chases en 30s (regresión NaN chase) cicatrizada`);
+    return `chases=${chases}, captures=${captures}`;
+  });
+
   // ═══ TASK_142: GAPS CRITICOS DE COBERTURA ═══
   suite('Task_142: gaps criticos');
 

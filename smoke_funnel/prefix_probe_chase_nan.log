@@ -1,0 +1,175 @@
+
+🧬 sim-harness: 1 seed(s) × 0.75 min, dt=0.0167s
+
+  Run 1/1 (seed=777)... PROBE t=3.6 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.0113
+PROBE t=4.2 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.6997
+PROBE t=4.3 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.7692
+PROBE t=4.8 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.4179
+PROBE t=4.9 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.9438
+PROBE t=5.6 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.3309
+PROBE t=5.6 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.3763
+PROBE t=6.2 predSp=NaN preySp=NaN sr=NaN sa=1.331 cs=NaN rng=0.1926
+PROBE t=6.3 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.2434
+PROBE t=6.3 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.9716
+PROBE t=6.8 predSp=NaN preySp=NaN sr=NaN sa=1.331 cs=NaN rng=0.1608
+PROBE t=6.9 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.7962
+PROBE t=6.9 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.9453
+PROBE t=7.6 predSp=NaN preySp=NaN sr=NaN sa=1.331 cs=NaN rng=0.8592
+PROBE t=7.6 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.5355
+PROBE t=7.7 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.9538
+PROBE t=8.2 predSp=NaN preySp=NaN sr=NaN sa=1.331 cs=NaN rng=0.0132
+PROBE t=8.2 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.6692
+PROBE t=8.3 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.4271
+PROBE t=8.9 predSp=NaN preySp=NaN sr=NaN sa=1.331 cs=NaN rng=0.6565
+PROBE t=9.0 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.0420
+PROBE t=9.0 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.5006
+PROBE t=9.5 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.3851
+PROBE t=9.7 predSp=NaN preySp=NaN sr=NaN sa=1.331 cs=NaN rng=0.5937
+PROBE t=9.8 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.2612
+PROBE t=10.2 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.0858
+PROBE t=10.2 predSp=NaN preySp=NaN sr=NaN sa=0.300 cs=NaN rng=0.7051
+PROBE t=10.4 predSp=NaN preySp=NaN sr=NaN sa=1.331 cs=NaN rng=0.0871
+PROBE t=10.4 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.6830
+PROBE t=10.8 predSp=NaN preySp=NaN sr=NaN sa=0.300 cs=NaN rng=0.5009
+PROBE t=10.9 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.9260
+PROBE t=10.9 predSp=NaN preySp=NaN sr=NaN sa=1.331 cs=NaN rng=0.4073
+PROBE t=11.1 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.2272
+PROBE t=11.3 predSp=NaN preySp=NaN sr=NaN sa=0.300 cs=NaN rng=0.6142
+PROBE t=11.5 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.9221
+PROBE t=11.7 predSp=NaN preySp=NaN sr=NaN sa=1.331 cs=NaN rng=0.7668
+PROBE t=11.8 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.3693
+PROBE t=12.1 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.0517
+PROBE t=12.1 predSp=NaN preySp=NaN sr=NaN sa=0.300 cs=NaN rng=0.8704
+PROBE t=12.2 predSp=NaN preySp=NaN sr=NaN sa=1.331 cs=NaN rng=0.7352
+PROBE t=12.4 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.4584
+PROBE t=12.7 predSp=NaN preySp=NaN sr=NaN sa=0.300 cs=NaN rng=0.8630
+PROBE t=12.8 predSp=NaN preySp=NaN sr=NaN sa=1.331 cs=NaN rng=0.8848
+PROBE t=12.8 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.8217
+PROBE t=13.1 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.1287
+PROBE t=13.3 predSp=NaN preySp=NaN sr=NaN sa=1.331 cs=NaN rng=0.4773
+PROBE t=13.3 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.6725
+PROBE t=13.3 predSp=NaN preySp=NaN sr=NaN sa=0.300 cs=NaN rng=0.4730
+PROBE t=13.7 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.9515
+PROBE t=13.9 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.4341
+PROBE t=14.0 predSp=NaN preySp=NaN sr=NaN sa=1.331 cs=NaN rng=0.7708
+PROBE t=14.1 predSp=NaN preySp=NaN sr=NaN sa=0.300 cs=NaN rng=0.0757
+PROBE t=14.4 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.8487
+PROBE t=14.5 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.9964
+PROBE t=14.8 predSp=NaN preySp=NaN sr=NaN sa=1.331 cs=NaN rng=0.3269
+PROBE t=14.9 predSp=NaN preySp=NaN sr=NaN sa=0.300 cs=NaN rng=0.8076
+PROBE t=15.0 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.8108
+PROBE t=15.1 predSp=NaN preySp=NaN sr=NaN sa=0.530 cs=NaN rng=0.3660
+PROBE t=15.4 predSp=NaN preySp=NaN sr=NaN sa=1.331 cs=NaN rng=0.5858
+PROBE t=15.6 predSp=NaN preySp=NaN sr=NaN sa=0.689 cs=NaN rng=0.7415
+done in 42.8s
+
+  JSON written to /tmp/probe_chase.json
+
+═══════════════════════════════════════════════════════════════
+  🧬 SIM-HARNESS — Multi-seed Ecosystem Analysis
+═══════════════════════════════════════════════════════════════
+
+  Commit:     65e2536
+  Seeds:      1 (777)
+  Duration:   00:45 (45s per run)
+  dt:         0.0167s (eff: 0.0167s, chunks: 1)
+  Interval:   10s
+  Migration:  ON
+  Timestamp:  2026-08-17T00:22:02.460Z
+
+── POPULATIONS (mean ± σ across seeds) ────────────────────────
+  Group                Mean         σ          Min          Max
+  ──────────────────────────────────────────────────────────────
+  Prod A (dens.)            0.25       0.00       0.25       0.25
+  Prod B (colonia)         72.00       0.00      72.00      72.00
+  Prod C (móvil)           52.00       0.00      52.00      52.00
+  Consumidores               720       0.00        720        720
+  Depredadores             30.00       0.00      30.00      30.00
+
+── PERCENTILES p50/p95 (mean across seeds) ────────────────────
+  Group                p50         p95
+  ──────────────────────────────────────────────────────────────
+  Prod B                    72.0       72.0
+  Prod C                     108        228
+  Consumers                  720        720
+  Predators                 30.0       30.0
+
+── ENERGY (mean ± σ) ──────────────────────────────────────────
+  Productores               2505        0.0
+  Consumidores             27040        0.0
+  Depredadores              2685        0.0
+  Campo                     4460        0.0
+  Carcasses                  0.0        0.0
+  Promedio                  37.2        0.0
+
+── ENERGY FLOWS (media temporal ± σ, energy/s) ────────────
+  Grazing                  20.91       0.00
+  Colonia feed             14.07       0.00
+  ProdC grazing            34.02       0.00
+  Predación                 1.17       0.00
+  Carcass eat               0.00       0.00
+  Metabolismo                377       0.00
+  Reproducción              0.00       0.00
+  Excretion                 0.67       0.00
+  Thermal                   0.00       0.00
+  Carcass expire            0.00       0.00
+  Photosynth (field)       63.29       0.00
+  Photosynth (direct)      25.13       0.00
+  Photosynth (total)       88.41       0.00
+  Trophic amplification        175       0.00
+  True inputs              88.41       0.00
+  Destruction                393       0.00
+  Death decay (45%)         0.00       0.00
+
+  ── FUNNEL predación (pasos-depredador/s, media temporal) ──
+  Detect (>0 presa)          797        0.0
+  Detect (≥3 presas)        40.4        0.0
+  Contacto (eatRange)        317        0.0
+    rechazo cooldown         309        0.0
+    rechazo saciedad         0.0        0.0
+  Chase intentos             8.2        0.0
+    chase fallidos           8.2        0.0
+    rechazo gape             0.0        0.0
+  CAPTURAS                   0.0        0.0
+  NET MOBILE                -312       0.00
+  SYSTEM NET                -304       0.00
+  (field→mobile)           64.97       0.00
+  (mobile loss)              377       0.00
+  (internal xfer)          65.64       0.00
+  RESIDUAL max %             0.0
+  RESIDUAL med %             0.0
+  INVARIANTE ≤2%      ✅ PASS
+
+── EVENTOS (mean ± σ) ────────────────────────────────────────
+  Births/s:    0.000 ± 0.000
+  Deaths/s:    2.408 ± 0.000
+  Total births: 0 ± 0
+  Total deaths: 176 ± 0
+
+── ✅ Sin extinciones en ninguna semilla ──────────────────────
+
+── SUPERVIVENCIA ─────────────────────────────────────────────
+  Todos sobrevivieron: ✅ Sí
+  Grupos vivos promedio: 5.0/5
+  CV consumers: 0.000 | CV predators: 0.000
+
+── RENDIMIENTO ───────────────────────────────────────────────
+  Wall time: 41.5s ± 0.0s
+  Speed:     1.1x ± 0.0x
+
+── DETALLE POR SEMILLA ───────────────────────────────────────
+  Seed 777: P:72/52 C:720 X:30 | E:37.2 | B:0 D:176 | ✅
+
+═══════════════════════════════════════════════════════════════
+── VEREDICTO TASK_908 ────────────────────────────────────────
+  ✅ Survival >= 1/1 (got 1)
+  ✅ CV consumers <= 0.25 (got 0.000)
+  ✅ CV predators <= 0.25 (got 0.000)
+  ❌ Energy pool drift <= 10% (max 0.106, avg NET -304.5 E/s)
+  ✅ Extinctions = 0 (got 0)
+  ✅ No guild lost in any run
+  ✅ Diversity gene CV >= 20% (max 1.452)
+  ✅ Population decline <= 5%/10min (max 0.0%)
+  ─────────────────────────────────────────────
+  RESULTADO: ❌ FALLO
+
