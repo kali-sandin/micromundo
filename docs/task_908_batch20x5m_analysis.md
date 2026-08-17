@@ -128,4 +128,5 @@ Pool total (mobile+field+carcass): +87.9%/+87.7% en 300s (creación; tAmp gain:b
 - `test.js`: **82/82 PASS** (81 previos + regresión funnel NaN chase).
 - Smoke postfix 3×5m: invariante ledger residual 0.1-0.5% (≤2% ✅), 0 extinciones, 5/5 guildas.
 - Perf postfix: 233-293s wall por 300s sim (1.0-1.3x), sin regresión.
-- 20×5m batch: 20/20 OK persistido en `batch_5m_results/` (runner checkpoint, sin relanzamientos).
+- 20×5m batch (pre-fix NaN chase, commit 2840024): 20/20 OK persistido en `batch_5m_results/` (runner checkpoint, sin relanzamientos).
+- **Re-run 20×5m con fix (ec77250)** en `batch_5m_fix_results/`: el batch anterior corría SIN el fix NaN chase (`meta.git_commit: 2840024`), por lo que sus métricas de depredación/captura no son representativas del código actual. Mismas 20 semillas (12345+i·7919), mismo runner checkpointado (`run_batch_robust.sh 5 20 12345 batch_5m_fix_results`). Seed 1 validada: fnlCapture 0.050/s, predation 0.295 E/s (media temporal), residual entity max 1.03%/med 0.015%, field 0%, perf 1.3x. CV/perf 20 seeds se consolidan al completar.

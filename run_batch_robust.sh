@@ -1,13 +1,13 @@
 #!/bin/bash
 # run_batch_robust.sh — Batch multi-semilla robusto para sim-harness.js
 # Guarda cada semilla en fichero individual para resistir cortes.
-# Uso: ./run_batch_robust.sh <duration_min> <num_seeds> <base_seed>
+# Uso: ./run_batch_robust.sh <duration_min> <num_seeds> <base_seed> [outdir]
 set -euo pipefail
 
 DURATION="${1:-30}"
 NSEEDS="${2:-20}"
 BASE="${3:-12345}"
-OUTDIR="batch_${DURATION}m_results"
+OUTDIR="${4:-batch_${DURATION}m_results}"
 mkdir -p "$OUTDIR"
 
 echo "=== Batch ${NSEEDS}x${DURATION}m started $(date -Iseconds) ===" | tee "$OUTDIR/batch.log"
