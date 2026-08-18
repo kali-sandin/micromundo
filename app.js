@@ -1654,6 +1654,11 @@
         const dormancyCost = dt * 0.001;
         e.energy -= dormancyCost;
         sim.flowAccum.producerLoss += dormancyCost;
+        // Igual que consumers: sin chequeo, energia negativa ilimitada. Fix task_908.
+        if (e.energy <= 0) {
+          kill(e, 'Productor C móvil muere por energía en dormancia');
+          return;
+        }
         e.dormantTimer += dt;
         // Check revival: field mass local suficiente tras 15s mínimo
         if (e.dormantTimer > 15) {
@@ -2320,6 +2325,13 @@
         e.energy -= dt * 0.002; // metabolism minimo
         sim.mobileEnergySum -= dt * 0.002;
         sim.flowAccum.metabolism += dt * 0.002;
+        // Muerte por agotamiento en dormancia: sin este check, el return
+        // temprano salta el chequeo de energia del final de stepMobile y la
+        // energia deriva a negativo indefinidamente (fuga del ledger). Fix task_908.
+        if (e.energy <= 0) {
+          kill(e, 'Consumidor muere por energía en dormancia');
+          return;
+        }
         e.dormantTimer += dt;
         if (e.dormantTimer > 15) {
           const ci = fieldIndex(fieldCellX(e.x), fieldCellY(e.y));

@@ -509,6 +509,52 @@ function runFunctionalTests() {
     }
   });
 
+  assert('dormant consumer con energia agotada muere (no energia negativa)', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.sim.liveProducerBCount = 0;
+    api.sim.liveProducerCCount = 0;
+    api.sim.liveConsumerCount = 0;
+    api.sim.predatorCount = 0;
+    api.initProducerField();
+    api.sim.producerField.mass.fill(0);
+    api.sim.producerField.total = 0;
+    const c = api.spawnConsumer({ x: 100, y: 100, energy: 0.002, maxAge: 9999 });
+    c.dormant = true;
+    c.dormantTimer = 999; // revival bloqueado de todos modos por campo vacio
+    api.rebuildGrid();
+    for (let i = 0; i < 5; i++) {
+      api.stepMobile(c, 1 / 30);
+      if (!c.alive) break; // simulate() no stepea muertos
+    }
+    expectEq(c.alive, false, 'dormant sin reservas debe morir');
+    expectEq(c.energy >= 0, true, 'energia nunca negativa tras morir en dormancia');
+  });
+
+  assert('dormant ProducerC con energia agotada muere (no energia negativa)', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.sim.liveProducerBCount = 0;
+    api.sim.liveProducerCCount = 0;
+    api.sim.liveConsumerCount = 0;
+    api.sim.predatorCount = 0;
+    api.initProducerField();
+    api.sim.producerField.mass.fill(0);
+    api.sim.producerField.total = 0;
+    const p = api.spawnProducer({ sub: api.PRODUCER.C, x: 100, y: 100, energy: 1e-5, maxAge: 9999 });
+    p.dormant = true;
+    p.dormantTimer = 999;
+    api.rebuildGrid();
+    for (let i = 0; i < 5; i++) {
+      api.stepProducer(p, 1 / 30);
+      if (!p.alive) break;
+    }
+    expectEq(p.alive, false, 'ProducerC dormant sin reservas debe morir');
+    expectEq(p.energy >= 0, true, 'energia nunca negativa tras morir en dormancia');
+  });
+
   assert('consumer exhausto sin comida no aplica fear scan', () => {
     api.sim.creatures = [];
     api.sim.freeIds = [];

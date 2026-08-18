@@ -188,3 +188,21 @@ Accion harness (sin tocar reglas): metrica `energy.neg_mobile` {count,sum,min,do
 en cada sample (commit siguiente). Las seeds 3-20 del batch 30m ON la reportaran; con ella
 se identifica si los negativos son dormant o no. Probe 2m post-cambio: invariante <=2% PASS,
 neg=0, sin cambio de comportamiento.
+
+## 2026-08-18: causa energia negativa en 30m ON (run_1: consE -17906, NET -654 E/s)
+
+Los dormant (consumers y ProducerC) hacen `return` temprano en stepMobile/stepProducer
+ANTES del chequeo `e.energy <= 0 -> kill()` del final. Además el consumidor dormant
+paga el metabCost completo del step (restado en la linea previa a la rama dormant).
+Resultado: criaturas "inmortales" en diapausa cuya energia deriva a negativo sin limite
+y el ledger pierde ~-650 E/s a 30m; kill() luego descuenta max(0,energy)=0 => fuga no
+recuperada. Primer sintoma ~t=1650s (fuera del horizonte 5m: por eso 5m pre/post-fix
+son identicos, NET -311.5 ambos).
+
+Fix (sin tuning, restaura el contrato de muerte existente): kill al agotar reservas
+en la rama dormant, tanto consumers como ProducerC. Tests regresion en test.js
+(dormant muere, energia nunca negativa): 71/71 funcional. Harness 1x5m seed12345:
+sin negativos, sin extinciones, resto identico al pre-fix.
+
+Pendiente separado: drift NET -311 E/s a 5m = amplificacion trofica 419
+(grazeProducerDensity gain vs campo-indice), decision de Richard/Jared.
