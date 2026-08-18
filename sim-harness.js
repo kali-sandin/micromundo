@@ -203,6 +203,8 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
   let prevFieldTotal = 0;
   let residualMax = 0;
   let residualSamples = [];
+  let residualThroughputMax = 0;
+  let residualThroughputSamples = [];
   let fieldResidualMax = 0;
   let fieldResidualSamples = [];
   let prevAlive = {
@@ -211,6 +213,19 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
   };
   let prevBirths = 0;
   let prevDeaths = 0;
+  // Migration tracking: separate rescue/recolonization events from true births
+  let prevMigrations = null;
+  function snapshotMigrations() {
+    const m = api.sim.migrations || {};
+    const me = api.sim.migrationEnergy || {};
+    return {
+      producerB: m.producerB || 0, producerC: m.producerC || 0,
+      consumers: m.consumers || 0, predators: m.predators || 0,
+      producerB_e: me.producerB || 0, producerC_e: me.producerC || 0,
+      consumers_e: me.consumers || 0, predators_e: me.predators || 0,
+    };
+  }
+  prevMigrations = snapshotMigrations();
   let stepsProcessed = 0;
 
   // Flow accumulators for delta computation
@@ -235,6 +250,26 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     const deathsDelta = api.sim.deaths - prevDeaths;
     prevBirths = api.sim.births;
     prevDeaths = api.sim.deaths;
+
+    // Migration deltas per guild (count + energy): these are rescue/recolonization,
+    // NOT reproduction. sim.births includes them (UI compat), so net births subtracts.
+    const curMig = snapshotMigrations();
+    const migDelta = {
+      producerB: curMig.producerB - prevMigrations.producerB,
+      producerC: curMig.producerC - prevMigrations.producerC,
+      consumers: curMig.consumers - prevMigrations.consumers,
+      predators: curMig.predators - prevMigrations.predators,
+    };
+    const migEnergyDelta = {
+      producerB: curMig.producerB_e - prevMigrations.producerB_e,
+      producerC: curMig.producerC_e - prevMigrations.producerC_e,
+      consumers: curMig.consumers_e - prevMigrations.consumers_e,
+      predators: curMig.predators_e - prevMigrations.predators_e,
+    };
+    const migTotal = migDelta.producerB + migDelta.producerC + migDelta.consumers + migDelta.predators;
+    const migEnergyTotal = migEnergyDelta.producerB + migEnergyDelta.producerC + migEnergyDelta.consumers + migEnergyDelta.predators;
+    prevMigrations = curMig;
+    const birthsNet = birthsDelta - migTotal;
 
     // Energy by trophic level
     let producerEnergy = 0;
@@ -398,11 +433,18 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     const expectedDelta = (systemInputs - systemOutputs) * dt_real;
     const residual = Math.abs(deltaSystem - expectedDelta);
     const flowScale = Math.max(Math.abs(expectedDelta), Math.abs(deltaSystem), 1);
+    // Throughput-scaled residual: total entity-pool flow volume over the interval.
+    // Net deltas can be near zero at quasi-equilibrium and overstate residual %;
+    // normalizing by throughput gives the honest accounting-error ratio.
+    const entityThroughput = ((systemInputs + systemOutputs) * dt_real) || 1;
+    const residualThroughputPct = (residual / entityThroughput) * 100;
     const residualPct = (residual / flowScale) * 100;
     // Skip first sample (t=0): no prior simulation, meaningless delta
     if (lastRecord > 0) {
       if (residualPct > residualMax) residualMax = residualPct;
       residualSamples.push(residualPct);
+      if (residualThroughputPct > residualThroughputMax) residualThroughputMax = residualThroughputPct;
+      residualThroughputSamples.push(residualThroughputPct);
       // Debug: log first few residual breakdowns
       if (residualSamples.length <= 5 && process.env.RESIDUAL_DEBUG) {
         const feedG = flows.feedGain || 0;
@@ -435,6 +477,8 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     const fieldResidual = Math.abs(deltaField - fieldExpectedDelta);
     const fieldFlowScale = Math.max(Math.abs(fieldExpectedDelta), Math.abs(deltaField), 1);
     const fieldResidualPct = (fieldResidual / fieldFlowScale) * 100;
+    const fieldThroughput = ((fieldGrowth + fieldDeposits + fieldExtraction + fieldClamp) * dt_real) || 1;
+    const fieldResidualThroughputPct = (fieldResidual / fieldThroughput) * 100;
     if (lastRecord > 0) {
       if (fieldResidualPct > fieldResidualMax) fieldResidualMax = fieldResidualPct;
       fieldResidualSamples.push(fieldResidualPct);
@@ -464,10 +508,25 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
         avg: parseFloat(c.energyAvg.toFixed(2)),
       },
       rates: {
-        births_per_sec: parseFloat((birthsDelta / dt_real).toFixed(3)),
+        births_per_sec: parseFloat((birthsNet / dt_real).toFixed(3)),
         deaths_per_sec: parseFloat((deathsDelta / dt_real).toFixed(3)),
         births_total: api.sim.births,
         deaths_total: api.sim.deaths,
+        births_net_total: parseFloat((api.sim.births - (api.sim.migrations.producerB + api.sim.migrations.producerC + api.sim.migrations.consumers + api.sim.migrations.predators)).toFixed(0)),
+        migration_per_interval: {
+          counts: migDelta,
+          energy: {
+            producerB: parseFloat(migEnergyDelta.producerB.toFixed(1)),
+            producerC: parseFloat(migEnergyDelta.producerC.toFixed(1)),
+            consumers: parseFloat(migEnergyDelta.consumers.toFixed(1)),
+            predators: parseFloat(migEnergyDelta.predators.toFixed(1)),
+          },
+          energy_per_sec: parseFloat((migEnergyTotal / dt_real).toFixed(3)),
+        },
+        migration_totals: {
+          producerB: curMig.producerB, producerC: curMig.producerC,
+          consumers: curMig.consumers, predators: curMig.predators,
+        },
       },
       flows: {
         graze: parseFloat((flows.graze || 0).toFixed(3)),
@@ -509,8 +568,10 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
         fnlRejGape: parseFloat((flows.fnlRejGape || 0).toFixed(2)),
         fnlCapture: parseFloat((flows.fnlCapture || 0).toFixed(2)),
         residual_pct: parseFloat(residualPct.toFixed(3)),
+        residual_throughput_pct: parseFloat(residualThroughputPct.toFixed(3)),
         system_energy: parseFloat(curSystemEnergy.toFixed(1)),
         field_residual_pct: parseFloat(fieldResidualPct.toFixed(3)),
+        field_residual_throughput_pct: parseFloat(fieldResidualThroughputPct.toFixed(3)),
         field_growth: parseFloat(fieldGrowth.toFixed(3)),
         field_extraction: parseFloat(fieldExtraction.toFixed(3)),
         field_deposits: parseFloat(fieldDeposits.toFixed(3)),
@@ -631,6 +692,10 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     extinctions,
     percentiles,
     residual_max_pct: parseFloat(residualMax.toFixed(3)),
+    residual_throughput_max_pct: parseFloat(residualThroughputMax.toFixed(3)),
+    residual_throughput_median_pct: residualThroughputSamples.length > 0
+      ? parseFloat(residualThroughputSamples.slice().sort((a,b)=>a-b)[Math.floor(residualThroughputSamples.length/2)].toFixed(3))
+      : 0,
     residual_median_pct: residualSamples.length > 0
       ? parseFloat(residualSamples.slice().sort((a,b)=>a-b)[Math.floor(residualSamples.length/2)].toFixed(3))
       : 0,
@@ -662,10 +727,12 @@ function checkSurvival(lastMetric) {
 }
 
 // Helper: check if a creature belongs to a gene group (live computation)
+// NOTE: entities classify by e.sub (PRODUCER.B / PRODUCER.C), not e.mobile.
+// The old e.mobile check made producer-c always n=0 and producer-b absorb C.
 function groupForCreatureLive(e, group, api) {
   if (!e || !e.alive) return false;
-  if (group === 'producer-b' && e.type === api.TYPE.PRODUCER && !e.mobile) return true;
-  if (group === 'producer-c' && e.type === api.TYPE.PRODUCER && e.mobile) return true;
+  if (group === 'producer-b' && e.type === api.TYPE.PRODUCER && e.sub === api.PRODUCER.B) return true;
+  if (group === 'producer-c' && e.type === api.TYPE.PRODUCER && e.sub === api.PRODUCER.C) return true;
   if (group === 'consumer' && e.type === api.TYPE.CONSUMER) return true;
   if (group === 'predator' && e.type === api.TYPE.PREDATOR) return true;
   return false;

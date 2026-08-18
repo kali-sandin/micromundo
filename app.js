@@ -245,6 +245,9 @@
     dayNightPhase: 0,
     births: 0,
     deaths: 0,
+    // Migration (rescue/recolonization) counters, separated from true births
+    migrations: { producerB: 0, producerC: 0, consumers: 0, predators: 0 },
+    migrationEnergy: { producerB: 0, producerC: 0, consumers: 0, predators: 0 },
     seed: 0,
     fps: 0,
     creatures: [],
@@ -2685,11 +2688,12 @@
         fertility: mutate(Number(donor.fertility), 0.1, 0.22, 3),
         maxAge: mutate(Number(donor.maxAge), Number(donor.maxAge) * 0.15, isPredator ? 5000 : 1800, isPredator ? 15000 : 8000)
       };
-      if (isProducerB) { opts.sub = PRODUCER.B; const m = spawnProducer(opts); if (m) sim.flowAccum.birthGain += m.energy; }
-      else if (isProducerC) { opts.sub = PRODUCER.C; const m = spawnProducer(opts); if (m) sim.flowAccum.birthGain += m.energy; }
-      else if (type === 'consumers') { opts.energy = rand(10, 15); const m = spawnConsumer(opts); if (m) sim.flowAccum.birthGain += m.energy; }
-      else if (isPredator) { opts.energy = rand(30, 50); const m = spawnPredator(opts); if (m) sim.flowAccum.birthGain += m.energy; }
+      if (isProducerB) { opts.sub = PRODUCER.B; const m = spawnProducer(opts); if (m) { sim.flowAccum.birthGain += m.energy; sim.migrationEnergy.producerB += m.energy; } }
+      else if (isProducerC) { opts.sub = PRODUCER.C; const m = spawnProducer(opts); if (m) { sim.flowAccum.birthGain += m.energy; sim.migrationEnergy.producerC += m.energy; } }
+      else if (type === 'consumers') { opts.energy = rand(10, 15); const m = spawnConsumer(opts); if (m) { sim.flowAccum.birthGain += m.energy; sim.migrationEnergy.consumers += m.energy; } }
+      else if (isPredator) { opts.energy = rand(30, 50); const m = spawnPredator(opts); if (m) { sim.flowAccum.birthGain += m.energy; sim.migrationEnergy.predators += m.energy; } }
       sim.births += 1;
+      sim.migrations[type] = (sim.migrations[type] || 0) + 1;
     }
     if (LOG_EVENTS) { var label = isPredator ? 'depredadores' : type === 'consumers' ? 'consumidores' : isProducerB ? 'productores B' : 'productores C'; logEvent('Migración: ' + n + ' ' + label + ' recoloniaron desde los bordes (pop. previa: ' + count + ')', 'birth'); }
   }
@@ -4071,6 +4075,8 @@
     sim.time = 0;
     sim.births = 0;
     sim.deaths = 0;
+    sim.migrations = { producerB: 0, producerC: 0, consumers: 0, predators: 0 };
+    sim.migrationEnergy = { producerB: 0, producerC: 0, consumers: 0, predators: 0 };
     sim.predatorCount = 0;
     sim.liveConsumerCount = 0;
     sim.liveProducerBCount = 0;
