@@ -199,6 +199,7 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
   const metrics = [];
   const extinctions = [];
   let lastRecord = 0;
+  let lastProgressLog = 0;
   let prevSystemEnergy = 0;
   let prevFieldTotal = 0;
   let residualMax = 0;
@@ -663,6 +664,13 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     // Record metrics at intervals
     if (api.sim.time - lastRecord >= intervalSec) {
       recordMetrics();
+    }
+
+    // Progress line every 60s of sim time (stderr only; does not affect output)
+    if (api.sim.time - lastProgressLog >= 60) {
+      lastProgressLog = api.sim.time;
+      const el = ((Date.now() - wallStart) / 1000).toFixed(0);
+      console.error(`[seed ${seed}] t=${api.sim.time.toFixed(0)}s/${durationSec}s wall=${el}s pop=${(api.sim.creatures || []).length}`);
     }
   }
 

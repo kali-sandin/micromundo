@@ -1,0 +1,21 @@
+=== Batch 20x30m started 2026-08-11T17:48:15+02:00 ===
+[1/20] seed=12345 start=2026-08-11T17:48:15+02:00
+
+🧬 sim-harness: 1 seed(s) × 30 min, dt=0.0167s
+
+  Run 1/1 (seed=12345)... [1/20] seed=12345 FAILED
+[2/20] seed=20264 start=2026-08-12T02:00:43+02:00
+
+🧬 sim-harness: 1 seed(s) × 30 min, dt=0.0167s
+
+  Run 1/1 (seed=20264)... [2/20] seed=20264 FAILED
+[3/20] seed=28183 start=2026-08-12T02:00:51+02:00
+
+🧬 sim-harness: 1 seed(s) × 30 min, dt=0.0167s
+
+  Run 1/1 (seed=28183)... [3/20] seed=28183 FAILED
+[4/20] seed=36102 start=2026-08-12T02:01:00+02:00
+
+🧬 sim-harness: 1 seed(s) × 30 min, dt=0.0167s
+
+  Run 1/1 (seed=36102)... 
