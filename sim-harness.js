@@ -273,6 +273,7 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     const birthsNet = birthsDelta - migTotal;
 
     // Energy by trophic level
+    let negMobile = { count: 0, sum: 0, min: 0, dormant: 0, dormantNeg: 0 };
     let producerEnergy = 0;
     let consumerEnergy = 0;
     let predatorEnergy = 0;
@@ -284,6 +285,10 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
       if (e.type === api.TYPE.PRODUCER) producerEnergy += (e.energy || 0) + (e.leafEnergy || 0);
       else if (e.type === api.TYPE.CONSUMER) consumerEnergy += e.energy || 0;
       else if (e.type === api.TYPE.PREDATOR) predatorEnergy += e.energy || 0;
+      if (e.type === api.TYPE.CONSUMER || e.type === api.TYPE.PREDATOR) {
+        if (e.energy < 0) { negMobile.count += 1; negMobile.sum += e.energy; if (e.energy < negMobile.min) negMobile.min = e.energy; }
+        if (e.dormant) { negMobile.dormant += 1; if (e.energy < 0) negMobile.dormantNeg += 1; }
+      }
     }
     const carcasses = api.sim.carcasses;
     for (let i = 0; i < carcasses.length; i++) {
@@ -507,6 +512,7 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
         carcass: parseFloat(carcassEnergy.toFixed(1)),
         mobile_sum: parseFloat((api.sim.mobileEnergySum || 0).toFixed(1)),
         avg: parseFloat(c.energyAvg.toFixed(2)),
+        neg_mobile: { count: negMobile.count, sum: parseFloat(negMobile.sum.toFixed(1)), min: parseFloat(negMobile.min.toFixed(2)), dormant: negMobile.dormant, dormant_neg: negMobile.dormantNeg },
       },
       rates: {
         births_per_sec: parseFloat((birthsNet / dt_real).toFixed(3)),

@@ -156,3 +156,35 @@ Si Richard prefiere conservación dimensional estricta, **Opción G** es correct
 
 Jared/Richard deben decidir qué alternativa (A-H) aplicar. Bruce Lee no hace tuning sin autorización.
 Datos cuantitativos disponibles en `task_908_viability_analysis.js` y `task_908_viability_2.js`.
+
+## 2026-08-18 03:5x — 30m ON seed 12345 (run_1): energía consumer negativa en vivos
+
+Serie temporal (interval 10s, resumen cada 240s):
+
+| t | pA | pC | cons | pred | consE | graze | metab |
+|---|----|----|------|------|-------|-------|-------|
+| 0 | 0.143 | 228 | 720 | 30 | 32529 | 0 | 0 |
+| 240 | 0.689 | 9 | 755 | 7 | 44769 | 52 | 369 |
+| 481 | 0.575 | 7 | 1679 | 4 | 108168 | 107 | 815 |
+| 721 | 0.224 | 3 | 2242 | 8 | 78650 | 77 | 1000 |
+| 961 | 0.249 | 0 | 2213 | 11 | 18041 | 56 | 572 |
+| 1202 | 0.366 | 2 | 2212 | 12 | 9895 | 75 | 682 |
+| 1442 | 0.374 | 5 | 2280 | 17 | 11693 | 81 | 755 |
+| 1683 | 0.326 | 5 | 2430 | 7 | -3540 | 79 | 799 |
+| 1800 | 0.303 | 4 | 2478 | 5 | -17906 | 76 | 793 |
+
+Hallazgos:
+1. consE = suma REAL de e.energy de vivos (recalculada en cada sample, no es mobileEnergySum).
+   Termina en -17906 => media -7.2 E por consumer VIVO. El kill-check `e.energy<=0` (app.js:2529)
+   no se está aplicando a parte de la poblacion.
+2. Unico early-return que salta el kill-check: rama dormant de stepMobile (app.js:2319-2335, `return`
+   antes del check). Pero su drain es 0.002/s (max ~-3.6 en 1800s), insuficiente para media -7.2.
+   => hay otra via de energia negativa persistente sin muerte, pendiente de identificar.
+3. Inflacion previa: consE sube a 108168 (3.3x inicial) en t=481 con graze 107 E/s.
+4. pC colapsa 228-><10 en 240s; persiste solo por migracion (493 immigrantes pC, 78 predators).
+5. Predacion ~0 en toda la serie (max 1.28 E/s agregado): funnel bloqueado en cooldown contacto.
+
+Accion harness (sin tocar reglas): metrica `energy.neg_mobile` {count,sum,min,dormant,dormant_neg}
+en cada sample (commit siguiente). Las seeds 3-20 del batch 30m ON la reportaran; con ella
+se identifica si los negativos son dormant o no. Probe 2m post-cambio: invariante <=2% PASS,
+neg=0, sin cambio de comportamiento.
