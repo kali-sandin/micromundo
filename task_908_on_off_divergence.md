@@ -88,3 +88,24 @@ run_4 seed 36102 confirma el patrón: 2 extinciones (predator+producerC), NET -6
 - Pass rate 0/4 en ambos regimenes (criterio >=18/20 con todas las guildas): la vigencia de task_908 sigue siendo decision de Jared/Richard. residual_max ON 168% vs OFF 37% (sintoma del boom-bust con rescates ON).
 
 Interim mientras run_5/20 OFF corre (ETA total batch ~15h desde 02:47). Comparacion formal 20/20 al terminar.
+
+## Actualización (05:50): consolidado 4/4 seeds emparejadas
+
+Extinción OFF (última muestra con población >0; ON 4/4 vivo a t=1800s):
+
+| seed | predator OFF ext | producerC OFF ext | rescates ON (predator/pC) |
+|------|------------------|-------------------|---------------------------|
+| 12345 | t=260 | t=270 | 77 / 757 |
+| 20264 | t=300 | t=150 | 93 / 209 |
+| 28183 | t=380 | t=260 | 95 / 128 |
+| 36102 | t=300 | t=160 | 103 / 804 |
+
+- 4/4 seeds OFF: predator y producerC extintos t=150–390s; en 3/4 pC cae antes que predator
+  (declive autónomo por pastoreo, no colateral).
+- Energía tail-30: NET ON -604 a -639 vs OFF -599 a -645 E/s — prácticamente idénticos.
+  El colapso de 2 guildas apenas cambia el balance energético global: consumers en meseta
+  ~1700-2300 sostienen el déficit metabólico (~700 vs fotosíntesis ~90 E/s) en ambos modos.
+- Conclusión reforzada: la viabilidad ON de predator/pC es 100% dependiente de rescate
+  (94±10 y 475±300 inyecciones/30m). El déficit energético NET ~-620 E/s existe en ambos
+  modos y no es causa de la extinción (pA/pB/consumers persisten con el mismo déficit).
+- Batch OFF sigue (run_5/20, t≈1200/1800s). ETA restante ~10-11h.
