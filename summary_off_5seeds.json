@@ -1,0 +1,58 @@
+{
+ "runs": [
+  {
+   "seed": "12345",
+   "ext": [
+    "predator@270.2",
+    "producer-c@280.2"
+   ],
+   "net_tail": -627.9426333333333,
+   "metab": 690.9952333333334,
+   "photosynth": 90.50253333333333
+  },
+  {
+   "seed": "20264",
+   "ext": [
+    "producer-c@160.2",
+    "predator@310.3"
+   ],
+   "net_tail": -642.3880333333333,
+   "metab": 704.5795,
+   "photosynth": 91.06336666666667
+  },
+  {
+   "seed": "28183",
+   "ext": [
+    "producer-c@270.2",
+    "predator@390.4"
+   ],
+   "net_tail": -625.5153666666665,
+   "metab": 691.5593333333334,
+   "photosynth": 89.71793333333332
+  },
+  {
+   "seed": "36102",
+   "ext": [
+    "producer-c@170.2",
+    "predator@310.3"
+   ],
+   "net_tail": -646.0268333333332,
+   "metab": 708.2587000000001,
+   "photosynth": 90.48706666666664
+  },
+  {
+   "seed": "44021",
+   "ext": [
+    "producer-c@160.2",
+    "predator@290.2"
+   ],
+   "net_tail": -634.9231666666667,
+   "metab": 697.3325,
+   "photosynth": 90.46693333333336
+  }
+ ],
+ "net_mean": -635.3592066666666,
+ "net_sd": 7.94,
+ "net_cv": 0.0125,
+ "all_collapsed": "predator+producerC extintos en 5/5"
+}

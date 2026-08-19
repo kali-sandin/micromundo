@@ -108,4 +108,21 @@ Extinción OFF (última muestra con población >0; ON 4/4 vivo a t=1800s):
 - Conclusión reforzada: la viabilidad ON de predator/pC es 100% dependiente de rescate
   (94±10 y 475±300 inyecciones/30m). El déficit energético NET ~-620 E/s existe en ambos
   modos y no es causa de la extinción (pA/pB/consumers persisten con el mismo déficit).
-- Batch OFF sigue (run_5/20, t≈1200/1800s). ETA restante ~10-11h.
+- Batch OFF sigue (run_6/20). ETA restante ~11h.
+
+## Actualización (06:05): consolidado 5/5 seeds emparejadas
+
+| seed | predator OFF ext | producerC OFF ext | NET tail-30 OFF (E/s) |
+|------|------------------|-------------------|------------------------|
+| 12345 | t=270 | t=280 | -627.9 |
+| 20264 | t=310 | t=160 | -642.4 |
+| 28183 | t=390 | t=270 | -625.5 |
+| 36102 | t=310 | t=170 | -646.0 |
+| 44021 | t=290 | t=160 | -634.9 |
+
+- 5/5 seeds OFF: predator+producerC extintos t=160–390s. Determinista. summary_off_5seeds.json.
+- NET tail-30: -635±8 E/s (CV 1.25%); metab ~699 vs fotosint ~90 E/s.
+- Comparativa emparejada ON vs OFF (compare_on_off.js, 5 seeds): pC OFF 0.00 en 5/5
+  (ON 7.2±5.0), predators OFF 0.00 en 5/5 (ON 11.2±2.6); pool -1.6%, drift NET -3.3%,
+  consumers +0.1%. Migración sostiene biodiversidad, no energía.
+- Pass rate 0/5 ambos modos (criterio >=18/20): decisión de vigencia para Jared/Richard.
