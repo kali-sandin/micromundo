@@ -73,7 +73,7 @@ function poolTotal(m) {
     (e.field || 0) + (e.carcass || 0) + (e.mobile_sum || 0) * 0 - (e.consumer || 0) * 0 || 0;
 }
 
-const files = fs.readdirSync(batchDir).filter(f => /^seed_.*\.json$/.test(f)).sort();
+const files = fs.readdirSync(batchDir).filter(f => /^seed_.*\.json$/.test(f) || /^run_.*_seed\d+\.json$/.test(f)).sort();
 if (!files.length) { console.error('No seed_*.json in ' + batchDir); process.exit(1); }
 
 const rows = [];

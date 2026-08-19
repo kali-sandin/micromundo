@@ -49,8 +49,9 @@ function parseArgs() {
   };
   for (const arg of process.argv.slice(2)) {
     if (arg === '--no-migration') { opts.migration = false; continue; }
+    if (arg === '--quiet') { opts.quiet = true; continue; }
     const m = arg.match(/^--(\w+)=(.*)$/);
-    if (!m) continue;
+    if (!m) { console.error(`[args] unknown argument: ${arg}`); process.exit(2); }
     const [, key, val] = m;
     switch (key) {
       case 'duration': opts.durationMin = parseFloat(val); break;
@@ -59,7 +60,17 @@ function parseArgs() {
       case 'interval': opts.intervalSec = parseFloat(val); break;
       case 'dt': opts.dt = parseFloat(val); break;
       case 'out': opts.outFile = val; break;
-      case 'quiet': opts.quiet = true; break;
+      case 'quiet': if (val !== 'true' && val !== 'false') { console.error(`[args] --quiet expects true/false`); process.exit(2); } opts.quiet = val === 'true'; break;
+      case 'migration': {
+        const v = val.toLowerCase();
+        if (v === 'off' || v === 'false' || v === '0') opts.migration = false;
+        else if (v === 'on' || v === 'true' || v === '1') opts.migration = true;
+        else { console.error(`[args] --migration expects on|off|true|false (got: ${val})`); process.exit(2); }
+        break;
+      }
+      default:
+        console.error(`[args] unknown option: --${key}`);
+        process.exit(2);
     }
   }
   return opts;

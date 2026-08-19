@@ -27,7 +27,12 @@ const CRITERIA = {
 
 function loadSeed(filepath) {
   const raw = fs.readFileSync(filepath, 'utf8');
-  return JSON.parse(raw);
+  const data = JSON.parse(raw);
+  // Harness batch reports wrap single-run data in runs[0]
+  if (data.runs && data.runs.length) {
+    return { ...data.runs[0], meta: data.meta };
+  }
+  return data;
 }
 
 function analyzeSeed(data) {
@@ -137,9 +142,16 @@ function analyzeSeed(data) {
   };
 }
 
+function cvOf(vals) {
+  const mean = vals.reduce((a,b) => a+b, 0) / vals.length;
+  if (mean <= 0) return vals.some(v => v > 0) ? Infinity : 0;
+  const variance = vals.reduce((a,b) => a + (b-mean)**2, 0) / vals.length;
+  return Math.sqrt(variance) / mean;
+}
+
 function main() {
   const files = fs.readdirSync(batchDir)
-    .filter(f => f.startsWith('seed_') && f.endsWith('.json'))
+    .filter(f => (/^seed_.*\.json$/.test(f) || /^run_.*_seed\d+\.json$/.test(f)))
     .sort();
 
   if (files.length === 0) {
@@ -148,7 +160,14 @@ function main() {
     process.exit(0);
   }
 
-  console.log(`\n📊 ANÁLISIS BATCH — ${files.length} seeds\n`);
+  console.log(`\n📊 ANÁLISIS BATCH — ${files.length} seeds`);
+  // Show migration state from first file meta if present
+  try {
+    const first = loadSeed(path.join(batchDir, files[0]));
+    if (first && first.meta && first.meta.config) {
+      console.log(`   migration: ${first.meta.config.migration ? 'ON' : 'OFF'} | commit: ${(first.meta.git_commit||'?').slice(0,7)} | dt: ${first.meta.config.dt}`);
+    }
+  } catch (_) {}
   console.log('═'.repeat(80));
 
   const results = [];
@@ -157,7 +176,8 @@ function main() {
       const data = loadSeed(path.join(batchDir, f));
       const analysis = analyzeSeed(data);
       if (analysis) {
-        results.push({ seed: f.replace('seed_','').replace('.json',''), ...analysis });
+        const seedMatch = f.match(/seed(\d+)\.json$/);
+        results.push({ seed: seedMatch ? seedMatch[1] : f.replace(/\.json$/, ''), ...analysis });
       }
     } catch (e) {
       console.log(`⚠️  Error leyendo ${f}: ${e.message}`);
@@ -191,13 +211,14 @@ function main() {
   const popFinal = results.map(r => r.finalPop);
   const avgConsumers = popFinal.reduce((a,p) => a + (p.consumers||0), 0) / popFinal.length;
   const avgPredators = popFinal.reduce((a,p) => a + (p.predators||0), 0) / popFinal.length;
-  const consumerVals = popFinal.map(p => p.consumers || 0);
-  const consumerMean = consumerVals.reduce((a,b) => a+b, 0) / consumerVals.length;
-  const consumerVar = consumerVals.reduce((a,b) => a + (b-consumerMean)**2, 0) / consumerVals.length;
-  const consumerCV = Math.sqrt(consumerVar) / Math.max(1, consumerMean);
+  const consumerCV = cvOf(popFinal.map(p => p.consumers || 0));
+  const predatorCV = cvOf(popFinal.map(p => p.predators || 0));
+  const producerCCV = cvOf(popFinal.map(p => p.producerC || 0));
+  const producerBCV = cvOf(popFinal.map(p => p.producerB || 0));
 
   console.log(`\n   Consumers finales: media=${avgConsumers.toFixed(0)}, CV=${(consumerCV*100).toFixed(1)}% (criterio: <=${CRITERIA.MAX_CV*100}%)`);
-  console.log(`   Predators finales: media=${avgPredators.toFixed(0)}`);
+  console.log(`   Predators finales: media=${avgPredators.toFixed(0)}, CV=${(predatorCV*100).toFixed(1)}% (criterio: <=${CRITERIA.MAX_CV*100}%)`);
+  console.log(`   ProducerB finales: CV=${(producerBCV*100).toFixed(1)}% | ProducerC finales: CV=${(producerCCV*100).toFixed(1)}%`);
 
   // Ledger dimensional agregado
   console.log('\n' + '═'.repeat(80));
