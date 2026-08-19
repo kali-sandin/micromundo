@@ -1,0 +1,62 @@
+[
+ {
+  "seed": 12345,
+  "ext": [
+   "predator@270.2",
+   "producer-c@280.2"
+  ],
+  "final": {
+   "pB": 72,
+   "pC": 0,
+   "cons": 1738,
+   "pred": 0
+  },
+  "maxCons": 2201,
+  "net_tail": -627.9,
+  "metab": 691,
+  "photo": 90.5,
+  "births": 1738,
+  "deaths": 978,
+  "wall_min": 45.8
+ },
+ {
+  "seed": 20264,
+  "ext": [
+   "producer-c@160.2",
+   "predator@310.3"
+  ],
+  "final": {
+   "pB": 71,
+   "pC": 0,
+   "cons": 1730,
+   "pred": 0
+  },
+  "maxCons": 2187,
+  "net_tail": -642.4,
+  "metab": 704.6,
+  "photo": 91.1,
+  "births": 1740,
+  "deaths": 989,
+  "wall_min": 45.6
+ },
+ {
+  "seed": 28183,
+  "ext": [
+   "producer-c@270.2",
+   "predator@390.4"
+  ],
+  "final": {
+   "pB": 72,
+   "pC": 0,
+   "cons": 1777,
+   "pred": 0
+  },
+  "maxCons": 2261,
+  "net_tail": -625.5,
+  "metab": 691.6,
+  "photo": 89.7,
+  "births": 1818,
+  "deaths": 1019,
+  "wall_min": 45.7
+ }
+]
