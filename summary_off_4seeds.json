@@ -1,0 +1,39 @@
+{
+ "runs": [
+  {
+   "seed": "12345",
+   "final": {},
+   "ext": 2,
+   "net_tail": -597.0840000000001,
+   "metab": 643.8387833333335,
+   "photosynth": 87.94233888888888
+  },
+  {
+   "seed": "20264",
+   "final": {},
+   "ext": 2,
+   "net_tail": -619.308,
+   "metab": 650.6094555555557,
+   "photosynth": 87.74525555555553
+  },
+  {
+   "seed": "28183",
+   "final": {},
+   "ext": 2,
+   "net_tail": -589.044,
+   "metab": 647.9161333333335,
+   "photosynth": 88.3504722222222
+  },
+  {
+   "seed": "36102",
+   "final": {},
+   "ext": 2,
+   "net_tail": -604.702,
+   "metab": 647.394111111111,
+   "photosynth": 88.03480555555551
+  }
+ ],
+ "net_mean": -602.5345,
+ "net_cv": 0.01851371934204236,
+ "all_collapsed": "predator+producerC extintos en 4/4"
+}

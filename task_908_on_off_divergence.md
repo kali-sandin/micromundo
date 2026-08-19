@@ -72,3 +72,7 @@ Extinciones 3/3: predator y producerC extintos entre t=160-390s. Consumidores so
 Estructura final común en OFF: 2 guildas (producerA field + producerB colony + consumers). El sistema ON sostiene 4-5 guildas solo gracias a migración-rescate (77-757 rescates en seed 12345). Conclusión provisional: sin rescate, el déficit energético de niveles tróficos superiores (predator) y el pastoreo insostenible sobre producerC son estructurales; el +43% energía reportado antes era artefacto (OFF previos eran ON). Batch OFF sigue (run_4/20); comparación formal al completar 20/20 con compare_on_off.js.
 
 Métricas exactas tail-30s (media últimos 5 min) por seed en `batch_30m_results_off/summary_off_3seeds.json`: NET -625/-642/-628 E/s, metab 691-705 E/s, fotosint ~90 E/s, maxCons 2187-2261, births 1738-1818 vs deaths 978-1019. Uniformidad inter-seed muy alta (CV NET <1.5%): el colapso OFF 2-guildas es determinista, no estocástico.
+
+## OFF 4/4 seeds (2026-08-19 05:2x)
+
+run_4 seed 36102 confirma el patrón: 2 extinciones (predator+producerC), NET -604.7 E/s (tail mean), metab 647.4 vs fotosint 88.0. `summary_off_4seeds.json`: NET mean -602.5 E/s, CV 1.85%, 4/4 colapso 2-guildas. Con 4/4 idéntico, la probabilidad de que 20/20 OFF cambie de régimen es despreciable; el resto del batch confirma y acota varianza. Batch sigue (run_5/20); decisión ON/OFF para Jared/Richard con esta evidencia.
