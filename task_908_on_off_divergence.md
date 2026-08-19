@@ -46,7 +46,15 @@ Primera divergencia en t=120.2s (producerC 9 OFF vs 10 ON). Causa: `checkMigrati
 - Patrón idéntico en 2/2 seeds OFF: productores B y A estables, consumers boom (~720→2178 p95) y luego meseta ~1600-1700, predator+producerC extintos <6 min, consumo energético neto negativo ~-610 E/s sostenido.
 - run_2 reproduce el orden inverso (pC antes que predator): pC no depende del colapso predator; su declive es autónomo (pastoreo temprano de consumers).
 
+## Actualización (04:35): checkpoint 3/20 seeds OFF
+
+- **run_3 seed28183**: ext producerC t=270.2, predator t=390.4. NET -610 E/s (agregado).
+- 3/3 seeds OFF: patrón idéntico (pA/pB estables, consumers meseta ~1750, predator+pC extintos <7 min, 3/5 guildas, 2 ext/seed).
+- `compare_on_off` con seeds emparejadas (3): Δ pool ON→OFF **-2.1%** (61267 vs 59966 E), drift NET ON +28.7 vs OFF +26.8 E/s. El **+43% energía** previo era artefacto de runs OFF inválidos (eran ON).
+- Contraste clave ON vs OFF (3 seeds): pC ON 8.7±5.9 vs OFF 0; predator ON 10.3±2.9 vs OFF 0; predation flow ON 0.20 vs OFF 0 E/s; residual entity ON 168% vs OFF 36% (residual alto ON = migración inyecta energía).
+- Conclusión provisional: sin migración el sistema pierde 2/5 guildas de forma determinista; con migración sobrevive 4-5/5 pero introduce energía externa (residual 168%) y pass rate ON sigue 0/20. El criterio de éxito de task_908 no se cumple en ningún modo; la decisión (reformular rescate vs aceptar extinción local) es de dirección.
+
 ## Estado
 
-- OFF batch: run_3/20 en curso (~03:44 start, ~46 min/run). ETA total ~15h. No relanzar nada; runner sano.
+- OFF batch: run_4/20 en curso. ETA restante ~12-13h. No relanzar nada; runner sano (speed 0.70x).
 - Este análisis no cambia reglas; es evidencia de línea base para Jared/Richard.
