@@ -39,7 +39,14 @@ Primera divergencia en t=120.2s (producerC 9 OFF vs 10 ON). Causa: `checkMigrati
 3. El batch OFF 20x30m en curso cuantificará si esto es sistemático (todas las seeds) o
    específico de seed 12345. Comparación global: `node compare_on_off.js batch_30m_results batch_30m_results_off`.
 
+## Actualización (03:45): runs OFF 2/20 confirmados
+
+- **run_1 seed12345**: ext predator t=270.2, producerC t=280.2. NET -607 E/s.
+- **run_2 seed20264**: ext producerC t=160.2, predator t=310.3. NET -615 E/s.
+- Patrón idéntico en 2/2 seeds OFF: productores B y A estables, consumers boom (~720→2178 p95) y luego meseta ~1600-1700, predator+producerC extintos <6 min, consumo energético neto negativo ~-610 E/s sostenido.
+- run_2 reproduce el orden inverso (pC antes que predator): pC no depende del colapso predator; su declive es autónomo (pastoreo temprano de consumers).
+
 ## Estado
 
-- OFF batch: run_2/20 en curso (~15-16h ETA). No relanzar nada; runner sano.
+- OFF batch: run_3/20 en curso (~03:44 start, ~46 min/run). ETA total ~15h. No relanzar nada; runner sano.
 - Este análisis no cambia reglas; es evidencia de línea base para Jared/Richard.
