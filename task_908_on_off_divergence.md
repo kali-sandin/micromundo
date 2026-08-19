@@ -58,3 +58,15 @@ Primera divergencia en t=120.2s (producerC 9 OFF vs 10 ON). Causa: `checkMigrati
 
 - OFF batch: run_4/20 en curso. ETA restante ~12-13h. No relanzar nada; runner sano (speed 0.70x).
 - Este análisis no cambia reglas; es evidencia de línea base para Jared/Richard.
+
+## Consolidación OFF real 3/3 seeds (2026-08-19 04:5x, commit 839c95e)
+
+Extinciones 3/3: predator y producerC extintos entre t=160-390s. Consumidores sobreviven y se estabilizan ~1730-1780.
+
+| seed | ext pC | ext predator | consumers final | NET estimado | residual_max |
+|------|--------|--------------|----------------|--------------|--------------|
+| 12345 | t=280 | t=270 | 1738 | metab 682 vs fotosint 90 | 26.1% |
+| 20264 | t=160 | t=310 | 1730 | metab 706 vs fotosint 91 | 36.5% |
+| 28183 | t=270 | t=390 | 1777 | metab 671 vs fotosint 89 | 11.4% |
+
+Estructura final común en OFF: 2 guildas (producerA field + producerB colony + consumers). El sistema ON sostiene 4-5 guildas solo gracias a migración-rescate (77-757 rescates en seed 12345). Conclusión provisional: sin rescate, el déficit energético de niveles tróficos superiores (predator) y el pastoreo insostenible sobre producerC son estructurales; el +43% energía reportado antes era artefacto (OFF previos eran ON). Batch OFF sigue (run_4/20); comparación formal al completar 20/20 con compare_on_off.js.
