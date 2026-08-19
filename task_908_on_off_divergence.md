@@ -76,3 +76,15 @@ Métricas exactas tail-30s (media últimos 5 min) por seed en `batch_30m_results
 ## OFF 4/4 seeds (2026-08-19 05:2x)
 
 run_4 seed 36102 confirma el patrón: 2 extinciones (predator+producerC), NET -604.7 E/s (tail mean), metab 647.4 vs fotosint 88.0. `summary_off_4seeds.json`: NET mean -602.5 E/s, CV 1.85%, 4/4 colapso 2-guildas. Con 4/4 idéntico, la probabilidad de que 20/20 OFF cambie de régimen es despreciable; el resto del batch confirma y acota varianza. Batch sigue (run_5/20); decisión ON/OFF para Jared/Richard con esta evidencia.
+
+## Comparativa ON vs OFF emparejada 4 seeds (2026-08-19 05:3x, interim)
+
+`node compare_on_off.js batch_30m_results batch_30m_results_off` (semillas 12345/20264/28183/36102 emparejadas, flows/drift 2ª mitad):
+
+- **Guildas**: OFF pierde predator y producerC en 4/4 (Δ -100% ambos). ON sostiene pred 7-14 y pC 4-17 (aunque pC marginal, 3/4 seeds <15).
+- **Energía**: pool final ON 60603 vs OFF 59991 (Δ -1.0%); NET drift 2ª mitad ON 28.1 vs OFF 27.0 E/s (Δ -3.6%); graze y metabolism casi idénticos (Δ <1%).
+- **Nota NET**: el NET tail-30 de summary_off_4seeds (-602 E/s) usa ventana de 5 min sobre fase transitoria post-colapso (consumers catabolizando biomasa de boom); el NET de 2ª mitad (27 E/s) refleja el meseta estable. Ambos consistentes: OFF converge a meseta 2-guildas energeticamente neutra.
+- **Conclusion clave**: migración-rescate NO cambia el balance energetico global (<1%); su efecto real es **mantener biodiversidad trófica** (5 guildas vs 2). El deficit energetico de niveles superiores es estructural; la migracion solo lo enmascara.
+- Pass rate 0/4 en ambos regimenes (criterio >=18/20 con todas las guildas): la vigencia de task_908 sigue siendo decision de Jared/Richard. residual_max ON 168% vs OFF 37% (sintoma del boom-bust con rescates ON).
+
+Interim mientras run_5/20 OFF corre (ETA total batch ~15h desde 02:47). Comparacion formal 20/20 al terminar.
