@@ -14,3 +14,5 @@ ON batch finished (20 results). Starting OFF.
 ON batch finished (20 results). Starting OFF.
 === Batch 20x30m OFF started 2026-08-19T02:12:33+02:00 ===
 [1/20] seed=12345 start=2026-08-19T02:12:33+02:00
+[1/20] seed=12345 done=2026-08-19T02:58:24+02:00
+[2/20] seed=20264 start=2026-08-19T02:58:24+02:00
