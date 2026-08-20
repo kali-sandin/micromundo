@@ -126,3 +126,32 @@ Extinción OFF (última muestra con población >0; ON 4/4 vivo a t=1800s):
   (ON 7.2±5.0), predators OFF 0.00 en 5/5 (ON 11.2±2.6); pool -1.6%, drift NET -3.3%,
   consumers +0.1%. Migración sostiene biodiversidad, no energía.
 - Pass rate 0/5 ambos modos (criterio >=18/20): decisión de vigencia para Jared/Richard.
+
+## Cierre final (20/20 seeds emparejadas, 30m cada una)
+
+Fuente: `batch_30m_results_off/` (20 runs, commit b6e60fc) vs `batch_30m_results/` (20 runs, ON).
+Consolidado en `summary_20seeds_on_off.json`.
+
+### OFF (migración desactivada)
+- Extinciones: predator 20/20, producerC 20/20 (t~150–390s). 2/5 guildas al final.
+- Consumers 1757±1.4% CV, producerB 71.9. NET tail -613.9±4.7 E/s.
+- Flows: metab ~650 vs fotosint ~73 E/s. Perf speed 0.75.
+
+### ON (migración activa)
+- Extinciones: 0/20 en ambos grupos, pero solo por rescate continuo
+  (~379 inmigrantes producerC, ~84 predators por 30m).
+- NET tail -616.2±5.1 E/s (≈OFF). Consumers 1760, predators 9.5, pC 7.7. Perf 0.70 (~5pp).
+
+### Comparación formal
+1. Energía: NET casi idéntico en ambos modos (CV<1%); el déficit NO causa la extinción.
+2. Causalidad: OFF pierde predator+pC por dinámica trófica local (pastoreo de pC y
+   viabilidad de predator), no por energía total.
+3. Migración: sostiene biodiversidad, no energía; cuesta ~5pp de throughput.
+
+### Veredicto de hipótesis (task_908)
+**REFUTADA de forma determinista y reproducible**: baseline fiel sin migración NO conserva
+5 guildas (0/20; criterio de éxito exigía >=18/20). El fallo no es estocástico (CV NET <1%).
+Líneas de seguimiento separadas para Jared: analizador genético+regresión, pastoreo de
+producerC, viabilidad de predator (con controles diagnósticos). Sin tuning ni mecánica nueva.
+
+Pruebas: suite 84/84 pass tras consolidación.

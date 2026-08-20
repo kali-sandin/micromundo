@@ -1,0 +1,132 @@
+{
+  "off": {
+    "mode": "OFF",
+    "n": 20,
+    "seeds": [
+      12345,
+      20264,
+      28183,
+      36102,
+      44021,
+      51940,
+      59859,
+      67778,
+      75697,
+      83616,
+      91535,
+      99454,
+      107373,
+      115292,
+      123211,
+      131130,
+      139049,
+      146968,
+      154887,
+      162806
+    ],
+    "extinctions": {
+      "predator": 20,
+      "producerC": 20
+    },
+    "populations": {
+      "consumers": {
+        "mean": 1757,
+        "cv": 0.0141
+      },
+      "producerB": {
+        "mean": 71.9
+      },
+      "predators": {
+        "mean": 0
+      },
+      "producerC": {
+        "mean": 0
+      }
+    },
+    "energy_net_E_s": {
+      "mean": -613.9,
+      "sd": 4.74
+    },
+    "flows": {
+      "metabolism_E_s": 650.3,
+      "photosynthField_E_s": 73.3
+    },
+    "migration_totals_mean": {
+      "producerC": 0,
+      "predators": 0
+    },
+    "perf": {
+      "wall_ms_mean": "2473333",
+      "speed_factor": 0.75
+    }
+  },
+  "on": {
+    "mode": "ON",
+    "n": 20,
+    "seeds": [
+      12345,
+      20264,
+      28183,
+      36102,
+      44021,
+      51940,
+      59859,
+      67778,
+      75697,
+      83616,
+      91535,
+      99454,
+      107373,
+      115292,
+      123211,
+      131130,
+      139049,
+      146968,
+      154887,
+      162806
+    ],
+    "extinctions": {
+      "predator": 0,
+      "producerC": 0
+    },
+    "populations": {
+      "consumers": {
+        "mean": 1760,
+        "cv": 0.0135
+      },
+      "producerB": {
+        "mean": 71.9
+      },
+      "predators": {
+        "mean": 9.5
+      },
+      "producerC": {
+        "mean": 7.7
+      }
+    },
+    "energy_net_E_s": {
+      "mean": -616.2,
+      "sd": 5.09
+    },
+    "flows": {
+      "metabolism_E_s": 654.7,
+      "photosynthField_E_s": 73.2
+    },
+    "migration_totals_mean": {
+      "producerC": 378.9,
+      "predators": 83.9
+    },
+    "perf": {
+      "wall_ms_mean": "2611305",
+      "speed_factor": 0.7
+    }
+  },
+  "formal_comparison": {
+    "guild_survival_OFF": "2/5 guildas (producerA-field, producerB, consumers); predator y producerC extintos 20/20 (t~150-390s)",
+    "guild_survival_ON": "5/5 guildas presentes en final 20/20 solo por rescate migratorio continuo",
+    "energy": "NET casi identico (~-615 E/s ambos modos, CV<1%): el deficit energetico NO es la causa de extincion",
+    "causality": "OFF pierde predator+pC por dinamica trofica local (pastoreo pC + viabilidad predator), no por energia total",
+    "migration": "ON sostiene biodiversidad con ~379 inmigrantes producerC y ~84 predators por 30m (rescate continuo); coste perf ~5pp speed (0.70 ON vs 0.75 OFF)",
+    "hypothesis_verdict": "REFUTADA: baseline fiel SIN migracion NO conserva 5 guildas (0/20). Criterio de exito >=18/20 no cumplido: fallo determinista y reproducible."
+  }
+}
