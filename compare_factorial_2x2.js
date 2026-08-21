@@ -32,7 +32,7 @@ function analyzeRun(file) {
   const m = data.metrics || data.results || [];
   if (!m.length) return null;
   const pop = (r) => r.populations || {};
-  const pCnow = (r) => (pop(r).pC !== undefined ? pop(r).pC : (pop(r).ProducerC !== undefined ? pop(r).ProducerC : null));
+  const pCnow = (r) => { const p = pop(r); return (p.producerC !== undefined ? p.producerC : (p.pC !== undefined ? p.pC : (p.ProducerC !== undefined ? p.ProducerC : null))); };
   const t0 = m[0], t60 = m.find(r => r.t >= 55) || t0, tl = m[m.length - 1];
   const pC0 = pCnow(t0), pC60 = pCnow(t60), pCf = pCnow(tl);
   const predF = (pop(tl).predators !== undefined ? pop(tl).predators : pop(tl).predator);
