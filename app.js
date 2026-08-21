@@ -1974,6 +1974,12 @@
     if (target.virtualCarcass) return eatCarcass(e, target, dt);
     if (!target.alive) return false;
     if (target.dormant) return false;
+    // task_550 diagnostic ablation (harness-only, inert in browser):
+    // block feeding on ProducerC by eater type to isolate collapse causes.
+    if (target.type === TYPE.PRODUCER && target.sub === PRODUCER.C && globalThis.__ABLATE) {
+      if (e.type === TYPE.CONSUMER && globalThis.__ABLATE.consumerPC === false) return false;
+      if (e.type === TYPE.PREDATOR && globalThis.__ABLATE.predatorPC === false) return false;
+    }
     // Digestion (task_300): predator digiriendo no puede cazar
     if (e.type === TYPE.PREDATOR && (e.digestTimer || 0) > 0) return false;
     if (target.virtualA) return grazeProducerDensity(e, dt);

@@ -8,3 +8,5 @@ isolate-*.log
 batch_30m_results/
 baseline_20x30m_*.log
 baseline_20x30m_*.json
+factorial_2x2_results/
+factorial_2x2_results-*.log

@@ -46,6 +46,7 @@ function parseArgs() {
     outFile: null,
     quiet: false,
     migration: true,
+    ablate: {}, // task_550: { consumerPC: false, predatorPC: false }
   };
   for (const arg of process.argv.slice(2)) {
     if (arg === '--no-migration') { opts.migration = false; continue; }
@@ -60,6 +61,16 @@ function parseArgs() {
       case 'interval': opts.intervalSec = parseFloat(val); break;
       case 'dt': opts.dt = parseFloat(val); break;
       case 'out': opts.outFile = val; break;
+      case 'ablate': {
+        // --ablate=consumer-pc=off,predator-pc=off  (task_550 factorial diagnostic)
+        for (const part of val.split(',')) {
+          if (!part) continue;
+          const m2 = part.match(/^(consumer-pc|predator-pc)=(on|off|true|false|1|0)$/);
+          if (!m2) { console.error(`[args] --ablate expects consumer-pc|predator-pc=on|off (got: ${part})`); process.exit(2); }
+          opts.ablate[m2[1] === 'consumer-pc' ? 'consumerPC' : 'predatorPC'] = ['on', 'true', '1'].includes(m2[2]);
+        }
+        break;
+      }
       case 'quiet': if (val !== 'true' && val !== 'false') { console.error(`[args] --quiet expects true/false`); process.exit(2); } opts.quiet = val === 'true'; break;
       case 'migration': {
         const v = val.toLowerCase();
@@ -181,6 +192,7 @@ function loadSim() {
   ctx.self = ctx;
 
   vm.createContext(ctx);
+  ctx.__ABLATE = Object.assign({}, OPTS.ablate); // undefined keys leave browser behaviour untouched
   vm.runInContext(src, ctx, { filename: 'app.js' });
   if (!ctx.__sim) throw new Error('Failed to extract __sim from app.js');
   return ctx.__sim;
@@ -903,6 +915,7 @@ function aggregateRuns(runs) {
 
   return {
     seeds: n,
+    ablation: Object.assign({}, OPTS.ablate), // task_550: echoes active ablation flags
     populations: popStats,
     energy: energyStats,
     percentiles: pctStats,
@@ -1288,6 +1301,7 @@ function main() {
         dt: DT,
         interval_sec: OPTS.intervalSec,
         migration: OPTS.migration,
+        ablation: Object.assign({}, OPTS.ablate),
       },
     },
     aggregate: agg,
