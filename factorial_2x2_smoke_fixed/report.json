@@ -1,0 +1,227 @@
+{
+  "cc": {
+    "label": "consumer-pC ON / predator-pC ON",
+    "n_runs": 2,
+    "seeds": [
+      12345,
+      20264
+    ],
+    "producerC_final": {
+      "n": 2,
+      "mean": 0,
+      "sd": 0,
+      "min": 0,
+      "max": 0
+    },
+    "producerC_p50": {
+      "n": 2,
+      "mean": 2.5,
+      "sd": 1.5,
+      "min": 1,
+      "max": 4
+    },
+    "consumers_final": {
+      "n": 2,
+      "mean": 858,
+      "sd": 13,
+      "min": 845,
+      "max": 871
+    },
+    "predators_final": {
+      "n": 2,
+      "mean": 0.5,
+      "sd": 0.5,
+      "min": 0,
+      "max": 1
+    },
+    "energyConsumer": {
+      "n": 2,
+      "mean": 59471.149999999994,
+      "sd": 1015.5499999999993,
+      "min": 58455.6,
+      "max": 60486.7
+    },
+    "energyField": {
+      "n": 2,
+      "mean": 13078,
+      "sd": 90.39999999999964,
+      "min": 12987.6,
+      "max": 13168.4
+    },
+    "producerA_density": {
+      "n": 2,
+      "mean": 0.7347,
+      "sd": 0.005099999999999993,
+      "min": 0.7296,
+      "max": 0.7398
+    },
+    "producerB_final": {
+      "n": 2,
+      "mean": 71.5,
+      "sd": 0.5,
+      "min": 71,
+      "max": 72
+    },
+    "pc_collapse_fraction": 1,
+    "predator_extinct_fraction": 0.5
+  },
+  "co": {
+    "label": "consumer-pC ON / predator-pC OFF",
+    "n_runs": 0,
+    "seeds": [],
+    "producerC_final": null,
+    "producerC_p50": null,
+    "consumers_final": null,
+    "predators_final": null,
+    "energyConsumer": null,
+    "energyField": null,
+    "producerA_density": null,
+    "producerB_final": null,
+    "pc_collapse_fraction": null,
+    "predator_extinct_fraction": null
+  },
+  "oc": {
+    "label": "consumer-pC OFF / predator-pC ON",
+    "n_runs": 1,
+    "seeds": [
+      12345
+    ],
+    "producerC_final": {
+      "n": 1,
+      "mean": 255,
+      "sd": 0,
+      "min": 255,
+      "max": 255
+    },
+    "producerC_p50": {
+      "n": 1,
+      "mean": 216,
+      "sd": 0,
+      "min": 216,
+      "max": 216
+    },
+    "consumers_final": {
+      "n": 1,
+      "mean": 832,
+      "sd": 0,
+      "min": 832,
+      "max": 832
+    },
+    "predators_final": {
+      "n": 1,
+      "mean": 0,
+      "sd": 0,
+      "min": 0,
+      "max": 0
+    },
+    "energyConsumer": {
+      "n": 1,
+      "mean": 56936.4,
+      "sd": 0,
+      "min": 56936.4,
+      "max": 56936.4
+    },
+    "energyField": {
+      "n": 1,
+      "mean": 13161.5,
+      "sd": 0,
+      "min": 13161.5,
+      "max": 13161.5
+    },
+    "producerA_density": {
+      "n": 1,
+      "mean": 0.7394,
+      "sd": 0,
+      "min": 0.7394,
+      "max": 0.7394
+    },
+    "producerB_final": {
+      "n": 1,
+      "mean": 72,
+      "sd": 0,
+      "min": 72,
+      "max": 72
+    },
+    "pc_collapse_fraction": 0,
+    "predator_extinct_fraction": 1
+  },
+  "oo": {
+    "label": "consumer-pC OFF / predator-pC OFF",
+    "n_runs": 1,
+    "seeds": [
+      12345
+    ],
+    "producerC_final": {
+      "n": 1,
+      "mean": 276,
+      "sd": 0,
+      "min": 276,
+      "max": 276
+    },
+    "producerC_p50": {
+      "n": 1,
+      "mean": 228,
+      "sd": 0,
+      "min": 228,
+      "max": 228
+    },
+    "consumers_final": {
+      "n": 1,
+      "mean": 849,
+      "sd": 0,
+      "min": 849,
+      "max": 849
+    },
+    "predators_final": {
+      "n": 1,
+      "mean": 0,
+      "sd": 0,
+      "min": 0,
+      "max": 0
+    },
+    "energyConsumer": {
+      "n": 1,
+      "mean": 56798.6,
+      "sd": 0,
+      "min": 56798.6,
+      "max": 56798.6
+    },
+    "energyField": {
+      "n": 1,
+      "mean": 13126.1,
+      "sd": 0,
+      "min": 13126.1,
+      "max": 13126.1
+    },
+    "producerA_density": {
+      "n": 1,
+      "mean": 0.7374,
+      "sd": 0,
+      "min": 0.7374,
+      "max": 0.7374
+    },
+    "producerB_final": {
+      "n": 1,
+      "mean": 72,
+      "sd": 0,
+      "min": 72,
+      "max": 72
+    },
+    "pc_collapse_fraction": 0,
+    "predator_extinct_fraction": 1
+  },
+  "comparison": {
+    "consumer_pc": {
+      "contrast": "consumer-pC ON / predator-pC ON vs consumer-pC OFF / predator-pC OFF",
+      "collapse_on": "2/2",
+      "collapse_off": "0/1",
+      "fisher_p_onetail": 0.33333333333333337
+    },
+    "predator_pc": {
+      "contrast": "consumer-pC ON / predator-pC ON vs consumer-pC ON / predator-pC OFF",
+      "collapse_on": "2/2",
+      "collapse_off": "0/0",
+      "fisher_p_onetail": 1
+    }
+  }
+}

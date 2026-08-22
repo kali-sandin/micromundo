@@ -86,13 +86,16 @@ function fisherExact(a, b, c, d) {
   // one-sided Fisher: enrichment of collapses in group1
   const logFact = n => { let s = 0; for (let i = 2; i <= n; i++) s += Math.log(i); return s; };
   const n1 = a + b, n2 = c + d, n = n1 + n2;
-  const base = logFact(n) - logFact(a + c) - logFact(b + d) - logFact(n1) - logFact(n2);
+  // base = log C(n, n1) (normalizacion hipergeometrica correcta;
+  // fix task_550: antes restaba logFact(a+c)+logFact(b+d) en base, pmf no sumaba 1)
+  const base = logFact(n1) + logFact(n2) - logFact(n); // = -log C(n, n1)
   let p = 0;
   const prob = k => base + logFact(a + c) - logFact(k) - logFact(a + c - k) + logFact(b + d) - logFact(n1 - k) - logFact(b + d - n1 + k);
   const pObs = prob(a);
-  for (let k = Math.max(0, n1 - (b + d)); k <= Math.min(n1, a + c); k++) {
-    const pk = Math.exp(prob(k));
-    if (pk <= pObs * (1 + 1e-9)) p += pk;
+  // one-sided (enrichment of collapses in group1): solo k >= a
+  for (let k = a; k <= Math.min(n1, a + c); k++) {
+    // comparacion en espacio log (fix task_550: antes pk lineal vs pObs log)
+    if (prob(k) <= pObs + 1e-9) p += Math.exp(prob(k));
   }
   return Math.min(1, p);
 }

@@ -1,0 +1,29 @@
+=== phase2 start 2026-08-22T02:11:28+02:00 git=15db457 ===
+[cc seed=12345 dur=5m] start=2026-08-22T02:11:28+02:00
+[seed 12345] t=60s/300s wall=51s pop=913
+[seed 12345] t=120s/300s wall=100s pop=913
+[seed 12345] t=180s/300s wall=152s pop=913
+[seed 12345] t=240s/300s wall=203s pop=913
+[cc seed=12345] done=2026-08-22T02:15:50+02:00
+[oc seed=12345 dur=5m] start=2026-08-22T02:15:50+02:00
+[seed 12345] t=60s/300s wall=77s pop=1050
+[seed 12345] t=120s/300s wall=159s pop=1050
+[seed 12345] t=180s/300s wall=254s pop=1050
+[seed 12345] t=240s/300s wall=347s pop=1050
+[oc seed=12345] done=2026-08-22T02:23:15+02:00
+[oo seed=12345 dur=5m] start=2026-08-22T02:23:15+02:00
+[seed 12345] t=60s/300s wall=61s pop=1050
+[seed 12345] t=120s/300s wall=131s pop=1050
+[seed 12345] t=180s/300s wall=213s pop=1050
+[seed 12345] t=240s/300s wall=308s pop=1050
+[oo seed=12345] done=2026-08-22T02:30:11+02:00
+[cc seed=20264 dur=5m] start=2026-08-22T02:30:11+02:00
+[seed 20264] t=60s/300s wall=50s pop=913
+[seed 20264] t=120s/300s wall=94s pop=913
+[seed 20264] t=180s/300s wall=137s pop=793
+[seed 20264] t=240s/300s wall=179s pop=810
+[cc seed=20264] done=2026-08-22T02:33:56+02:00
+[oc seed=20264 dur=5m] start=2026-08-22T02:33:56+02:00
+[seed 20264] t=60s/300s wall=59s pop=1050
+[seed 20264] t=120s/300s wall=124s pop=1050
+[seed 20264] t=180s/300s wall=196s pop=1050

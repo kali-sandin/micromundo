@@ -1521,6 +1521,12 @@
         if (!t.alive) continue;
         if (t.virtualA) continue;
         if (t.dormant) continue;
+        // task_550: la ablacion debe bloquear tambien la SELECCION de objetivo,
+        // no solo feedConsumer; si no, el agente se sigue atrayendo hacia pC.
+        if (globalThis.__ABLATE && t.type === TYPE.PRODUCER && t.sub === PRODUCER.C) {
+          if (e.type === TYPE.CONSUMER && globalThis.__ABLATE.consumerPC === false) continue;
+          if (e.type === TYPE.PREDATOR && globalThis.__ABLATE.predatorPC === false) continue;
+        }
         if (e.type === TYPE.PREDATOR && isColonyProducer(t)) continue;
         if (isColonyProducer(t) && ((t.leafCount || 0) <= 0 || t.leafEnergy <= 0.35)) continue;
         if (t.type === TYPE.PRODUCER && t.sub !== PRODUCER.A && !canEatArmored(e, t)) continue;
@@ -2439,6 +2445,8 @@
         for (let i = 0; i < nearbyMobile.length; i += 1) {
           const p = nearbyMobile[i];
           if (!p.alive || p.sub === PRODUCER.A || isColonyProducer(p) || !canEatArmored(e, p)) continue;
+          // task_550: ablacion predator-pC OFF excluye pC tambien de la seleccion (plant loop)
+          if (globalThis.__ABLATE && p.sub === PRODUCER.C && globalThis.__ABLATE.predatorPC === false) continue;
           const d2 = torusDistance2(e, p);
           if (d2 < bestD2 && d2 <= plantR2) {
             bestPlant = p;
