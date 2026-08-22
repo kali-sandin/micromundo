@@ -78,3 +78,5 @@
 [seed 12345] t=900s/1800s wall=3190s pop=2830
 [seed 12345] t=960s/1800s wall=3729s pop=2830
 [seed 12345] t=1020s/1800s wall=4384s pop=2460
+[seed 12345] t=1080s/1800s wall=5154s pop=2460
+[seed 12345] t=1140s/1800s wall=5986s pop=2460
