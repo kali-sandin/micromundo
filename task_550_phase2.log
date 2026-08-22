@@ -62,3 +62,19 @@
 === smoke done 2026-08-22T03:13:35+02:00 ===
 [oo seed=12345 dur=30m] start=2026-08-22T03:13:35+02:00
 [seed 12345] t=60s/1800s wall=60s pop=1050
+[seed 12345] t=120s/1800s wall=133s pop=1050
+[seed 12345] t=180s/1800s wall=216s pop=1050
+[seed 12345] t=240s/1800s wall=309s pop=1050
+[seed 12345] t=300s/1800s wall=417s pop=1197
+[seed 12345] t=360s/1800s wall=547s pop=1437
+[seed 12345] t=420s/1800s wall=706s pop=1758
+[seed 12345] t=480s/1800s wall=898s pop=2123
+[seed 12345] t=540s/1800s wall=1126s pop=2438
+[seed 12345] t=600s/1800s wall=1383s pop=2668
+[seed 12345] t=660s/1800s wall=1678s pop=2761
+[seed 12345] t=720s/1800s wall=1992s pop=2811
+[seed 12345] t=780s/1800s wall=2339s pop=2830
+[seed 12345] t=840s/1800s wall=2729s pop=2830
+[seed 12345] t=900s/1800s wall=3190s pop=2830
+[seed 12345] t=960s/1800s wall=3729s pop=2830
+[seed 12345] t=1020s/1800s wall=4384s pop=2460
