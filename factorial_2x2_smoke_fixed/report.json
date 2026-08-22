@@ -82,146 +82,162 @@
   },
   "oc": {
     "label": "consumer-pC OFF / predator-pC ON",
-    "n_runs": 1,
+    "n_runs": 4,
     "seeds": [
-      12345
+      12345,
+      20264,
+      28183,
+      36102
     ],
     "producerC_final": {
-      "n": 1,
-      "mean": 255,
-      "sd": 0,
+      "n": 4,
+      "mean": 264.75,
+      "sd": 9.256754290786809,
       "min": 255,
-      "max": 255
+      "max": 280
     },
     "producerC_p50": {
-      "n": 1,
-      "mean": 216,
-      "sd": 0,
-      "min": 216,
-      "max": 216
+      "n": 4,
+      "mean": 218.25,
+      "sd": 4.602988159880492,
+      "min": 214,
+      "max": 226
     },
     "consumers_final": {
-      "n": 1,
-      "mean": 832,
-      "sd": 0,
-      "min": 832,
-      "max": 832
+      "n": 4,
+      "mean": 840,
+      "sd": 28.801041647829337,
+      "min": 805,
+      "max": 885
     },
     "predators_final": {
-      "n": 1,
-      "mean": 0,
-      "sd": 0,
+      "n": 4,
+      "mean": 1.75,
+      "sd": 1.920286436967152,
       "min": 0,
-      "max": 0
+      "max": 5
     },
     "energyConsumer": {
-      "n": 1,
-      "mean": 56936.4,
-      "sd": 0,
-      "min": 56936.4,
-      "max": 56936.4
+      "n": 4,
+      "mean": 57322.95,
+      "sd": 1130.9928171743613,
+      "min": 55644.1,
+      "max": 58444.2
     },
     "energyField": {
-      "n": 1,
-      "mean": 13161.5,
-      "sd": 0,
-      "min": 13161.5,
-      "max": 13161.5
+      "n": 4,
+      "mean": 13165.325,
+      "sd": 96.64404728176511,
+      "min": 13031.9,
+      "max": 13305.1
     },
     "producerA_density": {
-      "n": 1,
-      "mean": 0.7394,
-      "sd": 0,
-      "min": 0.7394,
-      "max": 0.7394
+      "n": 4,
+      "mean": 0.739625,
+      "sd": 0.005447648575302955,
+      "min": 0.7321,
+      "max": 0.7475
     },
     "producerB_final": {
-      "n": 1,
-      "mean": 72,
-      "sd": 0,
-      "min": 72,
+      "n": 4,
+      "mean": 71.75,
+      "sd": 0.4330127018922193,
+      "min": 71,
       "max": 72
     },
     "pc_collapse_fraction": 0,
-    "predator_extinct_fraction": 1
+    "predator_extinct_fraction": 0.25
   },
   "oo": {
     "label": "consumer-pC OFF / predator-pC OFF",
-    "n_runs": 1,
+    "n_runs": 4,
     "seeds": [
-      12345
+      12345,
+      20264,
+      28183,
+      36102
     ],
     "producerC_final": {
-      "n": 1,
-      "mean": 276,
-      "sd": 0,
+      "n": 4,
+      "mean": 279.75,
+      "sd": 3.766629793329841,
       "min": 276,
-      "max": 276
+      "max": 286
     },
     "producerC_p50": {
-      "n": 1,
+      "n": 4,
       "mean": 228,
       "sd": 0,
       "min": 228,
       "max": 228
     },
     "consumers_final": {
-      "n": 1,
-      "mean": 849,
-      "sd": 0,
-      "min": 849,
-      "max": 849
+      "n": 4,
+      "mean": 846.5,
+      "sd": 19.93113142799475,
+      "min": 827,
+      "max": 878
     },
     "predators_final": {
-      "n": 1,
-      "mean": 0,
-      "sd": 0,
+      "n": 4,
+      "mean": 1,
+      "sd": 1.7320508075688772,
       "min": 0,
-      "max": 0
+      "max": 4
     },
     "energyConsumer": {
-      "n": 1,
-      "mean": 56798.6,
-      "sd": 0,
-      "min": 56798.6,
-      "max": 56798.6
+      "n": 4,
+      "mean": 57141.600000000006,
+      "sd": 736.7084667628035,
+      "min": 56140.5,
+      "max": 58085.5
     },
     "energyField": {
-      "n": 1,
-      "mean": 13126.1,
-      "sd": 0,
+      "n": 4,
+      "mean": 13168.775,
+      "sd": 48.75507024915464,
       "min": 13126.1,
-      "max": 13126.1
+      "max": 13245.1
     },
     "producerA_density": {
-      "n": 1,
-      "mean": 0.7374,
-      "sd": 0,
+      "n": 4,
+      "mean": 0.7398,
+      "sd": 0.002750454507894981,
       "min": 0.7374,
-      "max": 0.7374
+      "max": 0.7441
     },
     "producerB_final": {
-      "n": 1,
-      "mean": 72,
-      "sd": 0,
-      "min": 72,
+      "n": 4,
+      "mean": 71.75,
+      "sd": 0.4330127018922193,
+      "min": 71,
       "max": 72
     },
     "pc_collapse_fraction": 0,
-    "predator_extinct_fraction": 1
+    "predator_extinct_fraction": 0.75
   },
   "comparison": {
     "consumer_pc": {
       "contrast": "consumer-pC ON / predator-pC ON vs consumer-pC OFF / predator-pC OFF",
       "collapse_on": "2/2",
-      "collapse_off": "0/1",
-      "fisher_p_onetail": 0.33333333333333337
+      "collapse_off": "0/4",
+      "fisher_p_onetail": 0.06666666666666664
     },
     "predator_pc": {
       "contrast": "consumer-pC ON / predator-pC ON vs consumer-pC ON / predator-pC OFF",
       "collapse_on": "2/2",
       "collapse_off": "0/0",
       "fisher_p_onetail": 1
+    },
+    "producerC_final_welch": {
+      "diff": -279.75,
+      "z": -148.54127713607372,
+      "p": 0
+    },
+    "consumers_final_welch": {
+      "diff": 11.5,
+      "z": 0.8482235371587724,
+      "p": 0.3963133972307784
     }
   }
 }

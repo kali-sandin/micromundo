@@ -27,3 +27,38 @@
 [seed 20264] t=60s/300s wall=59s pop=1050
 [seed 20264] t=120s/300s wall=124s pop=1050
 [seed 20264] t=180s/300s wall=196s pop=1050
+[seed 20264] t=240s/300s wall=276s pop=1050
+[oc seed=20264] done=2026-08-22T02:40:09+02:00
+[oo seed=20264 dur=5m] start=2026-08-22T02:40:09+02:00
+[seed 20264] t=60s/300s wall=61s pop=1050
+[seed 20264] t=120s/300s wall=129s pop=1050
+[seed 20264] t=180s/300s wall=208s pop=1050
+[seed 20264] t=240s/300s wall=300s pop=1050
+[oo seed=20264] done=2026-08-22T02:46:57+02:00
+[oc seed=28183 dur=5m] start=2026-08-22T02:46:57+02:00
+[seed 28183] t=60s/300s wall=59s pop=1050
+[seed 28183] t=120s/300s wall=125s pop=1050
+[seed 28183] t=180s/300s wall=200s pop=1050
+[seed 28183] t=240s/300s wall=281s pop=1068
+[oc seed=28183] done=2026-08-22T02:53:14+02:00
+[oo seed=28183 dur=5m] start=2026-08-22T02:53:14+02:00
+[seed 28183] t=60s/300s wall=60s pop=1050
+[seed 28183] t=120s/300s wall=127s pop=1050
+[seed 28183] t=180s/300s wall=205s pop=1050
+[seed 28183] t=240s/300s wall=291s pop=1059
+[oo seed=28183] done=2026-08-22T02:59:48+02:00
+[oc seed=36102 dur=5m] start=2026-08-22T02:59:48+02:00
+[seed 36102] t=60s/300s wall=82s pop=1050
+[seed 36102] t=120s/300s wall=160s pop=1050
+[seed 36102] t=180s/300s wall=240s pop=1050
+[seed 36102] t=240s/300s wall=325s pop=1050
+[oc seed=36102] done=2026-08-22T03:06:53+02:00
+[oo seed=36102 dur=5m] start=2026-08-22T03:06:53+02:00
+[seed 36102] t=60s/300s wall=61s pop=1050
+[seed 36102] t=120s/300s wall=128s pop=1050
+[seed 36102] t=180s/300s wall=207s pop=1050
+[seed 36102] t=240s/300s wall=297s pop=1050
+[oo seed=36102] done=2026-08-22T03:13:35+02:00
+=== smoke done 2026-08-22T03:13:35+02:00 ===
+[oo seed=12345 dur=30m] start=2026-08-22T03:13:35+02:00
+[seed 12345] t=60s/1800s wall=60s pop=1050
