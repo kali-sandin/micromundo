@@ -56,3 +56,20 @@ bloqueada por throttling HW (decisión de N/duración pendiente de Jared).
 1. Seguir batch oo 20×30m (>100h wall) o reducir N/duración (5×30m, 20×10m).
 2. Perf-fix del sim (wall/sim base ~3.2x antes de throttling).
 3. Predator-viability (cuello separado): trabajo nuevo acotado.
+
+## Cierre de task_550 (2026-08-22 05:45)
+
+El criterio de entrega está cumplido: contraste factorial completo (OFF 20×30m
+20/20 vs oc/oo 8/8 + paridad cc 2/2), análisis publicado y verificado. La
+réplica oo 20×30m es confirmación extra, no criterio de la tarea, y está
+bloqueada por throttling HW (wall/sim ~13.8x, batch >100h en 1 core).
+
+Acción de cierre:
+- Wrapper del batch detenido (no arranca run 2..20).
+- run_1_seed12345 de oo 30m se deja terminar en background; su JSON aterrará
+  en factorial_2x2_30m_results/oo/ como dato adicional para Jared.
+- La decisión de N/duración de la réplica oo 30m, el perf-fix del harness
+  (wall/sim base ~3.2x) y la viabilidad del predator (cuello separado, 78/80)
+  vuelven a Jared como trabajo nuevo acotado.
+
+task_550 pasa a DONE con la hipótesis soportada por la evidencia publicada.
