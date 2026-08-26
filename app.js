@@ -310,10 +310,13 @@
     flowAccum: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0, photosynthField: 0, photosynthDirect: 0, producerLoss: 0, asexualRepro: 0, birthGain: 0, trophicAmplification: 0, deathDecay: 0, feedGain: 0, fieldClampLoss: 0,
       // task_908 funnel depredacion predator->consumer: etapas y rechazos (pasos-depredador acumulados)
       fnlPreyNear: 0, fnlPreyNear3: 0, fnlContact: 0, fnlRejCooldown: 0, fnlRejSatiety: 0,
-      fnlChase: 0, fnlRejChase: 0, fnlRejGape: 0, fnlCapture: 0 },
+      fnlChase: 0, fnlRejChase: 0, fnlRejGape: 0, fnlCapture: 0,
+      // task_910 balance predator: ingreso (capturas+carcass) vs metabolismo/thermal
+      predIncome: 0, predMetab: 0, predThermal: 0 },
     flowAccumPrev: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0, photosynthField: 0, photosynthDirect: 0, producerLoss: 0, asexualRepro: 0, birthGain: 0, trophicAmplification: 0, deathDecay: 0, feedGain: 0, fieldClampLoss: 0,
       fnlPreyNear: 0, fnlPreyNear3: 0, fnlContact: 0, fnlRejCooldown: 0, fnlRejSatiety: 0,
-      fnlChase: 0, fnlRejChase: 0, fnlRejGape: 0, fnlCapture: 0 },
+      fnlChase: 0, fnlRejChase: 0, fnlRejGape: 0, fnlCapture: 0,
+      predIncome: 0, predMetab: 0, predThermal: 0 },
     flowRate: { in: 0, out: 0, balance: 0, transfer: 0 }
   };
 
@@ -1025,6 +1028,7 @@
     sim.mobileEnergySum += actualGainCar;
     e.energy = newEng;
     sim.flowAccum.carcassEat += actualGainCar;
+    if (e.type === TYPE.PREDATOR) sim.flowAccum.predIncome += actualGainCar;
     sim.flowAccum.feedGain += actualGainCar;
     if (bite > actualGainCar) sim.flowAccum.carcassExpire += bite - actualGainCar;
     if (car.energy <= 0.2) {
@@ -2131,6 +2135,7 @@
     if (e.type === TYPE.PREDATOR) sim.flowAccum.predation += targetLoss;
     else sim.flowAccum.prodCGraze += targetLoss;
     if (fnlPredHunt) sim.flowAccum.fnlCapture += 1;
+    if (e.type === TYPE.PREDATOR) sim.flowAccum.predIncome += actualGainPred;
     sim.flowAccum.feedGain += actualGainPred;
     if (actualGainPred > targetLoss) sim.flowAccum.trophicAmplification += actualGainPred - targetLoss;
     else if (actualGainPred < targetLoss) sim.flowAccum.deathDecay += targetLoss - actualGainPred;
@@ -2325,6 +2330,7 @@
     e.energy -= metabCost;
     sim.mobileEnergySum -= metabCost;
     sim.flowAccum.metabolism += metabCost;
+    if (e.type === TYPE.PREDATOR) sim.flowAccum.predMetab += metabCost;
     // Oxidative damage (Rate of Living Theory): metabolism acumula ROS damage.
     // Reduce effective maxAge hasta -50%. Criaturas high-performance viven menos.
     // Reset en offspring (nacen limpios). Press towards metabolic efficiency.
@@ -2380,6 +2386,7 @@
       e.energy -= thermalLoss;
       sim.mobileEnergySum -= thermalLoss;
       sim.flowAccum.thermal += thermalLoss;
+      if (e.type === TYPE.PREDATOR) sim.flowAccum.predThermal += thermalLoss;
     }
     const effMaxAge = e.maxAge * (1 - e.oxidativeDamage);
     if (Number.isFinite(effMaxAge) && e.age > effMaxAge && chance(dt / (e.type === TYPE.PREDATOR ? 150 : 95))) {

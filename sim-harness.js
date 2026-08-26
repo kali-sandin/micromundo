@@ -258,7 +258,9 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     'photosynthField', 'photosynthDirect', 'producerLoss', 'asexualRepro', 'birthGain', 'trophicAmplification', 'deathDecay', 'feedGain', 'fieldClampLoss',
     // task_908 funnel predacion (pasos-depredador/s)
     'fnlPreyNear', 'fnlPreyNear3', 'fnlContact', 'fnlRejCooldown', 'fnlRejSatiety',
-    'fnlChase', 'fnlRejChase', 'fnlRejGape', 'fnlCapture'];
+    'fnlChase', 'fnlRejChase', 'fnlRejGape', 'fnlCapture',
+    // task_910 balance predator
+    'predIncome', 'predMetab', 'predThermal'];
   let prevFlowAccum = {};
   function snapshotFlowAccum() {
     const snap = {};
@@ -597,6 +599,12 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
         fnlRejChase: parseFloat((flows.fnlRejChase || 0).toFixed(2)),
         fnlRejGape: parseFloat((flows.fnlRejGape || 0).toFixed(2)),
         fnlCapture: parseFloat((flows.fnlCapture || 0).toFixed(2)),
+        predIncome: parseFloat((flows.predIncome || 0).toFixed(3)),
+        predMetab: parseFloat((flows.predMetab || 0).toFixed(3)),
+        predThermal: parseFloat((flows.predThermal || 0).toFixed(3)),
+        pred_income_metab_ratio: parseFloat((
+          (flows.predMetab || 0) > 0 ? (flows.predIncome || 0) / flows.predMetab : 0
+        ).toFixed(3)),
         residual_pct: parseFloat(residualPct.toFixed(3)),
         residual_throughput_pct: parseFloat(residualThroughputPct.toFixed(3)),
         system_energy: parseFloat(curSystemEnergy.toFixed(1)),
@@ -854,7 +862,8 @@ function aggregateRuns(runs) {
     'metabolism', 'reproduction', 'excretion', 'thermal', 'carcassExpire',
     'photosynthField', 'photosynthDirect', 'photosynth', 'trophicAmplification', 'feedGain', 'trueInputs', 'destruction', 'system_net', 'deathDecay',
     'fnlPreyNear', 'fnlPreyNear3', 'fnlContact', 'fnlRejCooldown', 'fnlRejSatiety',
-    'fnlChase', 'fnlRejChase', 'fnlRejGape', 'fnlCapture'];
+    'fnlChase', 'fnlRejChase', 'fnlRejGape', 'fnlCapture',
+    'predIncome', 'predMetab', 'predThermal'];
   function temporalMeanFlows(run, key) {
     // media sobre intervalos con t>0 (el intervalo t=0 arranca en 0 y diluiria)
     let sum = 0, n = 0;
@@ -1061,6 +1070,20 @@ function printHumanReport(runs, agg) {
       }
       if (fnl.fnlChase.mean > 0 && fnl.fnlCapture.mean > 0) {
         lines.push(`  captura/chase: ${((fnl.fnlCapture.mean / fnl.fnlChase.mean) * 100).toFixed(1)}%`);
+      }
+      if (fnl.fnlPreyNear.mean > 0) {
+        lines.push(`  captura/preyNear: ${((fnl.fnlCapture.mean / fnl.fnlPreyNear.mean) * 100).toFixed(2)}%`);
+      }
+    }
+    // task_910: balance energetico predator (E/s temporales)
+    if (fnl && fnl.predIncome) {
+      lines.push('');
+      lines.push('  ── BALANCE PREDATOR (E/s, media temporal) ──');
+      lines.push(`  ${'Ingreso'.padEnd(19)} ${fmt(fnl.predIncome.mean, 3).padStart(10)} ${fmt(fnl.predIncome.stdev, 3).padStart(10)}`);
+      lines.push(`  ${'Metabolismo'.padEnd(19)} ${fmt(fnl.predMetab.mean, 3).padStart(10)} ${fmt(fnl.predMetab.stdev, 3).padStart(10)}`);
+      lines.push(`  ${'Thermal'.padEnd(19)} ${fmt(fnl.predThermal.mean, 3).padStart(10)} ${fmt(fnl.predThermal.stdev, 3).padStart(10)}`);
+      if (fnl.predMetab.mean > 0) {
+        lines.push(`  ingreso/metab: ${(fnl.predIncome.mean / fnl.predMetab.mean).toFixed(3)}`);
       }
     }
     if (agg.flows.net) {

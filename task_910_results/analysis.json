@@ -1,0 +1,73 @@
+{
+  "rows": [
+    {
+      "seed": "12345",
+      "extT": 270.2,
+      "ext10m": true,
+      "predIncome": 0.786,
+      "predMetab": 15.508,
+      "predThermal": 0,
+      "incMetab": 0.051,
+      "capPreyNearPct": 0.015,
+      "finalPreds": 0,
+      "finalCons": 2136,
+      "finalProdC": 0
+    },
+    {
+      "seed": "20264",
+      "extT": 310.3,
+      "ext10m": true,
+      "predIncome": 1.176,
+      "predMetab": 13.696,
+      "predThermal": 0,
+      "incMetab": 0.086,
+      "capPreyNearPct": 0.023,
+      "finalPreds": 0,
+      "finalCons": 2077,
+      "finalProdC": 0
+    },
+    {
+      "seed": "28183",
+      "extT": 390.4,
+      "ext10m": true,
+      "predIncome": 0.834,
+      "predMetab": 11.926,
+      "predThermal": 0,
+      "incMetab": 0.07,
+      "capPreyNearPct": 0.011,
+      "finalPreds": 0,
+      "finalCons": 2217,
+      "finalProdC": 0
+    },
+    {
+      "seed": "36102",
+      "extT": 310.3,
+      "ext10m": true,
+      "predIncome": 1.385,
+      "predMetab": 12.622,
+      "predThermal": 0,
+      "incMetab": 0.11,
+      "capPreyNearPct": 0.025,
+      "finalPreds": 0,
+      "finalCons": 2152,
+      "finalProdC": 0
+    },
+    {
+      "seed": "44021",
+      "extT": 290.2,
+      "ext10m": true,
+      "predIncome": 0.906,
+      "predMetab": 14.691,
+      "predThermal": 0,
+      "incMetab": 0.062,
+      "capPreyNearPct": 0.017,
+      "finalPreds": 0,
+      "finalCons": 2145,
+      "finalProdC": 0
+    }
+  ],
+  "extCount": 5,
+  "incMetabMax": 0.11,
+  "capPNMax": 0.025,
+  "verdict": "SOPORTADA: >=4/5 extinciones<10m, inc/metab<0.8, cap/preyNear<0.1%"
+}

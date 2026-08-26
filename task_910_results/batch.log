@@ -1,0 +1,57 @@
+=== Batch 5x10m OFF started 2026-08-26T02:53:14+02:00 ===
+[1/5] seed=12345 start=2026-08-26T02:53:14+02:00
+[seed 12345] t=60s/600s wall=51s pop=913
+[seed 12345] t=120s/600s wall=95s pop=913
+[seed 12345] t=180s/600s wall=140s pop=913
+[seed 12345] t=240s/600s wall=183s pop=913
+[seed 12345] t=300s/600s wall=230s pop=943
+[seed 12345] t=360s/600s wall=287s pop=1155
+[seed 12345] t=420s/600s wall=358s pop=1440
+[seed 12345] t=480s/600s wall=443s pop=1766
+[seed 12345] t=540s/600s wall=543s pop=2044
+[1/5] seed=12345 done=2026-08-26T03:04:11+02:00
+[2/5] seed=20264 start=2026-08-26T03:04:11+02:00
+[seed 20264] t=60s/600s wall=52s pop=913
+[seed 20264] t=120s/600s wall=97s pop=913
+[seed 20264] t=180s/600s wall=141s pop=793
+[seed 20264] t=240s/600s wall=183s pop=810
+[seed 20264] t=300s/600s wall=228s pop=917
+[seed 20264] t=360s/600s wall=282s pop=1116
+[seed 20264] t=420s/600s wall=348s pop=1370
+[seed 20264] t=480s/600s wall=427s pop=1662
+[seed 20264] t=540s/600s wall=524s pop=1961
+[2/5] seed=20264 done=2026-08-26T03:14:45+02:00
+[3/5] seed=28183 start=2026-08-26T03:14:45+02:00
+[seed 28183] t=60s/600s wall=67s pop=913
+[seed 28183] t=120s/600s wall=126s pop=913
+[seed 28183] t=180s/600s wall=176s pop=913
+[seed 28183] t=240s/600s wall=223s pop=913
+[seed 28183] t=300s/600s wall=272s pop=991
+[seed 28183] t=360s/600s wall=328s pop=1218
+[seed 28183] t=420s/600s wall=400s pop=1549
+[seed 28183] t=480s/600s wall=489s pop=1898
+[seed 28183] t=540s/600s wall=594s pop=2153
+[3/5] seed=28183 done=2026-08-26T03:26:37+02:00
+[4/5] seed=36102 start=2026-08-26T03:26:37+02:00
+[seed 36102] t=60s/600s wall=49s pop=913
+[seed 36102] t=120s/600s wall=93s pop=913
+[seed 36102] t=180s/600s wall=135s pop=795
+[seed 36102] t=240s/600s wall=176s pop=830
+[seed 36102] t=300s/600s wall=221s pop=945
+[seed 36102] t=360s/600s wall=274s pop=1147
+[seed 36102] t=420s/600s wall=341s pop=1434
+[seed 36102] t=480s/600s wall=421s pop=1759
+[seed 36102] t=540s/600s wall=518s pop=2055
+[4/5] seed=36102 done=2026-08-26T03:37:05+02:00
+[5/5] seed=44021 start=2026-08-26T03:37:05+02:00
+[seed 44021] t=60s/600s wall=49s pop=913
+[seed 44021] t=120s/600s wall=93s pop=913
+[seed 44021] t=180s/600s wall=135s pop=913
+[seed 44021] t=240s/600s wall=177s pop=913
+[seed 44021] t=300s/600s wall=223s pop=948
+[seed 44021] t=360s/600s wall=277s pop=1149
+[seed 44021] t=420s/600s wall=345s pop=1433
+[seed 44021] t=480s/600s wall=427s pop=1762
+[seed 44021] t=540s/600s wall=525s pop=2050
+[5/5] seed=44021 done=2026-08-26T03:47:41+02:00
+=== Batch 5x10m OFF finished 2026-08-26T03:47:41+02:00 ===

@@ -1,0 +1,11 @@
+seed      extT    ext<10m  income  metab   inc/metab  cap/preyNear%  final(pC/cons/pred)
+12345  270.2   true     0.786   15.508  0.051      0.015         0/2136/0
+20264  310.3   true     1.176   13.696  0.086      0.023         0/2077/0
+28183  390.4   true     0.834   11.926  0.07       0.011         0/2217/0
+36102  310.3   true     1.385   12.622  0.11       0.025         0/2152/0
+44021  290.2   true     0.906   14.691  0.062      0.017         0/2145/0
+
+extinciones<10m: 5/5  supervivientes: 0
+ingreso/metab: media=0.076 max=0.11
+capture/preyNear: max=0.025%
+VEREDICTO: SOPORTADA: >=4/5 extinciones<10m, inc/metab<0.8, cap/preyNear<0.1%
