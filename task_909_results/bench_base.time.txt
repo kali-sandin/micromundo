@@ -1,0 +1,2 @@
+[seed 12345] t=60s/180s wall=57s pop=913
+[seed 12345] t=120s/180s wall=106s pop=913

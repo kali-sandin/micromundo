@@ -83,3 +83,10 @@
 [seed 12345] t=1200s/1800s wall=6912s pop=2460
 [seed 12345] t=1260s/1800s wall=7903s pop=2460
 [seed 12345] t=1320s/1800s wall=8961s pop=2460
+[seed 12345] t=1380s/1800s wall=10057s pop=2483
+[seed 12345] t=1440s/1800s wall=11177s pop=2531
+[seed 12345] t=1500s/1800s wall=12310s pop=2583
+[seed 12345] t=1560s/1800s wall=13486s pop=2647
+[seed 12345] t=1620s/1800s wall=14701s pop=2699
+[seed 12345] t=1680s/1800s wall=15943s pop=2739
+[seed 12345] t=1740s/1800s wall=17201s pop=2758

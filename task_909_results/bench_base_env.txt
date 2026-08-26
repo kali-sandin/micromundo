@@ -1,0 +1,3 @@
+tag=base sim_min=3 cpu_load=0 date=2026-08-26T02:01:52+02:00
+pre: throttled=0x0 temp=73.0'C frequency(0)=2400023808
+post: throttled=0x0 temp=77.4'C frequency(0)=2400023808

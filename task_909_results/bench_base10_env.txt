@@ -1,0 +1,4 @@
+tag=base10 sim_min=10 cpu_load=0 date=2026-08-26T02:05:05+02:00
+pre: throttled=0x0 temp=76.8'C frequency(0)=2400023808
+post: throttled=0xe0008 temp=82.3'C frequency(0)=2311021568
+post: throttled=0xe0000 temp=79.6'C frequency(0)=2400023808
