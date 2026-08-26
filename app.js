@@ -168,9 +168,12 @@
   const DEFAULT_INITIAL_PERCEPTION = 150;
   const PRODUCER_C_MAX_PERCEPTION = 180;
   const PRODUCER_C_DEFAULT_FERTILITY = 0.026;
-  const PRODUCER_C_CROWD_RADIUS = 320;
+  // task_037: escala global de radios de interaccion (sensing/mate/crowd) a la mitad.
+  // Solo distancias de interaccion; el contacto fisico (eatRange, radios corporales) no se toca.
+  const RANGE_SCALE = 0.5;
+  const PRODUCER_C_CROWD_RADIUS = 320 * RANGE_SCALE;
   const PRODUCER_C_CROWD_LIMIT = 2;
-  const COLONY_MATE_RANGE = 800;
+  const COLONY_MATE_RANGE = 800 * RANGE_SCALE;
 
   const canvas = document.getElementById('world');
   const ctx = canvas.getContext('2d', { alpha: false });
@@ -1650,7 +1653,7 @@
   }
 
   function consumerThreatRange(e) {
-    return Math.min(260, Math.max(65, e.perception * 0.7 + e.chemosense * 17.5 + e.cilia * 3));
+    return Math.min(260, Math.max(65, e.perception * 0.7 + e.chemosense * 17.5 + e.cilia * 3)) * RANGE_SCALE;
   }
 
   function stepProducer(e, dt) {
@@ -1698,7 +1701,7 @@
       if (sim.time - (e._threatScanAt || 0) > 1.5) {
         e._threatScanAt = sim.time;
         if (!e._threatBuf) { e._threatBuf = []; e._threatBufB = []; }
-        queryNearby2(e.x, e.y, e.perception || 105, TYPE.CONSUMER, TYPE.PREDATOR, e._threatBuf, e._threatBufB);
+        queryNearby2(e.x, e.y, (e.perception || 105) * RANGE_SCALE, TYPE.CONSUMER, TYPE.PREDATOR, e._threatBuf, e._threatBufB);
       }
       let threatDx = 0, threatDy = 0;
       let threatD2 = Infinity;
@@ -2200,7 +2203,7 @@
     // Allee effect: ampliar rango de mate search en baja densidad.
     // Consumers: <30 pop -> 1.5x range. Predators: <40 -> 1.5x range.
     const alleeBoost = lowPop ? 1.5 : 1;
-    const mateRange = type === TYPE.PREDATOR ? Math.min(450, e.perception * 1.2 * alleeBoost) : e.perception * 0.8 * alleeBoost;
+    const mateRange = (type === TYPE.PREDATOR ? Math.min(450, e.perception * 1.2 * alleeBoost) : e.perception * 0.8 * alleeBoost) * RANGE_SCALE;
     let mate = null;
     if (cachedMate && cachedMate.alive && cachedMate.energy > cachedMate.maxEnergy * 0.55 && cachedMate.cooldown <= 0) {
       mate = cachedMate;
@@ -2236,7 +2239,7 @@
       : (lowPopFind ? 0.55 : 0.68);
     if (e.energy < e.maxEnergy * mateSearchThreshold || e.cooldown > 0) return null;
     const alleeR = lowPopFind ? 1.5 : 1;
-    const radius = type === TYPE.PREDATOR ? Math.min(550, e.perception * 1.55 * alleeR) : e.perception * 0.9 * alleeR;
+    const radius = (type === TYPE.PREDATOR ? Math.min(550, e.perception * 1.55 * alleeR) : e.perception * 0.9 * alleeR) * RANGE_SCALE;
     queryNearby(e.x, e.y, radius, type, mateSeekCandidates);
     let best = null;
     let bestD2 = Infinity;
@@ -2426,7 +2429,7 @@
     if (e.type === TYPE.PREDATOR) {
       // queryNearby2: 1 sola pasada de grid para CONSUMER + GB_MOBILE (task_890).
       // Antes eran 2 queries separadas con radii distintos. Ahora 1 pasada + filtrado por r2.
-      queryNearby2(e.x, e.y, e.perception, TYPE.CONSUMER, GB_MOBILE, nearby, nearbyMobile);
+      queryNearby2(e.x, e.y, e.perception * RANGE_SCALE, TYPE.CONSUMER, GB_MOBILE, nearby, nearbyMobile);
       const consumerCount = nearby.length;
       e._localPreyDensity = consumerCount;
       // task_908 funnel: deteccion (pasos-depredador con presas en perception)
@@ -2436,7 +2439,7 @@
       if (!digesting) {
       food = consumerCount >= 3 ? nearestFood(e, nearby) : null;
       if (!food) {
-        const carrion = nearestCarcassFood(e, e.perception * 0.85);
+        const carrion = nearestCarcassFood(e, e.perception * 0.85 * RANGE_SCALE);
         if (carrion) {
           food = carrion;
         } else if (consumerCount > 0) {
@@ -2446,7 +2449,7 @@
       if (!food) {
         // Buscar ProducerC en nearbyMobile (ya poblado por queryNearby2).
         // Filtrar por radio reducido (perception*0.72) para mantener comportamiento.
-        const plantR2 = (e.perception * 0.72) * (e.perception * 0.72);
+        const plantR2 = (e.perception * 0.72 * RANGE_SCALE) * (e.perception * 0.72 * RANGE_SCALE);
         let bestPlant = null;
         let bestD2 = Infinity;
         for (let i = 0; i < nearbyMobile.length; i += 1) {
@@ -2464,7 +2467,7 @@
       }
       // Intraguild predation: si no encontro comida y predatorCount>25, cazar predators mas pequeños
       if (!food && sim.predatorCount > 25) {
-        queryNearby(e.x, e.y, e.perception * 0.6, TYPE.PREDATOR, nearby);
+        queryNearby(e.x, e.y, e.perception * 0.6 * RANGE_SCALE, TYPE.PREDATOR, nearby);
         let bestPrey = null;
         let bestPreyD2 = Infinity;
         for (let i = 0; i < nearby.length; i += 1) {
@@ -2489,7 +2492,7 @@
         steeringTarget = food || (cachedMate = findMateTarget(e, TYPE.PREDATOR));
       }
     } else {
-      queryNearby2(e.x, e.y, e.perception, GB_COLONY, GB_MOBILE, nearby, nearbyMobile);
+      queryNearby2(e.x, e.y, e.perception * RANGE_SCALE, GB_COLONY, GB_MOBILE, nearby, nearbyMobile);
       const entityFood = nearestFood(e, nearby, nearbyMobile);
       // Spatial memory: cache bestProducerDensityTarget result to avoid scanning
       // the field grid every frame. TTL-based; rescan when expired or energy low.
@@ -2504,7 +2507,7 @@
           _scratchFieldFood.density = 0.5; // approximate; refreshed on next scan
           fieldFood = _scratchFieldFood;
         } else {
-          fieldFood = bestProducerDensityTarget(e.x, e.y, e.perception);
+          fieldFood = bestProducerDensityTarget(e.x, e.y, e.perception * RANGE_SCALE);
           if (fieldFood) {
             e.feedHotspotX = fieldFood.x;
             e.feedHotspotY = fieldFood.y;
@@ -2541,7 +2544,7 @@
           if (fieldScore > entityScore) food = fieldFood;
         }
       }
-      if (!food && e.energy < e.maxEnergy * 0.42) food = nearestCarcassFood(e, e.perception * 0.65);
+      if (!food && e.energy < e.maxEnergy * 0.42) food = nearestCarcassFood(e, e.perception * 0.65 * RANGE_SCALE);
       if (e.starved !== 2 || food) {
         queryNearby(e.x, e.y, consumerThreatRange(e), TYPE.PREDATOR, consumerThreats);
         threat = nearestThreat(e, consumerThreats);
