@@ -171,6 +171,9 @@
   // task_037: escala global de radios de interaccion (sensing/mate/crowd) a la mitad.
   // Solo distancias de interaccion; el contacto fisico (eatRange, radios corporales) no se toca.
   const RANGE_SCALE = 0.5;
+  // task_911 spike: presupuesto de persecucion continua (s) antes de fatiga.
+  // Solo activo con __SPIKE.predIntermittent; revertible borrando el flag.
+  const PRED_PURSUIT_BUDGET = 6;
   const PRODUCER_C_CROWD_RADIUS = 320 * RANGE_SCALE;
   const PRODUCER_C_CROWD_LIMIT = 2;
   const COLONY_MATE_RANGE = 800 * RANGE_SCALE;
@@ -315,11 +318,14 @@
       fnlPreyNear: 0, fnlPreyNear3: 0, fnlContact: 0, fnlRejCooldown: 0, fnlRejSatiety: 0,
       fnlChase: 0, fnlRejChase: 0, fnlRejGape: 0, fnlCapture: 0,
       // task_910 balance predator: ingreso (capturas+carcass) vs metabolismo/thermal
-      predIncome: 0, predMetab: 0, predThermal: 0 },
+      predIncome: 0, predMetab: 0, predThermal: 0,
+      // task_911 spike: duty-cycle persecucion intermitente (segundos acumulados)
+      pursuitChase: 0, pursuitCoast: 0 },
     flowAccumPrev: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0, photosynthField: 0, photosynthDirect: 0, producerLoss: 0, asexualRepro: 0, birthGain: 0, trophicAmplification: 0, deathDecay: 0, feedGain: 0, fieldClampLoss: 0,
       fnlPreyNear: 0, fnlPreyNear3: 0, fnlContact: 0, fnlRejCooldown: 0, fnlRejSatiety: 0,
       fnlChase: 0, fnlRejChase: 0, fnlRejGape: 0, fnlCapture: 0,
-      predIncome: 0, predMetab: 0, predThermal: 0 },
+      predIncome: 0, predMetab: 0, predThermal: 0,
+      pursuitChase: 0, pursuitCoast: 0 },
     flowRate: { in: 0, out: 0, balance: 0, transfer: 0 }
   };
 
@@ -1926,8 +1932,33 @@
   }
 
   function steerCreature(e, dt, food, threat = null) {
-    const pressure = Boolean(threat || (food && e.type === TYPE.PREDATOR));
-    const resting = updateResting(e, dt, pressure);
+    let pressure = Boolean(threat || (food && e.type === TYPE.PREDATOR));
+    // task_911 spike reversible: persecucion intermitente con fatiga del predator.
+    // Flag globalThis.__SPIKE.predIntermittent (inerte en navegador). Sin tocar
+    // gains, metabolismo ni genetica: solo regula cuando el predator descansa.
+    // Persecucion limitada por presupuesto (budget); al agotarlo, coast forzado
+    // (reposo, metabolismo basal) que recupera presupuesto. Presa cercana (threat)
+    // no esta afectada: esto es del predator, no de la presa.
+    let forcedRest = false;
+    if (globalThis.__SPIKE && globalThis.__SPIKE.predIntermittent && e.type === TYPE.PREDATOR && !threat) {
+      if (e.pursuitBudget === undefined) e.pursuitBudget = PRED_PURSUIT_BUDGET;
+      if (sim.time < (e.pursuitRestUntil || 0)) {
+        forcedRest = true;
+        e.pursuitBudget = Math.min(e.pursuitBudget + dt * 0.8, PRED_PURSUIT_BUDGET);
+        sim.flowAccum.pursuitCoast += dt;
+      } else if (pressure) {
+        e.pursuitBudget -= dt;
+        sim.flowAccum.pursuitChase += dt;
+        if (e.pursuitBudget <= 0) {
+          // Fatiga: abandona la persecucion y glidea en reposo hasta recuperarse.
+          e.pursuitRestUntil = sim.time + rand(2.2, 4.5);
+          forcedRest = true;
+        }
+      } else {
+        e.pursuitBudget = Math.min(e.pursuitBudget + dt * 0.6, PRED_PURSUIT_BUDGET);
+      }
+    }
+    const resting = forcedRest || updateResting(e, dt, pressure);
     e._resting = resting;
     let turnNoise = hasMove(e, 0) ? 2.5 : hasMove(e, 2) ? 1.2 : 0.8;
     // Dispersion density-dependent: alta densidad local aumenta wander para redistribuir.

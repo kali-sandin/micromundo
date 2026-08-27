@@ -47,6 +47,7 @@ function parseArgs() {
     quiet: false,
     migration: true,
     ablate: {}, // task_550: { consumerPC: false, predatorPC: false }
+    spike: {},  // task_911: { predIntermittent: true }
   };
   for (const arg of process.argv.slice(2)) {
     if (arg === '--no-migration') { opts.migration = false; continue; }
@@ -68,6 +69,16 @@ function parseArgs() {
           const m2 = part.match(/^(consumer-pc|predator-pc)=(on|off|true|false|1|0)$/);
           if (!m2) { console.error(`[args] --ablate expects consumer-pc|predator-pc=on|off (got: ${part})`); process.exit(2); }
           opts.ablate[m2[1] === 'consumer-pc' ? 'consumerPC' : 'predatorPC'] = ['on', 'true', '1'].includes(m2[2]);
+        }
+        break;
+      }
+      case 'spike': {
+        // --spike=pred-intermittent=on  (task_911 reversible spike flags)
+        for (const part of val.split(',')) {
+          if (!part) continue;
+          const m2 = part.match(/^(pred-intermittent)=(on|off|true|false|1|0)$/);
+          if (!m2) { console.error(`[args] --spike expects pred-intermittent=on|off (got: ${part})`); process.exit(2); }
+          opts.spike.predIntermittent = ['on', 'true', '1'].includes(m2[2]);
         }
         break;
       }
@@ -193,6 +204,7 @@ function loadSim() {
 
   vm.createContext(ctx);
   ctx.__ABLATE = Object.assign({}, OPTS.ablate); // undefined keys leave browser behaviour untouched
+  ctx.__SPIKE = Object.assign({}, OPTS.spike); // task_911: undefined keys leave browser behaviour untouched
   vm.runInContext(src, ctx, { filename: 'app.js' });
   if (!ctx.__sim) throw new Error('Failed to extract __sim from app.js');
   return ctx.__sim;
@@ -260,7 +272,9 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     'fnlPreyNear', 'fnlPreyNear3', 'fnlContact', 'fnlRejCooldown', 'fnlRejSatiety',
     'fnlChase', 'fnlRejChase', 'fnlRejGape', 'fnlCapture',
     // task_910 balance predator
-    'predIncome', 'predMetab', 'predThermal'];
+    'predIncome', 'predMetab', 'predThermal',
+    // task_911 spike duty-cycle
+    'pursuitChase', 'pursuitCoast'];
   let prevFlowAccum = {};
   function snapshotFlowAccum() {
     const snap = {};
@@ -602,6 +616,8 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
         predIncome: parseFloat((flows.predIncome || 0).toFixed(3)),
         predMetab: parseFloat((flows.predMetab || 0).toFixed(3)),
         predThermal: parseFloat((flows.predThermal || 0).toFixed(3)),
+        pursuitChase: parseFloat((flows.pursuitChase || 0).toFixed(3)),
+        pursuitCoast: parseFloat((flows.pursuitCoast || 0).toFixed(3)),
         pred_income_metab_ratio: parseFloat((
           (flows.predMetab || 0) > 0 ? (flows.predIncome || 0) / flows.predMetab : 0
         ).toFixed(3)),
@@ -863,7 +879,8 @@ function aggregateRuns(runs) {
     'photosynthField', 'photosynthDirect', 'photosynth', 'trophicAmplification', 'feedGain', 'trueInputs', 'destruction', 'system_net', 'deathDecay',
     'fnlPreyNear', 'fnlPreyNear3', 'fnlContact', 'fnlRejCooldown', 'fnlRejSatiety',
     'fnlChase', 'fnlRejChase', 'fnlRejGape', 'fnlCapture',
-    'predIncome', 'predMetab', 'predThermal'];
+    'predIncome', 'predMetab', 'predThermal',
+    'pursuitChase', 'pursuitCoast'];
   function temporalMeanFlows(run, key) {
     // media sobre intervalos con t>0 (el intervalo t=0 arranca en 0 y diluiria)
     let sum = 0, n = 0;
