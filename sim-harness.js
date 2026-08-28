@@ -74,11 +74,12 @@ function parseArgs() {
       }
       case 'spike': {
         // --spike=pred-intermittent=on  (task_911 reversible spike flags)
+        // --spike=pred-ambush=on       (task_912 reversible spike flag)
         for (const part of val.split(',')) {
           if (!part) continue;
-          const m2 = part.match(/^(pred-intermittent)=(on|off|true|false|1|0)$/);
-          if (!m2) { console.error(`[args] --spike expects pred-intermittent=on|off (got: ${part})`); process.exit(2); }
-          opts.spike.predIntermittent = ['on', 'true', '1'].includes(m2[2]);
+          const m2 = part.match(/^(pred-intermittent|pred-ambush)=(on|off|true|false|1|0)$/);
+          if (!m2) { console.error(`[args] --spike expects pred-intermittent|pred-ambush=on|off (got: ${part})`); process.exit(2); }
+          opts.spike[m2[1] === 'pred-intermittent' ? 'predIntermittent' : 'predAmbush'] = ['on', 'true', '1'].includes(m2[2]);
         }
         break;
       }
@@ -274,7 +275,9 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     // task_910 balance predator
     'predIncome', 'predMetab', 'predThermal',
     // task_911 spike duty-cycle
-    'pursuitChase', 'pursuitCoast'];
+    'pursuitChase', 'pursuitCoast',
+    // task_912 spike emboscada
+    'ambushHide', 'ambushLunge', 'ambushProbe', 'ambushProbeDense'];
   let prevFlowAccum = {};
   function snapshotFlowAccum() {
     const snap = {};
@@ -618,6 +621,16 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
         predThermal: parseFloat((flows.predThermal || 0).toFixed(3)),
         pursuitChase: parseFloat((flows.pursuitChase || 0).toFixed(3)),
         pursuitCoast: parseFloat((flows.pursuitCoast || 0).toFixed(3)),
+        ambushHide: parseFloat((flows.ambushHide || 0).toFixed(3)),
+        ambushLunge: parseFloat((flows.ambushLunge || 0).toFixed(3)),
+        ambushProbe: parseFloat((flows.ambushProbe || 0).toFixed(0)),
+        ambushMaxSeen: parseFloat((flows.ambushMaxSeen || 0).toFixed(3)),
+        ambushP01: parseFloat((flows.ambushP01 || 0).toFixed(0)),
+        ambushP03: parseFloat((flows.ambushP03 || 0).toFixed(0)),
+        ambushP05: parseFloat((flows.ambushP05 || 0).toFixed(0)),
+        ambushPreyMax: parseFloat((flows.ambushPreyMax || 0).toFixed(3)),
+        ambushCenterMax: parseFloat((flows.ambushCenterMax || 0).toFixed(3)),
+        ambushProbeDense: parseFloat((flows.ambushProbeDense || 0).toFixed(0)),
         pred_income_metab_ratio: parseFloat((
           (flows.predMetab || 0) > 0 ? (flows.predIncome || 0) / flows.predMetab : 0
         ).toFixed(3)),
@@ -880,7 +893,8 @@ function aggregateRuns(runs) {
     'fnlPreyNear', 'fnlPreyNear3', 'fnlContact', 'fnlRejCooldown', 'fnlRejSatiety',
     'fnlChase', 'fnlRejChase', 'fnlRejGape', 'fnlCapture',
     'predIncome', 'predMetab', 'predThermal',
-    'pursuitChase', 'pursuitCoast'];
+    'pursuitChase', 'pursuitCoast',
+    'ambushHide', 'ambushLunge', 'ambushProbe', 'ambushProbeDense'];
   function temporalMeanFlows(run, key) {
     // media sobre intervalos con t>0 (el intervalo t=0 arranca en 0 y diluiria)
     let sum = 0, n = 0;
@@ -942,6 +956,7 @@ function aggregateRuns(runs) {
   return {
     seeds: n,
     ablation: Object.assign({}, OPTS.ablate), // task_550: echoes active ablation flags
+    spike: Object.assign({}, OPTS.spike), // task_911/912: echoes active spike flags
     populations: popStats,
     energy: energyStats,
     percentiles: pctStats,
@@ -1342,6 +1357,7 @@ function main() {
         interval_sec: OPTS.intervalSec,
         migration: OPTS.migration,
         ablation: Object.assign({}, OPTS.ablate),
+        spike: Object.assign({}, OPTS.spike), // task_911/912: registra flags activos
       },
     },
     aggregate: agg,

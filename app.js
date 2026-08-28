@@ -174,6 +174,13 @@
   // task_911 spike: presupuesto de persecucion continua (s) antes de fatiga.
   // Solo activo con __SPIKE.predIntermittent; revertible borrando el flag.
   const PRED_PURSUIT_BUDGET = 6;
+  // task_912 spike: emboscada sit-and-pursue en vegetacion.
+  // Solo activo con __SPIKE.predAmbush; revertible borrando el flag.
+  const PRED_AMBUSH_LUNGE_RANGE = 55;
+  const PRED_AMBUSH_LUNGE_TIME = 0.9;
+  const PRED_AMBUSH_RECOVER = 4;
+  const PRED_AMBUSH_FIELD_MIN = 0.9; // ~p90 del campo real (probe 2026-08-28: max~1.0, p90~0.92)
+  const PRED_AMBUSH_REVEAL_RANGE = 22;
   const PRODUCER_C_CROWD_RADIUS = 320 * RANGE_SCALE;
   const PRODUCER_C_CROWD_LIMIT = 2;
   const COLONY_MATE_RANGE = 800 * RANGE_SCALE;
@@ -320,12 +327,15 @@
       // task_910 balance predator: ingreso (capturas+carcass) vs metabolismo/thermal
       predIncome: 0, predMetab: 0, predThermal: 0,
       // task_911 spike: duty-cycle persecucion intermitente (segundos acumulados)
-      pursuitChase: 0, pursuitCoast: 0 },
+      pursuitChase: 0, pursuitCoast: 0,
+      // task_912 spike: emboscada (segundos oculto / segundos de lunge)
+      ambushHide: 0, ambushLunge: 0 },
     flowAccumPrev: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0, photosynthField: 0, photosynthDirect: 0, producerLoss: 0, asexualRepro: 0, birthGain: 0, trophicAmplification: 0, deathDecay: 0, feedGain: 0, fieldClampLoss: 0,
       fnlPreyNear: 0, fnlPreyNear3: 0, fnlContact: 0, fnlRejCooldown: 0, fnlRejSatiety: 0,
       fnlChase: 0, fnlRejChase: 0, fnlRejGape: 0, fnlCapture: 0,
       predIncome: 0, predMetab: 0, predThermal: 0,
-      pursuitChase: 0, pursuitCoast: 0 },
+      pursuitChase: 0, pursuitCoast: 0,
+      ambushHide: 0, ambushLunge: 0 },
     flowRate: { in: 0, out: 0, balance: 0, transfer: 0 }
   };
 
@@ -1650,6 +1660,12 @@
       // Skip predators that can't penetrate this consumer's armor
       if (!canEatArmored(t, e)) continue;
       const d2 = torusDistance2(e, t);
+      // task_912 spike: predator emboscado en vegetacion oculto a la deteccion
+      // de la presa salvo a distancia de revelado (contacto casi inmediato).
+      if (globalThis.__SPIKE && globalThis.__SPIKE.predAmbush && t._ambushHidden) {
+        const reveal = PRED_AMBUSH_REVEAL_RANGE + t.radius + e.radius;
+        if (d2 > reveal * reveal) continue;
+      }
       if (d2 < bestD2) {
         best = t;
         bestD2 = d2;
@@ -1940,6 +1956,11 @@
     // (reposo, metabolismo basal) que recupera presupuesto. Presa cercana (threat)
     // no esta afectada: esto es del predator, no de la presa.
     let forcedRest = false;
+    // task_912 spike: predator emboscado en vegetacion permanece en reposo
+    // (steering congelado, metabolismo basal del rest existente).
+    if (globalThis.__SPIKE && globalThis.__SPIKE.predAmbush && e.type === TYPE.PREDATOR && e._ambushHidden && !threat) {
+      forcedRest = true;
+    }
     if (globalThis.__SPIKE && globalThis.__SPIKE.predIntermittent && e.type === TYPE.PREDATOR && !threat) {
       if (e.pursuitBudget === undefined) e.pursuitBudget = PRED_PURSUIT_BUDGET;
       if (sim.time < (e.pursuitRestUntil || 0)) {
@@ -2008,8 +2029,16 @@
     if (e.type === TYPE.CONSUMER && (e._crowdDensity || 0) > 8 && !threat) {
       dispersionFactor = 1 + Math.min((e._crowdDensity - 8) * 0.02, 0.3);
     }
-    e.x += lutCos(e.angle) * e.speed * ciliaPulse * burst * panic * vegFactor * dispersionFactor * dt;
-    e.y += lutSin(e.angle) * e.speed * ciliaPulse * burst * panic * vegFactor * dispersionFactor * dt;
+    // task_912 spike: multiplicador corto de velocidad durante el lunge.
+    // Mismo canal que panic/burst: no altera gains ni metabolismo base.
+    let ambushLungeFactor = 1;
+    if (globalThis.__SPIKE && globalThis.__SPIKE.predAmbush && e.type === TYPE.PREDATOR
+        && sim.time < (e.ambushLungeUntil || 0)) {
+      ambushLungeFactor = 2.1;
+      e._hadPanic = false;
+    }
+    e.x += lutCos(e.angle) * e.speed * ciliaPulse * burst * panic * vegFactor * dispersionFactor * ambushLungeFactor * dt;
+    e.y += lutSin(e.angle) * e.speed * ciliaPulse * burst * panic * vegFactor * dispersionFactor * ambushLungeFactor * dt;
     wrapInsideWorld(e);
   }
 
@@ -2466,6 +2495,57 @@
       // task_908 funnel: deteccion (pasos-depredador con presas en perception)
       if (consumerCount > 0) sim.flowAccum.fnlPreyNear += 1;
       if (consumerCount >= 3) sim.flowAccum.fnlPreyNear3 += 1;
+      // task_912 spike reversible: emboscada sit-and-pursue en vegetacion.
+      // Predator en celda de campo denso queda oculto (reposo forzado, metabolismo
+      // basal del rest existente) y no es visto por la presa (nearestThreat).
+      // Cuando una presa entra en rango de lunge, ataca: giro + multiplicador de
+      // velocidad corto (PRED_AMBUSH_LUNGE_TIME) con recuperacion posterior.
+      // Sin queries nuevas: reutiliza `nearby` ya poblado por queryNearby2.
+      // Sin tocar gains, metabolismo ni genetica.
+      e._ambushHidden = false;
+      if (globalThis.__SPIKE && globalThis.__SPIKE.predAmbush) {
+        // El lunge es una ventana temporal: acumula incluso digiriendo.
+        if (sim.time < (e.ambushLungeUntil || 0)) {
+          sim.flowAccum.ambushLunge += dt;
+        } else if (!digesting && sim.producerField.mass.length) {
+          const fMass = sim.producerField.mass[fieldIndex(fieldCellX(e.x), fieldCellY(e.y))];
+          sim.flowAccum.ambushProbe = (sim.flowAccum.ambushProbe || 0) + 1;
+          if (fMass > (sim.flowAccum.ambushMaxSeen || 0)) sim.flowAccum.ambushMaxSeen = fMass;
+          if (fMass > 0.1) sim.flowAccum.ambushP01 = (sim.flowAccum.ambushP01 || 0) + 1;
+          if (fMass > 0.3) sim.flowAccum.ambushP03 = (sim.flowAccum.ambushP03 || 0) + 1;
+          if (fMass > 0.5) sim.flowAccum.ambushP05 = (sim.flowAccum.ambushP05 || 0) + 1;
+          if (!sim.flowAccum.ambushDbg) {
+            sim.flowAccum.ambushDbg = 1;
+            const f = sim.producerField;
+            let nz = 0, mx = 0;
+            for (let i = 0; i < f.mass.length; i++) { if (f.mass[i] > 0) nz++; if (f.mass[i] > mx) mx = f.mass[i]; }
+            console.error('[ambushDbg] cols=' + f.cols + ' rows=' + f.rows + ' len=' + f.mass.length + ' nz=' + nz + ' max=' + mx + ' total=' + f.total + ' cellW=' + f.cellW + ' WORLDw=' + WORLD.w + ' fx(center)=' + fieldCellX(WORLD.w / 2) + ',' + fieldCellY(WORLD.h / 2) + ' idxMass=' + f.mass[fieldIndex(fieldCellX(WORLD.w / 2), fieldCellY(WORLD.h / 2))]);
+          }
+          const pk = nearby[0];
+          if (pk) { const pm = sim.producerField.mass[fieldIndex(fieldCellX(pk.x), fieldCellY(pk.y))]; if (pm > (sim.flowAccum.ambushPreyMax || 0)) sim.flowAccum.ambushPreyMax = pm; }
+          const cm = sim.producerField.mass[fieldIndex(fieldCellX(WORLD.w/2), fieldCellY(WORLD.h/2))];
+          if (cm > (sim.flowAccum.ambushCenterMax || 0)) sim.flowAccum.ambushCenterMax = cm;
+          if (fMass > PRED_AMBUSH_FIELD_MIN) sim.flowAccum.ambushProbeDense = (sim.flowAccum.ambushProbeDense || 0) + 1;
+          if (fMass > PRED_AMBUSH_FIELD_MIN && sim.time >= (e.ambushCooldown || 0)) {
+            e._ambushHidden = true;
+            sim.flowAccum.ambushHide += dt;
+            const lr2 = PRED_AMBUSH_LUNGE_RANGE * PRED_AMBUSH_LUNGE_RANGE;
+            for (let i = 0; i < nearby.length; i += 1) {
+              const p = nearby[i];
+              if (!p || !p.alive) continue;
+              // Lunge solo con hambre (coherente con saciedad de feedConsumer)
+              if (e.energy > e.maxEnergy * 0.85) break;
+              if (torusDistance2(e, p) <= lr2) {
+                e.ambushLungeUntil = sim.time + PRED_AMBUSH_LUNGE_TIME;
+                e.ambushCooldown = e.ambushLungeUntil + PRED_AMBUSH_RECOVER;
+                e._ambushHidden = false;
+                e.angle = Math.atan2(torusDelta(p.y - e.y, WORLD.h), torusDelta(p.x - e.x, WORLD.w));
+                break;
+              }
+            }
+          }
+        }
+      }
       // Digestion (task_300): predator digiriendo no busca comida
       if (!digesting) {
       food = consumerCount >= 3 ? nearestFood(e, nearby) : null;

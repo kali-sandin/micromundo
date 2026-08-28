@@ -110,6 +110,7 @@ function loadApp() {
       producerCCrowdFactor, grazeProducerDensity, reproduceMobile,
       stepProducerField, fieldCellX, fieldCellY, fieldIndex,
       setSeed,
+      __setSpike: (o) => { globalThis.__SPIKE = o; },
       saveSnapshot, saveSnapshotJSON, loadSnapshot, loadSnapshotJSON,
       applyWorldSizeFromForm,
       GROUPS, GROUP_KEYS, GROUP_LABELS, TYPE, PRODUCER,
@@ -829,6 +830,101 @@ function runFunctionalTests() {
 
   // ═══ TASK_142: GAPS CRITICOS DE COBERTURA ═══
   suite('Task_142: gaps criticos');
+
+  // ═══ TASK_912: SPIKE EMBOSCADA EN VEGETACION ═══
+  suite('Task_912: spike emboscada');
+
+  assert('flag OFF: sin __SPIKE la emboscada es inerte', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.initProducerField();
+    api.__setSpike(undefined);
+    const p = api.spawnPredator({ x: 400, y: 400 });
+    const fi = api.fieldIndex(api.fieldCellX(400), api.fieldCellY(400));
+    api.sim.producerField.mass[fi] = 2.0;
+    api.rebuildGrid();
+    for (let i = 0; i < 20; i++) api.simulate(0.5);
+    expectEq(p._ambushHidden, false, '_ambushHidden debe ser false sin flag');
+    return 'inerte sin flag';
+  });
+
+  assert('flag ON: predator en campo denso queda oculto y no se desplaza', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.initProducerField();
+    api.__setSpike({ predAmbush: true });
+    const p = api.spawnPredator({ x: 400, y: 400 });
+    const fi = api.fieldIndex(api.fieldCellX(400), api.fieldCellY(400));
+    api.sim.producerField.mass[fi] = 2.0;
+    api.rebuildGrid();
+    const hide0 = api.sim.flowAccum.ambushHide;
+    const x0 = p.x; const y0 = p.y;
+    let hiddenSeen = false;
+    for (let i = 0; i < 40; i++) {
+      api.sim.producerField.mass[fi] = 2.0; // mantener celda densa: aislamiento unitario
+      api.simulate(0.5);
+      if (p.alive && p._ambushHidden) hiddenSeen = true;
+    }
+    api.__setSpike(undefined);
+    expectOk(hiddenSeen, 'predator nunca entro en _ambushHidden con flag ON y campo denso');
+    expectOk(api.sim.flowAccum.ambushHide > hide0, 'ambushHide no acumulo');
+    expectOk(Math.abs(p.x - x0) < 40 && Math.abs(p.y - y0) < 40, 'predator oculto se desplazo demasiado');
+    return `hide=+${(api.sim.flowAccum.ambushHide - hide0).toFixed(1)}s`;
+  });
+
+  assert('flag ON: presa no detecta al predator oculto a media distancia', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.initProducerField();
+    api.__setSpike({ predAmbush: true });
+    const p = api.spawnPredator({ x: 400, y: 400, energy: 1 });
+    p.energy = p.maxEnergy; // saciado: no lunge (gate de hambre), solo oculto
+    const c = api.spawnConsumer({ x: 400 + 60, y: 400, size: 2 });
+    c.perception = 400; c.chemosense = 0; c.cilia = 0; c.speed = 4; // threatRange~130, minimiza deriva
+    expectOk(c.size / Math.max(1, p.size) <= 0.85, 'setup: gape debe permitir amenaza');
+    const rd = 22 + p.radius + c.radius;
+    const fi = api.fieldIndex(api.fieldCellX(400), api.fieldCellY(400));
+    api.sim.producerField.mass[fi] = 2.0;
+    c.x = 400 + 300; // warm-up lejos: garantiza estado oculto antes de medir
+    api.rebuildGrid();
+    for (let i = 0; i < 3; i++) api.simulate(0.5);
+    expectOk(p._ambushHidden, `warm-up no oculto al predator (orden de loop)`);
+    c.x = 400 + rd + 10; c.y = 400; // fuera de reveal, dentro de threatRange
+    api.simulate(0.5);
+    const fearHidden = c.fearFactor;
+    api.__setSpike(undefined);
+    p._ambushHidden = false;
+    p.energy = p.maxEnergy * 0.5; // hambre: sin ocultacion, visible
+    api.simulate(0.5);
+    const fearVisible = c.fearFactor;
+    expectEq(fearHidden, 1, `presa detecto al predator oculto: hidden=${p._ambushHidden} fear=${fearHidden} dist=${Math.hypot(c.x-p.x,c.y-p.y).toFixed(1)} reveal=${(22+p.radius+c.radius).toFixed(1)} digest=${p.digestTimer} mass=${api.sim.producerField.mass[fi]}`);
+    expectEq(fearVisible, 0.6, 'control sin flag deberia detectar amenaza');
+    return 'ocultacion efectiva';
+  });
+
+  assert('flag ON: presa en rango de lunge provoca ataque (ambushLunge>0)', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.initProducerField();
+    api.__setSpike({ predAmbush: true });
+    const p = api.spawnPredator({ x: 400, y: 400 });
+    api.spawnConsumer({ x: 400 + 35, y: 400 }); // dentro de PRED_AMBUSH_LUNGE_RANGE (55)
+    const fi = api.fieldIndex(api.fieldCellX(400), api.fieldCellY(400));
+    api.sim.producerField.mass[fi] = 2.0;
+    api.rebuildGrid();
+    const lunge0 = api.sim.flowAccum.ambushLunge;
+    for (let i = 0; i < 10; i++) {
+      api.sim.producerField.mass[fi] = 2.0;
+      api.simulate(0.5);
+    }
+    api.__setSpike(undefined);
+    expectOk(api.sim.flowAccum.ambushLunge > lunge0, 'ambushLunge no acumulo con presa en rango');
+    return `lunge=+${(api.sim.flowAccum.ambushLunge - lunge0).toFixed(2)}s`;
+  });
 
   assert('grazeProducerDensity: gain y field loss', () => {
     api.sim.creatures = [];
