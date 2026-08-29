@@ -48,6 +48,7 @@ function parseArgs() {
     migration: true,
     ablate: {}, // task_550: { consumerPC: false, predatorPC: false }
     spike: {},  // task_911: { predIntermittent: true }
+    shadow: {}, // task_913: { predApparatus: true } shadow-only, sin cambio de conducta
   };
   for (const arg of process.argv.slice(2)) {
     if (arg === '--no-migration') { opts.migration = false; continue; }
@@ -77,9 +78,19 @@ function parseArgs() {
         // --spike=pred-ambush=on       (task_912 reversible spike flag)
         for (const part of val.split(',')) {
           if (!part) continue;
-          const m2 = part.match(/^(pred-intermittent|pred-ambush)=(on|off|true|false|1|0)$/);
+          const m2 = part.match(/^(pred-intermittent|pred-ambush|pred-tether)=(on|off|true|false|1|0)$/);
           if (!m2) { console.error(`[args] --spike expects pred-intermittent|pred-ambush=on|off (got: ${part})`); process.exit(2); }
-          opts.spike[m2[1] === 'pred-intermittent' ? 'predIntermittent' : 'predAmbush'] = ['on', 'true', '1'].includes(m2[2]);
+          opts.spike[{ 'pred-intermittent': 'predIntermittent', 'pred-ambush': 'predAmbush', 'pred-tether': 'predTether' }[m2[1]]] = ['on', 'true', '1'].includes(m2[2]);
+        }
+        break;
+      }
+      case 'shadow': {
+        // --shadow=pred-apparatus=on  (task_913 Gate 1: medicion shadow-only)
+        for (const part of val.split(',')) {
+          if (!part) continue;
+          const m2 = part.match(/^(pred-apparatus)=(on|off|true|false|1|0)$/);
+          if (!m2) { console.error(`[args] --shadow expects pred-apparatus=on|off (got: ${part})`); process.exit(2); }
+          opts.shadow.predApparatus = ['on', 'true', '1'].includes(m2[2]);
         }
         break;
       }
@@ -206,6 +217,7 @@ function loadSim() {
   vm.createContext(ctx);
   ctx.__ABLATE = Object.assign({}, OPTS.ablate); // undefined keys leave browser behaviour untouched
   ctx.__SPIKE = Object.assign({}, OPTS.spike); // task_911: undefined keys leave browser behaviour untouched
+  ctx.__SHADOW = Object.assign({}, OPTS.shadow); // task_913: shadow-only, undefined keys leave behaviour untouched
   vm.runInContext(src, ctx, { filename: 'app.js' });
   if (!ctx.__sim) throw new Error('Failed to extract __sim from app.js');
   return ctx.__sim;
@@ -277,7 +289,11 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     // task_911 spike duty-cycle
     'pursuitChase', 'pursuitCoast',
     // task_912 spike emboscada
-    'ambushHide', 'ambushLunge', 'ambushProbe', 'ambushProbeDense'];
+    'ambushHide', 'ambushLunge', 'ambushProbe', 'ambushProbeDense',
+    // task_913 shadow-only cono+tether
+    'shdTetherOpp', 'shdConeSteps', 'shdEpisodes', 'shdGainUBSum', 'shdPredSteps',
+    // task_913 Gate 2: strikes cono+tether
+    'tetherStrike'];
   let prevFlowAccum = {};
   function snapshotFlowAccum() {
     const snap = {};
@@ -631,6 +647,13 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
         ambushPreyMax: parseFloat((flows.ambushPreyMax || 0).toFixed(3)),
         ambushCenterMax: parseFloat((flows.ambushCenterMax || 0).toFixed(3)),
         ambushProbeDense: parseFloat((flows.ambushProbeDense || 0).toFixed(0)),
+        // task_913 shadow-only cono+tether (conteos absolutos del intervalo)
+        shdTetherOpp: parseFloat((flows.shdTetherOpp || 0).toFixed(0)),
+        shdConeSteps: parseFloat((flows.shdConeSteps || 0).toFixed(0)),
+        shdEpisodes: parseFloat((flows.shdEpisodes || 0).toFixed(0)),
+        shdGainUBSum: parseFloat((flows.shdGainUBSum || 0).toFixed(1)),
+        shdPredSteps: parseFloat((flows.shdPredSteps || 0).toFixed(0)),
+        tetherStrike: parseFloat((flows.tetherStrike || 0).toFixed(2)),
         pred_income_metab_ratio: parseFloat((
           (flows.predMetab || 0) > 0 ? (flows.predIncome || 0) / flows.predMetab : 0
         ).toFixed(3)),
@@ -957,6 +980,7 @@ function aggregateRuns(runs) {
     seeds: n,
     ablation: Object.assign({}, OPTS.ablate), // task_550: echoes active ablation flags
     spike: Object.assign({}, OPTS.spike), // task_911/912: echoes active spike flags
+    shadow: Object.assign({}, OPTS.shadow), // task_913: echoes active shadow flags
     populations: popStats,
     energy: energyStats,
     percentiles: pctStats,
@@ -1358,6 +1382,7 @@ function main() {
         migration: OPTS.migration,
         ablation: Object.assign({}, OPTS.ablate),
         spike: Object.assign({}, OPTS.spike), // task_911/912: registra flags activos
+        shadow: Object.assign({}, OPTS.shadow), // task_913: registra flags shadow activos
       },
     },
     aggregate: agg,

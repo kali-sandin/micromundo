@@ -181,6 +181,19 @@
   const PRED_AMBUSH_RECOVER = 4;
   const PRED_AMBUSH_FIELD_MIN = 0.9; // ~p90 del campo real (probe 2026-08-28: max~1.0, p90~0.92)
   const PRED_AMBUSH_REVEAL_RANGE = 22;
+  // task_913 Gate 1 shadow-only: cono+tether morfologico HIPOTETICO del predator.
+  // No cambia conducta ni queries: solo mide oportunidades reutilizando `nearby`
+  // y estima upper-bound de ingreso si toda oportunidad fuese captura al ceiling
+  // fisico (handling huntCooldown + digestTimer). Inerte sin flag __SHADOW.
+  const SHADOW_APPARATUS_TETHER = 60;        // alcance tether hipotetico (px)
+  const SHADOW_APPARATUS_CONE = Math.PI / 6; // semiangulo cono (30 grados)
+  // task_913 Gate 2: aparato cono+tether morfologico del predator (flag
+  // __SPIKE.predTether, inerte en navegador y con flag OFF). Extiende SOLO el
+  // alcance de captura predator->consumer hasta PRED_TETHER_RANGE dentro del
+  // cono frontal PRED_TETHER_CONE. Sin tocar gains, metabolismo, chase
+  // success, gape, satiety, cooldowns ni genetica. Revertible por flag.
+  const PRED_TETHER_RANGE = 60;
+  const PRED_TETHER_CONE = Math.PI / 6;
   const PRODUCER_C_CROWD_RADIUS = 320 * RANGE_SCALE;
   const PRODUCER_C_CROWD_LIMIT = 2;
   const COLONY_MATE_RANGE = 800 * RANGE_SCALE;
@@ -329,13 +342,20 @@
       // task_911 spike: duty-cycle persecucion intermitente (segundos acumulados)
       pursuitChase: 0, pursuitCoast: 0,
       // task_912 spike: emboscada (segundos oculto / segundos de lunge)
-      ambushHide: 0, ambushLunge: 0 },
+      ambushHide: 0, ambushLunge: 0,
+      // task_913 shadow-only: cono+tether (pasos/conteos/ganancia UB)
+      shdTetherOpp: 0, shdConeSteps: 0, shdEpisodes: 0, shdGainUBSum: 0, shdPredSteps: 0,
+      // task_913 Gate 2: strikes de captura a distancia (cono+tether)
+      tetherStrike: 0 },
     flowAccumPrev: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0, photosynthField: 0, photosynthDirect: 0, producerLoss: 0, asexualRepro: 0, birthGain: 0, trophicAmplification: 0, deathDecay: 0, feedGain: 0, fieldClampLoss: 0,
       fnlPreyNear: 0, fnlPreyNear3: 0, fnlContact: 0, fnlRejCooldown: 0, fnlRejSatiety: 0,
       fnlChase: 0, fnlRejChase: 0, fnlRejGape: 0, fnlCapture: 0,
       predIncome: 0, predMetab: 0, predThermal: 0,
       pursuitChase: 0, pursuitCoast: 0,
-      ambushHide: 0, ambushLunge: 0 },
+      ambushHide: 0, ambushLunge: 0,
+      shdTetherOpp: 0, shdConeSteps: 0, shdEpisodes: 0, shdGainUBSum: 0, shdPredSteps: 0,
+      // task_913 Gate 2: strikes de captura a distancia (cono+tether)
+      tetherStrike: 0 },
     flowRate: { in: 0, out: 0, balance: 0, transfer: 0 }
   };
 
@@ -2059,7 +2079,18 @@
     const dx = torusDelta(target.x - e.x, WORLD.w);
     const dy = torusDelta(target.y - e.y, WORLD.h);
     const eatRange = e.radius + target.radius + (e.feeding === 1 ? e.cilia * 2.2 : 3);
-    if (dx * dx + dy * dy > eatRange * eatRange) return false;
+    // task_913 Gate 2: strike morfologico cono+tether. El alcance efectivo crece
+    // solo para predator->consumer, con presa en el cono frontal. Todo lo demas
+    // (chase success, gape, satiety, handling, digest) queda intacto.
+    let effRange = eatRange;
+    if (globalThis.__SPIKE && globalThis.__SPIKE.predTether
+        && e.type === TYPE.PREDATOR && target.type === TYPE.CONSUMER) {
+      const aim = Math.atan2(dy, dx);
+      const da = Math.abs(Math.atan2(Math.sin(aim - e.angle), Math.cos(aim - e.angle)));
+      if (da <= PRED_TETHER_CONE) effRange = Math.max(effRange, PRED_TETHER_RANGE);
+    }
+    if (dx * dx + dy * dy > effRange * effRange) return false;
+    if (effRange > eatRange) sim.flowAccum.tetherStrike = (sim.flowAccum.tetherStrike || 0) + 1;
 
     if (isColonyProducer(target)) {
       if (e.type === TYPE.PREDATOR) return false;
@@ -2495,6 +2526,37 @@
       // task_908 funnel: deteccion (pasos-depredador con presas en perception)
       if (consumerCount > 0) sim.flowAccum.fnlPreyNear += 1;
       if (consumerCount >= 3) sim.flowAccum.fnlPreyNear3 += 1;
+      // task_913 Gate 1 shadow-only: sin queries nuevas, reutiliza `nearby`.
+      // Oportunidad = presa gape-compatible dentro del tether y del cono frontal.
+      // Episode = transicion 0->1 oportunidades (encuentro geometrico nuevo).
+      // gainUB = mejor ganancia posible de captura en este paso (cap 1.3x energia presa).
+      if (globalThis.__SHADOW && globalThis.__SHADOW.predApparatus) {
+        sim.flowAccum.shdPredSteps = (sim.flowAccum.shdPredSteps || 0) + 1;
+        let opp = false, gainUB = 0, oppAny = 0;
+        const t2 = SHADOW_APPARATUS_TETHER * SHADOW_APPARATUS_TETHER;
+        for (let i = 0; i < nearby.length; i += 1) {
+          const p = nearby[i];
+          if (!p || !p.alive || p.dormant) continue;
+          const dx = torusDelta(p.x - e.x, WORLD.w), dy = torusDelta(p.y - e.y, WORLD.h);
+          const d2 = dx * dx + dy * dy;
+          if (d2 > t2) continue;
+          oppAny += 1;
+          // gape estructural (no tunable): presas >0.85x tamaño inalcanzables
+          if (p.size / Math.max(1, e.size) > 0.85) continue;
+          const da = Math.abs(Math.atan2(Math.sin(Math.atan2(dy, dx) - e.angle), Math.cos(Math.atan2(dy, dx) - e.angle)));
+          if (da > SHADOW_APPARATUS_CONE) continue;
+          opp = true;
+          const g = Math.min(92 + p.size * 16 + p.reserves * 7, p.energy * 1.3);
+          if (g > gainUB) gainUB = g;
+        }
+        sim.flowAccum.shdTetherOpp = (sim.flowAccum.shdTetherOpp || 0) + oppAny;
+        if (opp) {
+          sim.flowAccum.shdConeSteps = (sim.flowAccum.shdConeSteps || 0) + 1;
+          sim.flowAccum.shdGainUBSum = (sim.flowAccum.shdGainUBSum || 0) + gainUB;
+          if (!e._shdHadOpp) sim.flowAccum.shdEpisodes = (sim.flowAccum.shdEpisodes || 0) + 1;
+        }
+        e._shdHadOpp = opp;
+      }
       // task_912 spike reversible: emboscada sit-and-pursue en vegetacion.
       // Predator en celda de campo denso queda oculto (reposo forzado, metabolismo
       // basal del rest existente) y no es visto por la presa (nearestThreat).

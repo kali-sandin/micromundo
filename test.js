@@ -926,6 +926,39 @@ function runFunctionalTests() {
     return `lunge=+${(api.sim.flowAccum.ambushLunge - lunge0).toFixed(2)}s`;
   });
 
+  // ═══ TASK_913: APARATO CONO+TETHER REVERSIBLE ═══
+  suite('Task_913: spike aparato cono+tether');
+
+  assert('flag OFF: presa fuera de eatRange no activa tether', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.__setSpike(undefined);
+    const p = api.spawnPredator({ x: 400, y: 400 });
+    const c = api.spawnConsumer({ x: 445, y: 400, size: 2 });
+    p.angle = 0; p.energy = p.maxEnergy * 0.5; p.huntCooldown = 0; p.digestTimer = 0;
+    const strikes0 = api.sim.flowAccum.tetherStrike || 0;
+    const fed = api.feedConsumer(p, c, 1 / 30);
+    expectEq(fed, false, 'sin flag no debe alcanzar una presa a 45px');
+    expectEq(api.sim.flowAccum.tetherStrike || 0, strikes0, 'sin flag no debe contar tetherStrike');
+    return 'inerte sin flag';
+  });
+
+  assert('flag ON: presa alineada dentro de 60px activa tether', () => {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.__setSpike({ predTether: true });
+    const p = api.spawnPredator({ x: 400, y: 400 });
+    const c = api.spawnConsumer({ x: 445, y: 400, size: 2 });
+    p.angle = 0; p.energy = p.maxEnergy * 0.5; p.huntCooldown = 0; p.digestTimer = 0;
+    const strikes0 = api.sim.flowAccum.tetherStrike || 0;
+    api.feedConsumer(p, c, 1 / 30);
+    api.__setSpike(undefined);
+    expectOk((api.sim.flowAccum.tetherStrike || 0) > strikes0, 'flag ON no activo tetherStrike a 45px en cono frontal');
+    return `tetherStrike=+${(api.sim.flowAccum.tetherStrike - strikes0).toFixed(0)}`;
+  });
+
   assert('grazeProducerDensity: gain y field loss', () => {
     api.sim.creatures = [];
     api.sim.freeIds = [];
