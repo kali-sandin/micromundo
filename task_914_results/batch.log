@@ -1,2 +1,57 @@
 === Batch 5x10m shadow pred-profit started 2026-08-30T03:34:52+02:00 ===
 [1/5] seed=12345 start=2026-08-30T03:34:52+02:00
+[seed 12345] t=60s/600s wall=53s pop=913
+[seed 12345] t=120s/600s wall=100s pop=913
+[seed 12345] t=180s/600s wall=144s pop=913
+[seed 12345] t=240s/600s wall=188s pop=913
+[seed 12345] t=300s/600s wall=234s pop=913
+[seed 12345] t=360s/600s wall=287s pop=1021
+[seed 12345] t=420s/600s wall=349s pop=1205
+[seed 12345] t=480s/600s wall=424s pop=1451
+[seed 12345] t=540s/600s wall=514s pop=1739
+[1/5] seed=12345 done=2026-08-30T03:45:11+02:00
+[2/5] seed=20264 start=2026-08-30T03:45:11+02:00
+[seed 20264] t=60s/600s wall=52s pop=913
+[seed 20264] t=120s/600s wall=97s pop=913
+[seed 20264] t=180s/600s wall=140s pop=913
+[seed 20264] t=240s/600s wall=182s pop=913
+[seed 20264] t=300s/600s wall=225s pop=913
+[seed 20264] t=360s/600s wall=273s pop=968
+[seed 20264] t=420s/600s wall=329s pop=1138
+[seed 20264] t=480s/600s wall=396s pop=1363
+[seed 20264] t=540s/600s wall=475s pop=1614
+[2/5] seed=20264 done=2026-08-30T03:54:38+02:00
+[3/5] seed=28183 start=2026-08-30T03:54:38+02:00
+[seed 28183] t=60s/600s wall=50s pop=1050
+[seed 28183] t=120s/600s wall=96s pop=913
+[seed 28183] t=180s/600s wall=141s pop=913
+[seed 28183] t=240s/600s wall=184s pop=913
+[seed 28183] t=300s/600s wall=229s pop=926
+[seed 28183] t=360s/600s wall=280s pop=1071
+[seed 28183] t=420s/600s wall=341s pop=1282
+[seed 28183] t=480s/600s wall=416s pop=1579
+[seed 28183] t=540s/600s wall=506s pop=1886
+[3/5] seed=28183 done=2026-08-30T04:04:51+02:00
+[4/5] seed=36102 start=2026-08-30T04:04:51+02:00
+[seed 36102] t=60s/600s wall=50s pop=913
+[seed 36102] t=120s/600s wall=95s pop=913
+[seed 36102] t=180s/600s wall=137s pop=913
+[seed 36102] t=240s/600s wall=179s pop=913
+[seed 36102] t=300s/600s wall=223s pop=913
+[seed 36102] t=360s/600s wall=272s pop=1013
+[seed 36102] t=420s/600s wall=331s pop=1207
+[seed 36102] t=480s/600s wall=401s pop=1443
+[seed 36102] t=540s/600s wall=485s pop=1721
+[4/5] seed=36102 done=2026-08-30T04:14:35+02:00
+[5/5] seed=44021 start=2026-08-30T04:14:35+02:00
+[seed 44021] t=60s/600s wall=51s pop=913
+[seed 44021] t=120s/600s wall=96s pop=913
+[seed 44021] t=180s/600s wall=140s pop=913
+[seed 44021] t=240s/600s wall=182s pop=913
+[seed 44021] t=300s/600s wall=226s pop=913
+[seed 44021] t=360s/600s wall=276s pop=1001
+[seed 44021] t=420s/600s wall=333s pop=1175
+[seed 44021] t=480s/600s wall=402s pop=1417
+[seed 44021] t=540s/600s wall=484s pop=1690
+[5/5] seed=44021 done=2026-08-30T04:24:17+02:00
+=== batch done 2026-08-30T04:24:17+02:00 ===
