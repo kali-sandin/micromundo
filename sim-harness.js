@@ -85,12 +85,12 @@ function parseArgs() {
         break;
       }
       case 'shadow': {
-        // --shadow=pred-apparatus=on  (task_913 Gate 1: medicion shadow-only)
+        // --shadow=pred-apparatus=on|pred-profit=on  (task_913/task_914: medicion shadow-only)
         for (const part of val.split(',')) {
           if (!part) continue;
-          const m2 = part.match(/^(pred-apparatus)=(on|off|true|false|1|0)$/);
-          if (!m2) { console.error(`[args] --shadow expects pred-apparatus=on|off (got: ${part})`); process.exit(2); }
-          opts.shadow.predApparatus = ['on', 'true', '1'].includes(m2[2]);
+          const m2 = part.match(/^(pred-apparatus|pred-profit)=(on|off|true|false|1|0)$/);
+          if (!m2) { console.error(`[args] --shadow expects pred-apparatus|pred-profit=on|off (got: ${part})`); process.exit(2); }
+          opts.shadow[{ 'pred-apparatus': 'predApparatus', 'pred-profit': 'predProfit' }[m2[1]]] = ['on', 'true', '1'].includes(m2[2]);
         }
         break;
       }
@@ -293,7 +293,9 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     // task_913 shadow-only cono+tether
     'shdTetherOpp', 'shdConeSteps', 'shdEpisodes', 'shdGainUBSum', 'shdPredSteps',
     // task_913 Gate 2: strikes cono+tether
-    'tetherStrike'];
+    'tetherStrike',
+    // task_914 shadow-only: seleccion de presa nearest-vs-score
+    'shSelSteps', 'shSelDiff', 'shGainNearSum', 'shGainScoreSum', 'shDistNearSum', 'shDistScoreSum'];
   let prevFlowAccum = {};
   function snapshotFlowAccum() {
     const snap = {};
@@ -654,6 +656,13 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
         shdGainUBSum: parseFloat((flows.shdGainUBSum || 0).toFixed(1)),
         shdPredSteps: parseFloat((flows.shdPredSteps || 0).toFixed(0)),
         tetherStrike: parseFloat((flows.tetherStrike || 0).toFixed(2)),
+        // task_914 shadow-only: seleccion nearest-vs-score (conteos absolutos)
+        shSelSteps: parseFloat((flows.shSelSteps || 0).toFixed(0)),
+        shSelDiff: parseFloat((flows.shSelDiff || 0).toFixed(0)),
+        shGainNearSum: parseFloat((flows.shGainNearSum || 0).toFixed(1)),
+        shGainScoreSum: parseFloat((flows.shGainScoreSum || 0).toFixed(1)),
+        shDistNearSum: parseFloat((flows.shDistNearSum || 0).toFixed(1)),
+        shDistScoreSum: parseFloat((flows.shDistScoreSum || 0).toFixed(1)),
         pred_income_metab_ratio: parseFloat((
           (flows.predMetab || 0) > 0 ? (flows.predIncome || 0) / flows.predMetab : 0
         ).toFixed(3)),

@@ -346,7 +346,9 @@
       // task_913 shadow-only: cono+tether (pasos/conteos/ganancia UB)
       shdTetherOpp: 0, shdConeSteps: 0, shdEpisodes: 0, shdGainUBSum: 0, shdPredSteps: 0,
       // task_913 Gate 2: strikes de captura a distancia (cono+tether)
-      tetherStrike: 0 },
+      tetherStrike: 0,
+      // task_914 shadow-only: seleccion de presa por rentabilidad (nearest vs score)
+      shSelSteps: 0, shSelDiff: 0, shGainNearSum: 0, shGainScoreSum: 0, shDistNearSum: 0, shDistScoreSum: 0 },
     flowAccumPrev: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0, photosynthField: 0, photosynthDirect: 0, producerLoss: 0, asexualRepro: 0, birthGain: 0, trophicAmplification: 0, deathDecay: 0, feedGain: 0, fieldClampLoss: 0,
       fnlPreyNear: 0, fnlPreyNear3: 0, fnlContact: 0, fnlRejCooldown: 0, fnlRejSatiety: 0,
       fnlChase: 0, fnlRejChase: 0, fnlRejGape: 0, fnlCapture: 0,
@@ -355,7 +357,9 @@
       ambushHide: 0, ambushLunge: 0,
       shdTetherOpp: 0, shdConeSteps: 0, shdEpisodes: 0, shdGainUBSum: 0, shdPredSteps: 0,
       // task_913 Gate 2: strikes de captura a distancia (cono+tether)
-      tetherStrike: 0 },
+      tetherStrike: 0,
+      // task_914 shadow-only: seleccion de presa por rentabilidad
+      shSelSteps: 0, shSelDiff: 0, shGainNearSum: 0, shGainScoreSum: 0, shDistNearSum: 0, shDistScoreSum: 0 },
     flowRate: { in: 0, out: 0, balance: 0, transfer: 0 }
   };
 
@@ -2617,6 +2621,35 @@
           food = carrion;
         } else if (consumerCount > 0) {
           food = nearestFood(e, nearby);
+        }
+      }
+      // task_914 Gate 1 shadow-only: seleccion de presa por rentabilidad neta.
+      // Sin cambiar conducta ni queries nuevas: replica los filtros de
+      // nearestFood sobre `nearby` (consumers gape-compatible) y compara la
+      // eleccion real (nearest) con la que haria score = gain/(1+dist).
+      // gain = mismo ceiling fisico que task_913 (cap 1.3x energia presa).
+      if (globalThis.__SHADOW && globalThis.__SHADOW.predProfit) {
+        let near = null, nearD2 = Infinity, score = null, scoreD2 = 0, bestS = -1;
+        for (let i = 0; i < nearby.length; i += 1) {
+          const p = nearby[i];
+          if (!p || !p.alive || p.virtualA || p.dormant) continue;
+          if (p.size / Math.max(1, e.size) > 0.85) continue;
+          const d2 = torusDistance2(e, p);
+          if (d2 < nearD2) { near = p; nearD2 = d2; }
+          const g = Math.min(92 + p.size * 16 + p.reserves * 7, p.energy * 1.3);
+          const s = g / (1 + Math.sqrt(d2));
+          if (s > bestS) { bestS = s; score = p; scoreD2 = d2; }
+        }
+        if (near) {
+          const gOf = (p) => Math.min(92 + p.size * 16 + p.reserves * 7, p.energy * 1.3);
+          sim.flowAccum.shSelSteps += 1;
+          sim.flowAccum.shGainNearSum += gOf(near);
+          if (score) {
+            sim.flowAccum.shGainScoreSum += gOf(score);
+            sim.flowAccum.shDistNearSum += Math.sqrt(nearD2);
+            sim.flowAccum.shDistScoreSum += Math.sqrt(scoreD2);
+            if (score !== near) sim.flowAccum.shSelDiff += 1;
+          }
         }
       }
       if (!food) {
