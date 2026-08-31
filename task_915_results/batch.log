@@ -1,2 +1,57 @@
-=== Batch 5x10m shadow pred-suctorial started 2026-08-31T02:13:25+02:00 ===
-[1/5] seed=12345 start=2026-08-31T02:13:25+02:00
+=== Batch 5x10m shadow pred-suctorial started 2026-08-31T02:22:19+02:00 ===
+[1/5] seed=12345 start=2026-08-31T02:22:19+02:00
+[seed 12345] t=60s/600s wall=55s pop=913
+[seed 12345] t=120s/600s wall=102s pop=913
+[seed 12345] t=180s/600s wall=145s pop=913
+[seed 12345] t=240s/600s wall=188s pop=913
+[seed 12345] t=300s/600s wall=233s pop=913
+[seed 12345] t=360s/600s wall=282s pop=1021
+[seed 12345] t=420s/600s wall=341s pop=1205
+[seed 12345] t=480s/600s wall=412s pop=1451
+[seed 12345] t=540s/600s wall=500s pop=1739
+[1/5] seed=12345 done=2026-08-31T02:32:19+02:00
+[2/5] seed=20264 start=2026-08-31T02:32:19+02:00
+[seed 20264] t=60s/600s wall=53s pop=913
+[seed 20264] t=120s/600s wall=100s pop=913
+[seed 20264] t=180s/600s wall=144s pop=913
+[seed 20264] t=240s/600s wall=186s pop=913
+[seed 20264] t=300s/600s wall=230s pop=913
+[seed 20264] t=360s/600s wall=279s pop=968
+[seed 20264] t=420s/600s wall=336s pop=1138
+[seed 20264] t=480s/600s wall=405s pop=1363
+[seed 20264] t=540s/600s wall=486s pop=1614
+[2/5] seed=20264 done=2026-08-31T02:42:00+02:00
+[3/5] seed=28183 start=2026-08-31T02:42:00+02:00
+[seed 28183] t=60s/600s wall=50s pop=1050
+[seed 28183] t=120s/600s wall=97s pop=913
+[seed 28183] t=180s/600s wall=142s pop=913
+[seed 28183] t=240s/600s wall=186s pop=913
+[seed 28183] t=300s/600s wall=232s pop=926
+[seed 28183] t=360s/600s wall=285s pop=1071
+[seed 28183] t=420s/600s wall=349s pop=1282
+[seed 28183] t=480s/600s wall=427s pop=1579
+[seed 28183] t=540s/600s wall=520s pop=1886
+[3/5] seed=28183 done=2026-08-31T02:52:27+02:00
+[4/5] seed=36102 start=2026-08-31T02:52:27+02:00
+[seed 36102] t=60s/600s wall=51s pop=913
+[seed 36102] t=120s/600s wall=98s pop=913
+[seed 36102] t=180s/600s wall=142s pop=913
+[seed 36102] t=240s/600s wall=185s pop=913
+[seed 36102] t=300s/600s wall=231s pop=913
+[seed 36102] t=360s/600s wall=282s pop=1013
+[seed 36102] t=420s/600s wall=343s pop=1207
+[seed 36102] t=480s/600s wall=415s pop=1443
+[seed 36102] t=540s/600s wall=502s pop=1721
+[4/5] seed=36102 done=2026-08-31T03:02:31+02:00
+[5/5] seed=44021 start=2026-08-31T03:02:31+02:00
+[seed 44021] t=60s/600s wall=50s pop=913
+[seed 44021] t=120s/600s wall=95s pop=913
+[seed 44021] t=180s/600s wall=139s pop=913
+[seed 44021] t=240s/600s wall=181s pop=913
+[seed 44021] t=300s/600s wall=225s pop=913
+[seed 44021] t=360s/600s wall=273s pop=1001
+[seed 44021] t=420s/600s wall=331s pop=1175
+[seed 44021] t=480s/600s wall=402s pop=1417
+[seed 44021] t=540s/600s wall=485s pop=1690
+[5/5] seed=44021 done=2026-08-31T03:12:15+02:00
+=== batch done 2026-08-31T03:12:15+02:00 ===

@@ -1,0 +1,15 @@
+=== task_915 Gate 1 shadow-only: suctorial persistente (dedup por episodio) ===
+seed 12345: pred=10.4 acq=0 held=0 attach=0.4s transfer=0E (0E/s/pred)
+  metab=0.0643E/s/pred real=0.0027 -> ratioProj .3=0 .5=0 .7=0 wallSim=1.002
+seed 20264: pred=10.5 acq=0 held=0 attach=0.2s transfer=0E (0E/s/pred)
+  metab=0.063E/s/pred real=0.003 -> ratioProj .3=0 .5=0 .7=0 wallSim=1.034
+seed 28183: pred=12 acq=0 held=0 attach=0s transfer=0E (0E/s/pred)
+  metab=0.0625E/s/pred real=0.0033 -> ratioProj .3=0 .5=0 .7=0 wallSim=0.959
+seed 36102: pred=9.7 acq=0 held=0 attach=0.1s transfer=0E (0E/s/pred)
+  metab=0.0627E/s/pred real=0.0037 -> ratioProj .3=0 .5=0 .7=0 wallSim=0.996
+seed 44021: pred=10.1 acq=0 held=0 attach=0.3s transfer=0E (0E/s/pred)
+  metab=0.0658E/s/pred real=0.0014 -> ratioProj .3=0 .5=0 .7=0 wallSim=1.03
+
+wallSim medio: shadow915=1.004 vs shadow913=0.991 -> overhead=1.29%
+seeds con ratioProj(.7)>=0.8: 0/5; media ratioProj(.7)=0.000
+GATE 1 REFUTA (0/5 <0.8 en eta=.7): publicar y cerrar
