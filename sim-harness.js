@@ -88,9 +88,9 @@ function parseArgs() {
         // --shadow=pred-apparatus=on|pred-profit=on  (task_913/task_914: medicion shadow-only)
         for (const part of val.split(',')) {
           if (!part) continue;
-          const m2 = part.match(/^(pred-apparatus|pred-profit)=(on|off|true|false|1|0)$/);
-          if (!m2) { console.error(`[args] --shadow expects pred-apparatus|pred-profit=on|off (got: ${part})`); process.exit(2); }
-          opts.shadow[{ 'pred-apparatus': 'predApparatus', 'pred-profit': 'predProfit' }[m2[1]]] = ['on', 'true', '1'].includes(m2[2]);
+          const m2 = part.match(/^(pred-apparatus|pred-profit|pred-suctorial)=(on|off|true|false|1|0)$/);
+          if (!m2) { console.error(`[args] --shadow expects pred-apparatus|pred-profit|pred-suctorial=on|off (got: ${part})`); process.exit(2); }
+          opts.shadow[{ 'pred-apparatus': 'predApparatus', 'pred-profit': 'predProfit', 'pred-suctorial': 'predSuctorial' }[m2[1]]] = ['on', 'true', '1'].includes(m2[2]);
         }
         break;
       }
@@ -295,7 +295,9 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     // task_913 Gate 2: strikes cono+tether
     'tetherStrike',
     // task_914 shadow-only: seleccion de presa nearest-vs-score
-    'shSelSteps', 'shSelDiff', 'shGainNearSum', 'shGainScoreSum', 'shDistNearSum', 'shDistScoreSum'];
+    'shSelSteps', 'shSelDiff', 'shGainNearSum', 'shGainScoreSum', 'shDistNearSum', 'shDistScoreSum',
+    // task_915 shadow-only: suctorial (dedup por episodio)
+    'shSucSteps', 'shSucNear', 'shSucAcq', 'shSucAcqHeld', 'shSucTransfer', 'shSucAttachTime'];
   let prevFlowAccum = {};
   function snapshotFlowAccum() {
     const snap = {};
@@ -663,6 +665,13 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
         shGainScoreSum: parseFloat((flows.shGainScoreSum || 0).toFixed(1)),
         shDistNearSum: parseFloat((flows.shDistNearSum || 0).toFixed(1)),
         shDistScoreSum: parseFloat((flows.shDistScoreSum || 0).toFixed(1)),
+        // task_915 shadow-only: suctorial (adquisiciones dedup, transfer, attach)
+        shSucAcq: parseFloat((flows.shSucAcq || 0).toFixed(0)),
+        shSucSteps: parseFloat((flows.shSucSteps || 0).toFixed(0)),
+        shSucNear: parseFloat((flows.shSucNear || 0).toFixed(0)),
+        shSucAcqHeld: parseFloat((flows.shSucAcqHeld || 0).toFixed(0)),
+        shSucTransfer: parseFloat((flows.shSucTransfer || 0).toFixed(1)),
+        shSucAttachTime: parseFloat((flows.shSucAttachTime || 0).toFixed(1)),
         pred_income_metab_ratio: parseFloat((
           (flows.predMetab || 0) > 0 ? (flows.predIncome || 0) / flows.predMetab : 0
         ).toFixed(3)),

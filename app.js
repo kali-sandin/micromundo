@@ -187,6 +187,16 @@
   // fisico (handling huntCooldown + digestTimer). Inerte sin flag __SHADOW.
   const SHADOW_APPARATUS_TETHER = 60;        // alcance tether hipotetico (px)
   const SHADOW_APPARATUS_CONE = Math.PI / 6; // semiangulo cono (30 grados)
+  // task_915 Gate 1 shadow-only: alimentacion suctorial persistente HIPOTETICA.
+  // Contacto = presa gape-compatible dentro de eatRange (misma formula fisica
+  // de feedConsumer). Adquisicion = episodio continuo con la MISMA presa
+  // (deduplica el UB solapado de task_913). Transferencia solo si el episodio
+  // dura >= SH_SUC_MIN_HOLD (piso fisico de handling huntCooldown) y se corta
+  // a SH_SUC_MAX_ATT (max tiempo que una presa tolera el attach). Techo de
+  // ganancia = mismo ceiling ecologico de captura (cap 1.3x energia presa).
+  // Inerte sin flag __SHADOW.predSuctorial.
+  const SH_SUC_MIN_HOLD = 1.8;
+  const SH_SUC_MAX_ATT = 30;
   // task_913 Gate 2: aparato cono+tether morfologico del predator (flag
   // __SPIKE.predTether, inerte en navegador y con flag OFF). Extiende SOLO el
   // alcance de captura predator->consumer hasta PRED_TETHER_RANGE dentro del
@@ -348,7 +358,9 @@
       // task_913 Gate 2: strikes de captura a distancia (cono+tether)
       tetherStrike: 0,
       // task_914 shadow-only: seleccion de presa por rentabilidad (nearest vs score)
-      shSelSteps: 0, shSelDiff: 0, shGainNearSum: 0, shGainScoreSum: 0, shDistNearSum: 0, shDistScoreSum: 0 },
+      shSelSteps: 0, shSelDiff: 0, shGainNearSum: 0, shGainScoreSum: 0, shDistNearSum: 0, shDistScoreSum: 0,
+      // task_915 shadow-only: alimentacion suctorial (adquisiciones dedup por episodio)
+      shSucAcq: 0, shSucAcqHeld: 0, shSucTransfer: 0, shSucAttachTime: 0 },
     flowAccumPrev: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0, photosynthField: 0, photosynthDirect: 0, producerLoss: 0, asexualRepro: 0, birthGain: 0, trophicAmplification: 0, deathDecay: 0, feedGain: 0, fieldClampLoss: 0,
       fnlPreyNear: 0, fnlPreyNear3: 0, fnlContact: 0, fnlRejCooldown: 0, fnlRejSatiety: 0,
       fnlChase: 0, fnlRejChase: 0, fnlRejGape: 0, fnlCapture: 0,
@@ -359,7 +371,9 @@
       // task_913 Gate 2: strikes de captura a distancia (cono+tether)
       tetherStrike: 0,
       // task_914 shadow-only: seleccion de presa por rentabilidad
-      shSelSteps: 0, shSelDiff: 0, shGainNearSum: 0, shGainScoreSum: 0, shDistNearSum: 0, shDistScoreSum: 0 },
+      shSelSteps: 0, shSelDiff: 0, shGainNearSum: 0, shGainScoreSum: 0, shDistNearSum: 0, shDistScoreSum: 0,
+      // task_915 shadow-only: alimentacion suctorial
+      shSucAcq: 0, shSucAcqHeld: 0, shSucTransfer: 0, shSucAttachTime: 0 },
     flowRate: { in: 0, out: 0, balance: 0, transfer: 0 }
   };
 
@@ -2560,6 +2574,63 @@
           if (!e._shdHadOpp) sim.flowAccum.shdEpisodes = (sim.flowAccum.shdEpisodes || 0) + 1;
         }
         e._shdHadOpp = opp;
+      }
+      // task_915 Gate 1 shadow-only: alimentacion suctorial persistente.
+      // Sin cambiar conducta ni queries nuevas: reutiliza `nearby`. Un
+      // episodio de attach solo cuenta UNA adquisicion (dedup por par
+      // predator-presa, corrige el UB por-paso de task_913). La transferencia
+      // proyectada requiere episodio sostenido y usa el ceiling fisico de
+      // captura; el ingreso real seria eta * transfer con eta=.3/.5/.7.
+      if (globalThis.__SHADOW && globalThis.__SHADOW.predSuctorial) {
+        let contact = null, contactD2 = Infinity;
+        sim.flowAccum.shSucSteps = (sim.flowAccum.shSucSteps || 0) + 1;
+        const crBase = e.radius + (e.feeding === 1 ? e.cilia * 2.2 : 3);
+        let gapeOk = 0;
+        for (let i = 0; i < nearby.length; i += 1) {
+          const p = nearby[i];
+          if (!p || !p.alive || p.virtualA || p.dormant) continue;
+          if (p.size / Math.max(1, e.size) > 0.85) continue;
+          gapeOk += 1;
+          const dx = torusDelta(p.x - e.x, WORLD.w), dy = torusDelta(p.y - e.y, WORLD.h);
+          const d2 = dx * dx + dy * dy;
+          const er = crBase + p.radius;
+          if (d2 > er * er) continue;
+          if (d2 < contactD2) { contact = p; contactD2 = d2; }
+        }
+        sim.flowAccum.shSucNear = (sim.flowAccum.shSucNear || 0) + gapeOk;
+        if (contact) {
+          if (e._shSucPrey !== contact) {
+            // cierre de episodio previo (transfer solo si se sostuvo >= MIN_HOLD)
+            if (e._shSucPrey && !e._shSucCapped && e._shSucTime >= SH_SUC_MIN_HOLD) {
+              sim.flowAccum.shSucTransfer += Math.min(e._shSucGain, e._shSucPrey.energy * 1.3);
+              sim.flowAccum.shSucAcqHeld += 1;
+            }
+            // nueva adquisicion (episodio deduplicado por par predator-presa)
+            sim.flowAccum.shSucAcq += 1;
+            e._shSucPrey = contact;
+            e._shSucTime = 0;
+            e._shSucGain = Math.min(92 + contact.size * 16 + contact.reserves * 7, contact.energy * 1.3);
+            e._shSucCapped = false;
+          }
+          if (!e._shSucCapped) {
+            e._shSucTime += dt;
+            sim.flowAccum.shSucAttachTime += dt;
+            if (e._shSucTime >= SH_SUC_MAX_ATT) {
+              // la presa no tolera mas attach: cierra el episodio con transferencia
+              sim.flowAccum.shSucTransfer += e._shSucGain;
+              sim.flowAccum.shSucAcqHeld += 1;
+              e._shSucCapped = true; // no reacumula hasta romper contacto
+            }
+          }
+        } else if (e._shSucPrey) {
+          // episodio roto: cierra sin reacumular la misma presa
+          if (!e._shSucCapped && e._shSucTime >= SH_SUC_MIN_HOLD) {
+            sim.flowAccum.shSucTransfer += Math.min(e._shSucGain, e._shSucPrey.energy * 1.3);
+            sim.flowAccum.shSucAcqHeld += 1;
+          }
+          e._shSucPrey = null;
+          e._shSucCapped = false;
+        }
       }
       // task_912 spike reversible: emboscada sit-and-pursue en vegetacion.
       // Predator en celda de campo denso queda oculto (reposo forzado, metabolismo
