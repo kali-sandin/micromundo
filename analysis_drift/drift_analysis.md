@@ -52,3 +52,22 @@ de las tasks 913-916.
    La migración solo enmascara.
 
 Sin cambios de código en este análisis; artefactos en `analysis_drift/`.
+
+## Addendum: robustez multi-seed (2026-09-01 06:00, HEAD a2b58e0)
+
+Réplica 10m migr ON dt1/60 en seeds 777/8696/16615 (`migr_on_seed777.json`, 3 runs) más el run previo 12345:
+
+| seed | trophicAmp E/s | system_net E/s | predIncome/predMetab | contacto/s | migrantes predator | migrantes pC |
+|---|---|---|---|---|---|---|
+| 12345 | +663.8 | −512.2 | 0.034 | 0.35 | 37 | 54 |
+| 777   | +704.6 | −553.9 | 0.062 | 0.02 | 23 | 45 |
+| 8696  | +690.6 | −540.4 | 0.059 | 0.05 | 22 | 29 |
+| 16615 | +695.5 | −540.4 | 0.055 | 0.09 | 20 | 31 |
+
+Conclusiones reforzadas (4/4 seeds):
+
+1. La creación vía trophicAmp (+664..705 E/s) y el `system_net` negativo (−512..−554) son **estructurales**, no artifact de seed; residual invariante 2.0-2.3%.
+2. El predator "vivo" con migr ON requiere 20-37 migrantes/10m en todas las seeds: sin migración, trayectoria de extinción. Es rescate sistemático, no viabilidad.
+3. Funnel sigue cerrado: predIncome/predMetab 0.03-0.06 y contacto ~0.02-0.35/s, coherente con 910-916.
+
+Recomendación sin cambios: gates de predator con `--migration=off` o exigiendo `migration_totals.predators==0`.
