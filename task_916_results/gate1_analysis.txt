@@ -1,0 +1,15 @@
+=== task_916 Gate 1 shadow-only: stamina de huida de presa (contacto proyectado dedup) ===
+seed 12345: pred=10.4 acq=24 panic=30s depl=14s close=29s transfer=437.9E (0.07E/s/pred)
+  metab=0.0643E/s/pred real=0.0027 -> ratioProj .3=0.328 .5=0.547 .7=0.766 wallSim=0.853
+seed 20264: pred=10.5 acq=25 panic=40s depl=13s close=40s transfer=1128.4E (0.18E/s/pred)
+  metab=0.063E/s/pred real=0.003 -> ratioProj .3=0.856 .5=1.427 .7=1.998 wallSim=0.943
+seed 28183: pred=12 acq=11 panic=30s depl=18s close=29s transfer=417.9E (0.058E/s/pred)
+  metab=0.0625E/s/pred real=0.0033 -> ratioProj .3=0.28 .5=0.467 .7=0.653 wallSim=0.881
+seed 36102: pred=9.7 acq=25 panic=43s depl=16s close=43s transfer=1149E (0.198E/s/pred)
+  metab=0.0627E/s/pred real=0.0037 -> ratioProj .3=0.948 .5=1.58 .7=2.212 wallSim=0.901
+seed 44021: pred=10.1 acq=40 panic=31s depl=14s close=30s transfer=1775.2E (0.293E/s/pred)
+  metab=0.0658E/s/pred real=0.0014 -> ratioProj .3=1.335 .5=2.224 .7=3.114 wallSim=0.932
+
+wallSim medio: shadow916=0.902 vs shadow915=1.004 -> overhead=-10.18%
+seeds con ratioProj(.7)>=0.8: 3/5; media ratioProj(.7)=1.749
+GATE 1 REFUTA (3/5 <0.8 en eta=.7): publicar y cerrar
