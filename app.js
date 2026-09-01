@@ -197,6 +197,15 @@
   // Inerte sin flag __SHADOW.predSuctorial.
   const SH_SUC_MIN_HOLD = 1.8;
   const SH_SUC_MAX_ATT = 30;
+  // task_916 Gate 1 shadow-only: reserva anaerobia de huida de presa HIPOTETICA.
+  // Stamina derivada de magnitudes fisicas existentes (sin tuning libre):
+  // reserva anaerobia = 25% de reserves; coste/s del sprint = surcharge de
+  // panic sobre el metabolismo base (metabFactor 6.5, (panic-1)^2*3, misma
+  // formula de stepMobile). Con stamina S, el boost proyectado decae
+  // linealmente: projPanic = 1 + (panic-1)*S. Inerte sin flag
+  // __SHADOW.preyStamina: no cambia conducta, metabolismo ni queries nuevas.
+  const SH_STA_ANAER_FRAC = 0.25;
+  const SH_STA_BASE_METAB = 6.5;
   // task_913 Gate 2: aparato cono+tether morfologico del predator (flag
   // __SPIKE.predTether, inerte en navegador y con flag OFF). Extiende SOLO el
   // alcance de captura predator->consumer hasta PRED_TETHER_RANGE dentro del
@@ -360,7 +369,9 @@
       // task_914 shadow-only: seleccion de presa por rentabilidad (nearest vs score)
       shSelSteps: 0, shSelDiff: 0, shGainNearSum: 0, shGainScoreSum: 0, shDistNearSum: 0, shDistScoreSum: 0,
       // task_915 shadow-only: alimentacion suctorial (adquisiciones dedup por episodio)
-      shSucAcq: 0, shSucAcqHeld: 0, shSucTransfer: 0, shSucAttachTime: 0 },
+      shSucAcq: 0, shSucAcqHeld: 0, shSucTransfer: 0, shSucAttachTime: 0,
+      // task_916 shadow-only: stamina de presa (proyeccion de contacto)
+      shStaSteps: 0, shStaPanicTime: 0, shStaDeplTime: 0, shStaAcq: 0, shStaTransfer: 0, shStaCloseTime: 0 },
     flowAccumPrev: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0, photosynthField: 0, photosynthDirect: 0, producerLoss: 0, asexualRepro: 0, birthGain: 0, trophicAmplification: 0, deathDecay: 0, feedGain: 0, fieldClampLoss: 0,
       fnlPreyNear: 0, fnlPreyNear3: 0, fnlContact: 0, fnlRejCooldown: 0, fnlRejSatiety: 0,
       fnlChase: 0, fnlRejChase: 0, fnlRejGape: 0, fnlCapture: 0,
@@ -373,7 +384,9 @@
       // task_914 shadow-only: seleccion de presa por rentabilidad
       shSelSteps: 0, shSelDiff: 0, shGainNearSum: 0, shGainScoreSum: 0, shDistNearSum: 0, shDistScoreSum: 0,
       // task_915 shadow-only: alimentacion suctorial
-      shSucAcq: 0, shSucAcqHeld: 0, shSucTransfer: 0, shSucAttachTime: 0 },
+      shSucAcq: 0, shSucAcqHeld: 0, shSucTransfer: 0, shSucAttachTime: 0,
+      // task_916 shadow-only: stamina de presa
+      shStaSteps: 0, shStaPanicTime: 0, shStaDeplTime: 0, shStaAcq: 0, shStaTransfer: 0, shStaCloseTime: 0 },
     flowRate: { in: 0, out: 0, balance: 0, transfer: 0 }
   };
 
@@ -2077,6 +2090,57 @@
     }
     e.x += lutCos(e.angle) * e.speed * ciliaPulse * burst * panic * vegFactor * dispersionFactor * ambushLungeFactor * dt;
     e.y += lutSin(e.angle) * e.speed * ciliaPulse * burst * panic * vegFactor * dispersionFactor * ambushLungeFactor * dt;
+    // task_916 Gate 1 shadow-only: reserva anaerobia de huida de presa.
+    // Sin cambiar conducta ni queries nuevas. Modela stamina S (0..1) con
+    // reserva anaerobia = 25% reserves y coste/s = surcharge de panic sobre el
+    // metabolismo base. Proyecta: boost de huida decae con S, y un integrador
+    // gemelo de distancia predador-presa (solo persiguiendo: closing>0)
+    // estima contactos fisicos proyectados. Cada contacto proyectado cuenta
+    // UNA captura dedup por episodio con la economia fisica de captura
+    // (cap 1.3x energia de la presa, misma formula que task_915).
+    if (globalThis.__SHADOW && globalThis.__SHADOW.preyStamina && e.type === TYPE.CONSUMER) {
+      const anaerE = Math.max(1, e.reserves * SH_STA_ANAER_FRAC);
+      if (e._shSta === undefined) e._shSta = 1;
+      if (threat) {
+        sim.flowAccum.shStaSteps = (sim.flowAccum.shStaSteps || 0) + 1;
+        sim.flowAccum.shStaPanicTime += dt;
+        const panicCost = e.metabolism * SH_STA_BASE_METAB * (panic - 1) * (panic - 1) * 3;
+        e._shSta = Math.max(0, e._shSta - (panicCost * dt) / anaerE);
+        if (e._shSta <= 0.05) sim.flowAccum.shStaDeplTime += dt;
+        const projPanic = 1 + (panic - 1) * e._shSta;
+        const { dx: tdx, dy: tdy } = torusVector(e, threat);
+        const dist = Math.sqrt(tdx * tdx + tdy * tdy);
+        const away = Math.atan2(-tdy, -tdx);
+        const radialFrac = Math.max(0, Math.cos(normalizeAngle(e.angle - away)));
+        const preyRadialBase = (e.speed * ciliaPulse * burst * vegFactor * radialFrac) / panic;
+        const projAway = preyRadialBase * projPanic;
+        let predVeg = 1;
+        if (sim.producerField.mass.length) {
+          const fm = sim.producerField.mass[fieldIndex(fieldCellX(threat.x), fieldCellY(threat.y))];
+          if (fm > 1.2) predVeg = 0.6;
+        }
+        const closing = threat.speed * predVeg - projAway;
+        const contactRange = e.radius + threat.radius + 3;
+        if (e._shStaPrey !== threat) { e._shStaPrey = threat; e._shStaD = dist; }
+        if (closing > 0 && dist > contactRange) {
+          sim.flowAccum.shStaCloseTime += dt;
+          e._shStaD = Math.max(contactRange, e._shStaD - closing * dt);
+        } else {
+          e._shStaD = dist; // la presa reabre el hueco: resetea el gemelo
+        }
+        if (e._shStaD <= contactRange && closing > 0) {
+          // contacto proyectado: UNA captura por episodio de persecucion
+          sim.flowAccum.shStaAcq += 1;
+          sim.flowAccum.shStaTransfer += Math.min(92 + e.size * 16 + e.reserves * 7, e.energy * 1.3);
+          e._shStaPrey = null; // exige romper y reabrir para reacumular
+          e._shStaD = dist;
+        }
+      } else {
+        // recuperacion aerobica en reposo de amenaza: metabolismo ordinario
+        e._shSta = Math.min(1, e._shSta + (dt * e.metabolism * 1.6) / anaerE);
+        e._shStaPrey = null;
+      }
+    }
     wrapInsideWorld(e);
   }
 

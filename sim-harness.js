@@ -88,9 +88,9 @@ function parseArgs() {
         // --shadow=pred-apparatus=on|pred-profit=on  (task_913/task_914: medicion shadow-only)
         for (const part of val.split(',')) {
           if (!part) continue;
-          const m2 = part.match(/^(pred-apparatus|pred-profit|pred-suctorial)=(on|off|true|false|1|0)$/);
-          if (!m2) { console.error(`[args] --shadow expects pred-apparatus|pred-profit|pred-suctorial=on|off (got: ${part})`); process.exit(2); }
-          opts.shadow[{ 'pred-apparatus': 'predApparatus', 'pred-profit': 'predProfit', 'pred-suctorial': 'predSuctorial' }[m2[1]]] = ['on', 'true', '1'].includes(m2[2]);
+          const m2 = part.match(/^(pred-apparatus|pred-profit|pred-suctorial|prey-stamina)=(on|off|true|false|1|0)$/);
+          if (!m2) { console.error(`[args] --shadow expects pred-apparatus|pred-profit|pred-suctorial|prey-stamina=on|off (got: ${part})`); process.exit(2); }
+          opts.shadow[{ 'pred-apparatus': 'predApparatus', 'pred-profit': 'predProfit', 'pred-suctorial': 'predSuctorial', 'prey-stamina': 'preyStamina' }[m2[1]]] = ['on', 'true', '1'].includes(m2[2]);
         }
         break;
       }
@@ -297,7 +297,9 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     // task_914 shadow-only: seleccion de presa nearest-vs-score
     'shSelSteps', 'shSelDiff', 'shGainNearSum', 'shGainScoreSum', 'shDistNearSum', 'shDistScoreSum',
     // task_915 shadow-only: suctorial (dedup por episodio)
-    'shSucSteps', 'shSucNear', 'shSucAcq', 'shSucAcqHeld', 'shSucTransfer', 'shSucAttachTime'];
+    'shSucSteps', 'shSucNear', 'shSucAcq', 'shSucAcqHeld', 'shSucTransfer', 'shSucAttachTime',
+    // task_916 shadow-only: stamina de presa (contacto proyectado dedup)
+    'shStaSteps', 'shStaPanicTime', 'shStaDeplTime', 'shStaAcq', 'shStaTransfer', 'shStaCloseTime'];
   let prevFlowAccum = {};
   function snapshotFlowAccum() {
     const snap = {};
@@ -672,6 +674,13 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
         shSucAcqHeld: parseFloat((flows.shSucAcqHeld || 0).toFixed(0)),
         shSucTransfer: parseFloat((flows.shSucTransfer || 0).toFixed(1)),
         shSucAttachTime: parseFloat((flows.shSucAttachTime || 0).toFixed(1)),
+        // task_916 shadow-only: stamina de presa (contactos proyectados, transfer)
+        shStaSteps: parseFloat((flows.shStaSteps || 0).toFixed(0)),
+        shStaPanicTime: parseFloat((flows.shStaPanicTime || 0).toFixed(1)),
+        shStaDeplTime: parseFloat((flows.shStaDeplTime || 0).toFixed(1)),
+        shStaAcq: parseFloat((flows.shStaAcq || 0).toFixed(0)),
+        shStaTransfer: parseFloat((flows.shStaTransfer || 0).toFixed(1)),
+        shStaCloseTime: parseFloat((flows.shStaCloseTime || 0).toFixed(1)),
         pred_income_metab_ratio: parseFloat((
           (flows.predMetab || 0) > 0 ? (flows.predIncome || 0) / flows.predMetab : 0
         ).toFixed(3)),
