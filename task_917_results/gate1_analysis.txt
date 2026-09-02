@@ -1,0 +1,14 @@
+task_917 Gate 1: ledger P-A campo-consumer (shadow, migr OFF, 5x10m, dt 1/60)
+
+seed    | wallSim | paridadP50% | paridadP95% | ampShareP50% | ampShareP95% | fotoField/s | tAmp/s | ext
+12345   |   0.70x |       0.02 |       0.13 |       91.52 |       92.09 |      72.67 |  673.1 | 2
+20264   |   0.85x |       0.02 |       0.12 |       91.57 |       92.08 |      71.62 |  653.4 | 2
+28183   |   0.82x |       0.02 |       0.14 |       91.47 |       92.17 |      73.69 |  694.4 | 2
+36102   |   0.79x |       0.02 |       0.12 |       91.47 |       92.00 |      72.46 |  667.8 | 2
+44021   |   0.87x |       0.02 |       0.13 |       91.67 |       92.07 |      72.25 |  667.0 | 2
+
+GATE PARIDAD campo (p95<=2%): PASS
+GATE INPUT NO SOLAR (tAmp/intake p95<=2%): FAIL
+GATE COSTE (<=5%): analisis post-run, sin cambios en sim -> coste estructural 0; wallSim arriba
+
+VEREDICTO Gate 1: REFUTADO -> publicar datos/tests y cerrar sin tocar x18
