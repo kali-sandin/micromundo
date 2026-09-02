@@ -13,6 +13,7 @@ más allá del patrón estructural OFF ya conocido (pérdida de predator y pC).
 | 51940 | 52f667c | 0.456   | 72 | 0  | 1941      | extinto  | 2 |
 | 61111 | 269617d | 0.450   | 72 | 0  | 1987      | extinto  | 2 |
 | 42424 | 52fc6ef | 0.479   | 72 | 0  | 1880      | extinto  | 2 |
+| 88888 | ce41d16 | 0.448   | 72 | 0  | 1952      | ext t≈230 | 2 (pC t≈270, pred t≈230) |
 
 Previa 3m OFF seed12345 en `ba4587f` (head_ba4587f_3m_off.json): consumers 707,
 pB 72, pC 12, predator 24 (declive predator OFF conocido, coherente).
@@ -24,7 +25,7 @@ registradas en contador (carreras cortas con declive parcial). Mismo patrón.
 
 ## Conclusión
 
-- Patrón estructural OFF reproducible en 6 commits y ≥6 seeds: predator y pC
+- Patrón estructural OFF reproducible en 7 commits y ≥7 seeds: predator y pC
   tienden a extinguirse sin migración; consumers 1880-2013 en régimen; pB
   clavado en 72; pA density 0.44-0.48.
 - Ninguna regresión nueva atribuible a los checkpoints de task_917 (ledger
@@ -38,5 +39,6 @@ registradas en contador (carreras cortas con declive parcial). Mismo patrón.
 - `reg10m_off_head_52f667c_seed51940.{json,log}`
 - `reg10m_off_head_269617d_seed61111.{json,log}`
 - `reg10m_off_head_52fc6ef_seed42424.{json,log}`
+- `reg10m_off_head_ce41d16_seed88888.{json,log}` (suite 90/90 OK en el mismo commit)
 - `reg10m_off_head_13cecd3_seed54321.json`
 - `head_ba4587f_3m_off.json`
