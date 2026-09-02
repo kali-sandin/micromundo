@@ -1,0 +1,6093 @@
+{
+  "meta": {
+    "tool": "sim-harness.js",
+    "version": "1.0",
+    "git_commit": "3c87454",
+    "timestamp": "2026-09-02T02:13:37.627Z",
+    "config": {
+      "duration_min": 10,
+      "duration_sec": 600,
+      "seeds": [
+        777
+      ],
+      "seed_count": 1,
+      "dt": 0.016666666666666666,
+      "interval_sec": 30,
+      "migration": false,
+      "ablation": {},
+      "spike": {},
+      "shadow": {}
+    }
+  },
+  "aggregate": {
+    "seeds": 1,
+    "ablation": {},
+    "spike": {},
+    "shadow": {},
+    "populations": {
+      "producerA_density": {
+        "mean": 0.4356,
+        "stdev": 0,
+        "min": 0.4356,
+        "max": 0.4356
+      },
+      "producerB": {
+        "mean": 72,
+        "stdev": 0,
+        "min": 72,
+        "max": 72
+      },
+      "producerC": {
+        "mean": 0,
+        "stdev": 0,
+        "min": 0,
+        "max": 0
+      },
+      "consumers": {
+        "mean": 2013,
+        "stdev": 0,
+        "min": 2013,
+        "max": 2013
+      },
+      "predators": {
+        "mean": 0,
+        "stdev": 0,
+        "min": 0,
+        "max": 0
+      }
+    },
+    "energy": {
+      "producer": {
+        "mean": 2879.2,
+        "stdev": 0
+      },
+      "consumer": {
+        "mean": 122776.3,
+        "stdev": 0
+      },
+      "predator": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "field": {
+        "mean": 7754.4,
+        "stdev": 0
+      },
+      "carcass": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "avg": {
+        "mean": 60.67,
+        "stdev": 0
+      }
+    },
+    "percentiles": {
+      "populations": {
+        "producerB": {
+          "p50_mean": 72,
+          "p50_stdev": 0,
+          "p95_mean": 72,
+          "p95_stdev": 0
+        },
+        "producerC": {
+          "p50_mean": 2,
+          "p50_stdev": 0,
+          "p95_mean": 132,
+          "p95_stdev": 0
+        },
+        "consumers": {
+          "p50_mean": 825,
+          "p50_stdev": 0,
+          "p95_mean": 1894,
+          "p95_stdev": 0
+        },
+        "predators": {
+          "p50_mean": 4,
+          "p50_stdev": 0,
+          "p95_mean": 30,
+          "p95_stdev": 0
+        }
+      },
+      "energy": {
+        "producer": {
+          "p50_mean": 2828,
+          "p50_stdev": 0,
+          "p95_mean": 3595.8,
+          "p95_stdev": 0
+        },
+        "consumer": {
+          "p50_mean": 59270.1,
+          "p50_stdev": 0,
+          "p95_mean": 121197.5,
+          "p95_stdev": 0
+        },
+        "predator": {
+          "p50_mean": 8.9,
+          "p50_stdev": 0,
+          "p95_mean": 3116.2,
+          "p95_stdev": 0
+        },
+        "field": {
+          "p50_mean": 10672.5,
+          "p50_stdev": 0,
+          "p95_mean": 13212.8,
+          "p95_stdev": 0
+        },
+        "avg": {
+          "p50_mean": 63.33,
+          "p50_stdev": 0,
+          "p95_mean": 75.46,
+          "p95_stdev": 0
+        }
+      }
+    },
+    "rates": {
+      "births_per_sec": {
+        "mean": 3.998,
+        "stdev": 0
+      },
+      "deaths_per_sec": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "total_births": {
+        "mean": 1306,
+        "stdev": 0
+      },
+      "total_deaths": {
+        "mean": 271,
+        "stdev": 0
+      }
+    },
+    "flows": {
+      "graze": {
+        "mean": 64.99454999999999,
+        "stdev": 0
+      },
+      "colonyFeed": {
+        "mean": 6.787100000000001,
+        "stdev": 0
+      },
+      "prodCGraze": {
+        "mean": 4.7183,
+        "stdev": 0
+      },
+      "predation": {
+        "mean": 0.2801,
+        "stdev": 0
+      },
+      "carcassEat": {
+        "mean": 0.126,
+        "stdev": 0
+      },
+      "metabolism": {
+        "mean": 511.64605,
+        "stdev": 0
+      },
+      "reproduction": {
+        "mean": 170.53294999999997,
+        "stdev": 0
+      },
+      "excretion": {
+        "mean": 0.74875,
+        "stdev": 0
+      },
+      "thermal": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "carcassExpire": {
+        "mean": 0.16835,
+        "stdev": 0
+      },
+      "photosynthField": {
+        "mean": 72.87485,
+        "stdev": 0
+      },
+      "photosynthDirect": {
+        "mean": 16.199949999999998,
+        "stdev": 0
+      },
+      "trophicAmplification": {
+        "mean": 682.4995,
+        "stdev": 0
+      },
+      "feedGain": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "deathDecay": {
+        "mean": 0.3057,
+        "stdev": 0
+      },
+      "fnlPreyNear": {
+        "mean": 70.4275,
+        "stdev": 0
+      },
+      "fnlPreyNear3": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "fnlContact": {
+        "mean": 0.135,
+        "stdev": 0
+      },
+      "fnlRejCooldown": {
+        "mean": 0.11000000000000001,
+        "stdev": 0
+      },
+      "fnlRejSatiety": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "fnlChase": {
+        "mean": 0.025,
+        "stdev": 0
+      },
+      "fnlRejChase": {
+        "mean": 0.0035000000000000005,
+        "stdev": 0
+      },
+      "fnlRejGape": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "fnlCapture": {
+        "mean": 0.022,
+        "stdev": 0
+      },
+      "predIncome": {
+        "mean": 0.40615000000000007,
+        "stdev": 0
+      },
+      "predMetab": {
+        "mean": 6.612849999999999,
+        "stdev": 0
+      },
+      "predThermal": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "pursuitChase": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "pursuitCoast": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "ambushHide": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "ambushLunge": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "ambushProbe": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "ambushProbeDense": {
+        "mean": 0,
+        "stdev": 0
+      },
+      "photosynth": {
+        "mean": 89.0748,
+        "stdev": 0
+      },
+      "trueInputs": {
+        "mean": 89.0748,
+        "stdev": 0
+      },
+      "destruction": {
+        "mean": 621.00355,
+        "stdev": 0
+      },
+      "system_net": {
+        "mean": -531.92875,
+        "stdev": 0
+      },
+      "balance_in": {
+        "mean": 122.955,
+        "stdev": 0
+      },
+      "balance_out": {
+        "mean": 958.84,
+        "stdev": 0
+      },
+      "net": {
+        "mean": -835.885,
+        "stdev": 0
+      },
+      "system_net_last": {
+        "mean": -1053.313,
+        "stdev": 0
+      },
+      "field_input": {
+        "mean": 122.955,
+        "stdev": 0
+      },
+      "mobile_loss": {
+        "mean": 957.488,
+        "stdev": 0
+      },
+      "internal_transfer": {
+        "mean": 257.566,
+        "stdev": 0
+      },
+      "_last": {
+        "graze": {
+          "mean": 113.82,
+          "stdev": 0
+        },
+        "colonyFeed": {
+          "mean": 9.134,
+          "stdev": 0
+        },
+        "prodCGraze": {
+          "mean": 0,
+          "stdev": 0
+        },
+        "predation": {
+          "mean": 0,
+          "stdev": 0
+        },
+        "carcassEat": {
+          "mean": 0,
+          "stdev": 0
+        },
+        "metabolism": {
+          "mean": 957.488,
+          "stdev": 0
+        },
+        "reproduction": {
+          "mean": 300.017,
+          "stdev": 0
+        },
+        "excretion": {
+          "mean": 1.352,
+          "stdev": 0
+        },
+        "thermal": {
+          "mean": 0,
+          "stdev": 0
+        },
+        "carcassExpire": {
+          "mean": 0,
+          "stdev": 0
+        },
+        "photosynth": {
+          "mean": 93.415,
+          "stdev": 0
+        },
+        "system_net": {
+          "mean": -1053.313,
+          "stdev": 0
+        }
+      }
+    },
+    "extinctions": {
+      "total": 2,
+      "per_run": [
+        2
+      ],
+      "mean": 2
+    },
+    "survival": {
+      "groups_alive_mean": 2,
+      "all_survived": false,
+      "any_extinction": true
+    },
+    "stability": {
+      "cv_consumers": 0,
+      "cv_predators": 0
+    },
+    "performance": {
+      "wall_time_ms": {
+        "mean": 716419,
+        "stdev": 0
+      },
+      "speed_factor": {
+        "mean": 0.8,
+        "stdev": 0
+      }
+    },
+    "dimensional_invariante": {
+      "entity_residual_max": {
+        "mean": 2.31,
+        "max": 2.31
+      },
+      "entity_residual_median": {
+        "mean": 0.333
+      },
+      "field_residual_max": {
+        "mean": 0.001,
+        "max": 0.001
+      },
+      "field_residual_median": {
+        "mean": 0
+      }
+    }
+  },
+  "verdict": {
+    "all_pass": false,
+    "checks": [
+      {
+        "name": "Survival >= 1/1 (got 0)",
+        "pass": false
+      },
+      {
+        "name": "CV consumers <= 0.25 (got 0.000)",
+        "pass": true
+      },
+      {
+        "name": "CV predators <= 0.25 (got 0.000)",
+        "pass": true
+      },
+      {
+        "name": "Energy pool drift <= 10% (max 2.406, avg NET -531.9 E/s)",
+        "pass": false
+      },
+      {
+        "name": "Extinctions = 0 (got 2)",
+        "pass": false
+      },
+      {
+        "name": "No guild lost in any run",
+        "pass": false
+      },
+      {
+        "name": "Diversity gene CV >= 20% (max 0.907)",
+        "pass": true
+      },
+      {
+        "name": "Population decline <= 5%/10min (max 0.0%)",
+        "pass": true
+      }
+    ]
+  },
+  "runs": [
+    {
+      "seed": 777,
+      "git_commit": "3c87454",
+      "duration_sim_sec": 600,
+      "wall_time_ms": 716419,
+      "speed_factor": 0.8,
+      "dt": 0.016666666666666666,
+      "effective_dt": 0.016666666666666666,
+      "chunks_per_step": 1,
+      "interval_sec": 30,
+      "migration_enabled": false,
+      "metrics": [
+        {
+          "t": 0,
+          "populations": {
+            "producerA_density": 0.1433,
+            "producerB": 72,
+            "producerC": 228,
+            "consumers": 720,
+            "predators": 30,
+            "total_creatures": 1050
+          },
+          "energy": {
+            "producer": 4022.5,
+            "consumer": 32144,
+            "predator": 3882.1,
+            "field": 2551.5,
+            "carcass": 0,
+            "mobile_sum": 36026.1,
+            "avg": 38.14,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 0,
+            "deaths_per_sec": 0,
+            "births_total": 0,
+            "deaths_total": 0,
+            "births_net_total": 0,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 0,
+            "colonyFeed": 0,
+            "prodCGraze": 0,
+            "predation": 0,
+            "carcassEat": 0,
+            "metabolism": 0,
+            "reproduction": 0,
+            "excretion": 0,
+            "thermal": 0,
+            "carcassExpire": 0,
+            "photosynthField": 0,
+            "photosynthDirect": 0,
+            "photosynth": 0,
+            "trophicAmplification": 0,
+            "deathDecay": 0,
+            "trueInputs": 0,
+            "destruction": 0,
+            "producerLoss": 0,
+            "birthGain": 0,
+            "reproductiveWaste": 0,
+            "balance_in": 0,
+            "balance_out": 0,
+            "system_net": 0,
+            "field_input": 0,
+            "mobile_loss": 0,
+            "carcass_loss": 0,
+            "mobile_to_field": 0,
+            "internal_transfer": 0,
+            "fnlPreyNear": 0,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0,
+            "predIncome": 0,
+            "predMetab": 0,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0,
+            "residual_pct": 100,
+            "residual_throughput_pct": 90246.565,
+            "system_energy": 40048.5,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 0,
+            "field_extraction": 0,
+            "field_deposits": 0,
+            "field_clamp": 0,
+            "field_delta": 0
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 2551.5159415751687
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 16.378297601395886,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 18,
+                "leafEnergy": 12.534245087577599,
+                "leafCount": 4.444444444444445,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.801611545168441,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 0,
+                "leafEnergy": 8.150381952752412,
+                "leafCount": 1.1358024691358004,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 228,
+              "avg": {
+                "radius": 4.729223120878401,
+                "armor": 2.8145699472160977,
+                "fertility": 0.024680312032769245,
+                "perception": 150,
+                "energy": 8,
+                "maxAge": 6510.328166447665
+              },
+              "variance": {
+                "radius": 0.3904193098635318,
+                "armor": 0.1104304913684544,
+                "fertility": 0.000006835243362810113,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 784697.374340266
+              }
+            },
+            "consumer": {
+              "n": 720,
+              "avg": {
+                "size": 2.2209734112388655,
+                "reserves": 4.6513148523364185,
+                "flagella": 1,
+                "cilia": 2.0083333333333333,
+                "chemosense": 1.657979096838658,
+                "pseudopodia": 1.0348124169523858,
+                "armor": 0.5865634209316724,
+                "vacuole": 1.1766960494249679,
+                "fertility": 0.9725904413505485,
+                "perception": 150,
+                "metabolism": 0.08728284236332737,
+                "maxEnergy": 122.9758009834226
+              },
+              "variance": {
+                "size": 0.12496964348946449,
+                "reserves": 0.5908674978266788,
+                "flagella": 0.6666666666666667,
+                "cilia": 0.705486111111111,
+                "chemosense": 0.0757975640547488,
+                "pseudopodia": 0.036178521278091846,
+                "armor": 0.010225707024192121,
+                "vacuole": 0.02578480303529873,
+                "fertility": 0.012374674982526201,
+                "perception": 0,
+                "metabolism": 0.00024365003479150538,
+                "maxEnergy": 154.089753178725
+              }
+            },
+            "predator": {
+              "n": 30,
+              "avg": {
+                "size": 4.813159575282011,
+                "reserves": 12.370744087893694,
+                "flagella": 2.6333333333333333,
+                "cilia": 1,
+                "chemosense": 2.4369870343490048,
+                "pseudopodia": 0.7411006870951787,
+                "armor": 2.099201472810168,
+                "vacuole": 1.3506019615768576,
+                "fertility": 1.1005413595801758,
+                "perception": 150,
+                "metabolism": 0.17346037918490959,
+                "maxEnergy": 263.9445495111512
+              },
+              "variance": {
+                "size": 0.512471096479107,
+                "reserves": 3.369636641608224,
+                "flagella": 0.8988888888888891,
+                "cilia": 0.6666666666666667,
+                "chemosense": 0.12548638805990997,
+                "pseudopodia": 0.020209567440389042,
+                "armor": 0.15119137731407406,
+                "vacuole": 0.03338628594195736,
+                "fertility": 0.013156344270485176,
+                "perception": 0,
+                "metabolism": 0.0007609363354870273,
+                "maxEnergy": 918.5107275491173
+              }
+            }
+          }
+        },
+        {
+          "t": 30,
+          "populations": {
+            "producerA_density": 0.2116,
+            "producerB": 72,
+            "producerC": 132,
+            "consumers": 715,
+            "predators": 30,
+            "total_creatures": 949
+          },
+          "energy": {
+            "producer": 3595.8,
+            "consumer": 27513.7,
+            "predator": 3116.2,
+            "field": 3766.8,
+            "carcass": 34.6,
+            "mobile_sum": 30854,
+            "avg": 36.3,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 0,
+            "deaths_per_sec": 3.365,
+            "births_total": 0,
+            "deaths_total": 101,
+            "births_net_total": 0,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 19.402,
+            "colonyFeed": 7.052,
+            "prodCGraze": 27.149,
+            "predation": 2.101,
+            "carcassEat": 0.585,
+            "metabolism": 373.955,
+            "reproduction": 0,
+            "excretion": 0.674,
+            "thermal": 0,
+            "carcassExpire": 0.986,
+            "photosynthField": 59.059,
+            "photosynthDirect": 32.885,
+            "photosynth": 91.944,
+            "trophicAmplification": 151.269,
+            "deathDecay": 2.357,
+            "trueInputs": 91.944,
+            "destruction": 395.559,
+            "producerLoss": 18.261,
+            "birthGain": 0,
+            "reproductiveWaste": 0,
+            "balance_in": 54.187,
+            "balance_out": 375.772,
+            "system_net": -303.615,
+            "field_input": 53.602,
+            "mobile_loss": 373.955,
+            "carcass_loss": 0.986,
+            "mobile_to_field": 0.831,
+            "internal_transfer": 57.12,
+            "fnlPreyNear": 209.75,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0.17,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0.17,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0.17,
+            "predIncome": 2.687,
+            "predMetab": 26.904,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0.1,
+            "residual_pct": 0.001,
+            "residual_throughput_pct": 0,
+            "system_energy": 34260.3,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 59.059,
+            "field_extraction": 19.402,
+            "field_deposits": 0.831,
+            "field_clamp": 0,
+            "field_delta": 1215.33
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 3766.8461013938913
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 16.809912526596584,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 18.934908916442417,
+                "leafEnergy": 11.803810469041824,
+                "leafCount": 3.4583333333333335,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.7869559560958805,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 1.7520609981350503,
+                "leafEnergy": 28.07775942070299,
+                "leafCount": 2.9149305555555554,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 132,
+              "avg": {
+                "radius": 4.7311215464097005,
+                "armor": 2.8042643785022974,
+                "fertility": 0.024934983999460654,
+                "perception": 150,
+                "energy": 10.474168682427058,
+                "maxAge": 6524.040638302084
+              },
+              "variance": {
+                "radius": 0.37509681225501623,
+                "armor": 0.10981680231148161,
+                "fertility": 0.00000694640527116458,
+                "perception": 0,
+                "energy": 0.6169666351180894,
+                "maxAge": 703179.2738056332
+              }
+            },
+            "consumer": {
+              "n": 715,
+              "avg": {
+                "size": 2.219304873553143,
+                "reserves": 4.648467558186922,
+                "flagella": 1.006993006993007,
+                "cilia": 2.0083916083916082,
+                "chemosense": 1.6569362022779957,
+                "pseudopodia": 1.0359547599720484,
+                "armor": 0.5864935474202,
+                "vacuole": 1.1765366116364424,
+                "fertility": 0.9728672224143226,
+                "perception": 150,
+                "metabolism": 0.08739414102795968,
+                "maxEnergy": 122.91884074981363
+              },
+              "variance": {
+                "size": 0.124555993060536,
+                "reserves": 0.5905511021143717,
+                "flagella": 0.66428676218886,
+                "cilia": 0.710419091398113,
+                "chemosense": 0.07601428885169126,
+                "pseudopodia": 0.036163121818240995,
+                "armor": 0.010254134959176264,
+                "vacuole": 0.02565892971852901,
+                "fertility": 0.012325541571542864,
+                "perception": 0,
+                "metabolism": 0.00024352243840380147,
+                "maxEnergy": 153.92980042525596
+              }
+            },
+            "predator": {
+              "n": 30,
+              "avg": {
+                "size": 4.813159575282011,
+                "reserves": 12.370744087893694,
+                "flagella": 2.6333333333333333,
+                "cilia": 1,
+                "chemosense": 2.4369870343490048,
+                "pseudopodia": 0.7411006870951787,
+                "armor": 2.099201472810168,
+                "vacuole": 1.3506019615768576,
+                "fertility": 1.1005413595801758,
+                "perception": 150,
+                "metabolism": 0.17346037918490959,
+                "maxEnergy": 263.9445495111512
+              },
+              "variance": {
+                "size": 0.512471096479107,
+                "reserves": 3.369636641608224,
+                "flagella": 0.8988888888888891,
+                "cilia": 0.6666666666666667,
+                "chemosense": 0.12548638805990997,
+                "pseudopodia": 0.020209567440389042,
+                "armor": 0.15119137731407406,
+                "vacuole": 0.03338628594195736,
+                "fertility": 0.013156344270485176,
+                "perception": 0,
+                "metabolism": 0.0007609363354870273,
+                "maxEnergy": 918.5107275491173
+              }
+            }
+          }
+        },
+        {
+          "t": 60,
+          "populations": {
+            "producerA_density": 0.2898,
+            "producerB": 72,
+            "producerC": 90,
+            "consumers": 714,
+            "predators": 29,
+            "total_creatures": 905
+          },
+          "energy": {
+            "producer": 3460.2,
+            "consumer": 23714.3,
+            "predator": 2306.8,
+            "field": 5158.4,
+            "carcass": 16.9,
+            "mobile_sum": 26021.1,
+            "avg": 32.58,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 0,
+            "deaths_per_sec": 1.466,
+            "births_total": 0,
+            "deaths_total": 145,
+            "births_net_total": 0,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 25.401,
+            "colonyFeed": 5.078,
+            "prodCGraze": 16.211,
+            "predation": 1.148,
+            "carcassEat": 1.084,
+            "metabolism": 372.363,
+            "reproduction": 0,
+            "excretion": 0.664,
+            "thermal": 0,
+            "carcassExpire": 0.989,
+            "photosynthField": 70.928,
+            "photosynthDirect": 25.949,
+            "photosynth": 96.876,
+            "trophicAmplification": 179.324,
+            "deathDecay": 1.397,
+            "trueInputs": 96.876,
+            "destruction": 388.491,
+            "producerLoss": 13.742,
+            "birthGain": 0,
+            "reproductiveWaste": 0,
+            "balance_in": 47.774,
+            "balance_out": 374.186,
+            "system_net": -291.614,
+            "field_input": 46.69,
+            "mobile_loss": 372.363,
+            "carcass_loss": 0.989,
+            "mobile_to_field": 0.834,
+            "internal_transfer": 49.756,
+            "fnlPreyNear": 367.36,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0.03,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0.03,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0.03,
+            "predIncome": 2.232,
+            "predMetab": 25.718,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0.087,
+            "residual_pct": 0,
+            "residual_throughput_pct": 0,
+            "system_energy": 29498.2,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 70.928,
+            "field_extraction": 25.401,
+            "field_deposits": 0.834,
+            "field_clamp": 0,
+            "field_delta": 1391.604
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 5158.449764195518
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 17.238670011868013,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 20.012754002511397,
+                "leafEnergy": 11.790058299254616,
+                "leafCount": 3.125,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.7736661063140104,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 2.7316094613483415,
+                "leafEnergy": 38.77358364449404,
+                "leafCount": 3.3038194444444446,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 90,
+              "avg": {
+                "radius": 4.719387207378583,
+                "armor": 2.799726410874744,
+                "fertility": 0.024803918667761243,
+                "perception": 150,
+                "energy": 13.004123476920032,
+                "maxAge": 6488.59256727285
+              },
+              "variance": {
+                "radius": 0.385632057201434,
+                "armor": 0.11366623669833054,
+                "fertility": 0.000006102289667266536,
+                "perception": 0,
+                "energy": 1.4041814543911926,
+                "maxAge": 664915.0639476255
+              }
+            },
+            "consumer": {
+              "n": 714,
+              "avg": {
+                "size": 2.2197771928489396,
+                "reserves": 4.648927381317393,
+                "flagella": 1.0084033613445378,
+                "cilia": 2.008403361344538,
+                "chemosense": 1.656361003553026,
+                "pseudopodia": 1.0358732280501965,
+                "armor": 0.5866003855886223,
+                "vacuole": 1.1761885869581183,
+                "fertility": 0.9726048156555676,
+                "perception": 150,
+                "metabolism": 0.0874198752795738,
+                "maxEnergy": 122.9280499089497
+              },
+              "variance": {
+                "size": 0.12457093508530459,
+                "reserves": 0.5912270268206861,
+                "flagella": 0.6637949297366006,
+                "cilia": 0.7114139773556483,
+                "chemosense": 0.07588419113627776,
+                "pseudopodia": 0.03620901751842798,
+                "armor": 0.010260335200856785,
+                "vacuole": 0.025608264953528304,
+                "fertility": 0.012293571260274638,
+                "perception": 0,
+                "metabolism": 0.0002433899962748145,
+                "maxEnergy": 154.08475022346101
+              }
+            },
+            "predator": {
+              "n": 29,
+              "avg": {
+                "size": 4.8453964205203315,
+                "reserves": 12.369159123695923,
+                "flagella": 2.586206896551724,
+                "cilia": 1.0344827586206897,
+                "chemosense": 2.4309138832923987,
+                "pseudopodia": 0.7474861664271617,
+                "armor": 2.0984468770696796,
+                "vacuole": 1.3569258029542213,
+                "fertility": 1.0962458021957915,
+                "perception": 150,
+                "metabolism": 0.17210026407376758,
+                "maxEnergy": 264.1508630228567
+              },
+              "variance": {
+                "size": 0.4989660878714872,
+                "reserves": 3.4857556452149936,
+                "flagella": 0.8632580261593343,
+                "cilia": 0.6539833531510104,
+                "chemosense": 0.12870700997687035,
+                "pseudopodia": 0.01968321868728895,
+                "armor": 0.15638779064157582,
+                "vacuole": 0.033337808088354404,
+                "fertility": 0.01305645691701951,
+                "perception": 0,
+                "metabolism": 0.000731678126002628,
+                "maxEnergy": 948.9065533043322
+              }
+            }
+          }
+        },
+        {
+          "t": 90,
+          "populations": {
+            "producerA_density": 0.3724,
+            "producerB": 72,
+            "producerC": 59,
+            "consumers": 709,
+            "predators": 29,
+            "total_creatures": 869
+          },
+          "energy": {
+            "producer": 3215.1,
+            "consumer": 22282.7,
+            "predator": 1587.5,
+            "field": 6629.3,
+            "carcass": 8.8,
+            "mobile_sum": 23976.7,
+            "avg": 31.29,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 0,
+            "deaths_per_sec": 1.199,
+            "births_total": 0,
+            "deaths_total": 181,
+            "births_net_total": 0,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 31.61,
+            "colonyFeed": 7.716,
+            "prodCGraze": 14.585,
+            "predation": 0.093,
+            "carcassEat": 0.348,
+            "metabolism": 356.498,
+            "reproduction": 0,
+            "excretion": 0.577,
+            "thermal": 0,
+            "carcassExpire": 1.145,
+            "photosynthField": 79.848,
+            "photosynthDirect": 21.522,
+            "photosynth": 101.37,
+            "trophicAmplification": 237.176,
+            "deathDecay": 1.153,
+            "trueInputs": 101.37,
+            "destruction": 369.637,
+            "producerLoss": 10.841,
+            "birthGain": 0,
+            "reproductiveWaste": 0,
+            "balance_in": 54.258,
+            "balance_out": 358.406,
+            "system_net": -268.267,
+            "field_input": 53.91,
+            "mobile_loss": 356.498,
+            "carcass_loss": 1.145,
+            "mobile_to_field": 0.763,
+            "internal_transfer": 55.114,
+            "fnlPreyNear": 404.21,
+            "fnlPreyNear3": 0,
+            "fnlContact": 2.43,
+            "fnlRejCooldown": 2.2,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0.23,
+            "fnlRejChase": 0.07,
+            "fnlRejGape": 0,
+            "fnlCapture": 0.17,
+            "predIncome": 0.441,
+            "predMetab": 23.964,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0.018,
+            "residual_pct": 0,
+            "residual_throughput_pct": 0,
+            "system_energy": 27094.1,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 79.848,
+            "field_extraction": 31.61,
+            "field_deposits": 0.763,
+            "field_clamp": 0,
+            "field_delta": 1470.816
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 6629.265845184034
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 17.664589165033302,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 20.79751110520534,
+                "leafEnergy": 10.997457391124017,
+                "leafCount": 2.7222222222222223,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.761719207308943,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 3.910817474181499,
+                "leafEnergy": 50.823284709894196,
+                "leafCount": 4.03395061728395,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 59,
+              "avg": {
+                "radius": 4.796532252842449,
+                "armor": 2.826230894284964,
+                "fertility": 0.025268201681073882,
+                "perception": 150,
+                "energy": 15.692790520095171,
+                "maxAge": 6463.1155214655055
+              },
+              "variance": {
+                "radius": 0.4135850981624678,
+                "armor": 0.10898056299951353,
+                "fertility": 0.000005639952137448737,
+                "perception": 0,
+                "energy": 1.6312216384473004,
+                "maxAge": 711959.8474376872
+              }
+            },
+            "consumer": {
+              "n": 709,
+              "avg": {
+                "size": 2.2182819317244737,
+                "reserves": 4.645406076321308,
+                "flagella": 1.0126939351198871,
+                "cilia": 2.0098730606488013,
+                "chemosense": 1.6559638957871565,
+                "pseudopodia": 1.03566534413,
+                "armor": 0.586625557652132,
+                "vacuole": 1.1762813643736534,
+                "fertility": 0.9724122263007852,
+                "perception": 150,
+                "metabolism": 0.08748516267015587,
+                "maxEnergy": 122.86231455265766
+              },
+              "variance": {
+                "size": 0.12456924825253068,
+                "reserves": 0.5914653698686863,
+                "flagella": 0.6613339274808478,
+                "cilia": 0.7149942010937345,
+                "chemosense": 0.07610817324513386,
+                "pseudopodia": 0.03643127398158619,
+                "armor": 0.010263505643520687,
+                "vacuole": 0.025612836715546594,
+                "fertility": 0.012274104934318797,
+                "perception": 0,
+                "metabolism": 0.0002432025193502673,
+                "maxEnergy": 154.15329860171187
+              }
+            },
+            "predator": {
+              "n": 29,
+              "avg": {
+                "size": 4.8453964205203315,
+                "reserves": 12.369159123695923,
+                "flagella": 2.586206896551724,
+                "cilia": 1.0344827586206897,
+                "chemosense": 2.4309138832923987,
+                "pseudopodia": 0.7474861664271617,
+                "armor": 2.0984468770696796,
+                "vacuole": 1.3569258029542213,
+                "fertility": 1.0962458021957915,
+                "perception": 150,
+                "metabolism": 0.17210026407376758,
+                "maxEnergy": 264.1508630228567
+              },
+              "variance": {
+                "size": 0.4989660878714872,
+                "reserves": 3.4857556452149936,
+                "flagella": 0.8632580261593343,
+                "cilia": 0.6539833531510104,
+                "chemosense": 0.12870700997687035,
+                "pseudopodia": 0.01968321868728895,
+                "armor": 0.15638779064157582,
+                "vacuole": 0.033337808088354404,
+                "fertility": 0.01305645691701951,
+                "perception": 0,
+                "metabolism": 0.000731678126002628,
+                "maxEnergy": 948.9065533043322
+              }
+            }
+          }
+        },
+        {
+          "t": 120.1,
+          "populations": {
+            "producerA_density": 0.455,
+            "producerB": 72,
+            "producerC": 36,
+            "consumers": 707,
+            "predators": 29,
+            "total_creatures": 844
+          },
+          "energy": {
+            "producer": 3043.8,
+            "consumer": 23217.3,
+            "predator": 1018.4,
+            "field": 8098.8,
+            "carcass": 0,
+            "mobile_sum": 24235.7,
+            "avg": 32.32,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 0,
+            "deaths_per_sec": 0.833,
+            "births_total": 0,
+            "deaths_total": 206,
+            "births_net_total": 0,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 37.555,
+            "colonyFeed": 4.441,
+            "prodCGraze": 12.013,
+            "predation": 0.942,
+            "carcassEat": 0.503,
+            "metabolism": 348.729,
+            "reproduction": 0,
+            "excretion": 0.536,
+            "thermal": 0,
+            "carcassExpire": 0.247,
+            "photosynthField": 85.937,
+            "photosynthDirect": 18.268,
+            "photosynth": 104.205,
+            "trophicAmplification": 309.048,
+            "deathDecay": 0.405,
+            "trueInputs": 104.205,
+            "destruction": 358.119,
+            "producerLoss": 8.739,
+            "birthGain": 0,
+            "reproductiveWaste": 0,
+            "balance_in": 54.512,
+            "balance_out": 349.552,
+            "system_net": -253.914,
+            "field_input": 54.009,
+            "mobile_loss": 348.729,
+            "carcass_loss": 0.247,
+            "mobile_to_field": 0.577,
+            "internal_transfer": 56.031,
+            "fnlPreyNear": 184.96,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0.07,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0.07,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0.07,
+            "predIncome": 1.445,
+            "predMetab": 20.405,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0.071,
+            "residual_pct": 0.009,
+            "residual_throughput_pct": 0,
+            "system_energy": 27279.5,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 85.937,
+            "field_extraction": 37.555,
+            "field_deposits": 0.577,
+            "field_clamp": 0,
+            "field_delta": 1469.574
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 8098.839871149784
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 18.08768896488023,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 21.876529432303098,
+                "leafEnergy": 11.281890094806394,
+                "leafCount": 2.7083333333333335,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.75109329040248,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 4.298823457369053,
+                "leafEnergy": 55.83618097095638,
+                "leafCount": 3.3732638888888884,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 36,
+              "avg": {
+                "radius": 4.8717816305628885,
+                "armor": 2.812563109381009,
+                "fertility": 0.025327028308537104,
+                "perception": 150,
+                "energy": 18.233747075877066,
+                "maxAge": 6386.826897772154
+              },
+              "variance": {
+                "radius": 0.45526863593738653,
+                "armor": 0.09774456792206809,
+                "fertility": 0.000005910888487419409,
+                "perception": 0,
+                "energy": 1.8470537969914176,
+                "maxAge": 679020.0875764117
+              }
+            },
+            "consumer": {
+              "n": 707,
+              "avg": {
+                "size": 2.2181499727769025,
+                "reserves": 4.643886355546758,
+                "flagella": 1.0155586987270155,
+                "cilia": 2.00990099009901,
+                "chemosense": 1.6561114933521761,
+                "pseudopodia": 1.0356196129851238,
+                "armor": 0.5867680857847504,
+                "vacuole": 1.1764685804937336,
+                "fertility": 0.9725438925564825,
+                "perception": 150,
+                "metabolism": 0.08753553669501338,
+                "maxEnergy": 122.83779654352598
+              },
+              "variance": {
+                "size": 0.12488909577077045,
+                "reserves": 0.5914066375558065,
+                "flagella": 0.6602954092135827,
+                "cilia": 0.717016538994776,
+                "chemosense": 0.07623435084695673,
+                "pseudopodia": 0.03651881748339503,
+                "armor": 0.010285083484604662,
+                "vacuole": 0.025560599964284725,
+                "fertility": 0.012299889134994024,
+                "perception": 0,
+                "metabolism": 0.00024295634327621725,
+                "maxEnergy": 154.06940268108883
+              }
+            },
+            "predator": {
+              "n": 29,
+              "avg": {
+                "size": 4.8453964205203315,
+                "reserves": 12.369159123695923,
+                "flagella": 2.586206896551724,
+                "cilia": 1.0344827586206897,
+                "chemosense": 2.4309138832923987,
+                "pseudopodia": 0.7474861664271617,
+                "armor": 2.0984468770696796,
+                "vacuole": 1.3569258029542213,
+                "fertility": 1.0962458021957915,
+                "perception": 150,
+                "metabolism": 0.17210026407376758,
+                "maxEnergy": 264.1508630228567
+              },
+              "variance": {
+                "size": 0.4989660878714872,
+                "reserves": 3.4857556452149936,
+                "flagella": 0.8632580261593343,
+                "cilia": 0.6539833531510104,
+                "chemosense": 0.12870700997687035,
+                "pseudopodia": 0.01968321868728895,
+                "armor": 0.15638779064157582,
+                "vacuole": 0.033337808088354404,
+                "fertility": 0.01305645691701951,
+                "perception": 0,
+                "metabolism": 0.000731678126002628,
+                "maxEnergy": 948.9065533043322
+              }
+            }
+          }
+        },
+        {
+          "t": 150.1,
+          "populations": {
+            "producerA_density": 0.5299,
+            "producerB": 72,
+            "producerC": 20,
+            "consumers": 708,
+            "predators": 26,
+            "total_creatures": 826
+          },
+          "energy": {
+            "producer": 2765.6,
+            "consumer": 26499.1,
+            "predator": 600.7,
+            "field": 9432.2,
+            "carcass": 0,
+            "mobile_sum": 27136.4,
+            "avg": 36.2,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 0.033,
+            "deaths_per_sec": 0.633,
+            "births_total": 1,
+            "deaths_total": 225,
+            "births_net_total": 1,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 41.42,
+            "colonyFeed": 8.838,
+            "prodCGraze": 8.976,
+            "predation": 1.318,
+            "carcassEat": 0,
+            "metabolism": 345.965,
+            "reproduction": 2.481,
+            "excretion": 0.521,
+            "thermal": 0,
+            "carcassExpire": 0,
+            "photosynthField": 85.344,
+            "photosynthDirect": 15.749,
+            "photosynth": 101.092,
+            "trophicAmplification": 384.041,
+            "deathDecay": 0,
+            "trueInputs": 101.092,
+            "destruction": 354.514,
+            "producerLoss": 7.157,
+            "birthGain": 1.089,
+            "reproductiveWaste": 1.392,
+            "balance_in": 59.234,
+            "balance_out": 346.486,
+            "system_net": -253.421,
+            "field_input": 59.234,
+            "mobile_loss": 345.965,
+            "carcass_loss": 0,
+            "mobile_to_field": 0.522,
+            "internal_transfer": 62.164,
+            "fnlPreyNear": 190,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0,
+            "predIncome": 1.318,
+            "predMetab": 15.242,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0.086,
+            "residual_pct": 0.023,
+            "residual_throughput_pct": 0.002,
+            "system_energy": 29865.3,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 85.344,
+            "field_extraction": 41.42,
+            "field_deposits": 0.522,
+            "field_clamp": 0,
+            "field_delta": 1333.349
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 9432.189090616075
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 18.507755665666906,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 22.529520057720283,
+                "leafEnergy": 10.145051283293848,
+                "leafCount": 2.2083333333333335,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.741772001799802,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 5.218661551383377,
+                "leafEnergy": 59.894798685910985,
+                "leafCount": 3.3315972222222223,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 20,
+              "avg": {
+                "radius": 4.820891855114698,
+                "armor": 2.8411511495780153,
+                "fertility": 0.02536249673500902,
+                "perception": 150,
+                "energy": 20.651152272869158,
+                "maxAge": 6286.030472656572
+              },
+              "variance": {
+                "radius": 0.4668065382785791,
+                "armor": 0.08669213903765538,
+                "fertility": 0.000006209146043746616,
+                "perception": 0,
+                "energy": 2.6663206739352745,
+                "maxAge": 604116.6510979161
+              }
+            },
+            "consumer": {
+              "n": 708,
+              "avg": {
+                "size": 2.218191119049855,
+                "reserves": 4.64270985251605,
+                "flagella": 1.0141242937853108,
+                "cilia": 2.0084745762711864,
+                "chemosense": 1.6565034076282898,
+                "pseudopodia": 1.0359496802333423,
+                "armor": 0.5869601072836053,
+                "vacuole": 1.1769394569897103,
+                "fertility": 0.9726256449912318,
+                "perception": 150,
+                "metabolism": 0.08750534757957625,
+                "maxEnergy": 122.82088801354473
+              },
+              "variance": {
+                "size": 0.12471389570500158,
+                "reserves": 0.5915499181288091,
+                "flagella": 0.6608174534776086,
+                "cilia": 0.7174423058508097,
+                "chemosense": 0.07623526814764103,
+                "pseudopodia": 0.03654426091527352,
+                "armor": 0.010296625215537925,
+                "vacuole": 0.025681256766808103,
+                "fertility": 0.012287241616862121,
+                "perception": 0,
+                "metabolism": 0.0002432575321617272,
+                "maxEnergy": 154.0539206894009
+              }
+            },
+            "predator": {
+              "n": 26,
+              "avg": {
+                "size": 4.883518827627674,
+                "reserves": 12.677907790583346,
+                "flagella": 2.5,
+                "cilia": 1,
+                "chemosense": 2.421299835783487,
+                "pseudopodia": 0.7459324334247776,
+                "armor": 2.0620172208995102,
+                "vacuole": 1.3640122706573137,
+                "fertility": 1.094996714920063,
+                "perception": 150,
+                "metabolism": 0.17031295553076523,
+                "maxEnergy": 269.363439976214
+              },
+              "variance": {
+                "size": 0.4673239169719636,
+                "reserves": 2.958639512371178,
+                "flagella": 0.865384615384615,
+                "cilia": 0.6153846153846154,
+                "chemosense": 0.1425607925859449,
+                "pseudopodia": 0.021512700411605024,
+                "armor": 0.14878204933923111,
+                "vacuole": 0.035071823119828816,
+                "fertility": 0.014175290135975294,
+                "perception": 0,
+                "metabolism": 0.0007633694881711978,
+                "maxEnergy": 789.410221008191
+              }
+            }
+          }
+        },
+        {
+          "t": 180.1,
+          "populations": {
+            "producerA_density": 0.5952,
+            "producerB": 72,
+            "producerC": 14,
+            "consumers": 711,
+            "predators": 23,
+            "total_creatures": 820
+          },
+          "energy": {
+            "producer": 2711.1,
+            "consumer": 31360.3,
+            "predator": 310.3,
+            "field": 10593.8,
+            "carcass": 0,
+            "mobile_sum": 31670.6,
+            "avg": 41.93,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 0.1,
+            "deaths_per_sec": 0.3,
+            "births_total": 4,
+            "deaths_total": 234,
+            "births_net_total": 4,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 44.683,
+            "colonyFeed": 6.473,
+            "prodCGraze": 4.414,
+            "predation": 0,
+            "carcassEat": 0,
+            "metabolism": 347.69,
+            "reproduction": 7.454,
+            "excretion": 0.521,
+            "thermal": 0,
+            "carcassExpire": 0,
+            "photosynthField": 82.883,
+            "photosynthDirect": 14.827,
+            "photosynth": 97.71,
+            "trophicAmplification": 451.902,
+            "deathDecay": 0,
+            "trueInputs": 97.71,
+            "destruction": 360.378,
+            "producerLoss": 8.543,
+            "birthGain": 3.308,
+            "reproductiveWaste": 4.146,
+            "balance_in": 55.569,
+            "balance_out": 348.211,
+            "system_net": -262.668,
+            "field_input": 55.569,
+            "mobile_loss": 347.69,
+            "carcass_loss": 0,
+            "mobile_to_field": 0.521,
+            "internal_transfer": 59.399,
+            "fnlPreyNear": 52.27,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0,
+            "predIncome": 0,
+            "predMetab": 9.681,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0,
+            "residual_pct": 0.021,
+            "residual_throughput_pct": 0.004,
+            "system_energy": 34381.7,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 82.883,
+            "field_extraction": 44.683,
+            "field_deposits": 0.521,
+            "field_clamp": 0,
+            "field_delta": 1161.647
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 10593.836043038245
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 18.925043665072092,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 23.393086933994205,
+                "leafEnergy": 9.785099044573654,
+                "leafCount": 2.1527777777777777,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.73372870320253,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 5.936613987286364,
+                "leafEnergy": 60.74315050054629,
+                "leafCount": 3.0738811728395063,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 14,
+              "avg": {
+                "radius": 4.836964724636158,
+                "armor": 2.8391995337823546,
+                "fertility": 0.026001360258449884,
+                "perception": 150,
+                "energy": 23.019485756639714,
+                "maxAge": 6370.170901225532
+              },
+              "variance": {
+                "radius": 0.5244452214250792,
+                "armor": 0.10384285756084388,
+                "fertility": 0.000005188042222327568,
+                "perception": 0,
+                "energy": 2.5725765748294407,
+                "maxAge": 362754.20726367086
+              }
+            },
+            "consumer": {
+              "n": 711,
+              "avg": {
+                "size": 2.2179494769549732,
+                "reserves": 4.640038832510406,
+                "flagella": 1.0112517580872011,
+                "cilia": 2.0126582278481013,
+                "chemosense": 1.6568019116005637,
+                "pseudopodia": 1.0370880019269366,
+                "armor": 0.5866872352275088,
+                "vacuole": 1.1764844749408294,
+                "fertility": 0.9731788107695598,
+                "perception": 150,
+                "metabolism": 0.08746240507569225,
+                "maxEnergy": 122.77498858266661
+              },
+              "variance": {
+                "size": 0.12451301875355725,
+                "reserves": 0.591173040034846,
+                "flagella": 0.6609141855630132,
+                "cilia": 0.7185458170877164,
+                "chemosense": 0.07622432626359821,
+                "pseudopodia": 0.036710452018898776,
+                "armor": 0.010340321466418556,
+                "vacuole": 0.025722387108012112,
+                "fertility": 0.012316460941019014,
+                "perception": 0,
+                "metabolism": 0.00024312211846131467,
+                "maxEnergy": 153.97218992233866
+              }
+            },
+            "predator": {
+              "n": 23,
+              "avg": {
+                "size": 4.8449116334467455,
+                "reserves": 12.527646757946266,
+                "flagella": 2.3043478260869565,
+                "cilia": 1.1304347826086956,
+                "chemosense": 2.411643103031835,
+                "pseudopodia": 0.733085887969393,
+                "armor": 2.071668634495602,
+                "vacuole": 1.3701101763395507,
+                "fertility": 1.1100065938788533,
+                "perception": 150,
+                "metabolism": 0.16445639986561097,
+                "maxEnergy": 266.7296593617325
+              },
+              "variance": {
+                "size": 0.48293052445133355,
+                "reserves": 2.9753579004266157,
+                "flagella": 0.6465028355387519,
+                "cilia": 0.5482041587901703,
+                "chemosense": 0.14773604531360363,
+                "pseudopodia": 0.02207056243946459,
+                "armor": 0.1546883765019338,
+                "vacuole": 0.03501548759929429,
+                "fertility": 0.01317006088571615,
+                "perception": 0,
+                "metabolism": 0.0005600869757660699,
+                "maxEnergy": 803.849957802493
+              }
+            }
+          }
+        },
+        {
+          "t": 210.1,
+          "populations": {
+            "producerA_density": 0.6512,
+            "producerB": 72,
+            "producerC": 8,
+            "consumers": 721,
+            "predators": 17,
+            "total_creatures": 818
+          },
+          "energy": {
+            "producer": 2723.1,
+            "consumer": 37333.2,
+            "predator": 148.5,
+            "field": 11592,
+            "carcass": 0,
+            "mobile_sum": 37572.3,
+            "avg": 49.26,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 0.333,
+            "deaths_per_sec": 0.4,
+            "births_total": 14,
+            "deaths_total": 246,
+            "births_net_total": 14,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 47.107,
+            "colonyFeed": 2.825,
+            "prodCGraze": 4.62,
+            "predation": 0,
+            "carcassEat": 0,
+            "metabolism": 351.348,
+            "reproduction": 23.935,
+            "excretion": 0.517,
+            "thermal": 0,
+            "carcassExpire": 0,
+            "photosynthField": 79.863,
+            "photosynthDirect": 14.088,
+            "photosynth": 93.951,
+            "trophicAmplification": 508.048,
+            "deathDecay": 0.78,
+            "trueInputs": 93.951,
+            "destruction": 374.764,
+            "producerLoss": 9.261,
+            "birthGain": 10.56,
+            "reproductiveWaste": 13.375,
+            "balance_in": 54.552,
+            "balance_out": 351.866,
+            "system_net": -280.813,
+            "field_input": 54.552,
+            "mobile_loss": 351.348,
+            "carcass_loss": 0,
+            "mobile_to_field": 0.517,
+            "internal_transfer": 65.63,
+            "fnlPreyNear": 0,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0,
+            "predIncome": 0,
+            "predMetab": 5.392,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0,
+            "residual_pct": 0.075,
+            "residual_throughput_pct": 0.015,
+            "system_energy": 40204.9,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 79.863,
+            "field_extraction": 47.107,
+            "field_deposits": 0.517,
+            "field_clamp": 0,
+            "field_delta": 998.191
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 11592.027056514364
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 19.33957152917586,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 24.59436679694316,
+                "leafEnergy": 10.605257275153416,
+                "leafCount": 2.4166666666666665,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.726943761896223,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 7.041284059652185,
+                "leafEnergy": 55.51586265329307,
+                "leafCount": 2.354166666666668,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 8,
+              "avg": {
+                "radius": 4.73859048722917,
+                "armor": 2.8865972702909857,
+                "fertility": 0.026339795686444685,
+                "perception": 150,
+                "energy": 23.597024244873644,
+                "maxAge": 6404.947016527716
+              },
+              "variance": {
+                "radius": 0.5888356806173114,
+                "armor": 0.06312995379579789,
+                "fertility": 0.000005426848048303888,
+                "perception": 0,
+                "energy": 1.136726214537589,
+                "maxAge": 418797.14054344594
+              }
+            },
+            "consumer": {
+              "n": 721,
+              "avg": {
+                "size": 2.215865205097183,
+                "reserves": 4.638005303101095,
+                "flagella": 1.0097087378640777,
+                "cilia": 2.0208044382801664,
+                "chemosense": 1.657258342608491,
+                "pseudopodia": 1.0375549989202677,
+                "armor": 0.5870114655612128,
+                "vacuole": 1.1761683663459588,
+                "fertility": 0.9728569514055732,
+                "perception": 150,
+                "metabolism": 0.08741401888775267,
+                "maxEnergy": 122.72779796495992
+              },
+              "variance": {
+                "size": 0.12426080263575034,
+                "reserves": 0.588682026098521,
+                "flagella": 0.6559390275103347,
+                "cilia": 0.7221746649456273,
+                "chemosense": 0.07589817948134048,
+                "pseudopodia": 0.03668963604013986,
+                "armor": 0.010351344381425542,
+                "vacuole": 0.025707123712519042,
+                "fertility": 0.012278092720573675,
+                "perception": 0,
+                "metabolism": 0.00024117602270412077,
+                "maxEnergy": 153.36402506283957
+              }
+            },
+            "predator": {
+              "n": 17,
+              "avg": {
+                "size": 5.0259076942332666,
+                "reserves": 12.803440505965591,
+                "flagella": 2.0588235294117645,
+                "cilia": 1.2352941176470589,
+                "chemosense": 2.441540742546504,
+                "pseudopodia": 0.7382024174375411,
+                "armor": 2.091884762632768,
+                "vacuole": 1.4098484354732976,
+                "fertility": 1.1251691675324866,
+                "perception": 150,
+                "metabolism": 0.1595639879006454,
+                "maxEnergy": 272.4579176321223
+              },
+              "variance": {
+                "size": 0.44578109202211635,
+                "reserves": 2.672880548339208,
+                "flagella": 0.5259515570934266,
+                "cilia": 0.4152249134948096,
+                "chemosense": 0.14486491471548835,
+                "pseudopodia": 0.024351133045703466,
+                "armor": 0.15261126144411108,
+                "vacuole": 0.03341803138912547,
+                "fertility": 0.014807340204759711,
+                "perception": 0,
+                "metabolism": 0.0005053415464180734,
+                "maxEnergy": 686.3548286578443
+              }
+            }
+          }
+        },
+        {
+          "t": 240.1,
+          "populations": {
+            "producerA_density": 0.6927,
+            "producerB": 72,
+            "producerC": 6,
+            "consumers": 741,
+            "predators": 11,
+            "total_creatures": 830
+          },
+          "energy": {
+            "producer": 2745.6,
+            "consumer": 44341.4,
+            "predator": 66.7,
+            "field": 12329.5,
+            "carcass": 0,
+            "mobile_sum": 44408.1,
+            "avg": 56.81,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 0.667,
+            "deaths_per_sec": 0.267,
+            "births_total": 34,
+            "deaths_total": 254,
+            "births_net_total": 34,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 49.745,
+            "colonyFeed": 5.389,
+            "prodCGraze": 1.6,
+            "predation": 0,
+            "carcassEat": 0,
+            "metabolism": 359.819,
+            "reproduction": 50.221,
+            "excretion": 0.53,
+            "thermal": 0,
+            "carcassExpire": 0,
+            "photosynthField": 73.798,
+            "photosynthDirect": 13.588,
+            "photosynth": 87.386,
+            "trophicAmplification": 567.061,
+            "deathDecay": 0,
+            "trueInputs": 87.386,
+            "destruction": 398.436,
+            "producerLoss": 10.704,
+            "birthGain": 22.31,
+            "reproductiveWaste": 27.912,
+            "balance_in": 56.734,
+            "balance_out": 360.349,
+            "system_net": -311.05,
+            "field_input": 56.734,
+            "mobile_loss": 359.819,
+            "carcass_loss": 0,
+            "mobile_to_field": 0.53,
+            "internal_transfer": 79.573,
+            "fnlPreyNear": 0,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0,
+            "predIncome": 0,
+            "predMetab": 2.727,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0,
+            "residual_pct": 0.086,
+            "residual_throughput_pct": 0.019,
+            "system_energy": 47153.7,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 73.798,
+            "field_extraction": 49.745,
+            "field_deposits": 0.53,
+            "field_clamp": 0,
+            "field_delta": 737.477
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 12329.504138600938
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 19.75135769878338,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 25.54450025551039,
+                "leafEnergy": 10.596098612443946,
+                "leafCount": 2.486111111111111,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.721398261871457,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 8.437691846997836,
+                "leafEnergy": 50.93352382141916,
+                "leafCount": 2.2775848765432105,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 6,
+              "avg": {
+                "radius": 4.99886040812259,
+                "armor": 2.8902337116942376,
+                "fertility": 0.025870111429487117,
+                "perception": 150,
+                "energy": 23.91038474909469,
+                "maxAge": 6585.436948262183
+              },
+              "variance": {
+                "radius": 0.5066527097389368,
+                "armor": 0.0810351102762823,
+                "fertility": 0.000006352298952253302,
+                "perception": 0,
+                "energy": 0.04015446597406935,
+                "maxAge": 349959.4256930575
+              }
+            },
+            "consumer": {
+              "n": 741,
+              "avg": {
+                "size": 2.218092089649792,
+                "reserves": 4.629479167736688,
+                "flagella": 1.0121457489878543,
+                "cilia": 2.0445344129554655,
+                "chemosense": 1.659037694965977,
+                "pseudopodia": 1.0376531792926469,
+                "armor": 0.5871051071448388,
+                "vacuole": 1.1755790198688543,
+                "fertility": 0.9729310377491357,
+                "perception": 150,
+                "metabolism": 0.08751948697076066,
+                "maxEnergy": 122.60379183605153
+              },
+              "variance": {
+                "size": 0.12436433612586928,
+                "reserves": 0.5860996817569983,
+                "flagella": 0.6462762324684337,
+                "cilia": 0.7362083189911877,
+                "chemosense": 0.0761370034848805,
+                "pseudopodia": 0.03667813891275684,
+                "armor": 0.01022833577034754,
+                "vacuole": 0.025712474161884158,
+                "fertility": 0.012338927222387497,
+                "perception": 0,
+                "metabolism": 0.00023944656655122513,
+                "maxEnergy": 152.7890353081675
+              }
+            },
+            "predator": {
+              "n": 11,
+              "avg": {
+                "size": 5.121374753898317,
+                "reserves": 12.896102117505,
+                "flagella": 1.8181818181818181,
+                "cilia": 1.4545454545454546,
+                "chemosense": 2.5287713873099333,
+                "pseudopodia": 0.6803441957202586,
+                "armor": 2.1471299091491445,
+                "vacuole": 1.4212727790579898,
+                "fertility": 1.0758242946249412,
+                "perception": 150,
+                "metabolism": 0.15403945602590177,
+                "maxEnergy": 274.6010245071221
+              },
+              "variance": {
+                "size": 0.38250478067176985,
+                "reserves": 2.266307253869087,
+                "flagella": 0.33057851239669445,
+                "cilia": 0.24793388429752072,
+                "chemosense": 0.16387086922501481,
+                "pseudopodia": 0.02101644033316702,
+                "armor": 0.140170138882608,
+                "vacuole": 0.029492504437587996,
+                "fertility": 0.01036460892350699,
+                "perception": 0,
+                "metabolism": 0.00027021639800038286,
+                "maxEnergy": 558.4706493946287
+              }
+            }
+          }
+        },
+        {
+          "t": 270.1,
+          "populations": {
+            "producerA_density": 0.7227,
+            "producerB": 72,
+            "producerC": 3,
+            "consumers": 774,
+            "predators": 6,
+            "total_creatures": 855
+          },
+          "energy": {
+            "producer": 2619.3,
+            "consumer": 51860.5,
+            "predator": 26.7,
+            "field": 12864.7,
+            "carcass": 0,
+            "mobile_sum": 52034.6,
+            "avg": 63.92,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 1.099,
+            "deaths_per_sec": 0.267,
+            "births_total": 67,
+            "deaths_total": 262,
+            "births_net_total": 67,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 52.206,
+            "colonyFeed": 9.584,
+            "prodCGraze": 2.399,
+            "predation": 0,
+            "carcassEat": 0,
+            "metabolism": 370.54,
+            "reproduction": 85.133,
+            "excretion": 0.537,
+            "thermal": 0,
+            "carcassExpire": 0,
+            "photosynthField": 69.5,
+            "photosynthDirect": 13.41,
+            "photosynth": 82.91,
+            "trophicAmplification": 610.7,
+            "deathDecay": 0,
+            "trueInputs": 82.91,
+            "destruction": 431.219,
+            "producerLoss": 13.28,
+            "birthGain": 37.734,
+            "reproductiveWaste": 47.399,
+            "balance_in": 64.189,
+            "balance_out": 371.077,
+            "system_net": -348.309,
+            "field_input": 64.189,
+            "mobile_loss": 370.54,
+            "carcass_loss": 0,
+            "mobile_to_field": 0.537,
+            "internal_transfer": 102.46,
+            "fnlPreyNear": 0,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0,
+            "predIncome": 0,
+            "predMetab": 1.334,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0,
+            "residual_pct": 0.162,
+            "residual_throughput_pct": 0.036,
+            "system_energy": 54506.6,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 69.5,
+            "field_extraction": 52.206,
+            "field_deposits": 0.537,
+            "field_clamp": 0,
+            "field_delta": 535.208
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 12864.711943807864
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 20.16064699384797,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 26.037619463002457,
+                "leafEnergy": 9.341613048602259,
+                "leafCount": 2.1666666666666665,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.717071913884752,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 9.517646860096534,
+                "leafEnergy": 54.22292193300653,
+                "leafCount": 2.972222222222223,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 3,
+              "avg": {
+                "radius": 4.485543502324506,
+                "armor": 2.7778295025425472,
+                "fertility": 0.024514411082268216,
+                "perception": 150,
+                "energy": 24,
+                "maxAge": 6709.800391037367
+              },
+              "variance": {
+                "radius": 0.4209907767670238,
+                "armor": 0.10063431446173876,
+                "fertility": 0.000007866419294856575,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 204259.80988410115
+              }
+            },
+            "consumer": {
+              "n": 774,
+              "avg": {
+                "size": 2.2148720608909804,
+                "reserves": 4.620027474147653,
+                "flagella": 1.0051679586563307,
+                "cilia": 2.062015503875969,
+                "chemosense": 1.6575157791241675,
+                "pseudopodia": 1.0369629934075446,
+                "armor": 0.5891008282847577,
+                "vacuole": 1.1765164259797682,
+                "fertility": 0.9720962966103097,
+                "perception": 150,
+                "metabolism": 0.08731333488949067,
+                "maxEnergy": 122.43491547308285
+              },
+              "variance": {
+                "size": 0.12340213895058394,
+                "reserves": 0.5920552131747527,
+                "flagella": 0.6382161862601741,
+                "cilia": 0.7377561444624714,
+                "chemosense": 0.07562170683619707,
+                "pseudopodia": 0.037149073483249584,
+                "armor": 0.010277756725928788,
+                "vacuole": 0.025900889400830573,
+                "fertility": 0.012435082717082824,
+                "perception": 0,
+                "metabolism": 0.00023662806815280026,
+                "maxEnergy": 154.5527538380138
+              }
+            },
+            "predator": {
+              "n": 6,
+              "avg": {
+                "size": 4.874120241281921,
+                "reserves": 13.558758562673235,
+                "flagella": 1.5,
+                "cilia": 1.5,
+                "chemosense": 2.450410250021396,
+                "pseudopodia": 0.6464521129431126,
+                "armor": 2.2966944175594075,
+                "vacuole": 1.3829441938945928,
+                "fertility": 1.0918750923420097,
+                "perception": 150,
+                "metabolism": 0.14668932060992643,
+                "maxEnergy": 283.46222324973536
+              },
+              "variance": {
+                "size": 0.10702213468937316,
+                "reserves": 0.4611124180286481,
+                "flagella": 0.25,
+                "cilia": 0.25,
+                "chemosense": 0.12274141643983949,
+                "pseudopodia": 0.022928084685562844,
+                "armor": 0.1591456661110353,
+                "vacuole": 0.03691944522434465,
+                "fertility": 0.011007464653255417,
+                "perception": 0,
+                "metabolism": 0.00018324086933058092,
+                "maxEnergy": 121.28799391377834
+              }
+            }
+          }
+        },
+        {
+          "t": 300.1,
+          "populations": {
+            "producerA_density": 0.7419,
+            "producerB": 72,
+            "producerC": 2,
+            "consumers": 825,
+            "predators": 4,
+            "total_creatures": 903
+          },
+          "energy": {
+            "producer": 2722.6,
+            "consumer": 59270.1,
+            "predator": 8.9,
+            "field": 13206.2,
+            "carcass": 0,
+            "mobile_sum": 59279,
+            "avg": 68.66,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 1.699,
+            "deaths_per_sec": 0.1,
+            "births_total": 118,
+            "deaths_total": 265,
+            "births_net_total": 118,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 56.358,
+            "colonyFeed": 3.56,
+            "prodCGraze": 0.8,
+            "predation": 0,
+            "carcassEat": 0,
+            "metabolism": 392.472,
+            "reproduction": 129.571,
+            "excretion": 0.552,
+            "thermal": 0,
+            "carcassExpire": 0,
+            "photosynthField": 67.182,
+            "photosynthDirect": 13.472,
+            "photosynth": 80.654,
+            "trophicAmplification": 655.992,
+            "deathDecay": 0,
+            "trueInputs": 80.654,
+            "destruction": 476.41,
+            "producerLoss": 11.464,
+            "birthGain": 57.097,
+            "reproductiveWaste": 72.474,
+            "balance_in": 60.717,
+            "balance_out": 393.024,
+            "system_net": -395.756,
+            "field_input": 60.717,
+            "mobile_loss": 392.472,
+            "carcass_loss": 0,
+            "mobile_to_field": 0.552,
+            "internal_transfer": 118.367,
+            "fnlPreyNear": 0,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0,
+            "predIncome": 0,
+            "predMetab": 0.594,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0,
+            "residual_pct": 0.334,
+            "residual_throughput_pct": 0.069,
+            "system_energy": 62001.5,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 67.182,
+            "field_extraction": 56.358,
+            "field_deposits": 0.552,
+            "field_clamp": 0,
+            "field_delta": 341.471
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 13206.183376327046
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 20.567228107085814,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 27.080993277517642,
+                "leafEnergy": 10.066041500898272,
+                "leafCount": 2.3194444444444446,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.713950559379782,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 12.033806370404363,
+                "leafEnergy": 57.84585807435653,
+                "leafCount": 3.078510802469135,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 2,
+              "avg": {
+                "radius": 4.559272194041089,
+                "armor": 2.773945023124804,
+                "fertility": 0.022670945657366187,
+                "perception": 150,
+                "energy": 24,
+                "maxAge": 7025.887612283604
+              },
+              "variance": {
+                "radius": 0.615178405203828,
+                "armor": 0.15090620415156408,
+                "fertility": 0.0000016045346238574391,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 6656.32052064687
+              }
+            },
+            "consumer": {
+              "n": 825,
+              "avg": {
+                "size": 2.222237052650721,
+                "reserves": 4.605889968840827,
+                "flagella": 1,
+                "cilia": 2.0787878787878786,
+                "chemosense": 1.6575464758078562,
+                "pseudopodia": 1.0370935011215676,
+                "armor": 0.5899937957814193,
+                "vacuole": 1.1767681993764616,
+                "fertility": 0.9707157787517381,
+                "perception": 150,
+                "metabolism": 0.08721815789733801,
+                "maxEnergy": 122.25746904150034
+              },
+              "variance": {
+                "size": 0.12358775078122886,
+                "reserves": 0.5924393934212127,
+                "flagella": 0.6303030303030304,
+                "cilia": 0.7489439853076227,
+                "chemosense": 0.07486097231359157,
+                "pseudopodia": 0.03653737602454088,
+                "armor": 0.010146858309252382,
+                "vacuole": 0.025852704311087438,
+                "fertility": 0.012353964394750339,
+                "perception": 0,
+                "metabolism": 0.00023312758702750264,
+                "maxEnergy": 154.85721171239493
+              }
+            },
+            "predator": {
+              "n": 4,
+              "avg": {
+                "size": 4.898292828437504,
+                "reserves": 13.644153774102413,
+                "flagella": 1.5,
+                "cilia": 1.5,
+                "chemosense": 2.320169478386323,
+                "pseudopodia": 0.6913120756253034,
+                "armor": 2.205253643231263,
+                "vacuole": 1.4392037782239948,
+                "fertility": 1.0779773870268126,
+                "perception": 150,
+                "metabolism": 0.14482351033491103,
+                "maxEnergy": 285.18257699426636
+              },
+              "variance": {
+                "size": 0.1349998427291048,
+                "reserves": 0.445023561705824,
+                "flagella": 0.25,
+                "cilia": 0.25,
+                "chemosense": 0.1152968067038298,
+                "pseudopodia": 0.028349857400915723,
+                "armor": 0.2104873987812672,
+                "vacuole": 0.03986896789974903,
+                "fertility": 0.009438125984450929,
+                "perception": 0,
+                "metabolism": 0.00019167522729693007,
+                "maxEnergy": 133.2149237968697
+              }
+            }
+          }
+        },
+        {
+          "t": 330.1,
+          "populations": {
+            "producerA_density": 0.7467,
+            "producerB": 72,
+            "producerC": 2,
+            "consumers": 894,
+            "predators": 1,
+            "total_creatures": 969
+          },
+          "energy": {
+            "producer": 2828,
+            "consumer": 66999.9,
+            "predator": 0.3,
+            "field": 13291.5,
+            "carcass": 0,
+            "mobile_sum": 67114.4,
+            "avg": 72.18,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 2.299,
+            "deaths_per_sec": 0.1,
+            "births_total": 187,
+            "deaths_total": 268,
+            "births_net_total": 187,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 61.632,
+            "colonyFeed": 4.4,
+            "prodCGraze": 0,
+            "predation": 0,
+            "carcassEat": 0,
+            "metabolism": 421.474,
+            "reproduction": 181.465,
+            "excretion": 0.593,
+            "thermal": 0,
+            "carcassExpire": 0,
+            "photosynthField": 63.882,
+            "photosynthDirect": 13.6,
+            "photosynth": 77.481,
+            "trophicAmplification": 718.359,
+            "deathDecay": 0,
+            "trueInputs": 77.481,
+            "destruction": 532.996,
+            "producerLoss": 10.641,
+            "birthGain": 80.585,
+            "reproductiveWaste": 100.88,
+            "balance_in": 66.032,
+            "balance_out": 422.067,
+            "system_net": -455.514,
+            "field_input": 66.032,
+            "mobile_loss": 421.474,
+            "carcass_loss": 0,
+            "mobile_to_field": 0.593,
+            "internal_transfer": 147.209,
+            "fnlPreyNear": 0,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0,
+            "predIncome": 0,
+            "predMetab": 0.286,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0,
+            "residual_pct": 0.284,
+            "residual_throughput_pct": 0.056,
+            "system_energy": 69828.2,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 63.882,
+            "field_extraction": 61.632,
+            "field_deposits": 0.593,
+            "field_clamp": 0,
+            "field_delta": 85.311
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 13291.493948644329
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 20.97111913860563,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 27.98905337264339,
+                "leafEnergy": 10.62270437488546,
+                "leafCount": 2.5,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.71201726510526,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 11.939261287298905,
+                "leafEnergy": 53.4808500695824,
+                "leafCount": 3.0277777777777786,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 2,
+              "avg": {
+                "radius": 4.559272194041089,
+                "armor": 2.773945023124804,
+                "fertility": 0.022670945657366187,
+                "perception": 150,
+                "energy": 24,
+                "maxAge": 7025.887612283604
+              },
+              "variance": {
+                "radius": 0.615178405203828,
+                "armor": 0.15090620415156408,
+                "fertility": 0.0000016045346238574391,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 6656.32052064687
+              }
+            },
+            "consumer": {
+              "n": 894,
+              "avg": {
+                "size": 2.2213557824938173,
+                "reserves": 4.591075483463891,
+                "flagella": 1.0078299776286352,
+                "cilia": 2.08165548098434,
+                "chemosense": 1.6591278395541116,
+                "pseudopodia": 1.0392350704218636,
+                "armor": 0.5894099329883533,
+                "vacuole": 1.179456113121961,
+                "fertility": 0.9699330054261102,
+                "perception": 150,
+                "metabolism": 0.08727271758313708,
+                "maxEnergy": 122.02411671755877
+              },
+              "variance": {
+                "size": 0.12244004745109294,
+                "reserves": 0.5831460365295342,
+                "flagella": 0.6162697876472032,
+                "cilia": 0.7349431206802501,
+                "chemosense": 0.07454981958177331,
+                "pseudopodia": 0.03670520483095485,
+                "armor": 0.010014869403907112,
+                "vacuole": 0.025520809631178976,
+                "fertility": 0.012265040452714815,
+                "perception": 0,
+                "metabolism": 0.00023224268599230345,
+                "maxEnergy": 153.00645932525185
+              }
+            },
+            "predator": {
+              "n": 1,
+              "avg": {
+                "size": 5.030272295989863,
+                "reserves": 14.58898280024269,
+                "flagella": 2,
+                "cilia": 2,
+                "chemosense": 1.9086529239170111,
+                "pseudopodia": 0.6977267941971417,
+                "armor": 1.8108917492574206,
+                "vacuole": 1.4157670490795182,
+                "fertility": 1.1922680554933407,
+                "perception": 150,
+                "metabolism": 0.15402010924228507,
+                "maxEnergy": 301.07567939959546
+              },
+              "variance": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              }
+            }
+          }
+        },
+        {
+          "t": 360.1,
+          "populations": {
+            "producerA_density": 0.7423,
+            "producerB": 72,
+            "producerC": 2,
+            "consumers": 976,
+            "predators": 0,
+            "total_creatures": 1050
+          },
+          "energy": {
+            "producer": 2866.1,
+            "consumer": 74868.3,
+            "predator": 0,
+            "field": 13212.8,
+            "carcass": 0,
+            "mobile_sum": 74868.3,
+            "avg": 74.03,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 2.732,
+            "deaths_per_sec": 0.033,
+            "births_total": 269,
+            "deaths_total": 269,
+            "births_net_total": 269,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 66.657,
+            "colonyFeed": 6.724,
+            "prodCGraze": 0,
+            "predation": 0,
+            "carcassEat": 0,
+            "metabolism": 454.846,
+            "reproduction": 219.399,
+            "excretion": 0.647,
+            "thermal": 0,
+            "carcassExpire": 0,
+            "photosynthField": 63.389,
+            "photosynthDirect": 13.781,
+            "photosynth": 77.17,
+            "trophicAmplification": 774.586,
+            "deathDecay": 0,
+            "trueInputs": 77.17,
+            "destruction": 591.859,
+            "producerLoss": 15.071,
+            "birthGain": 97.458,
+            "reproductiveWaste": 121.942,
+            "balance_in": 73.381,
+            "balance_out": 455.493,
+            "system_net": -514.689,
+            "field_input": 73.381,
+            "mobile_loss": 454.846,
+            "carcass_loss": 0,
+            "mobile_to_field": 0.647,
+            "internal_transfer": 171.485,
+            "fnlPreyNear": 0,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0,
+            "predIncome": 0,
+            "predMetab": 0.01,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0,
+            "residual_pct": 0.333,
+            "residual_throughput_pct": 0.061,
+            "system_energy": 77734.5,
+            "field_residual_pct": 0.001,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 63.389,
+            "field_extraction": 66.657,
+            "field_deposits": 0.647,
+            "field_clamp": 0,
+            "field_delta": -78.682
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 13212.81233478524
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 21.37233806634955,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 28.63110856773122,
+                "leafEnergy": 10.509646432797442,
+                "leafCount": 2.5,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.711255724775299,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 14.780116561874024,
+                "leafEnergy": 57.90777763131031,
+                "leafCount": 3.166666666666666,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 2,
+              "avg": {
+                "radius": 4.559272194041089,
+                "armor": 2.773945023124804,
+                "fertility": 0.022670945657366187,
+                "perception": 150,
+                "energy": 24,
+                "maxAge": 7025.887612283604
+              },
+              "variance": {
+                "radius": 0.615178405203828,
+                "armor": 0.15090620415156408,
+                "fertility": 0.0000016045346238574391,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 6656.32052064687
+              }
+            },
+            "consumer": {
+              "n": 976,
+              "avg": {
+                "size": 2.2185589995752046,
+                "reserves": 4.5833870906657435,
+                "flagella": 1.0194672131147542,
+                "cilia": 2.084016393442623,
+                "chemosense": 1.6619174153297662,
+                "pseudopodia": 1.0409163576029494,
+                "armor": 0.5895847423432012,
+                "vacuole": 1.1796880086823913,
+                "fertility": 0.9708249307804229,
+                "perception": 150,
+                "metabolism": 0.08751127201446032,
+                "maxEnergy": 121.88373497827892
+              },
+              "variance": {
+                "size": 0.12150903856018402,
+                "reserves": 0.5749594458495579,
+                "flagella": 0.6092521751545281,
+                "cilia": 0.726547803009943,
+                "chemosense": 0.07397764129106488,
+                "pseudopodia": 0.036102469912338675,
+                "armor": 0.009848071715977125,
+                "vacuole": 0.025207045454899157,
+                "fertility": 0.01208315022074613,
+                "perception": 0,
+                "metabolism": 0.00023365273249533348,
+                "maxEnergy": 151.26052557825096
+              }
+            },
+            "predator": {
+              "n": 0,
+              "avg": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              },
+              "variance": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              }
+            }
+          }
+        },
+        {
+          "t": 390.1,
+          "populations": {
+            "producerA_density": 0.731,
+            "producerB": 72,
+            "producerC": 0,
+            "consumers": 1066,
+            "predators": 0,
+            "total_creatures": 1138
+          },
+          "energy": {
+            "producer": 2789,
+            "consumer": 82855.1,
+            "predator": 0,
+            "field": 13011.2,
+            "carcass": 0,
+            "mobile_sum": 83089.5,
+            "avg": 75.46,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 2.998,
+            "deaths_per_sec": 0.067,
+            "births_total": 359,
+            "deaths_total": 271,
+            "births_net_total": 359,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 72.492,
+            "colonyFeed": 8.996,
+            "prodCGraze": 1.599,
+            "predation": 0,
+            "carcassEat": 0,
+            "metabolism": 499.617,
+            "reproduction": 243.725,
+            "excretion": 0.713,
+            "thermal": 0,
+            "carcassExpire": 0,
+            "photosynthField": 65.061,
+            "photosynthDirect": 13.75,
+            "photosynth": 78.811,
+            "trophicAmplification": 827.46,
+            "deathDecay": 0.022,
+            "trueInputs": 78.811,
+            "destruction": 650.454,
+            "producerLoss": 15.353,
+            "birthGain": 108.264,
+            "reproductiveWaste": 135.462,
+            "balance_in": 83.087,
+            "balance_out": 500.331,
+            "system_net": -571.642,
+            "field_input": 83.087,
+            "mobile_loss": 499.617,
+            "carcass_loss": 0,
+            "mobile_to_field": 0.713,
+            "internal_transfer": 192.064,
+            "fnlPreyNear": 0,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0,
+            "predIncome": 0,
+            "predMetab": 0,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0,
+            "residual_pct": 0.37,
+            "residual_throughput_pct": 0.062,
+            "system_energy": 85644.1,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 65.061,
+            "field_extraction": 72.492,
+            "field_deposits": 0.713,
+            "field_clamp": 0,
+            "field_delta": -201.618
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 13011.194257848341
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 21.77090274692552,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 29.02918524949334,
+                "leafEnergy": 9.70660382681922,
+                "leafCount": 2.2083333333333335,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.711650237716924,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 16.294404655909034,
+                "leafEnergy": 56.37633130229153,
+                "leafCount": 2.776041666666666,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 0,
+              "avg": {
+                "radius": 0,
+                "armor": 0,
+                "fertility": 0,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 0
+              },
+              "variance": {
+                "radius": 0,
+                "armor": 0,
+                "fertility": 0,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 0
+              }
+            },
+            "consumer": {
+              "n": 1066,
+              "avg": {
+                "size": 2.2205478705238026,
+                "reserves": 4.576181954011103,
+                "flagella": 1.0178236397748592,
+                "cilia": 2.096622889305816,
+                "chemosense": 1.6637821809389008,
+                "pseudopodia": 1.0396508775515807,
+                "armor": 0.5886938523432691,
+                "vacuole": 1.1789120903059382,
+                "fertility": 0.9701877386808051,
+                "perception": 150,
+                "metabolism": 0.08746399126360127,
+                "maxEnergy": 121.7786647386531
+              },
+              "variance": {
+                "size": 0.12090698845801562,
+                "reserves": 0.5687528897948262,
+                "flagella": 0.5972432934749323,
+                "cilia": 0.7233094206393069,
+                "chemosense": 0.07192820410915113,
+                "pseudopodia": 0.03526989667982683,
+                "armor": 0.009724330389256963,
+                "vacuole": 0.024817387047967765,
+                "fertility": 0.012144939106934483,
+                "perception": 0,
+                "metabolism": 0.00023244791868625055,
+                "maxEnergy": 148.98474053817336
+              }
+            },
+            "predator": {
+              "n": 0,
+              "avg": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              },
+              "variance": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              }
+            }
+          }
+        },
+        {
+          "t": 420.2,
+          "populations": {
+            "producerA_density": 0.7095,
+            "producerB": 72,
+            "producerC": 0,
+            "consumers": 1170,
+            "predators": 0,
+            "total_creatures": 1242
+          },
+          "energy": {
+            "producer": 2793,
+            "consumer": 91025.1,
+            "predator": 0,
+            "field": 12629.3,
+            "carcass": 0,
+            "mobile_sum": 91025.1,
+            "avg": 75.54,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 3.465,
+            "deaths_per_sec": 0,
+            "births_total": 463,
+            "deaths_total": 271,
+            "births_net_total": 463,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 79.058,
+            "colonyFeed": 7.966,
+            "prodCGraze": 0,
+            "predation": 0,
+            "carcassEat": 0,
+            "metabolism": 548.993,
+            "reproduction": 277.952,
+            "excretion": 0.78,
+            "thermal": 0,
+            "carcassExpire": 0,
+            "photosynthField": 65.556,
+            "photosynthDirect": 13.807,
+            "photosynth": 79.363,
+            "trophicAmplification": 900.65,
+            "deathDecay": 0,
+            "trueInputs": 79.363,
+            "destruction": 721.637,
+            "producerLoss": 18.004,
+            "birthGain": 123.312,
+            "reproductiveWaste": 154.641,
+            "balance_in": 87.024,
+            "balance_out": 549.773,
+            "system_net": -642.274,
+            "field_input": 87.024,
+            "mobile_loss": 548.993,
+            "carcass_loss": 0,
+            "mobile_to_field": 0.78,
+            "internal_transfer": 211.115,
+            "fnlPreyNear": 0,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0,
+            "predIncome": 0,
+            "predMetab": 0,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0,
+            "residual_pct": 0.447,
+            "residual_throughput_pct": 0.071,
+            "system_energy": 93818.1,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 65.556,
+            "field_extraction": 79.058,
+            "field_deposits": 0.78,
+            "field_clamp": 0,
+            "field_delta": -381.882
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 12629.312110841289
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 22.16683091643408,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 29.485667554960937,
+                "leafEnergy": 9.306262271577816,
+                "leafCount": 2.2083333333333335,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.713185688087378,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 17.333705653670904,
+                "leafEnergy": 58.07467191713175,
+                "leafCount": 3.442708333333333,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 0,
+              "avg": {
+                "radius": 0,
+                "armor": 0,
+                "fertility": 0,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 0
+              },
+              "variance": {
+                "radius": 0,
+                "armor": 0,
+                "fertility": 0,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 0
+              }
+            },
+            "consumer": {
+              "n": 1170,
+              "avg": {
+                "size": 2.21868587329122,
+                "reserves": 4.565150782099742,
+                "flagella": 1.0341880341880343,
+                "cilia": 2.0991452991452992,
+                "chemosense": 1.6679972359400974,
+                "pseudopodia": 1.040268805830675,
+                "armor": 0.588867131721156,
+                "vacuole": 1.180715180461476,
+                "fertility": 0.9694279392852306,
+                "perception": 150,
+                "metabolism": 0.0877222238402059,
+                "maxEnergy": 121.59637382160388
+              },
+              "variance": {
+                "size": 0.11925118925292644,
+                "reserves": 0.5579874879148683,
+                "flagella": 0.5868653663525458,
+                "cilia": 0.7183753378625166,
+                "chemosense": 0.07179664614901826,
+                "pseudopodia": 0.03559412228365422,
+                "armor": 0.009476431576603939,
+                "vacuole": 0.024422913260518486,
+                "fertility": 0.012118948683265907,
+                "perception": 0,
+                "metabolism": 0.00022809020604937658,
+                "maxEnergy": 146.308518562706
+              }
+            },
+            "predator": {
+              "n": 0,
+              "avg": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              },
+              "variance": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              }
+            }
+          }
+        },
+        {
+          "t": 450.2,
+          "populations": {
+            "producerA_density": 0.6802,
+            "producerB": 72,
+            "producerC": 0,
+            "consumers": 1296,
+            "predators": 0,
+            "total_creatures": 1368
+          },
+          "energy": {
+            "producer": 2841,
+            "consumer": 98543.1,
+            "predator": 0,
+            "field": 12107.2,
+            "carcass": 0,
+            "mobile_sum": 98758.5,
+            "avg": 74.27,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 4.198,
+            "deaths_per_sec": 0,
+            "births_total": 589,
+            "deaths_total": 271,
+            "births_net_total": 589,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 86.064,
+            "colonyFeed": 6.602,
+            "prodCGraze": 0,
+            "predation": 0,
+            "carcassEat": 0,
+            "metabolism": 602.628,
+            "reproduction": 334.454,
+            "excretion": 0.853,
+            "thermal": 0,
+            "carcassExpire": 0,
+            "photosynthField": 67.816,
+            "photosynthDirect": 14.027,
+            "photosynth": 81.843,
+            "trophicAmplification": 954.281,
+            "deathDecay": 0,
+            "trueInputs": 81.843,
+            "destruction": 802.88,
+            "producerLoss": 14.241,
+            "birthGain": 148.443,
+            "reproductiveWaste": 186.011,
+            "balance_in": 92.666,
+            "balance_out": 603.481,
+            "system_net": -721.037,
+            "field_input": 92.666,
+            "mobile_loss": 602.628,
+            "carcass_loss": 0,
+            "mobile_to_field": 0.853,
+            "internal_transfer": 241.962,
+            "fnlPreyNear": 0,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0,
+            "predIncome": 0,
+            "predMetab": 0,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0,
+            "residual_pct": 0.564,
+            "residual_throughput_pct": 0.076,
+            "system_energy": 101384.2,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 67.816,
+            "field_extraction": 86.064,
+            "field_deposits": 0.853,
+            "field_clamp": 0,
+            "field_delta": -522.148
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 12107.164315479547
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 22.560140191289353,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 30.023745490155914,
+                "leafEnergy": 9.435050196191645,
+                "leafCount": 2.3194444444444446,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.715847524649064,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 14.82318047621493,
+                "leafEnergy": 57.14602626386123,
+                "leafCount": 3.939621913580246,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 0,
+              "avg": {
+                "radius": 0,
+                "armor": 0,
+                "fertility": 0,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 0
+              },
+              "variance": {
+                "radius": 0,
+                "armor": 0,
+                "fertility": 0,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 0
+              }
+            },
+            "consumer": {
+              "n": 1296,
+              "avg": {
+                "size": 2.221207555870098,
+                "reserves": 4.56444023683575,
+                "flagella": 1.0300925925925926,
+                "cilia": 2.1141975308641974,
+                "chemosense": 1.6676242623923443,
+                "pseudopodia": 1.0410050881702853,
+                "armor": 0.5889917573644585,
+                "vacuole": 1.1817805499577303,
+                "fertility": 0.9702131472644187,
+                "perception": 150,
+                "metabolism": 0.08767081926648873,
+                "maxEnergy": 121.6051248273795
+              },
+              "variance": {
+                "size": 0.11727423350010024,
+                "reserves": 0.5468833640060105,
+                "flagella": 0.5785697445130316,
+                "cilia": 0.7138107757963725,
+                "chemosense": 0.07129034327675532,
+                "pseudopodia": 0.03594419415996031,
+                "armor": 0.009357563045336359,
+                "vacuole": 0.024541065381191274,
+                "fertility": 0.012087440196955956,
+                "perception": 0,
+                "metabolism": 0.00022457776250487706,
+                "maxEnergy": 143.08076208700732
+              }
+            },
+            "predator": {
+              "n": 0,
+              "avg": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              },
+              "variance": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              }
+            }
+          }
+        },
+        {
+          "t": 480.2,
+          "populations": {
+            "producerA_density": 0.6445,
+            "producerB": 72,
+            "producerC": 0,
+            "consumers": 1452,
+            "predators": 0,
+            "total_creatures": 1524
+          },
+          "energy": {
+            "producer": 2813.6,
+            "consumer": 105026.8,
+            "predator": 0,
+            "field": 11471.9,
+            "carcass": 0,
+            "mobile_sum": 105026.8,
+            "avg": 70.76,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 5.197,
+            "deaths_per_sec": 0,
+            "births_total": 745,
+            "deaths_total": 271,
+            "births_net_total": 745,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 93.561,
+            "colonyFeed": 9.167,
+            "prodCGraze": 0,
+            "predation": 0,
+            "carcassEat": 0,
+            "metabolism": 671.483,
+            "reproduction": 418.487,
+            "excretion": 0.936,
+            "thermal": 0,
+            "carcassExpire": 0,
+            "photosynthField": 71.463,
+            "photosynthDirect": 14.152,
+            "photosynth": 85.615,
+            "trophicAmplification": 1027.687,
+            "deathDecay": 0,
+            "trueInputs": 85.615,
+            "destruction": 921.396,
+            "producerLoss": 16.819,
+            "birthGain": 185.394,
+            "reproductiveWaste": 233.094,
+            "balance_in": 102.727,
+            "balance_out": 672.418,
+            "system_net": -835.78,
+            "field_input": 102.727,
+            "mobile_loss": 671.483,
+            "carcass_loss": 0,
+            "mobile_to_field": 0.936,
+            "internal_transfer": 289.057,
+            "fnlPreyNear": 0,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0,
+            "predIncome": 0,
+            "predMetab": 0,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0,
+            "residual_pct": 0.938,
+            "residual_throughput_pct": 0.098,
+            "system_energy": 107840.4,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 71.463,
+            "field_extraction": 93.561,
+            "field_deposits": 0.936,
+            "field_clamp": 0,
+            "field_delta": -635.224
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 11471.940112614491
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 22.950848069034556,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 30.283810512926816,
+                "leafEnergy": 8.793455968851577,
+                "leafCount": 2.0555555555555554,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.719621741085007,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 15.01031031864511,
+                "leafEnergy": 58.679207523730256,
+                "leafCount": 3.719135802469137,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 0,
+              "avg": {
+                "radius": 0,
+                "armor": 0,
+                "fertility": 0,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 0
+              },
+              "variance": {
+                "radius": 0,
+                "armor": 0,
+                "fertility": 0,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 0
+              }
+            },
+            "consumer": {
+              "n": 1452,
+              "avg": {
+                "size": 2.2245837472252172,
+                "reserves": 4.560712306919561,
+                "flagella": 1.0268595041322315,
+                "cilia": 2.1205234159779613,
+                "chemosense": 1.6659473767578021,
+                "pseudopodia": 1.0444502496591468,
+                "armor": 0.5883393852552827,
+                "vacuole": 1.1816440518471834,
+                "fertility": 0.9708536226130875,
+                "perception": 150,
+                "metabolism": 0.08765427250145769,
+                "maxEnergy": 121.56694544914167
+              },
+              "variance": {
+                "size": 0.11469933377752284,
+                "reserves": 0.5355869034765526,
+                "flagella": 0.5729700270928668,
+                "cilia": 0.7037936654296537,
+                "chemosense": 0.06945379290386589,
+                "pseudopodia": 0.03530358132686162,
+                "armor": 0.009178956037595998,
+                "vacuole": 0.024001919719444098,
+                "fertility": 0.012042946716693592,
+                "perception": 0,
+                "metabolism": 0.00022245199087614527,
+                "maxEnergy": 139.75847751435867
+              }
+            },
+            "predator": {
+              "n": 0,
+              "avg": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              },
+              "variance": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              }
+            }
+          }
+        },
+        {
+          "t": 510.2,
+          "populations": {
+            "producerA_density": 0.5996,
+            "producerB": 72,
+            "producerC": 0,
+            "consumers": 1591,
+            "predators": 0,
+            "total_creatures": 1663
+          },
+          "energy": {
+            "producer": 2816.6,
+            "consumer": 112311.7,
+            "predator": 0,
+            "field": 10672.5,
+            "carcass": 0,
+            "mobile_sum": 112615.8,
+            "avg": 69.41,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 4.631,
+            "deaths_per_sec": 0,
+            "births_total": 884,
+            "deaths_total": 271,
+            "births_net_total": 884,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 100.981,
+            "colonyFeed": 8.15,
+            "prodCGraze": 0,
+            "predation": 0,
+            "carcassEat": 0,
+            "metabolism": 745.449,
+            "reproduction": 361.616,
+            "excretion": 1.038,
+            "thermal": 0,
+            "carcassExpire": 0,
+            "photosynthField": 73.31,
+            "photosynthDirect": 14.187,
+            "photosynth": 87.497,
+            "trophicAmplification": 1090.989,
+            "deathDecay": 0,
+            "trueInputs": 87.497,
+            "destruction": 963.434,
+            "producerLoss": 17.482,
+            "birthGain": 161.113,
+            "reproductiveWaste": 200.503,
+            "balance_in": 109.132,
+            "balance_out": 746.487,
+            "system_net": -875.938,
+            "field_input": 109.132,
+            "mobile_loss": 745.449,
+            "carcass_loss": 0,
+            "mobile_to_field": 1.038,
+            "internal_transfer": 271.282,
+            "fnlPreyNear": 0,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0,
+            "predIncome": 0,
+            "predMetab": 0,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0,
+            "residual_pct": 0.459,
+            "residual_throughput_pct": 0.051,
+            "system_energy": 115128.4,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 73.31,
+            "field_extraction": 100.981,
+            "field_deposits": 1.038,
+            "field_clamp": 0,
+            "field_delta": -799.46
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 10672.48045023749
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 23.338971929151707,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 30.627746093685605,
+                "leafEnergy": 8.492310494582517,
+                "leafCount": 1.9166666666666667,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.724494856843762,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 17.34603827219803,
+                "leafEnergy": 60.544804774656484,
+                "leafCount": 3.5486111111111107,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 0,
+              "avg": {
+                "radius": 0,
+                "armor": 0,
+                "fertility": 0,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 0
+              },
+              "variance": {
+                "radius": 0,
+                "armor": 0,
+                "fertility": 0,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 0
+              }
+            },
+            "consumer": {
+              "n": 1591,
+              "avg": {
+                "size": 2.2244029460306494,
+                "reserves": 4.555546874494049,
+                "flagella": 1.033940917661848,
+                "cilia": 2.117536140791955,
+                "chemosense": 1.6649650807954084,
+                "pseudopodia": 1.0455866379163294,
+                "armor": 0.5869036187753975,
+                "vacuole": 1.1804329720015727,
+                "fertility": 0.9718817720016055,
+                "perception": 150,
+                "metabolism": 0.0877800881991772,
+                "maxEnergy": 121.47888454310915
+              },
+              "variance": {
+                "size": 0.1132632218321481,
+                "reserves": 0.5307878716733505,
+                "flagella": 0.5657870461635828,
+                "cilia": 0.7046013461168474,
+                "chemosense": 0.06859017016468183,
+                "pseudopodia": 0.03488287506324261,
+                "armor": 0.00905518018367163,
+                "vacuole": 0.024002696537169577,
+                "fertility": 0.011994937156800556,
+                "perception": 0,
+                "metabolism": 0.00022262131459459007,
+                "maxEnergy": 139.51858653960699
+              }
+            },
+            "predator": {
+              "n": 0,
+              "avg": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              },
+              "variance": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              }
+            }
+          }
+        },
+        {
+          "t": 540.2,
+          "populations": {
+            "producerA_density": 0.5475,
+            "producerB": 72,
+            "producerC": 0,
+            "consumers": 1752,
+            "predators": 0,
+            "total_creatures": 1824
+          },
+          "energy": {
+            "producer": 2836.4,
+            "consumer": 117552,
+            "predator": 0,
+            "field": 9745.7,
+            "carcass": 0,
+            "mobile_sum": 117552,
+            "avg": 66,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 5.364,
+            "deaths_per_sec": 0,
+            "births_total": 1045,
+            "deaths_total": 271,
+            "births_net_total": 1045,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 108.05,
+            "colonyFeed": 7.611,
+            "prodCGraze": 0,
+            "predation": 0,
+            "carcassEat": 0,
+            "metabolism": 820.761,
+            "reproduction": 414.178,
+            "excretion": 1.166,
+            "thermal": 0,
+            "carcassExpire": 0,
+            "photosynthField": 76.009,
+            "photosynthDirect": 14.247,
+            "photosynth": 90.255,
+            "trophicAmplification": 1122.392,
+            "deathDecay": 0,
+            "trueInputs": 90.255,
+            "destruction": 1070.033,
+            "producerLoss": 18.941,
+            "birthGain": 183.846,
+            "reproductiveWaste": 230.332,
+            "balance_in": 115.661,
+            "balance_out": 821.927,
+            "system_net": -979.778,
+            "field_input": 115.661,
+            "mobile_loss": 820.761,
+            "carcass_loss": 0,
+            "mobile_to_field": 1.166,
+            "internal_transfer": 300.673,
+            "fnlPreyNear": 0,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0,
+            "predIncome": 0,
+            "predMetab": 0,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0,
+            "residual_pct": 0.997,
+            "residual_throughput_pct": 0.075,
+            "system_energy": 120388.4,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 76.009,
+            "field_extraction": 108.05,
+            "field_deposits": 1.166,
+            "field_clamp": 0,
+            "field_delta": -926.762
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 9745.717966395881
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 23.7245290338659,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 31.00488100808265,
+                "leafEnergy": 8.388897206248727,
+                "leafCount": 1.9027777777777777,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.7304538985100635,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 18.13456607376554,
+                "leafEnergy": 55.7340742472701,
+                "leafCount": 3.3099922839506175,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 0,
+              "avg": {
+                "radius": 0,
+                "armor": 0,
+                "fertility": 0,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 0
+              },
+              "variance": {
+                "radius": 0,
+                "armor": 0,
+                "fertility": 0,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 0
+              }
+            },
+            "consumer": {
+              "n": 1752,
+              "avg": {
+                "size": 2.2258030828611766,
+                "reserves": 4.5494390348906855,
+                "flagella": 1.03824200913242,
+                "cilia": 2.122146118721461,
+                "chemosense": 1.6657205624457263,
+                "pseudopodia": 1.0459190987198324,
+                "armor": 0.5882913313012215,
+                "vacuole": 1.1813295935183883,
+                "fertility": 0.9715369991236483,
+                "perception": 150,
+                "metabolism": 0.08788143253741992,
+                "maxEnergy": 121.39339817416267
+              },
+              "variance": {
+                "size": 0.11302010416158748,
+                "reserves": 0.5239119881763372,
+                "flagella": 0.5607521606096622,
+                "cilia": 0.7053999603844803,
+                "chemosense": 0.06816381557960316,
+                "pseudopodia": 0.03435897204582661,
+                "armor": 0.008998664084561458,
+                "vacuole": 0.02383018233130052,
+                "fertility": 0.01183040931117596,
+                "perception": 0,
+                "metabolism": 0.00022094102863577224,
+                "maxEnergy": 137.85142542341782
+              }
+            },
+            "predator": {
+              "n": 0,
+              "avg": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              },
+              "variance": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              }
+            }
+          }
+        },
+        {
+          "t": 570.2,
+          "populations": {
+            "producerA_density": 0.4915,
+            "producerB": 72,
+            "producerC": 0,
+            "consumers": 1894,
+            "predators": 0,
+            "total_creatures": 1966
+          },
+          "energy": {
+            "producer": 2904,
+            "consumer": 121197.5,
+            "predator": 0,
+            "field": 8749.3,
+            "carcass": 0,
+            "mobile_sum": 121609.7,
+            "avg": 63.33,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 4.731,
+            "deaths_per_sec": 0,
+            "births_total": 1187,
+            "deaths_total": 271,
+            "births_net_total": 1187,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 112.089,
+            "colonyFeed": 6.036,
+            "prodCGraze": 0,
+            "predation": 0,
+            "carcassEat": 0,
+            "metabolism": 890.803,
+            "reproduction": 360.571,
+            "excretion": 1.268,
+            "thermal": 0,
+            "carcassExpire": 0,
+            "photosynthField": 77.626,
+            "photosynthDirect": 14.318,
+            "photosynth": 91.944,
+            "trophicAmplification": 1108.138,
+            "deathDecay": 0,
+            "trueInputs": 91.944,
+            "destruction": 1111.126,
+            "producerLoss": 19.76,
+            "birthGain": 160.008,
+            "reproductiveWaste": 200.562,
+            "balance_in": 118.125,
+            "balance_out": 892.071,
+            "system_net": -1019.182,
+            "field_input": 118.125,
+            "mobile_loss": 890.803,
+            "carcass_loss": 0,
+            "mobile_to_field": 1.268,
+            "internal_transfer": 279.401,
+            "fnlPreyNear": 0,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0,
+            "predIncome": 0,
+            "predMetab": 0,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0,
+            "residual_pct": 1.254,
+            "residual_throughput_pct": 0.066,
+            "system_energy": 124101.5,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 77.626,
+            "field_extraction": 112.089,
+            "field_deposits": 1.268,
+            "field_clamp": 0,
+            "field_delta": -996.398
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 8749.319790440564
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 24.107536528944,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 31.512717634480776,
+                "leafEnergy": 8.820408499023092,
+                "leafCount": 2.0416666666666665,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.737486381672966,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 21.213792290940432,
+                "leafEnergy": 60.67714513310031,
+                "leafCount": 3.2621527777777786,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 0,
+              "avg": {
+                "radius": 0,
+                "armor": 0,
+                "fertility": 0,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 0
+              },
+              "variance": {
+                "radius": 0,
+                "armor": 0,
+                "fertility": 0,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 0
+              }
+            },
+            "consumer": {
+              "n": 1894,
+              "avg": {
+                "size": 2.225090575956995,
+                "reserves": 4.551709934008221,
+                "flagella": 1.044350580781415,
+                "cilia": 2.1246040126715946,
+                "chemosense": 1.6638047407861487,
+                "pseudopodia": 1.0460705599261064,
+                "armor": 0.5880159846011138,
+                "vacuole": 1.1797635655813812,
+                "fertility": 0.9711834828171029,
+                "perception": 150,
+                "metabolism": 0.08795013634318191,
+                "maxEnergy": 121.41962016738655
+              },
+              "variance": {
+                "size": 0.11205113339271389,
+                "reserves": 0.522933872664602,
+                "flagella": 0.5555831843792824,
+                "cilia": 0.6961950649469388,
+                "chemosense": 0.06755609678968799,
+                "pseudopodia": 0.0339910079493182,
+                "armor": 0.00891736197794124,
+                "vacuole": 0.023641797449749147,
+                "fertility": 0.011968033450345139,
+                "perception": 0,
+                "metabolism": 0.0002195940657712253,
+                "maxEnergy": 137.40738381009942
+              }
+            },
+            "predator": {
+              "n": 0,
+              "avg": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              },
+              "variance": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              }
+            }
+          }
+        },
+        {
+          "t": 600,
+          "populations": {
+            "producerA_density": 0.4356,
+            "producerB": 72,
+            "producerC": 0,
+            "consumers": 2013,
+            "predators": 0,
+            "total_creatures": 2085
+          },
+          "energy": {
+            "producer": 2879.2,
+            "consumer": 122776.3,
+            "predator": 0,
+            "field": 7754.4,
+            "carcass": 0,
+            "mobile_sum": 123623.6,
+            "avg": 60.67,
+            "neg_mobile": {
+              "count": 0,
+              "sum": 0,
+              "min": 0,
+              "dormant": 0,
+              "dormant_neg": 0
+            }
+          },
+          "rates": {
+            "births_per_sec": 3.998,
+            "deaths_per_sec": 0,
+            "births_total": 1306,
+            "deaths_total": 271,
+            "births_net_total": 1306,
+            "migration_per_interval": {
+              "counts": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy": {
+                "producerB": 0,
+                "producerC": 0,
+                "consumers": 0,
+                "predators": 0
+              },
+              "energy_per_sec": 0
+            },
+            "migration_totals": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            }
+          },
+          "flows": {
+            "graze": 113.82,
+            "colonyFeed": 9.134,
+            "prodCGraze": 0,
+            "predation": 0,
+            "carcassEat": 0,
+            "metabolism": 957.488,
+            "reproduction": 300.017,
+            "excretion": 1.352,
+            "thermal": 0,
+            "carcassExpire": 0,
+            "photosynthField": 79.043,
+            "photosynthDirect": 14.372,
+            "photosynth": 93.415,
+            "trophicAmplification": 1070.887,
+            "deathDecay": 0,
+            "trueInputs": 93.415,
+            "destruction": 1146.728,
+            "producerLoss": 22.482,
+            "birthGain": 133.259,
+            "reproductiveWaste": 166.758,
+            "balance_in": 122.955,
+            "balance_out": 958.84,
+            "system_net": -1053.313,
+            "field_input": 122.955,
+            "mobile_loss": 957.488,
+            "carcass_loss": 0,
+            "mobile_to_field": 1.352,
+            "internal_transfer": 257.566,
+            "fnlPreyNear": 0,
+            "fnlPreyNear3": 0,
+            "fnlContact": 0,
+            "fnlRejCooldown": 0,
+            "fnlRejSatiety": 0,
+            "fnlChase": 0,
+            "fnlRejChase": 0,
+            "fnlRejGape": 0,
+            "fnlCapture": 0,
+            "predIncome": 0,
+            "predMetab": 0,
+            "predThermal": 0,
+            "pursuitChase": 0,
+            "pursuitCoast": 0,
+            "ambushHide": 0,
+            "ambushLunge": 0,
+            "ambushProbe": 0,
+            "ambushMaxSeen": 0,
+            "ambushP01": 0,
+            "ambushP03": 0,
+            "ambushP05": 0,
+            "ambushPreyMax": 0,
+            "ambushCenterMax": 0,
+            "ambushProbeDense": 0,
+            "shdTetherOpp": 0,
+            "shdConeSteps": 0,
+            "shdEpisodes": 0,
+            "shdGainUBSum": 0,
+            "shdPredSteps": 0,
+            "tetherStrike": 0,
+            "shSelSteps": 0,
+            "shSelDiff": 0,
+            "shGainNearSum": 0,
+            "shGainScoreSum": 0,
+            "shDistNearSum": 0,
+            "shDistScoreSum": 0,
+            "shSucAcq": 0,
+            "shSucSteps": 0,
+            "shSucNear": 0,
+            "shSucAcqHeld": 0,
+            "shSucTransfer": 0,
+            "shSucAttachTime": 0,
+            "shStaSteps": 0,
+            "shStaPanicTime": 0,
+            "shStaDeplTime": 0,
+            "shStaAcq": 0,
+            "shStaTransfer": 0,
+            "shStaCloseTime": 0,
+            "pred_income_metab_ratio": 0,
+            "residual_pct": 2.31,
+            "residual_throughput_pct": 0.051,
+            "system_energy": 125655.5,
+            "field_residual_pct": 0,
+            "field_residual_throughput_pct": 0,
+            "field_growth": 79.043,
+            "field_extraction": 113.82,
+            "field_deposits": 1.352,
+            "field_clamp": 0,
+            "field_delta": -994.947
+          },
+          "genes": {
+            "producer-a": {
+              "n": 1,
+              "avg": {
+                "densityTotal": 8749.319790440564
+              },
+              "variance": {
+                "densityTotal": 0
+              }
+            },
+            "producer-b": {
+              "n": 72,
+              "avg": {
+                "radius": 24.484852992933284,
+                "armor": 3.9794062511226542,
+                "fertility": 0.022925446484036716,
+                "energy": 31.70369794491639,
+                "leafEnergy": 8.285235086686395,
+                "leafCount": 1.9444444444444444,
+                "maxAge": 14010.90375075601
+              },
+              "variance": {
+                "radius": 4.745508530132838,
+                "armor": 0.1454551941253044,
+                "fertility": 0.000004863913910420456,
+                "energy": 22.951317825682736,
+                "leafEnergy": 49.0059204108242,
+                "leafCount": 3.1080246913580254,
+                "maxAge": 4993193.9763536155
+              }
+            },
+            "producer-c": {
+              "n": 0,
+              "avg": {
+                "radius": 0,
+                "armor": 0,
+                "fertility": 0,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 0
+              },
+              "variance": {
+                "radius": 0,
+                "armor": 0,
+                "fertility": 0,
+                "perception": 0,
+                "energy": 0,
+                "maxAge": 0
+              }
+            },
+            "consumer": {
+              "n": 2013,
+              "avg": {
+                "size": 2.2234369660665156,
+                "reserves": 4.542188341859669,
+                "flagella": 1.0486835568802781,
+                "cilia": 2.1306507699950323,
+                "chemosense": 1.6646929766845273,
+                "pseudopodia": 1.0472331362282237,
+                "armor": 0.5876184063397305,
+                "vacuole": 1.1795874481016244,
+                "fertility": 0.9716974647392738,
+                "perception": 150,
+                "metabolism": 0.08800509480305345,
+                "maxEnergy": 121.25590981754259
+              },
+              "variance": {
+                "size": 0.11160503173809921,
+                "reserves": 0.5177118632806419,
+                "flagella": 0.5490457086069214,
+                "cilia": 0.696790286880927,
+                "chemosense": 0.06701756697499173,
+                "pseudopodia": 0.03381521724590164,
+                "armor": 0.008912244659353807,
+                "vacuole": 0.023341292117546875,
+                "fertility": 0.012030058357485052,
+                "perception": 0,
+                "metabolism": 0.0002169854226267507,
+                "maxEnergy": 136.14923036926848
+              }
+            },
+            "predator": {
+              "n": 0,
+              "avg": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              },
+              "variance": {
+                "size": 0,
+                "reserves": 0,
+                "flagella": 0,
+                "cilia": 0,
+                "chemosense": 0,
+                "pseudopodia": 0,
+                "armor": 0,
+                "vacuole": 0,
+                "fertility": 0,
+                "perception": 0,
+                "metabolism": 0,
+                "maxEnergy": 0
+              }
+            }
+          }
+        }
+      ],
+      "extinctions": [
+        {
+          "t": 360.1,
+          "group": "predator"
+        },
+        {
+          "t": 390.1,
+          "group": "producer-c"
+        }
+      ],
+      "percentiles": {
+        "populations": {
+          "producerB": {
+            "p50": 72,
+            "p95": 72
+          },
+          "producerC": {
+            "p50": 2,
+            "p95": 132
+          },
+          "consumers": {
+            "p50": 825,
+            "p95": 1894
+          },
+          "predators": {
+            "p50": 4,
+            "p95": 30
+          }
+        },
+        "energy": {
+          "producer": {
+            "p50": 2828,
+            "p95": 3595.8
+          },
+          "consumer": {
+            "p50": 59270.1,
+            "p95": 121197.5
+          },
+          "predator": {
+            "p50": 8.9,
+            "p95": 3116.2
+          },
+          "field": {
+            "p50": 10672.5,
+            "p95": 13212.8
+          },
+          "avg": {
+            "p50": 63.33,
+            "p95": 75.46
+          }
+        }
+      },
+      "residual_max_pct": 2.31,
+      "residual_throughput_max_pct": 0.098,
+      "residual_throughput_median_pct": 0.051,
+      "residual_median_pct": 0.333,
+      "field_residual_max_pct": 0.001,
+      "field_residual_median_pct": 0,
+      "final_state": {
+        "populations": {
+          "producerA_density": 0.4356,
+          "producerB": 72,
+          "producerC": 0,
+          "consumers": 2013,
+          "predators": 0,
+          "total_creatures": 2085
+        },
+        "energy": {
+          "producer": 2879.2,
+          "consumer": 122776.3,
+          "predator": 0,
+          "field": 7754.4,
+          "carcass": 0,
+          "mobile_sum": 123623.6,
+          "avg": 60.67,
+          "neg_mobile": {
+            "count": 0,
+            "sum": 0,
+            "min": 0,
+            "dormant": 0,
+            "dormant_neg": 0
+          }
+        },
+        "rates": {
+          "births_per_sec": 3.998,
+          "deaths_per_sec": 0,
+          "births_total": 1306,
+          "deaths_total": 271,
+          "births_net_total": 1306,
+          "migration_per_interval": {
+            "counts": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            },
+            "energy": {
+              "producerB": 0,
+              "producerC": 0,
+              "consumers": 0,
+              "predators": 0
+            },
+            "energy_per_sec": 0
+          },
+          "migration_totals": {
+            "producerB": 0,
+            "producerC": 0,
+            "consumers": 0,
+            "predators": 0
+          }
+        },
+        "flows": {
+          "graze": 113.82,
+          "colonyFeed": 9.134,
+          "prodCGraze": 0,
+          "predation": 0,
+          "carcassEat": 0,
+          "metabolism": 957.488,
+          "reproduction": 300.017,
+          "excretion": 1.352,
+          "thermal": 0,
+          "carcassExpire": 0,
+          "photosynthField": 79.043,
+          "photosynthDirect": 14.372,
+          "photosynth": 93.415,
+          "trophicAmplification": 1070.887,
+          "deathDecay": 0,
+          "trueInputs": 93.415,
+          "destruction": 1146.728,
+          "producerLoss": 22.482,
+          "birthGain": 133.259,
+          "reproductiveWaste": 166.758,
+          "balance_in": 122.955,
+          "balance_out": 958.84,
+          "system_net": -1053.313,
+          "field_input": 122.955,
+          "mobile_loss": 957.488,
+          "carcass_loss": 0,
+          "mobile_to_field": 1.352,
+          "internal_transfer": 257.566,
+          "fnlPreyNear": 0,
+          "fnlPreyNear3": 0,
+          "fnlContact": 0,
+          "fnlRejCooldown": 0,
+          "fnlRejSatiety": 0,
+          "fnlChase": 0,
+          "fnlRejChase": 0,
+          "fnlRejGape": 0,
+          "fnlCapture": 0,
+          "predIncome": 0,
+          "predMetab": 0,
+          "predThermal": 0,
+          "pursuitChase": 0,
+          "pursuitCoast": 0,
+          "ambushHide": 0,
+          "ambushLunge": 0,
+          "ambushProbe": 0,
+          "ambushMaxSeen": 0,
+          "ambushP01": 0,
+          "ambushP03": 0,
+          "ambushP05": 0,
+          "ambushPreyMax": 0,
+          "ambushCenterMax": 0,
+          "ambushProbeDense": 0,
+          "shdTetherOpp": 0,
+          "shdConeSteps": 0,
+          "shdEpisodes": 0,
+          "shdGainUBSum": 0,
+          "shdPredSteps": 0,
+          "tetherStrike": 0,
+          "shSelSteps": 0,
+          "shSelDiff": 0,
+          "shGainNearSum": 0,
+          "shGainScoreSum": 0,
+          "shDistNearSum": 0,
+          "shDistScoreSum": 0,
+          "shSucAcq": 0,
+          "shSucSteps": 0,
+          "shSucNear": 0,
+          "shSucAcqHeld": 0,
+          "shSucTransfer": 0,
+          "shSucAttachTime": 0,
+          "shStaSteps": 0,
+          "shStaPanicTime": 0,
+          "shStaDeplTime": 0,
+          "shStaAcq": 0,
+          "shStaTransfer": 0,
+          "shStaCloseTime": 0,
+          "pred_income_metab_ratio": 0,
+          "residual_pct": 2.31,
+          "residual_throughput_pct": 0.051,
+          "system_energy": 125655.5,
+          "field_residual_pct": 0,
+          "field_residual_throughput_pct": 0,
+          "field_growth": 79.043,
+          "field_extraction": 113.82,
+          "field_deposits": 1.352,
+          "field_clamp": 0,
+          "field_delta": -994.947
+        },
+        "survival": {
+          "producer-a": true,
+          "producer-b": true,
+          "producer-c": false,
+          "consumer": true,
+          "predator": false,
+          "all_alive": false
+        }
+      }
+    }
+  ]
+}
