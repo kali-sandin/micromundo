@@ -1,0 +1,9 @@
+[seed 42424] t=60s/600s wall=61s pop=913
+[seed 42424] t=120s/600s wall=114s pop=913
+[seed 42424] t=180s/600s wall=166s pop=913
+[seed 42424] t=240s/600s wall=217s pop=913
+[seed 42424] t=300s/600s wall=270s pop=913
+[seed 42424] t=360s/600s wall=328s pop=1000
+[seed 42424] t=420s/600s wall=397s pop=1189
+[seed 42424] t=480s/600s wall=480s pop=1411
+[seed 42424] t=540s/600s wall=579s pop=1684
