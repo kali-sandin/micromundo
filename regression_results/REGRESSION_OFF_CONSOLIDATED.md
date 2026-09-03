@@ -26,7 +26,7 @@ registradas en contador (carreras cortas con declive parcial). Mismo patrón.
 ## Conclusión
 
 - Patrón estructural OFF reproducible en 7 commits y ≥7 seeds: predator y pC
-  tienden a extinguirse sin migración; consumers 1880-2013 en régimen; pB
+  tienden a extinguirse sin migración; consumers 1851-2013 en régimen; pB
   clavado en 72; pA density 0.44-0.48.
 - Ninguna regresión nueva atribuible a los checkpoints de task_917 (ledger
   shadow, flags OFF). Suite OK en cada checkpoint.
@@ -42,3 +42,4 @@ registradas en contador (carreras cortas con declive parcial). Mismo patrón.
 - `reg10m_off_head_ce41d16_seed88888.{json,log}` (suite 90/90 OK en el mismo commit)
 - `reg10m_off_head_13cecd3_seed54321.json`
 - `head_ba4587f_3m_off.json`
+- `reg10m_off_head_8f62a2c_seed55005.{json,log}` (suite 90/90 OK en el mismo commit; predator ext t=340, pC ext t=420, pB 72, consumers 1851)
