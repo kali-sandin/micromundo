@@ -1,2 +1,44 @@
 === Batch 5x30m task_919 corte2 (HEAD 96d1893) 2026-09-04T04:15:50+02:00 ===
 [1/5] seed=12345 start=2026-09-04T04:15:50+02:00
+[seed 12345] t=60s/1800s wall=55s pop=913
+[seed 12345] t=120s/1800s wall=105s pop=913
+[seed 12345] t=180s/1800s wall=153s pop=913
+[seed 12345] t=240s/1800s wall=199s pop=913
+[seed 12345] t=300s/1800s wall=248s pop=913
+[seed 12345] t=360s/1800s wall=302s pop=1021
+[seed 12345] t=420s/1800s wall=367s pop=1205
+[seed 12345] t=480s/1800s wall=445s pop=1451
+[seed 12345] t=540s/1800s wall=537s pop=1739
+[seed 12345] t=600s/1800s wall=645s pop=1998
+[seed 12345] t=660s/1800s wall=766s pop=2179
+[seed 12345] t=720s/1800s wall=899s pop=2268
+[seed 12345] t=780s/1800s wall=1036s pop=2297
+[seed 12345] t=840s/1800s wall=1173s pop=2300
+[seed 12345] t=900s/1800s wall=1310s pop=2300
+[seed 12345] t=960s/1800s wall=1437s pop=2300
+[seed 12345] t=1020s/1800s wall=1553s pop=2000
+[seed 12345] t=1080s/1800s wall=1660s pop=1739
+[seed 12345] t=1140s/1800s wall=1762s pop=1739
+[seed 12345] t=1200s/1800s wall=1861s pop=1739
+[seed 12345] t=1260s/1800s wall=1960s pop=1739
+[seed 12345] t=1320s/1800s wall=2057s pop=1739
+[seed 12345] t=1380s/1800s wall=2155s pop=1739
+[seed 12345] t=1440s/1800s wall=2252s pop=1739
+[seed 12345] t=1500s/1800s wall=2349s pop=1739
+[seed 12345] t=1560s/1800s wall=2447s pop=1739
+[seed 12345] t=1620s/1800s wall=2546s pop=1739
+[seed 12345] t=1680s/1800s wall=2647s pop=1739
+[seed 12345] t=1740s/1800s wall=2748s pop=1739
+[1/5] seed=12345 done=2026-09-04T05:03:22+02:00
+[2/5] seed=20264 start=2026-09-04T05:03:22+02:00
+[seed 20264] t=60s/1800s wall=52s pop=913
+[seed 20264] t=120s/1800s wall=100s pop=913
+[seed 20264] t=180s/1800s wall=145s pop=913
+[seed 20264] t=240s/1800s wall=190s pop=913
+[seed 20264] t=300s/1800s wall=236s pop=913
+[seed 20264] t=360s/1800s wall=287s pop=968
+[seed 20264] t=420s/1800s wall=345s pop=1138
+[seed 20264] t=480s/1800s wall=416s pop=1363
+[seed 20264] t=540s/1800s wall=499s pop=1614
+[seed 20264] t=600s/1800s wall=596s pop=1846
+[seed 20264] t=660s/1800s wall=706s pop=2059
