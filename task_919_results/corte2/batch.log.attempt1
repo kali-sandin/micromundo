@@ -1,0 +1,31 @@
+=== Batch 5x30m task_919 corte2 (HEAD 96d1893) 2026-09-04T03:09:56+02:00 ===
+[1/5] seed=12345 start=2026-09-04T03:09:56+02:00
+[seed 12345] t=60s/1800s wall=53s pop=913
+[seed 12345] t=120s/1800s wall=102s pop=913
+[seed 12345] t=180s/1800s wall=149s pop=913
+[seed 12345] t=240s/1800s wall=195s pop=913
+[seed 12345] t=300s/1800s wall=243s pop=913
+[seed 12345] t=360s/1800s wall=307s pop=1021
+[seed 12345] t=420s/1800s wall=382s pop=1205
+[seed 12345] t=480s/1800s wall=461s pop=1451
+[seed 12345] t=540s/1800s wall=553s pop=1739
+[seed 12345] t=600s/1800s wall=660s pop=1998
+[seed 12345] t=660s/1800s wall=779s pop=2179
+[seed 12345] t=720s/1800s wall=909s pop=2268
+[seed 12345] t=780s/1800s wall=1043s pop=2297
+[seed 12345] t=840s/1800s wall=1180s pop=2300
+[seed 12345] t=900s/1800s wall=1313s pop=2300
+[seed 12345] t=960s/1800s wall=1438s pop=2300
+[seed 12345] t=1020s/1800s wall=1552s pop=2000
+[seed 12345] t=1080s/1800s wall=1656s pop=1739
+[seed 12345] t=1140s/1800s wall=1755s pop=1739
+[seed 12345] t=1200s/1800s wall=1852s pop=1739
+[seed 12345] t=1260s/1800s wall=1948s pop=1739
+[seed 12345] t=1320s/1800s wall=2043s pop=1739
+[seed 12345] t=1380s/1800s wall=2138s pop=1739
+[seed 12345] t=1440s/1800s wall=2234s pop=1739
+[seed 12345] t=1500s/1800s wall=2328s pop=1739
+[seed 12345] t=1560s/1800s wall=2423s pop=1739
+[seed 12345] t=1620s/1800s wall=2518s pop=1739
+[seed 12345] t=1680s/1800s wall=2615s pop=1739
+[seed 12345] t=1740s/1800s wall=2713s pop=1739
