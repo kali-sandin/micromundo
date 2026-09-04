@@ -1,0 +1,21 @@
+task_919 Corte 1: shadow 918 con unidades corregidas (metab*dt, respaldo por ciclo solar 600s)
+seeds=5 dir=task_918_results baseline=3e8d529 dur=600s
+
+paridad campo OFF p95 worst = 0.135% | wallSim = 0.78 0.8 0.81 0.85 0.77
+
+eta | conv | alive  | nsInt95% | nsWin95% | nsCum% | stockR | pend%/10m | inE/s | granE/s | intakeE/s | metabE/s | lossE/s | int/metab
+0.5 |    6 |   5/5 |    28.84 |        0 |     0 | 3.155 |    234.74 | 440.8 | 385.8 | 192.9 | 666.7 | 192.9 | 0.29/0.29/0.29/0.29/0.29
+0.5 |   12 |   5/5 |    28.84 |        0 |     0 | 3.155 |    234.74 | 881.6 | 771.6 | 385.8 | 666.7 | 385.8 | 0.58/0.58/0.57/0.58/0.58
+0.5 |   18 |   5/5 |    28.84 |        0 |     0 | 3.155 |    234.74 | 1322.4 | 1157.4 | 578.7 | 666.7 | 578.7 | 0.87/0.87/0.86/0.87/0.87
+0.7 |    6 |   5/5 |    28.84 |        0 |     0 | 3.155 |    234.74 | 440.8 | 385.8 | 270 | 666.7 | 115.7 | 0.41/0.41/0.4/0.41/0.4
+0.7 |   12 |   5/5 |    28.84 |        0 |     0 | 3.155 |    234.74 | 881.6 | 771.6 | 540.1 | 666.7 | 231.5 | 0.81/0.81/0.8/0.81/0.81
+0.7 |   18 |   5/5 |    28.84 |        0 |     0 | 3.155 |    234.74 | 1322.4 | 1157.4 | 810.1 | 666.7 | 347.2 | 1.22/1.22/1.2/1.22/1.21
+0.9 |    6 |   5/5 |    28.84 |        0 |     0 | 3.155 |    234.74 | 440.8 | 385.8 | 347.2 | 666.7 | 38.6 | 0.52/0.52/0.51/0.52/0.52
+0.9 |   12 |   5/5 |    28.84 |        0 |     0 | 3.155 |    234.74 | 881.6 | 771.6 | 694.4 | 666.7 | 77.2 | 1.04/1.05/1.03/1.05/1.04
+0.9 |   18 |   5/5 |    28.84 |        0 |     0 | 3.155 |    234.74 | 1322.4 | 1157.4 | 1041.6 | 666.7 | 115.7 | 1.56/1.57/1.54/1.57/1.56
+
+GATE PARIDAD campo OFF (p95<=2%): PASS (0.135%)
+GATE COSTE (<=5%): shadow post-hoc inerte (cero cambios app.js); wallSim arriba
+GATE RESERVA unidades corregidas (5/5 stock>0, nsWin<=2%, nsCum<=2%): PASS eta=0.5 conv=6 (nsWin 0%, cum 0%)
+Pendiente stock +234%/10m = transitorio (stock x3.15): se evalua |pend|<=5%/10m en Corte 2 (30m estacionario).
+NOTA intake/metab 0.8-1.2 (criterio 919 Corte 2): ver columna int/metab; shadow inerte no altera sim.
