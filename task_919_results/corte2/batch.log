@@ -42,3 +42,11 @@
 [seed 20264] t=540s/1800s wall=499s pop=1614
 [seed 20264] t=600s/1800s wall=596s pop=1846
 [seed 20264] t=660s/1800s wall=706s pop=2059
+[seed 20264] t=720s/1800s wall=827s pop=2174
+[seed 20264] t=780s/1800s wall=952s pop=2223
+[seed 20264] t=840s/1800s wall=1080s pop=2229
+[seed 20264] t=900s/1800s wall=1209s pop=2229
+[seed 20264] t=960s/1800s wall=1331s pop=2229
+[seed 20264] t=1020s/1800s wall=1443s pop=1938
+[seed 20264] t=1080s/1800s wall=1545s pop=1938
+[seed 20264] t=1140s/1800s wall=1641s pop=1685
