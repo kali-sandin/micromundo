@@ -1,0 +1,14 @@
+# task_920 Gate1 shadow conservativo (ventana 0-600s, 5 seeds, fuente corte2)
+# coste runtime: 0% (analisis post-hoc, sin cambios app.js)
+
+conv=6 eta=0.5: pass=false stockPos=5/5 residual<=2%=5/5 ratioOK=0/5 meanRatio=0.290 minStock=15268.2 starve%=0.0
+conv=6 eta=0.7: pass=false stockPos=5/5 residual<=2%=5/5 ratioOK=0/5 meanRatio=0.405 minStock=15268.2 starve%=0.0
+conv=6 eta=0.9: pass=false stockPos=5/5 residual<=2%=5/5 ratioOK=0/5 meanRatio=0.521 minStock=15268.2 starve%=0.0
+conv=12 eta=0.5: pass=false stockPos=5/5 residual<=2%=5/5 ratioOK=0/5 meanRatio=0.579 minStock=30536.4 starve%=0.0
+conv=12 eta=0.7: pass=true stockPos=5/5 residual<=2%=5/5 ratioOK=5/5 meanRatio=0.811 minStock=30536.4 starve%=0.0
+conv=12 eta=0.9: pass=true stockPos=5/5 residual<=2%=5/5 ratioOK=5/5 meanRatio=1.042 minStock=30536.4 starve%=0.0
+conv=18 eta=0.5: pass=true stockPos=5/5 residual<=2%=5/5 ratioOK=5/5 meanRatio=0.869 minStock=45804.6 starve%=0.0
+conv=18 eta=0.7: pass=false stockPos=5/5 residual<=2%=5/5 ratioOK=0/5 meanRatio=1.216 minStock=45804.6 starve%=0.0
+conv=18 eta=0.9: pass=false stockPos=5/5 residual<=2%=5/5 ratioOK=0/5 meanRatio=1.563 minStock=45804.6 starve%=0.0
+
+VEREDICTO: PASA con conv=12 eta=0.7 (meanRatio 0.811)

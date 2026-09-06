@@ -1,0 +1,15 @@
+# task_920 Gate1 shadow conservativo (ventana 0-600s, 0 seeds, fuente corte2)
+# coste runtime: 0% (analisis post-hoc, sin cambios app.js)
+
+conv=6 eta=0.5: pass=false stockPos=0/5 residual<=2%=0/5 ratioOK=0/5 meanRatio=0.000 minStock=Infinity starve%=0.0
+conv=6 eta=0.7: pass=false stockPos=0/5 residual<=2%=0/5 ratioOK=0/5 meanRatio=0.000 minStock=Infinity starve%=0.0
+conv=6 eta=0.9: pass=false stockPos=0/5 residual<=2%=0/5 ratioOK=0/5 meanRatio=0.000 minStock=Infinity starve%=0.0
+conv=12 eta=0.5: pass=false stockPos=0/5 residual<=2%=0/5 ratioOK=0/5 meanRatio=0.000 minStock=Infinity starve%=0.0
+conv=12 eta=0.7: pass=false stockPos=0/5 residual<=2%=0/5 ratioOK=0/5 meanRatio=0.000 minStock=Infinity starve%=0.0
+conv=12 eta=0.9: pass=false stockPos=0/5 residual<=2%=0/5 ratioOK=0/5 meanRatio=0.000 minStock=Infinity starve%=0.0
+conv=18 eta=0.5: pass=false stockPos=0/5 residual<=2%=0/5 ratioOK=0/5 meanRatio=0.000 minStock=Infinity starve%=0.0
+conv=18 eta=0.7: pass=false stockPos=0/5 residual<=2%=0/5 ratioOK=0/5 meanRatio=0.000 minStock=Infinity starve%=0.0
+conv=18 eta=0.9: pass=false stockPos=0/5 residual<=2%=0/5 ratioOK=0/5 meanRatio=0.000 minStock=Infinity starve%=0.0
+
+VEREDICTO: REFUTADA: ninguna combinacion (conv,eta) cumple 5/5 stock>0 + residual<=2% + ratio .8-1.2
+mejor aproximacion: conv=6 eta=0.5 meanRatio=0.000 (stockPos 0/5, ratioOK 0/5)
