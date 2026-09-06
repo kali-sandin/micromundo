@@ -1,0 +1,30 @@
+# task_919 Corte 2 - 5 seeds x 30m OFF (ledger corregido, baseline 4d1fd53, migr OFF)
+
+## Protocolo
+Seeds 12345/20264/28183/36102/44021, dt 1/60, sample 10s, flag OFF, shadow ledger con metab*dt y stock separado (Corte1 96d1893).
+
+## Resultados (medias por run, E/s salvo indicado)
+seed  | ext | photoField | photoDirect | trophAmp | metab   | predIncome | predMetab | fieldResMax
+12345 | 2   | 71.69      | 15.29       | 599.7    | 621.6   | 0.095      | 2.22      | 0.007
+20264 | 2   | 71.97      | 15.09       | 607.8    | 629.1   | 0.103      | 2.20      | 0.008
+28183 | 2   | 72.14      | 15.78       | 603.5    | 627.6   | 0.131      | 2.49      | 0.014
+36102 | 2   | 72.03      | 15.44       | 606.7    | 626.1   | 0.120      | 2.02      | 0.005
+44021 | 2   | 72.13      | 15.36       | 610.1    | 628.8   | 0.046      | 2.22      | 0.004
+
+- Extinciones: 2/5 por run (pC y predator) en 5/5 seeds (270-540s), consumers supervivientes.
+- Verdict all_pass=False en 5/5 (survival, extinciones, drift NET ~ -590 E/s sin trophAmp).
+- Paridad shadow: field residual max <= 0.014% (unidades correctas tras Corte1).
+- predIncome/predMetab ~ 0.02-0.06: el predator muere de inanicion, no de unidades.
+
+## Veredicto: REFUTADA (5/5)
+La correccion de unidades del shadow no cambia el patron 918. Con el ledger corregido,
+la fotosintesis real aporta ~87 E/s (field+direct) mientras trophicAmplification inyecta
+~600-610 E/s que subsidia el pool consumer (metab ~622-629 E/s). El sistema sin x18 tiene
+ NET ~ -590 E/s. La refutacion es estructural, no de unidades: la transferencia
+solar->biomasa->consumer no es conservativa (trophAmp ~7x el input solar).
+
+Gates de exito: residual<=2% OK, pero intake/metab fuera de .8-1.2 y extinciones 2/run
+en 5/5 => breach multiple. Hipotesis refutada con protocolo completo; tarea cerrada.
+Siguiente paso (task_920): transferencia trofica conservativa en shadow.
+
+Artefactos: run_led_{1..5}_seed*.json, batch.log, PROGRESS.md.
