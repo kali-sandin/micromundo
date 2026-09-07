@@ -1,0 +1,125 @@
+
+🧬 sim-harness: 1 seed(s) × 2 min, dt=0.0167s
+
+  Run 1/1 (seed=12345)... [seed 12345] t=60s/120s wall=63s pop=913
+[seed 12345] t=120s/120s wall=120s pop=913
+done in 120.9s
+
+  JSON written to task_921_results/parity_off_2m.json
+
+═══════════════════════════════════════════════════════════════
+  🧬 SIM-HARNESS — Multi-seed Ecosystem Analysis
+═══════════════════════════════════════════════════════════════
+
+  Commit:     4919c0f
+  Seeds:      1 (12345)
+  Duration:   02:00 (120s per run)
+  dt:         0.0167s (eff: 0.0167s, chunks: 1)
+  Interval:   10s
+  Migration:  OFF
+  Timestamp:  2026-09-07T00:22:03.460Z
+
+── POPULATIONS (mean ± σ across seeds) ────────────────────────
+  Group                Mean         σ          Min          Max
+  ──────────────────────────────────────────────────────────────
+  Prod A (dens.)            0.45       0.00       0.45       0.45
+  Prod B (colonia)         72.00       0.00      72.00      72.00
+  Prod C (móvil)           31.00       0.00      31.00      31.00
+  Consumidores               713       0.00        713        713
+  Depredadores             30.00       0.00      30.00      30.00
+
+── PERCENTILES p50/p95 (mean across seeds) ────────────────────
+  Group                p50         p95
+  ──────────────────────────────────────────────────────────────
+  Prod B                    72.0       72.0
+  Prod C                    74.0        228
+  Consumers                  717        720
+  Predators                 30.0       30.0
+
+── ENERGY (mean ± σ) ──────────────────────────────────────────
+  Productores               2894        0.0
+  Consumidores             23570        0.0
+  Depredadores               840        0.0
+  Campo                     8033        0.0
+  Carcasses                  6.3        0.0
+  Promedio                  32.3        0.0
+
+── ENERGY FLOWS (media temporal ± σ, energy/s) ────────────
+  Grazing                  26.63       0.00
+  Colonia feed              6.29       0.00
+  ProdC grazing            16.04       0.00
+  Predación                 0.84       0.00
+  Carcass eat               0.00       0.00
+  Metabolismo                341       0.00
+  Reproducción              0.55       0.00
+  Excretion                 0.62       0.00
+  Thermal                   0.00       0.00
+  Carcass expire            0.90       0.00
+  Photosynth (field)       68.02       0.00
+  Photosynth (direct)      21.64       0.00
+  Photosynth (total)       89.66       0.00
+  Trophic amplification        205       0.00
+  True inputs              89.66       0.00
+  Destruction                353       0.00
+  Death decay (45%)         0.90       0.00
+
+  ── FUNNEL predación (pasos-depredador/s, media temporal) ──
+  Detect (>0 presa)          292        0.0
+  Detect (≥3 presas)         0.0        0.0
+  Contacto (eatRange)        0.6        0.0
+    rechazo cooldown         0.5        0.0
+    rechazo saciedad         0.0        0.0
+  Chase intentos             0.1        0.0
+    chase fallidos           0.0        0.0
+    rechazo gape             0.0        0.0
+  CAPTURAS                   0.1        0.0
+  captura/chase: 80.0%
+  captura/preyNear: 0.02%
+
+  ── BALANCE PREDATOR (E/s, media temporal) ──
+  Ingreso                  0.844      0.000
+  Metabolismo             23.850      0.000
+  Thermal                  0.000      0.000
+  ingreso/metab: 0.035
+  NET MOBILE                0.00       0.00
+  SYSTEM NET                -264       0.00
+  (field→mobile)            0.00       0.00
+  (mobile loss)             0.00       0.00
+  (internal xfer)           0.00       0.00
+  RESIDUAL max %             0.2
+  RESIDUAL med %             0.0
+  INVARIANTE ≤2%      ✅ PASS
+
+── EVENTOS (mean ± σ) ────────────────────────────────────────
+  Births/s:    0.000 ± 0.000
+  Deaths/s:    0.000 ± 0.000
+  Total births: 1 ± 0
+  Total deaths: 205 ± 0
+
+── ✅ Sin extinciones en ninguna semilla ──────────────────────
+
+── SUPERVIVENCIA ─────────────────────────────────────────────
+  Todos sobrevivieron: ✅ Sí
+  Grupos vivos promedio: 5.0/5
+  CV consumers: 0.000 | CV predators: 0.000
+
+── RENDIMIENTO ───────────────────────────────────────────────
+  Wall time: 120s ± 0.0s
+  Speed:     1.0x ± 0.0x
+
+── DETALLE POR SEMILLA ───────────────────────────────────────
+  Seed 12345: P:72/31 C:713 X:30 | E:32.3 | B:1 D:205 | ✅
+
+═══════════════════════════════════════════════════════════════
+── VEREDICTO TASK_908 ────────────────────────────────────────
+  ✅ Survival >= 1/1 (got 1)
+  ✅ CV consumers <= 0.25 (got 0.000)
+  ✅ CV predators <= 0.25 (got 0.000)
+  ❌ Energy pool drift <= 10% (max 0.168, avg NET -263.8 E/s)
+  ✅ Extinctions = 0 (got 0)
+  ✅ No guild lost in any run
+  ✅ Diversity gene CV >= 20% (max 0.816)
+  ✅ Population decline <= 5%/10min (max 0.0%)
+  ─────────────────────────────────────────────
+  RESULTADO: ❌ FALLO
+

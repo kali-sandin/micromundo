@@ -49,6 +49,7 @@ function parseArgs() {
     ablate: {}, // task_550: { consumerPC: false, predatorPC: false }
     spike: {},  // task_911: { predIntermittent: true }
     shadow: {}, // task_913: { predApparatus: true } shadow-only, sin cambio de conducta
+    conserve: {}, // task_921: { trophicA: true } transferencia trofica conservativa (OFF por defecto)
   };
   for (const arg of process.argv.slice(2)) {
     if (arg === '--no-migration') { opts.migration = false; continue; }
@@ -91,6 +92,16 @@ function parseArgs() {
           const m2 = part.match(/^(pred-apparatus|pred-profit|pred-suctorial|prey-stamina)=(on|off|true|false|1|0)$/);
           if (!m2) { console.error(`[args] --shadow expects pred-apparatus|pred-profit|pred-suctorial|prey-stamina=on|off (got: ${part})`); process.exit(2); }
           opts.shadow[{ 'pred-apparatus': 'predApparatus', 'pred-profit': 'predProfit', 'pred-suctorial': 'predSuctorial', 'prey-stamina': 'preyStamina' }[m2[1]]] = ['on', 'true', '1'].includes(m2[2]);
+        }
+        break;
+      }
+      case 'conserve': {
+        // --conserve=trophic-a=on  (task_921: transferencia trofica conservativa A->consumer)
+        for (const part of val.split(',')) {
+          if (!part) continue;
+          const m2 = part.match(/^(trophic-a)=(on|off|true|false|1|0)$/);
+          if (!m2) { console.error(`[args] --conserve expects trophic-a=on|off (got: ${part})`); process.exit(2); }
+          opts.conserve[{ 'trophic-a': 'trophicA' }[m2[1]]] = ['on', 'true', '1'].includes(m2[2]);
         }
         break;
       }
@@ -218,6 +229,7 @@ function loadSim() {
   ctx.__ABLATE = Object.assign({}, OPTS.ablate); // undefined keys leave browser behaviour untouched
   ctx.__SPIKE = Object.assign({}, OPTS.spike); // task_911: undefined keys leave browser behaviour untouched
   ctx.__SHADOW = Object.assign({}, OPTS.shadow); // task_913: shadow-only, undefined keys leave behaviour untouched
+  ctx.__CONSERVE = Object.assign({}, OPTS.conserve); // task_921: conservacion trofica, OFF por defecto
   vm.runInContext(src, ctx, { filename: 'app.js' });
   if (!ctx.__sim) throw new Error('Failed to extract __sim from app.js');
   return ctx.__sim;
@@ -299,7 +311,9 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     // task_915 shadow-only: suctorial (dedup por episodio)
     'shSucSteps', 'shSucNear', 'shSucAcq', 'shSucAcqHeld', 'shSucTransfer', 'shSucAttachTime',
     // task_916 shadow-only: stamina de presa (contacto proyectado dedup)
-    'shStaSteps', 'shStaPanicTime', 'shStaDeplTime', 'shStaAcq', 'shStaTransfer', 'shStaCloseTime'];
+    'shStaSteps', 'shStaPanicTime', 'shStaDeplTime', 'shStaAcq', 'shStaTransfer', 'shStaCloseTime',
+    // task_921: transferencia trofica conservativa A->consumer
+    'conservIn', 'conservAssim', 'conservDetritus', 'conservStarved'];
   let prevFlowAccum = {};
   function snapshotFlowAccum() {
     const snap = {};
@@ -681,6 +695,11 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
         shStaAcq: parseFloat((flows.shStaAcq || 0).toFixed(0)),
         shStaTransfer: parseFloat((flows.shStaTransfer || 0).toFixed(1)),
         shStaCloseTime: parseFloat((flows.shStaCloseTime || 0).toFixed(1)),
+        // task_921: transferencia trofica conservativa A->consumer (tasas E/s)
+        conservIn: parseFloat((flows.conservIn || 0).toFixed(3)),
+        conservAssim: parseFloat((flows.conservAssim || 0).toFixed(3)),
+        conservDetritus: parseFloat((flows.conservDetritus || 0).toFixed(3)),
+        conservStarved: parseFloat((flows.conservStarved || 0).toFixed(3)),
         pred_income_metab_ratio: parseFloat((
           (flows.predMetab || 0) > 0 ? (flows.predIncome || 0) / flows.predMetab : 0
         ).toFixed(3)),
@@ -1008,6 +1027,7 @@ function aggregateRuns(runs) {
     ablation: Object.assign({}, OPTS.ablate), // task_550: echoes active ablation flags
     spike: Object.assign({}, OPTS.spike), // task_911/912: echoes active spike flags
     shadow: Object.assign({}, OPTS.shadow), // task_913: echoes active shadow flags
+    conserve: Object.assign({}, OPTS.conserve), // task_921: echoes flags de conservacion trofica
     populations: popStats,
     energy: energyStats,
     percentiles: pctStats,
@@ -1410,6 +1430,7 @@ function main() {
         ablation: Object.assign({}, OPTS.ablate),
         spike: Object.assign({}, OPTS.spike), // task_911/912: registra flags activos
         shadow: Object.assign({}, OPTS.shadow), // task_913: registra flags shadow activos
+        conserve: Object.assign({}, OPTS.conserve), // task_921: registra flags de conservacion trofica
       },
     },
     aggregate: agg,

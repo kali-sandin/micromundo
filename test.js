@@ -111,6 +111,7 @@ function loadApp() {
       stepProducerField, fieldCellX, fieldCellY, fieldIndex,
       setSeed,
       __setSpike: (o) => { globalThis.__SPIKE = o; },
+      __setConserve: (o) => { globalThis.__CONSERVE = o; },
       saveSnapshot, saveSnapshotJSON, loadSnapshot, loadSnapshotJSON,
       applyWorldSizeFromForm,
       GROUPS, GROUP_KEYS, GROUP_LABELS, TYPE, PRODUCER,
@@ -1444,6 +1445,78 @@ function runFunctionalTests() {
     for (let i = 0; i < 20; i++) api.simulate(0.5);
     const counts3 = api.counts();
     expectEq(counts2.consumers, counts3.consumers, 'Snapshot+sim no es determinista vs sim continua');
+  });
+
+  // ═══ TASK_921: TRANSFERENCIA TROFICA CONSERVATIVA A->CONSUMER ═══
+  suite('Task_921: conservacion trofica A->consumer');
+
+  function setupGrazingWorld() {
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.initProducerField();
+    api.setSeed(12345);
+    const c = api.spawnConsumer({ x: 400, y: 400 });
+    for (let i = 0; i < 9; i += 1) api.spawnConsumer({ x: 400, y: 400 });
+    // Campo denso alrededor para forzar grazing
+    const cx = api.fieldCellX(400); const cy = api.fieldCellY(400);
+    for (let dx = -3; dx <= 3; dx += 1) {
+      for (let dy = -3; dy <= 3; dy += 1) {
+        const fi = api.fieldIndex(((cx + dx) % 256 + 256) % 256, ((cy + dy) % 256 + 256) % 256);
+        api.sim.producerField.mass[fi] = 1.5;
+      }
+    }
+    api.rebuildGrid();
+    return c;
+  }
+
+  assert('921 flag OFF: conserv* queda a cero (inerte por defecto)', () => {
+    api.__setConserve(undefined);
+    setupGrazingWorld();
+    const graze0 = api.sim.flowAccum.graze;
+    for (let i = 0; i < 30; i += 1) api.simulate(0.5);
+    expectOk(api.sim.flowAccum.graze > graze0, 'no hubo grazing en el fixture');
+    expectEq(api.sim.flowAccum.conservIn, 0, 'conservIn debe ser 0 sin flag');
+    expectEq(api.sim.flowAccum.conservAssim, 0, 'conservAssim debe ser 0 sin flag');
+    expectEq(api.sim.flowAccum.conservDetritus, 0, 'conservDetritus debe ser 0 sin flag');
+    expectEq(api.sim.flowAccum.conservStarved, 0, 'conservStarved debe ser 0 sin flag');
+    return 'ledger inerte sin flag';
+  });
+
+  assert('921 flag ON: ledger conservativo cierra (in = assim + detritus)', () => {
+    api.__setConserve({ trophicA: true });
+    setupGrazingWorld();
+    for (let i = 0; i < 30; i += 1) api.simulate(0.5);
+    const fa = api.sim.flowAccum;
+    api.__setConserve(undefined);
+    expectOk(fa.conservIn > 0, 'no hubo transferencia conservativa');
+    const closing = fa.conservAssim + fa.conservDetritus;
+    const rel = Math.abs(closing - fa.conservIn) / fa.conservIn;
+    expectLte(rel, 1e-9, `ledger no cierra: in=${fa.conservIn} vs ${closing}`);
+    return `in=${fa.conservIn.toFixed(2)} assim=${fa.conservAssim.toFixed(2)} detritus=${fa.conservDetritus.toFixed(2)}`;
+  });
+
+  assert('921 flag ON: eta 0.5 exacto sin saturacion (assim = detritus)', () => {
+    api.__setConserve({ trophicA: true });
+    api.sim.creatures = [];
+    api.sim.freeIds = [];
+    api.sim.carcasses = [];
+    api.initProducerField();
+    api.setSeed(777);
+    const c = api.spawnConsumer({ x: 400, y: 400 });
+    c.energy = Math.min(c.energy, c.maxEnergy * 0.1); // lejos de saturacion
+    const fi = api.fieldIndex(api.fieldCellX(400), api.fieldCellY(400));
+    api.sim.producerField.mass[fi] = 1.5;
+    api.rebuildGrid();
+    let guard = 0;
+    while (api.sim.flowAccum.conservIn === 0 && guard < 100) { api.simulate(0.1); guard += 1; }
+    const fa = api.sim.flowAccum;
+    api.__setConserve(undefined);
+    expectOk(fa.conservIn > 0, 'no se produjo grazing conservativo');
+    // Sin saturacion: assim = eta*gross = 0.5*gross y detritus = (1-eta)*gross = assim
+    expectLte(Math.abs(fa.conservAssim - fa.conservDetritus) / fa.conservIn, 1e-9,
+      `eta!=0.5: assim=${fa.conservAssim} detritus=${fa.conservDetritus}`);
+    expectLte(fa.conservStarved / fa.conservIn, 1e-9, 'starved debe ser ~0 sin saturacion');
   });
 }
 

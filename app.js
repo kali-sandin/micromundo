@@ -371,7 +371,9 @@
       // task_915 shadow-only: alimentacion suctorial (adquisiciones dedup por episodio)
       shSucAcq: 0, shSucAcqHeld: 0, shSucTransfer: 0, shSucAttachTime: 0,
       // task_916 shadow-only: stamina de presa (proyeccion de contacto)
-      shStaSteps: 0, shStaPanicTime: 0, shStaDeplTime: 0, shStaAcq: 0, shStaTransfer: 0, shStaCloseTime: 0 },
+      shStaSteps: 0, shStaPanicTime: 0, shStaDeplTime: 0, shStaAcq: 0, shStaTransfer: 0, shStaCloseTime: 0,
+      // task_921: transferencia trofica conservativa A->consumer (flag OFF por defecto)
+      conservIn: 0, conservAssim: 0, conservDetritus: 0, conservStarved: 0 },
     flowAccumPrev: { graze: 0, colonyFeed: 0, prodCGraze: 0, predation: 0, carcassEat: 0, carcassToField: 0, metabolism: 0, reproduction: 0, excretion: 0, thermal: 0, carcassExpire: 0, photosynthField: 0, photosynthDirect: 0, producerLoss: 0, asexualRepro: 0, birthGain: 0, trophicAmplification: 0, deathDecay: 0, feedGain: 0, fieldClampLoss: 0,
       fnlPreyNear: 0, fnlPreyNear3: 0, fnlContact: 0, fnlRejCooldown: 0, fnlRejSatiety: 0,
       fnlChase: 0, fnlRejChase: 0, fnlRejGape: 0, fnlCapture: 0,
@@ -386,7 +388,9 @@
       // task_915 shadow-only: alimentacion suctorial
       shSucAcq: 0, shSucAcqHeld: 0, shSucTransfer: 0, shSucAttachTime: 0,
       // task_916 shadow-only: stamina de presa
-      shStaSteps: 0, shStaPanicTime: 0, shStaDeplTime: 0, shStaAcq: 0, shStaTransfer: 0, shStaCloseTime: 0 },
+      shStaSteps: 0, shStaPanicTime: 0, shStaDeplTime: 0, shStaAcq: 0, shStaTransfer: 0, shStaCloseTime: 0,
+      // task_921: transferencia trofica conservativa A->consumer
+      conservIn: 0, conservAssim: 0, conservDetritus: 0, conservStarved: 0 },
     flowRate: { in: 0, out: 0, balance: 0, transfer: 0 }
   };
 
@@ -1020,7 +1024,25 @@
     // gain=0.047*18*densityFactor ~= 0.85/evento en zona rica, 0.34 en zona pobre.
     // Ratio gain:metab ~5.2x. Eficiencia trofica ~24%.
     const gain = bite * 18 * densityFactor;
-    const actualGain = Math.min(gain, e.maxEnergy - e.energy);
+    // task_921: transferencia trofica conservativa A->consumer. Inerte salvo
+    // __CONSERVE.trophicA (OFF por defecto). ON: conversion documentada 18 E/mass
+    // (920: conv=18) SIN densityFactor, eta 0.5 asimilada por el consumer y el
+    // (1-eta) restante contado a detrito: no se crea energia neta nueva en el
+    // paso A->consumer. La saturacion (maxEnergy) tambien va a detrito/starved.
+    let gainEff = gain;
+    if (globalThis.__CONSERVE && globalThis.__CONSERVE.trophicA) {
+      const gross = bite * 18;
+      const assimWish = gross * 0.5;
+      const capped = Math.min(assimWish, e.maxEnergy - e.energy);
+      gainEff = capped;
+      sim.flowAccum.conservIn += gross;
+      sim.flowAccum.conservAssim += capped;
+      // Todo lo no asimilado (fraccion (1-eta) mas la saturacion) va a detrito:
+      // el paso A->consumer nunca crea energia neta nueva.
+      sim.flowAccum.conservDetritus += gross - capped;
+      sim.flowAccum.conservStarved += assimWish - capped; // diagnostico: parte pedida y no otorgada
+    }
+    const actualGain = Math.min(gainEff, e.maxEnergy - e.energy);
     const newEnergy = e.energy + actualGain;
     sim.mobileEnergySum += actualGain;
     e.energy = newEnergy;
