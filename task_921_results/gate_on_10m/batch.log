@@ -1,0 +1,57 @@
+=== Gate ON 5x10m (HEAD a9a84bf) started 2026-09-07T02:25:57+02:00 ===
+[1/5] seed=12345 start=2026-09-07T02:25:57+02:00
+[seed 12345] t=60s/600s wall=64s pop=913
+[seed 12345] t=120s/600s wall=120s pop=913
+[seed 12345] t=180s/600s wall=173s pop=913
+[seed 12345] t=240s/600s wall=227s pop=913
+[seed 12345] t=300s/600s wall=280s pop=913
+[seed 12345] t=360s/600s wall=333s pop=913
+[seed 12345] t=420s/600s wall=389s pop=913
+[seed 12345] t=480s/600s wall=450s pop=973
+[seed 12345] t=540s/600s wall=516s pop=1046
+[1/5] seed=12345 done=2026-09-07T02:35:45+02:00
+[2/5] seed=20264 start=2026-09-07T02:35:45+02:00
+[seed 20264] t=60s/600s wall=64s pop=913
+[seed 20264] t=120s/600s wall=121s pop=913
+[seed 20264] t=180s/600s wall=174s pop=913
+[seed 20264] t=240s/600s wall=225s pop=913
+[seed 20264] t=300s/600s wall=278s pop=807
+[seed 20264] t=360s/600s wall=331s pop=835
+[seed 20264] t=420s/600s wall=389s pop=880
+[seed 20264] t=480s/600s wall=448s pop=946
+[seed 20264] t=540s/600s wall=511s pop=1014
+[2/5] seed=20264 done=2026-09-07T02:45:27+02:00
+[3/5] seed=28183 start=2026-09-07T02:45:27+02:00
+[seed 28183] t=60s/600s wall=63s pop=1050
+[seed 28183] t=120s/600s wall=120s pop=913
+[seed 28183] t=180s/600s wall=175s pop=913
+[seed 28183] t=240s/600s wall=227s pop=913
+[seed 28183] t=300s/600s wall=280s pop=913
+[seed 28183] t=360s/600s wall=335s pop=913
+[seed 28183] t=420s/600s wall=393s pop=930
+[seed 28183] t=480s/600s wall=456s pop=1005
+[seed 28183] t=540s/600s wall=525s pop=1110
+[3/5] seed=28183 done=2026-09-07T02:55:28+02:00
+[4/5] seed=36102 start=2026-09-07T02:55:28+02:00
+[seed 36102] t=60s/600s wall=63s pop=913
+[seed 36102] t=120s/600s wall=118s pop=913
+[seed 36102] t=180s/600s wall=172s pop=913
+[seed 36102] t=240s/600s wall=224s pop=913
+[seed 36102] t=300s/600s wall=276s pop=913
+[seed 36102] t=360s/600s wall=330s pop=913
+[seed 36102] t=420s/600s wall=386s pop=914
+[seed 36102] t=480s/600s wall=446s pop=984
+[seed 36102] t=540s/600s wall=511s pop=1066
+[4/5] seed=36102 done=2026-09-07T03:05:13+02:00
+[5/5] seed=44021 start=2026-09-07T03:05:13+02:00
+[seed 44021] t=60s/600s wall=61s pop=913
+[seed 44021] t=120s/600s wall=115s pop=913
+[seed 44021] t=180s/600s wall=170s pop=913
+[seed 44021] t=240s/600s wall=221s pop=913
+[seed 44021] t=300s/600s wall=273s pop=913
+[seed 44021] t=360s/600s wall=329s pop=913
+[seed 44021] t=420s/600s wall=385s pop=913
+[seed 44021] t=480s/600s wall=446s pop=976
+[seed 44021] t=540s/600s wall=511s pop=1050
+[5/5] seed=44021 done=2026-09-07T03:14:57+02:00
+=== Gate ON 5x10m finished 2026-09-07T03:14:57+02:00 ===

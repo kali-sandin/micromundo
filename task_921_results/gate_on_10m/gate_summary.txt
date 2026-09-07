@@ -1,0 +1,26 @@
+=== task_921 Gate ON 5x10m summary ===
+runs: 5/5  (window 0..600s)
+OFF baseline wall/sim (task_920, 60m runs): 1.6027 (n=5)
+mean ON wall/sim: 0.9778
+cost overhead ON vs OFF: -38.99% (limit <=5%)
+
+seed    | stock>0 | fieldMin   | residual% | assim     | demand    | ratio | A_final | consumers | wall/sim
+--------+---------+------------+-----------+-----------+-----------+-------+---------+-----------+----------
+12345   | OK    |     2552.6 |     0.923 |    277349 |    265012 |  1.05 |     0.7 |      1077 | 0.978
+20264   | OK    |     2544.7 |     1.001 |    271167 |    259832 |  1.04 |     0.7 |      1020 | 0.967
+28183   | OK    |     2579.5 |     1.035 |    280531 |    271550 |  1.03 |     0.7 |      1139 | 1.000
+36102   | OK    |     2557.7 |     1.154 |    278612 |    266015 |  1.05 |     0.7 |      1088 | 0.972
+44021   | OK    |     2545.0 |     0.963 |    276369 |    264667 |  1.04 |     0.7 |      1067 | 0.972
+
+Notes:
+- residual = |conservIn - (conservAssim+conservDetritus+conservStarved)| / conservIn (real closure incl. starved loss), cumulative over 0..600s.
+- ratio = cum conservAssim / cum (metabolism+thermal+reproduction). No dedicated "metab demand" metric exists; used available metabolic expenditure flows from flows.*.
+- stock A = energy.field > 0 at every sample.
+- cost = mean(wall/sim ON) / mean(wall/sim OFF baseline_off_60m) - 1. Caveat: OFF runs are 60m duration; wall/sim normalizes duration.
+
+VERDICT: PASA
+  seed 12345: ok
+  seed 20264: ok
+  seed 28183: ok
+  seed 36102: ok
+  seed 44021: ok
