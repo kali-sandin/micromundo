@@ -1,0 +1,22 @@
+=== task_921 cp2: pareado OFF/ON 5x60m ===
+ON runs: 0/5 (/home/kali/.openclaw/workspace/projects/micromundo/task_921_results/paired_on_60m)  OFF baseline: 5/5
+
+AVISO: batch ON incompleto; analisis preliminar.
+
+seed   | vivos | CV     | pend%/10m | derivaE | divON | divOFF | divRat | consON | consOFF | cons%  | TTE check
+-------+-------+--------+-----------+---------+-------+--------+--------+--------+---------+--------+----------
+
+wall/sim ON mean: n/a | OFF mean: 1.603 | coste: n/a% (<=5%)
+Nota coste: wall/sim depende de carga CPU del host en el momento de cada batch; comparar solo batches medidos en condiciones comparables.
+
+Criterios (evaluados solo con 5/5):
+1 A+consumer vivos 5/5:      FAIL
+2 CV<=25%:                   FAIL
+3 pendiente<=5%/10m:         FAIL
+4 diversidad>=80% OFF:       FAIL
+5 deriva E<=10%:             FAIL
+6 consumer 50-150% OFF:      FAIL
+7 otras TTE no >10% antes:   FAIL
+8 coste<=5%:                 FAIL
+
+VEREDICTO cp2: PENDIENTE (batch ON incompleto)
