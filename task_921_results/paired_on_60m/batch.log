@@ -1,0 +1,35 @@
+=== ON 5x60m (HEAD b8cba8a) started 2026-09-07T03:18:09+02:00 ===
+[1/5] seed=12345 start=2026-09-07T03:18:09+02:00
+[seed 12345] t=60s/3600s wall=66s pop=913
+[seed 12345] t=120s/3600s wall=125s pop=913
+[seed 12345] t=180s/3600s wall=181s pop=913
+[seed 12345] t=240s/3600s wall=234s pop=913
+[seed 12345] t=300s/3600s wall=289s pop=913
+[seed 12345] t=360s/3600s wall=344s pop=913
+[seed 12345] t=420s/3600s wall=404s pop=924
+[seed 12345] t=480s/3600s wall=468s pop=989
+[seed 12345] t=540s/3600s wall=536s pop=1064
+[seed 12345] t=600s/3600s wall=612s pop=1171
+[seed 12345] t=660s/3600s wall=694s pop=1280
+[seed 12345] t=720s/3600s wall=787s pop=1399
+[seed 12345] t=780s/3600s wall=886s pop=1530
+[seed 12345] t=840s/3600s wall=990s pop=1647
+[seed 12345] t=900s/3600s wall=1105s pop=1748
+[seed 12345] t=960s/3600s wall=1226s pop=1837
+[seed 12345] t=1020s/3600s wall=1354s pop=1920
+[seed 12345] t=1080s/3600s wall=1488s pop=1976
+[seed 12345] t=1140s/3600s wall=1625s pop=2002
+[seed 12345] t=1200s/3600s wall=1764s pop=2013
+[seed 12345] t=1260s/3600s wall=1903s pop=2017
+[seed 12345] t=1320s/3600s wall=2043s pop=2017
+[seed 12345] t=1380s/3600s wall=2183s pop=2017
+[seed 12345] t=1440s/3600s wall=2321s pop=2017
+[seed 12345] t=1500s/3600s wall=2454s pop=2017
+[seed 12345] t=1560s/3600s wall=2589s pop=2017
+[seed 12345] t=1620s/3600s wall=2720s pop=2017
+[seed 12345] t=1680s/3600s wall=2850s pop=2017
+[seed 12345] t=1740s/3600s wall=2976s pop=2017
+[seed 12345] t=1800s/3600s wall=3103s pop=2017
+[seed 12345] t=1860s/3600s wall=3230s pop=2017
+[seed 12345] t=1920s/3600s wall=3355s pop=2017
+[seed 12345] t=1981s/3600s wall=3481s pop=2017

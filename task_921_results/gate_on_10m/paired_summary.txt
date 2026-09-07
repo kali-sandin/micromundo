@@ -1,0 +1,25 @@
+=== task_921 cp2: pareado OFF/ON 5x60m ===
+ON runs: 5/5 (../../task_921_results/gate_on_10m)  OFF baseline: 5/5
+
+seed   | vivos | CV     | pend%/10m | derivaE | divON | divOFF | divRat | consON | consOFF | cons%  | TTE check
+-------+-------+--------+-----------+---------+-------+--------+--------+--------+---------+--------+----------
+12345  | SI   |  0.104 |     19.48 |   99.26% |  1.00 |   1.00 |   1.00 |   1077 |    1580 |    68% | FALLA predator@300s ok,producer-c:350<441s
+20264  | SI   |  0.096 |     13.91 |   94.21% |  1.00 |   1.00 |   1.00 |   1020 |    1554 |    66% | ok predator@310s ok,producer-c@521s ok
+28183  | SI   |  0.118 |     23.91 |   94.78% |  1.00 |   1.00 |   1.00 |   1139 |    1676 |    68% | ok predator@350s ok
+36102  | SI   |  0.107 |     21.79 |  104.54% |  1.00 |   1.00 |   1.00 |   1088 |    1573 |    69% | FALLA predator@320s ok,producer-c:340<531s
+44021  | SI   |  0.099 |     21.06 |   98.02% |  1.00 |   1.00 |   1.00 |   1067 |    1603 |    67% | ok predator@310s ok,producer-c@360s ok
+
+wall/sim ON mean: 0.978 | OFF mean: 1.603 | coste: -38.99% (<=5%)
+Nota coste: wall/sim depende de carga CPU del host en el momento de cada batch; comparar solo batches medidos en condiciones comparables.
+
+Criterios (evaluados solo con 5/5):
+1 A+consumer vivos 5/5:      PASS
+2 CV<=25%:                   PASS
+3 pendiente<=5%/10m:         FAIL
+4 diversidad>=80% OFF:       PASS
+5 deriva E<=10%:             FAIL
+6 consumer 50-150% OFF:      PASS
+7 otras TTE no >10% antes:   FAIL
+8 coste<=5%:                 PASS
+
+VEREDICTO cp2: FALLA
