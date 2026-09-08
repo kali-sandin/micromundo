@@ -1,22 +1,25 @@
 === task_921 cp2: pareado OFF/ON 5x60m ===
-ON runs: 0/5 (/home/kali/.openclaw/workspace/projects/micromundo/task_921_results/paired_on_60m)  OFF baseline: 5/5
-
-AVISO: batch ON incompleto; analisis preliminar.
+ON runs: 5/5 (/home/kali/.openclaw/workspace/projects/micromundo/task_921_results/paired_on_60m)  OFF baseline: 5/5
 
 seed   | vivos | CV     | pend%/10m | derivaE | divON | divOFF | divRat | consON | consOFF | cons%  | TTE check
 -------+-------+--------+-----------+---------+-------+--------+--------+--------+---------+--------+----------
+12345  | SI   |  0.089 |     10.78 |   95.67% |  1.00 |   1.00 |   1.00 |   1320 |    1580 |    84% | ok predator@300s ok,producer-c@451s ok
+20264  | SI   |  0.090 |     13.36 |   94.66% |  1.00 |   1.00 |   1.00 |   1286 |    1554 |    83% | FALLA producer-c:320<541s,predator@320s ok
+28183  | SI   |  0.087 |     11.94 |   86.15% |  1.00 |   1.00 |   1.00 |   1352 |    1676 |    81% | ok predator@421s ok,producer-c@531s ok
+36102  | SI   |  0.065 |      7.75 |   92.02% |  1.00 |   1.00 |   1.00 |   1412 |    1573 |    90% | ok predator@310s ok,producer-c@591s ok
+44021  | SI   |  0.070 |      7.96 |   98.24% |  1.00 |   1.00 |   1.00 |   1400 |    1603 |    87% | ok predator@300s ok,producer-c@541s ok
 
-wall/sim ON mean: n/a | OFF mean: 1.603 | coste: n/a% (<=5%)
+wall/sim ON mean: 1.677 | OFF mean: 1.603 | coste: 4.63% (<=5%)
 Nota coste: wall/sim depende de carga CPU del host en el momento de cada batch; comparar solo batches medidos en condiciones comparables.
 
 Criterios (evaluados solo con 5/5):
-1 A+consumer vivos 5/5:      FAIL
-2 CV<=25%:                   FAIL
+1 A+consumer vivos 5/5:      PASS
+2 CV<=25%:                   PASS
 3 pendiente<=5%/10m:         FAIL
-4 diversidad>=80% OFF:       FAIL
+4 diversidad>=80% OFF:       PASS
 5 deriva E<=10%:             FAIL
-6 consumer 50-150% OFF:      FAIL
+6 consumer 50-150% OFF:      PASS
 7 otras TTE no >10% antes:   FAIL
-8 coste<=5%:                 FAIL
+8 coste<=5%:                 PASS
 
-VEREDICTO cp2: PENDIENTE (batch ON incompleto)
+VEREDICTO cp2: FALLA
