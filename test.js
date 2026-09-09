@@ -1629,7 +1629,7 @@ function runPerfTests() {
     api.recordGeneHistory();
     const c = api.counts();
     return `criaturas: ${api.sim.creatures.filter(e => e && e.alive).length}`;
-  }, { maxMs: 5000 });
+  }, { maxMs: 15000 }); // 4379-4719ms medidos en Pi idle: 5000 daba flake bajo carga nocturna concurrente
 
   perf('200 steps de simulate (dt=0.5)', () => {
     api.resetWorld();
