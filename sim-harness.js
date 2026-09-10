@@ -99,9 +99,9 @@ function parseArgs() {
         // --conserve=trophic-a=on  (task_921: transferencia trofica conservativa A->consumer)
         for (const part of val.split(',')) {
           if (!part) continue;
-          const m2 = part.match(/^(trophic-a)=(on|off|true|false|1|0)$/);
-          if (!m2) { console.error(`[args] --conserve expects trophic-a=on|off (got: ${part})`); process.exit(2); }
-          opts.conserve[{ 'trophic-a': 'trophicA' }[m2[1]]] = ['on', 'true', '1'].includes(m2[2]);
+          const m2 = part.match(/^(trophic-a|dual-ledger)=(on|off|true|false|1|0)$/);
+          if (!m2) { console.error(`[args] --conserve expects trophic-a|dual-ledger=on|off (got: ${part})`); process.exit(2); }
+          opts.conserve[{ 'trophic-a': 'trophicA', 'dual-ledger': 'dualLedger' }[m2[1]]] = ['on', 'true', '1'].includes(m2[2]);
         }
         break;
       }
@@ -268,6 +268,10 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
   let residualThroughputSamples = [];
   let fieldResidualMax = 0;
   let fieldResidualSamples = [];
+  // task_922: dual ledger masa/E (shadow puro, contabilidad sin conducta con --conserve=dual-ledger=on)
+  let dualResidualMax = 0;
+  let dualResidualSamples = [];
+  let prevDualValued = 0;
   let prevAlive = {
     'producer-a': true, 'producer-b': true, 'producer-c': true,
     'consumer': true, 'predator': true,
@@ -572,7 +576,54 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     }
     prevFieldTotal = curFieldTotal;
 
-    metrics.push({
+    // ── task_922: dual ledger masa/E (flag OFF por defecto; contabilidad pura) ──
+    // Valora campo A a 18 E/mass (conversion documentada task_920) y cierra UNA
+    // invariante en unidades E comunes: E_valued = entidades + carcasses + 18*field.total.
+    // Componiendo la identidad 908 (pool entidades) con la invariante de campo:
+    //   dE_valued = solar(18*photoField + photoDirect)
+    //             - destruccion(metab+thermal+deathDecay+carcExp+prodLossE+reproWaste+18*clamp)
+    //             + grazeAmp(tAmp + bite*(1-18))          [evento pastoreo = gain - 18*bite]
+    //             + depAmp(17*(excretion+carcassToField)) [E insertada como masa 1:1]
+    //             (sin xfer extra: carcassEat/birthGain ya cancelan con
+    //              carcassExpire/reproWaste; sumarlos aqui duplicaria)
+    // producerLoss mezcla clamp de masa y perdidas E de entidades: separarlas.
+    let dualObj = null;
+    if (OPTS.conserve.dualLedger) {
+      const M2E = 18;
+      const dualValued = curSystemEnergy + curFieldTotal * M2E;
+      const deltaDual = dualValued - prevDualValued;
+      const dualSolar = (flows.photosynthField || 0) * M2E + (flows.photosynthDirect || 0);
+      const prodLossE = (flows.producerLoss || 0) - (flows.fieldClampLoss || 0);
+      const dualDestr = (flows.metabolism || 0) + (flows.thermal || 0) + (flows.deathDecay || 0)
+        + (flows.carcassExpire || 0) + prodLossE + reproductiveWaste + (flows.fieldClampLoss || 0) * M2E;
+      const dualGrazeAmp = (flows.trophicAmplification || 0) + (flows.graze || 0) * (1 - M2E);
+      const dualDepAmp = (M2E - 1) * ((flows.excretion || 0) + (flows.carcassToField || 0));
+      // carcassEat: el cadaver pierde bite, el comedor gana gain y carcassExpire
+      // ya cubre bite-gain => neto dueno -carcassExpire, sin termino extra.
+      // birthGain: el progenitor pierde reproduction y reproWaste=repro-birthGain
+      // ya esta en destruccion => neto -reproWaste, sin termino extra.
+      const expectedDual = (dualSolar - dualDestr + dualGrazeAmp + dualDepAmp) * dt_real;
+      const residualDual = Math.abs(deltaDual - expectedDual);
+      const dualThroughput = ((dualSolar + dualDestr + Math.abs(dualGrazeAmp) + dualDepAmp) * dt_real) || 1;
+      const dualResidualPct = (residualDual / dualThroughput) * 100;
+      if (lastRecord > 0) {
+        if (dualResidualPct > dualResidualMax) dualResidualMax = dualResidualPct;
+        dualResidualSamples.push(dualResidualPct);
+      }
+      prevDualValued = dualValued;
+      dualObj = {
+        valued_energy: parseFloat(dualValued.toFixed(1)),
+        delta: parseFloat(deltaDual.toFixed(1)),
+        solar_in: parseFloat(dualSolar.toFixed(3)),
+        destruction: parseFloat(dualDestr.toFixed(3)),
+        graze_amp: parseFloat(dualGrazeAmp.toFixed(3)),
+        deposit_amp: parseFloat(dualDepAmp.toFixed(3)),
+        net_actual: parseFloat((deltaDual / dt_real).toFixed(3)),
+        residual_pct: parseFloat(dualResidualPct.toFixed(3)),
+      };
+    }
+
+    const point = {
       t: parseFloat(api.sim.time.toFixed(1)),
       populations: {
         producerA_density: parseFloat(c.producerDensity.toFixed(4)),
@@ -715,7 +766,9 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
         field_delta: parseFloat(deltaField.toFixed(3)),
       },
       genes,
-    });
+    };
+    if (OPTS.conserve.dualLedger) point.dual = dualObj;
+    metrics.push(point);
 
     lastRecord = api.sim.time;
   }
@@ -738,6 +791,7 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     // Note: field.total excluded — it's a density index, not energy.
     prevSystemEnergy = pe0 + ce0 + pre0 + care0;
     prevFieldTotal = api.sim.producerField.total || 0;
+    prevDualValued = pe0 + ce0 + pre0 + care0 + (api.sim.producerField.total || 0) * 18;
   }
 
   // Initial record
@@ -845,6 +899,10 @@ function runSingleSeed(seed, durationSec, intervalSec, dt, migrationEnabled) {
     field_residual_max_pct: parseFloat(fieldResidualMax.toFixed(3)),
     field_residual_median_pct: fieldResidualSamples.length > 0
       ? parseFloat(fieldResidualSamples.slice().sort((a,b)=>a-b)[Math.floor(fieldResidualSamples.length/2)].toFixed(3))
+      : 0,
+    dual_residual_max_pct: parseFloat(dualResidualMax.toFixed(3)),
+    dual_residual_median_pct: dualResidualSamples.length > 0
+      ? parseFloat(dualResidualSamples.slice().sort((a,b)=>a-b)[Math.floor(dualResidualSamples.length/2)].toFixed(3))
       : 0,
     final_state: {
       populations: last.populations,
@@ -1014,6 +1072,25 @@ function aggregateRuns(runs) {
   const internalTransfers = lastMetrics.map(m => m.flows ? m.flows.internal_transfer || 0 : 0);
   flowStats.internal_transfer = { mean: mean(internalTransfers), stdev: stdev(internalTransfers) };
   flowStats._last = flowStatsLast;
+
+  // task_922: dual ledger masa/E (solo presente con --conserve=dual-ledger=on)
+  const dualRuns = runs.filter(r => r.metrics.some(m => m.dual));
+  if (dualRuns.length > 0) {
+    const tmDual = (run, key) => {
+      let sum = 0, n = 0;
+      for (const m of run.metrics) { if (m.t <= 0 || !m.dual) continue; sum += m.dual[key] || 0; n++; }
+      return n > 0 ? sum / n : 0;
+    };
+    const dualStats = {};
+    for (const k of ['solar_in', 'destruction', 'graze_amp', 'deposit_amp', 'net_actual']) {
+      const vals = dualRuns.map(r => tmDual(r, k));
+      dualStats[k] = { mean: mean(vals), stdev: stdev(vals) };
+    }
+    dualStats.residual_max = Math.max(...runs.map(r => r.dual_residual_max_pct || 0));
+    const drMed = runs.map(r => r.dual_residual_median_pct || 0).sort((a, b) => a - b);
+    dualStats.residual_median = drMed[Math.floor(drMed.length / 2)] || 0;
+    flowStats.dual = dualStats;
+  }
 
   const extinctions = runs.map(r => r.extinctions.length);
   const survivalCounts = finals.map(f => Object.values(f.survival).filter(Boolean).length - 1);
@@ -1191,6 +1268,17 @@ function printHumanReport(runs, agg) {
     }
     if (agg.flows.net) {
       lines.push(`  ${'NET MOBILE'.padEnd(19)} ${fmt(agg.flows.net.mean, 2).padStart(10)} ${fmt(agg.flows.net.stdev, 2).padStart(10)}`);
+    }
+    if (agg.flows.dual) {
+      const d = agg.flows.dual;
+      lines.push(`  --- DUAL LEDGER masa/E (task_922, 18 E/mass) ---`);
+      lines.push(`  ${'SOLAR IN (valorado)'.padEnd(19)} ${fmt(d.solar_in.mean, 2).padStart(10)} ${fmt(d.solar_in.stdev, 2).padStart(10)}`);
+      lines.push(`  ${'DESTRUCCION E'.padEnd(19)} ${fmt(d.destruction.mean, 2).padStart(10)} ${fmt(d.destruction.stdev, 2).padStart(10)}`);
+      lines.push(`  ${'GRAZE AMP (g-18b)'.padEnd(19)} ${fmt(d.graze_amp.mean, 2).padStart(10)} ${fmt(d.graze_amp.stdev, 2).padStart(10)}`);
+      lines.push(`  ${'DEPOSIT AMP (17d)'.padEnd(19)} ${fmt(d.deposit_amp.mean, 2).padStart(10)} ${fmt(d.deposit_amp.stdev, 2).padStart(10)}`);
+      lines.push(`  ${'DUAL NET actual'.padEnd(19)} ${fmt(d.net_actual.mean, 2).padStart(10)} ${fmt(d.net_actual.stdev, 2).padStart(10)}`);
+      lines.push(`  ${'DUAL RESIDUAL max %'.padEnd(19)} ${fmt(d.residual_max, 2).padStart(10)}`);
+      lines.push(`  ${'DUAL INV ≤2%'.padEnd(19)} ${d.residual_max <= 2 ? '✅ PASS' : '❌ FAIL'}`);
     }
     if (agg.flows.system_net) {
       lines.push(`  ${'SYSTEM NET'.padEnd(19)} ${fmt(agg.flows.system_net.mean, 2).padStart(10)} ${fmt(agg.flows.system_net.stdev, 2).padStart(10)}`);
