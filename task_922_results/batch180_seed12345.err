@@ -1,0 +1,8 @@
+[seed 12345] t=60s/10800s wall=172s pop=913
+[seed 12345] t=120s/10800s wall=237s pop=913
+[seed 12345] t=180s/10800s wall=295s pop=913
+[seed 12345] t=240s/10800s wall=350s pop=913
+[seed 12345] t=300s/10800s wall=405s pop=913
+[seed 12345] t=360s/10800s wall=466s pop=1020
+[seed 12345] t=420s/10800s wall=539s pop=1194
+[seed 12345] t=480s/10800s wall=636s pop=1451
