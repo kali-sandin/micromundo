@@ -10,3 +10,4 @@ baseline_20x30m_*.log
 baseline_20x30m_*.json
 factorial_2x2_results/
 factorial_2x2_results-*.log
+task_922_results/*.err
