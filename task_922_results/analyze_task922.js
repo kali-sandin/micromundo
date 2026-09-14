@@ -99,5 +99,10 @@ for (const r of rows)
   console.log(`| ${r.file} | ${r.seed} | ${r.dual_residual_max_pct} | ${r.A_density.toFixed(3)} | ${r.consumers} | ${r.alive_AC} | ${r.cv_late_pct.toFixed(1)} | ${r.slope_late_pct_per10m.toFixed(2)} | ${r.diversity_cv?.toFixed(4) ?? 'n/a'} | ${r.diversity_ratio_off?.toFixed(3) ?? 'n/a'} | ${r.cost_wall_per_sim_s.toFixed(3)} | ${r.cost_ratio_off?.toFixed(3) ?? 'n/a'} | ${r.extinctions} |`);
 console.log('\nGATES (922): residual<=2%:', g.residual, '| A+cons 5/5:', g.alive5, '| CV<=25%:', g.cv,
   '| slope<=5%/10m:', g.slope, '| div>=80% OFF:', g.diversity, '| cost<=1.05x OFF:', g.cost);
-const pass = Object.values(g).every(v => v !== false);
-console.log('OVERALL:', pass ? 'PASS' : 'FAIL');
+// fail-closed: gate sin dato (null) es INCOMPLETE, nunca PASS
+const vals = Object.values(g);
+const anyNull = vals.some(v => v === null || v === undefined);
+const anyFalse = vals.some(v => v === false);
+const verdict = anyFalse ? 'FAIL' : (anyNull ? 'INCOMPLETE_MISSING_OFF' : 'PASS');
+console.log('OVERALL:', verdict);
+if (verdict !== 'PASS') process.exitCode = 1;

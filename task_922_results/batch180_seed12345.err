@@ -22,3 +22,6 @@
 [seed 12345] t=1320s/10800s wall=3904s pop=1737
 [seed 12345] t=1380s/10800s wall=4202s pop=1737
 [seed 12345] t=1440s/10800s wall=5100s pop=1737
+[seed 12345] t=60s/10800s wall=68s pop=913
+[seed 12345] t=120s/10800s wall=138s pop=913
+[seed 12345] t=180s/10800s wall=208s pop=913
