@@ -1720,3 +1720,123 @@ select {
     grid-template-columns: 1fr;
   }
 }
+
+/* ═══ task_923: Laboratorio causal (experimento control vs tratamiento) ═══ */
+.experiment-panel {
+  top: 118px;
+  right: 24px;
+  width: min(560px, calc(100vw - 28px));
+  max-height: min(70vh, 640px);
+  overflow: auto;
+  padding: 12px;
+  z-index: 24;
+}
+
+.experiment-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.exp-steps {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: inherit;
+}
+
+.exp-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+#experimentPrediction {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 9px;
+  font: inherit;
+  font-size: 0.85rem;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  opacity: 0.85;
+}
+
+.exp-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+}
+
+.exp-progress-bar {
+  flex: 1 1 auto;
+  height: 8px;
+  border-radius: 6px;
+  border: 1px solid currentColor;
+  opacity: 0.7;
+  overflow: hidden;
+}
+
+.exp-progress-fill {
+  width: 0%;
+  height: 100%;
+  background: currentColor;
+  transition: width 0.15s linear;
+}
+
+.exp-results {
+  overflow-x: auto;
+}
+
+.exp-table {
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  width: 100%;
+}
+
+.exp-table caption {
+  caption-side: top;
+  text-align: left;
+  font-size: 0.72rem;
+  padding-bottom: 6px;
+  opacity: 0.8;
+}
+
+.exp-table th,
+.exp-table td {
+  border: 1px solid currentColor;
+  padding: 3px 6px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.exp-table th[scope="row"] {
+  text-align: left;
+}
+
+.exp-c { opacity: 0.75; }
+.exp-t { font-weight: 700; }
+.exp-up { color: #4ade80; }
+.exp-down { color: #f87171; }
+.exp-eq { opacity: 0.6; }
+
+.exp-note,
+.exp-error {
+  font-size: 0.72rem;
+  margin: 6px 0 0;
+  opacity: 0.8;
+}
+
+.exp-error { color: #f87171; }
+
+@media (max-width: 620px) {
+  .experiment-panel {
+    top: auto;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-height: 55vh;
+  }
+}

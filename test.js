@@ -114,6 +114,8 @@ function loadApp() {
       __setConserve: (o) => { globalThis.__CONSERVE = o; },
       saveSnapshot, saveSnapshotJSON, loadSnapshot, loadSnapshotJSON,
       applyWorldSizeFromForm,
+      experimentSample, experimentRunArmSync, buildExperimentReport,
+      EXPERIMENT_HITOS_S, EXPERIMENT_DURATION_S,
       GROUPS, GROUP_KEYS, GROUP_LABELS, TYPE, PRODUCER,
       WORLD, CELL, FIELD_CELL,
       camera, worldToScreen, visibleTileOffsets,
@@ -1517,6 +1519,91 @@ function runFunctionalTests() {
     expectLte(Math.abs(fa.conservAssim - fa.conservDetritus) / fa.conservIn, 1e-9,
       `eta!=0.5: assim=${fa.conservAssim} detritus=${fa.conservDetritus}`);
     expectLte(fa.conservStarved / fa.conservIn, 1e-9, 'starved debe ser ~0 sin saturacion');
+  });
+
+  // ═══ TASK_923: LABORATORIO CAUSAL (experimento control vs tratamiento) ═══
+  suite('Task_923: laboratorio causal');
+
+  const EXP_DT = 1 / 60;
+
+  function expStepLoop(api2, steps) {
+    for (let i = 0; i < steps; i += 1) {
+      api2.compactIfNeeded();
+      api2.rebuildGrid();
+      api2.simulate(EXP_DT);
+    }
+  }
+
+  assert('923 snapshot guarda PRNG exacto: replay bit-exacto desde mitad de run', () => {
+    api.sim.seed = 4242;
+    api.resetWorld();
+    expStepLoop(api, 300); // 5s de sim
+    const snap = api.saveSnapshot();
+    expectOk(typeof snap.sim.prng === 'number', 'snapshot sin estado prng');
+    expStepLoop(api, 300);
+    const finalA = JSON.stringify(api.experimentSample());
+    // Replay desde el snapshot: debe converger al mismo estado exacto
+    api.loadSnapshot(snap);
+    expStepLoop(api, 300);
+    const finalB = JSON.stringify(api.experimentSample());
+    expectEq(finalB, finalA, 'replay desde snapshot diverge (PRNG no restaurado)');
+  });
+
+  assert('923 compat v1: snapshot sin prng sigue cargando (fallback seed)', () => {
+    api.sim.seed = 99;
+    api.resetWorld();
+    expStepLoop(api, 60);
+    const snap = api.saveSnapshot();
+    delete snap.sim.prng; // emulate v1
+    const ok = api.loadSnapshot(snap);
+    expectEq(ok, true, 'loadSnapshot rechazo snapshot v1 sin prng');
+  });
+
+  assert('923 paridad: brazo control desde mismo snapshot es identico', () => {
+    api.sim.seed = 777;
+    api.resetWorld();
+    expStepLoop(api, 120);
+    const snap = api.saveSnapshot();
+    const arm1 = api.experimentRunArmSync(snap, 10, 1, [5, 10]);
+    const arm2 = api.experimentRunArmSync(snap, 10, 1, [5, 10]);
+    expectEq(JSON.stringify(arm1.samples), JSON.stringify(arm2.samples),
+      'dos brazos control con misma seed divergen');
+    expectEq(arm1.samples.length, 3, 'hitos mal muestreados (esperado t0,5s,10s)');
+  });
+
+  assert('923 report versionado con unidades y misma seed', () => {
+    api.sim.seed = 555;
+    api.resetWorld();
+    expStepLoop(api, 120);
+    const snap = api.saveSnapshot();
+    const control = api.experimentRunArmSync(snap, 5, 1, [5]);
+    const treatment = api.experimentRunArmSync(snap, 5, 1.25, [5]);
+    const report = api.buildExperimentReport('test', snap, control, treatment);
+    expectEq(report.version, 1, 'version de report incorrecta');
+    expectEq(report.schema, 'micromundo.experiment/1', 'schema incorrecto');
+    expectEq(report.design.same_seed, true, 'design.same_seed debe ser true');
+    expectOk(report.units.energy === 'E' && report.units.time === 's', 'unidades ausentes');
+    expectOk(typeof report.design.snapshot.prng_state === 'number', 'report sin prng_state');
+    expectOk(Number.isFinite(treatment.samples[treatment.samples.length - 1].diversity_shannon_nats),
+      'diversidad no finita en brazo tratamiento');
+  });
+
+  perf('923 coste brazo 10s sim <=5% vs loop nativo', () => {
+    api.sim.seed = 31337;
+    api.resetWorld();
+    expStepLoop(api, 600); // calentar poblaciones
+    const snap = api.saveSnapshot();
+    const runNative = () => { api.loadSnapshot(snap); const t = Date.now(); expStepLoop(api, 600); return Date.now() - t; };
+    const runArm = () => { const t = Date.now(); api.experimentRunArmSync(snap, 10, 1, [5, 10]); return Date.now() - t; };
+    runNative(); // calentar JIT fuera de medida
+    const natives = [runNative(), runNative()];
+    const arms = [runArm(), runArm()];
+    const nativeMs = Math.min.apply(null, natives);
+    const armMs = Math.min.apply(null, arms);
+    if (nativeMs <= 0) return 'nativo demasiado rapido para comparar';
+    const overhead = (armMs - nativeMs) / nativeMs;
+    if (overhead > 0.05) throw new Error(`overhead ${(overhead * 100).toFixed(1)}% > 5% (arm=${armMs}ms native=${nativeMs}ms)`);
+    return `arm=${armMs}ms native=${nativeMs}ms overhead=${(overhead * 100).toFixed(1)}%`;
   });
 }
 

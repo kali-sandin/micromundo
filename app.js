@@ -265,7 +265,15 @@
     legendProducerC: document.getElementById('legendProducerC'),
     legendConsumers: document.getElementById('legendConsumers'),
     legendPredators: document.getElementById('legendPredators'),
-    worldReadout: document.getElementById('worldReadout')
+    worldReadout: document.getElementById('worldReadout'),
+    experimentToggle: document.getElementById('experimentToggle'),
+    experimentPanel: document.getElementById('experimentPanel'),
+    experimentPrediction: document.getElementById('experimentPrediction'),
+    experimentRun: document.getElementById('experimentRun'),
+    experimentProgress: document.getElementById('experimentProgress'),
+    experimentProgressLabel: document.getElementById('experimentProgressLabel'),
+    experimentResults: document.getElementById('experimentResults'),
+    experimentExport: document.getElementById('experimentExport')
   };
 
   const camera = {
@@ -529,11 +537,14 @@
   // ─── PRNG: mulberry32 para reproducibilidad ──────────────────
   // Reemplaza Math.random en toda la lógica de simulación.
   // Permite reproducir simulaciones con seed conocido (task_061).
+  // task_923: el estado vivo del PRNG se mantiene en _prngState para poder
+  // capturarlo/restaurarlo exactamente (replay bit-exacto desde un snapshot).
   let _prngState = 0;
   function mulberry32(a) {
+    _prngState = a | 0;
     return function () {
-      a |= 0; a = (a + 0x6D2B79F5) | 0;
-      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      const s = (_prngState = (_prngState + 0x6D2B79F5) | 0);
+      let t = Math.imul(s ^ (s >>> 15), 1 | s);
       t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
@@ -4096,6 +4107,9 @@
       Object.assign(fp, fa);
     }
     // Re-sync mobileEnergySum cada ~60s para corregir drift acumulado
+    // task_923: durante un experimento causal no debe dispararse (timing wall-clock
+    // dependiente del rAF contaminaria la comparacion control/tratamiento)
+    if (experiment.running) { sim.energyResyncAccum = 0; sim.thermalAccumulator = 0; }
     sim.energyResyncAccum = (sim.energyResyncAccum || 0) + dtStats;
     if (sim.energyResyncAccum >= 60) {
       sim.energyResyncAccum = 0;
@@ -5074,6 +5088,25 @@
       });
     });
     els.speed.addEventListener('input', setSpeed);
+    // task_923: laboratorio causal
+    els.experimentToggle.addEventListener('click', () => {
+      const show = els.experimentPanel.classList.toggle('hidden');
+      els.experimentToggle.classList.toggle('active', !show);
+      if (!show) els.experimentPrediction.focus();
+    });
+    els.experimentRun.addEventListener('click', () => { runExperimentUI(); });
+    els.experimentExport.addEventListener('click', exportExperimentJSON);
+    const expClose = els.experimentPanel.querySelector('[data-experiment-close]');
+    if (expClose) expClose.addEventListener('click', () => {
+      els.experimentPanel.classList.add('hidden');
+      els.experimentToggle.classList.remove('active');
+    });
+    els.experimentPanel.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape' && !experiment.running) {
+        els.experimentPanel.classList.add('hidden');
+        els.experimentToggle.classList.remove('active');
+      }
+    });
     els.systemEnergy.addEventListener('input', setSystemEnergy);
     els.dayNightToggle.addEventListener('click', toggleDayNight);
     els.playPause.addEventListener('click', () => setPaused(!sim.paused));
@@ -5280,7 +5313,11 @@
     'restUntil', 'restCooldown', 'burstCooldown', 'leafEnergy', 'leafCount',
     'maxRadius', 'maxAge', 'competitionAt', 'starved', 'grazeCooldown',
     'huntCooldown', 'oxidativeDamage', 'feedHotspotX', 'feedHotspotY',
-    'feedHotspotTTL', '_birthStep', 'vx', 'vy', 'fearFactor', 'digestTimer'
+    'feedHotspotTTL', '_birthStep', 'vx', 'vy', 'fearFactor', 'digestTimer',
+    // task_923: scratch conductual que afecta pasos futuros (replay exacto)
+    '_starveTimer', '_threatScanAt', '_threatBuf', '_threatBufB',
+    '_crowdFactor', '_crowdDensity', '_crowdCheckTimer', '_hadPanic',
+    '_foodFailCount', '_metabFactorSmooth', '_moveMask', '_resting'
   ];
 
   function saveSnapshot() {
@@ -5294,6 +5331,7 @@
         births: sim.births,
         deaths: sim.deaths,
         seed: sim.seed || 0,
+        prng: _prngState >>> 0, // task_923: estado exacto del PRNG para replay bit-exacto
         solarEnergy: sim.solarEnergy,
         solarEnergyBase: sim.solarEnergyBase,
         dayNightEnabled: sim.dayNightEnabled,
@@ -5305,7 +5343,11 @@
         liveProducerCCount: sim.liveProducerCCount,
         mobileEnergySum: sim.mobileEnergySum,
         nextCreatureUid: sim.nextCreatureUid,
-        migrationTimer: sim.migrationTimer
+        migrationTimer: sim.migrationTimer,
+        // task_923: estado adicional necesario para replay bit-exacto
+        loopOffset: sim._loopOffset || 0,
+        freeIds: sim.freeIds.slice(),
+        thermalAccumulator: +sim.thermalAccumulator || 0
       },
       world: { w: WORLD.w, h: WORLD.h },
       field: {
@@ -5314,14 +5356,31 @@
         cellW: field.cellW,
         cellH: field.cellH,
         total: field.total,
-        mass: Array.from(field.mass)
+        mass: Array.from(field.mass),
+        accumulator: +field.accumulator || 0 // task_923: fase fraccional del campo para replay exacto
       },
       creatures: aliveCreatures.map(e => {
         const o = {};
-        for (const k of CREATURE_KEYS) if (k in e) o[k] = e[k];
+        for (const k of CREATURE_KEYS) {
+          if (!(k in e)) continue;
+          const v = e[k];
+          // task_923: clon profundo de scratch arrays (_threatBuf/_threatBufB contienen
+          // referencias a criaturas vivas; sin clonar, el snapshot muta con el mundo
+          // y el replay bit-exacto / paridad de brazos diverge)
+          if (Array.isArray(v)) {
+            o[k] = v.map(x => (x && typeof x === 'object') ? Object.assign({}, x) : x);
+          } else {
+            o[k] = v;
+          }
+        }
         return o;
       }),
-      carcasses: sim.carcasses.map(c => ({ x: c.x, y: c.y, energy: c.energy, age: c.age, radius: c.radius }))
+      carcasses: sim.carcasses.map(c => ({
+        x: c.x, y: c.y, radius: c.radius, energy: c.energy,
+        maxEnergy: c.maxEnergy, life: c.life, maxLife: c.maxLife,
+        sourceType: c.sourceType, color: c.color, alive: !!c.alive,
+        virtualCarcass: !!c.virtualCarcass
+      }))
     };
     return snapshot;
   }
@@ -5343,9 +5402,14 @@
     sim.carcasses.length = 0;
     initGrid();
     initProducerField();
-    // Restaurar PRNG seed
+    // Restaurar PRNG: estado exacto si existe (task_923), si no seed (compat v1)
     sim.seed = snap.sim.seed >>> 0;
-    setSeed(sim.seed);
+    if (typeof snap.sim.prng === 'number') {
+      _prngState = snap.sim.prng >>> 0;
+      _rng = mulberry32(_prngState);
+    } else {
+      setSeed(sim.seed);
+    }
     // Restaurar producerField
     if (snap.field) {
       const f = snap.field;
@@ -5353,6 +5417,7 @@
       if (f.mass && f.mass.length === sim.producerField.mass.length) {
         sim.producerField.mass.set(f.mass);
       }
+      if (typeof f.accumulator === 'number') sim.producerField.accumulator = f.accumulator;
       sim.producerField.dirty = true;
     }
     // Restaurar sim state
@@ -5371,22 +5436,57 @@
     sim.mobileEnergySum = snap.sim.mobileEnergySum || 0;
     sim.nextCreatureUid = snap.sim.nextCreatureUid || 1;
     sim.migrationTimer = snap.sim.migrationTimer || 0;
+    // task_923: restaurar estado exacto de ejecucion (compat: 0/vacio si falta)
+    sim._loopOffset = (snap.sim.loopOffset | 0) || 0;
+    sim.freeIds = Array.isArray(snap.sim.freeIds) ? snap.sim.freeIds.slice() : [];
+    sim.thermalAccumulator = +snap.sim.thermalAccumulator || 0;
+    // task_923: resetear acumulador de resync para no disparar una resincronizacion
+    // espuria de mobileEnergySum dentro del updateStats del propio loadSnapshot
+    sim.energyResyncAccum = 0;
     // Restaurar criaturas
     for (const c of snap.creatures) {
       const e = Object.assign({}, c);
+      // task_923: clonar scratch arrays al ingerir para que criaturas restauradas
+      // no compartan buffers con el snapshot ni entre brazos del experimento
+      for (const k of Object.keys(e)) {
+        if (Array.isArray(e[k])) {
+          e[k] = e[k].map(x => (x && typeof x === 'object') ? Object.assign({}, x) : x);
+        }
+      }
       sim.creatures[e.id] = e;
       sim.creatureIndex.set(e.uid, e);
     }
-    // Restaurar carcasses
+    // task_923: los scratch buffers de amenazas deben apuntar a las criaturas
+    // restauradas (referencias vivas), no a copias congeladas; si no, el steering
+    // lee posiciones stale y el replay bit-exacto diverge
+    for (let i = 0; i < sim.creatures.length; i += 1) {
+      const e = sim.creatures[i];
+      if (!e || !e.alive) continue;
+      for (const bk of ['_threatBuf', '_threatBufB']) {
+        const buf = e[bk];
+        if (!Array.isArray(buf)) continue;
+        for (let j = 0; j < buf.length; j += 1) {
+          const ref = buf[j] && sim.creatureIndex.get(buf[j].uid);
+          if (ref) buf[j] = ref;
+        }
+      }
+    }
+    // Restaurar carcasses (compat: snapshots antiguos usaban age sin life/maxLife)
     if (snap.carcasses) {
-      for (const c of snap.carcasses) sim.carcasses.push(Object.assign({}, c));
+      for (const c of snap.carcasses) {
+        const car = Object.assign({}, c);
+        if (car.life == null) car.life = car.age || 0;
+        if (car.maxLife == null) car.maxLife = 20;
+        sim.carcasses.push(car);
+      }
     }
     // Refrescar grid, graficas y UI
     rebuildGrid();
     sim.graph.clear();
     sim.geneHistory.clear();
     sim.lastGraphAt = -Infinity;
-    sim.lastStatsAt = -Infinity;
+    // task_923: dtStats=0 evita resync/thermal espurios con dt infinito
+    sim.lastStatsAt = sim.time;
     recordGeneHistory();
     updateStats(true);
     if (LOG_EVENTS) logEvent('Snapshot cargado: ' + snap.creatures.length + ' criaturas');
@@ -5401,6 +5501,221 @@
       console.error('loadSnapshotJSON:', e);
       return false;
     }
+  }
+
+  // ═══ task_923: Laboratorio causal (experimento control vs tratamiento) ═══
+  // Recorrido Mundo > Experimento > Datos: congela el estado del mundo
+  // (incluido el PRNG), ejecuta dos brazos secuenciales con la MISMA seed
+  // (control y tratamiento +25% luz) y compara hitos con unidades explicitas.
+  const EXPERIMENT_VERSION = 1;
+  const EXPERIMENT_SCHEMA = 'micromundo.experiment/1';
+  const EXPERIMENT_DT = 1 / 60;
+  const EXPERIMENT_DURATION_S = 300; // 2x5 min secuenciales
+  const EXPERIMENT_HITOS_S = [60, 120, 180, 240, 300];
+  const EXPERIMENT_SOLAR_MULTIPLIER = 1.25; // +25% luz
+  const experiment = { running: false, lastReport: null };
+
+  function experimentFieldMass() {
+    const m = sim.producerField.mass;
+    let t = 0;
+    for (let i = 0; i < m.length; i += 1) t += m[i];
+    return t;
+  }
+
+  // Shannon sobre grupos troficos vivos (unidades: nats)
+  function experimentDiversity(c) {
+    const groups = [c.producerB, c.producerC, c.consumers, c.predators];
+    const total = groups[0] + groups[1] + groups[2] + groups[3];
+    if (total <= 0) return 0;
+    let H = 0;
+    for (let i = 0; i < groups.length; i += 1) {
+      if (groups[i] > 0) { const p = groups[i] / total; H -= p * Math.log(p); }
+    }
+    return H;
+  }
+
+  // Muestra con unidades explicitas (masa != energia E)
+  function experimentSample() {
+    const c = counts();
+    let carcassE = 0;
+    for (let i = 0; i < sim.carcasses.length; i += 1) carcassE += sim.carcasses[i].energy;
+    return {
+      time_s: +(sim.time - Math.floor(sim.time / 1e9) * 1e9).toFixed(3),
+      populations_counts: {
+        producerB: c.producerB, producerC: c.producerC,
+        consumers: c.consumers, predators: c.predators,
+        producerA_density: +c.producerDensity.toFixed(4)
+      },
+      births: sim.births, deaths: sim.deaths,
+      ledger: {
+        mobile_energy_E: +sim.mobileEnergySum.toFixed(2),
+        field_biomass_mass: +experimentFieldMass().toFixed(2),
+        carcass_energy_E: +carcassE.toFixed(2)
+      },
+      diversity_shannon_nats: +experimentDiversity(c).toFixed(4)
+    };
+  }
+
+  // Brazo sincrono puro: restaura el snapshot (mundo+PRNG exactos), aplica el
+  // multiplicador solar y avanza dt fijo 1/60 como el loop del navegador.
+  function experimentRunArmSync(snap, durationSec, solarMultiplier, hitosSec) {
+    if (!loadSnapshot(snap)) throw new Error('experimentRunArm: fallo restore snapshot');
+    if (solarMultiplier && solarMultiplier !== 1) {
+      sim.solarEnergyBase = +(sim.solarEnergyBase * solarMultiplier).toFixed(6);
+      if (!sim.dayNightEnabled) sim.solarEnergy = sim.solarEnergyBase;
+    }
+    const totalSteps = Math.round(durationSec / EXPERIMENT_DT);
+    const hitoSet = new Set(hitosSec.map(h => Math.round(h / EXPERIMENT_DT)));
+    const samples = [experimentSample()];
+    const wallStart = Date.now();
+    for (let i = 1; i <= totalSteps; i += 1) {
+      compactIfNeeded();
+      rebuildGrid();
+      simulate(EXPERIMENT_DT);
+      if (hitoSet.has(i)) samples.push(experimentSample());
+    }
+    return { samples: samples, wall_ms: Date.now() - wallStart };
+  }
+
+  function buildExperimentReport(predictionText, snap, control, treatment) {
+    const s0 = control.samples[0];
+    return {
+      version: EXPERIMENT_VERSION,
+      schema: EXPERIMENT_SCHEMA,
+      created: new Date().toISOString(),
+      prediction: predictionText || '',
+      treatment: {
+        solar_energy_multiplier: EXPERIMENT_SOLAR_MULTIPLIER,
+        description_es: 'Tratamiento: solarEnergyBase x1.25 (+25% luz solar)'
+      },
+      design: {
+        arms: ['control', 'treatment'],
+        same_seed: true,
+        duration_s_per_arm: EXPERIMENT_DURATION_S,
+        dt_s: EXPERIMENT_DT,
+        hitos_s: EXPERIMENT_HITOS_S.slice(),
+        snapshot: {
+          seed: snap.sim.seed >>> 0,
+          prng_state: snap.sim.prng >>> 0,
+          time_s: +snap.sim.time.toFixed(3),
+          populations_counts: s0.populations_counts
+        }
+      },
+      units: {
+        time: 's', energy: 'E', biomass: 'mass (densidad campo A)',
+        diversity: 'Shannon nats', populations: 'individuos'
+      },
+      arms: { control: control, treatment: treatment }
+    };
+  }
+
+  function experimentFmtDelta(cv, tv) {
+    if (typeof cv !== 'number' || typeof tv !== 'number') return '';
+    if (cv === 0) return tv === 0 ? '±0%' : 'nuevo';
+    const d = (tv - cv) / Math.abs(cv) * 100;
+    const sign = d > 0.05 ? '▲ +' : d < -0.05 ? '▼ ' : '±';
+    return sign + d.toFixed(1) + '%';
+  }
+
+  function renderExperimentResults(report) {
+    const rows = [];
+    const metrics = [
+      ['Consumidores', s => s.populations_counts.consumers, true],
+      ['Depredadores', s => s.populations_counts.predators, true],
+      ['Prod. B', s => s.populations_counts.producerB, true],
+      ['Prod. C', s => s.populations_counts.producerC, true],
+      ['Energía móvil (E)', s => s.ledger.mobile_energy_E, false],
+      ['Biomasa campo (mass)', s => s.ledger.field_biomass_mass, false],
+      ['Diversidad (nats)', s => s.diversity_shannon_nats, false]
+    ];
+    rows.push('<tr><th scope="col">Métrica</th><th scope="col">Inicio</th>' +
+      EXPERIMENT_HITOS_S.map(h => `<th scope="col">${h / 60}m</th>`).join('') + '</tr>');
+    for (const [label, get] of metrics) {
+      const cs = report.arms.control.samples, ts = report.arms.treatment.samples;
+      rows.push('<tr><th scope="row">' + label + '</th>' +
+        cs.map((c, i) => {
+          const cv = get(c), tv = get(ts[i]);
+          const delta = experimentFmtDelta(cv, tv);
+          const cls = delta.startsWith('▲') ? 'exp-up' : delta.startsWith('▼') ? 'exp-down' : 'exp-eq';
+          return `<td><span class="exp-c">${cv}</span> → <span class="exp-t">${tv}</span> <span class="${cls}">${delta}</span></td>`;
+        }).join('') + '</tr>');
+    }
+    const el = els.experimentResults;
+    el.innerHTML = '<table class="exp-table"><caption>Control → Tratamiento (+25% luz), misma seed. Unidades: individuos, E, mass, nats.</caption>' +
+      rows.join('') + '</table>' +
+      `<p class="exp-note">Seed ${report.design.snapshot.seed} · PRNG ${report.design.snapshot.prng_state} · brazo ${report.design.duration_s_per_arm / 60} min · control ${report.arms.control.wall_ms} ms / tratamiento ${report.arms.treatment.wall_ms} ms</p>`;
+  }
+
+  async function runExperimentUI() {
+    if (experiment.running) return;
+    experiment.running = true;
+    els.experimentRun.disabled = true;
+    els.experimentExport.hidden = true;
+    els.experimentResults.textContent = '';
+    els.experimentProgress.parentElement.hidden = false;
+    const prediction = (els.experimentPrediction.value || '').trim();
+    const wasPaused = sim.paused;
+    const snap = saveSnapshot(); // Mundo congelado (incluye PRNG exacto)
+    try {
+      const control = await experimentRunArmAsync(snap, 1, 'control');
+      const treatment = await experimentRunArmAsync(snap, EXPERIMENT_SOLAR_MULTIPLIER, 'tratamiento');
+      const report = buildExperimentReport(prediction, snap, control, treatment);
+      experiment.lastReport = report;
+      renderExperimentResults(report);
+      els.experimentExport.hidden = false;
+      if (LOG_EVENTS) logEvent('Experimento causal completado (seed ' + report.design.snapshot.seed + ')');
+    } catch (err) {
+      console.error('runExperimentUI:', err);
+      els.experimentResults.innerHTML = '<p class="exp-error">Error del experimento: ' + String(err && err.message || err) + '</p>';
+    } finally {
+      // Devolver el mundo exactamente a su estado previo y reanudar
+      loadSnapshot(snap);
+      sim.paused = wasPaused;
+      experiment.running = false;
+      els.experimentRun.disabled = false;
+      els.experimentProgress.parentElement.hidden = true;
+    }
+  }
+
+  // Ejecuta un brazo en trozos para no congelar la UI (progress visible).
+  async function experimentRunArmAsync(snap, solarMultiplier, label) {
+    const totalSteps = Math.round(EXPERIMENT_DURATION_S / EXPERIMENT_DT);
+    const hitoSet = new Set(EXPERIMENT_HITOS_S.map(h => Math.round(h / EXPERIMENT_DT)));
+    if (!loadSnapshot(snap)) throw new Error('fallo restore snapshot');
+    if (solarMultiplier !== 1) {
+      sim.solarEnergyBase = +(sim.solarEnergyBase * solarMultiplier).toFixed(6);
+      if (!sim.dayNightEnabled) sim.solarEnergy = sim.solarEnergyBase;
+    }
+    sim.paused = true; // el loop de animacion no debe pisar el estado del brazo
+    const samples = [experimentSample()];
+    const wallStart = Date.now();
+    const CHUNK = 600;
+    for (let i = 1; i <= totalSteps; i += 1) {
+      compactIfNeeded();
+      rebuildGrid();
+      simulate(EXPERIMENT_DT);
+      if (hitoSet.has(i)) samples.push(experimentSample());
+      if (i % CHUNK === 0 || i === totalSteps) {
+        const pct = Math.round(i / totalSteps * 100);
+        els.experimentProgress.style.width = pct + '%';
+        els.experimentProgressLabel.textContent = `Brazo ${label}: ${pct}% (${(i * EXPERIMENT_DT / 60).toFixed(1)} min sim)`;
+        await new Promise(r => setTimeout(r, 0));
+      }
+    }
+    return { samples: samples, wall_ms: Date.now() - wallStart };
+  }
+
+  function exportExperimentJSON() {
+    if (!experiment.lastReport) return;
+    const blob = new Blob([JSON.stringify(experiment.lastReport, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'micromundo_experimento_seed' + experiment.lastReport.design.snapshot.seed + '_' + Date.now() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
 
   function init() {

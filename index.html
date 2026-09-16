@@ -47,6 +47,7 @@
           <button class="tool-button" id="toggleGraphs" type="button"><span class="btn-icon">▧</span><span>Gráficas</span></button>
           <button class="tool-button active" id="toggleGenes" type="button"><span class="btn-icon">⟲</span><span>Genes</span></button>
           <button class="tool-button" id="toggleDebug" type="button"><span class="btn-icon">◎</span><span>Rangos</span></button>
+          <button class="tool-button" id="experimentToggle" type="button" title="Laboratorio causal: experimento control vs tratamiento"><span class="btn-icon">⚗</span><span>Experimento</span></button>
           <button class="tool-button" id="resetWorld" type="button"><span class="btn-icon">↻</span><span>Reiniciar</span></button>
           <button class="tool-button help-button" id="helpButton" type="button" title="Cómo funciona MicroMundo"><span class="btn-icon">?</span><span>Ayuda</span></button>
         </div>
@@ -73,6 +74,29 @@
             <span><i class="stat-symbol">◷</i>Tiempo sim.</span><b id="statTime">000m 00s</b>
             <span><i class="stat-symbol">▥</i>FPS</span><b id="statFps">0</b>
             <span><i class="stat-symbol">⇅</i>Flujo E/s</span><b id="statFlow">0</b>
+          </div>
+        </section>
+
+        <section class="hud panel experiment-panel hidden" id="experimentPanel" aria-label="Laboratorio causal: experimento control contra tratamiento">
+          <header class="panel-head">
+            <h2>⚗ Experimento causal</h2>
+            <button class="icon-button help-close" data-experiment-close type="button" title="Cerrar">×</button>
+          </header>
+          <div class="experiment-body">
+            <ol class="exp-steps">
+              <li><strong>Mundo:</strong> se congela el estado actual con su seed y PRNG exactos.</li>
+              <li><strong>Experimento:</strong> control y tratamiento (+25% luz) con la misma seed, 2 × 5 min secuenciales.</li>
+              <li><strong>Datos:</strong> comparación de hitos y exportación JSON con unidades.</li>
+            </ol>
+            <label class="exp-label" for="experimentPrediction">Predicción (¿qué esperas con +25% de luz?)</label>
+            <input id="experimentPrediction" type="text" maxlength="200" placeholder="Ej.: más biomasa y más consumidores">
+            <button class="tool-button primary" id="experimentRun" type="button">Ejecutar experimento (2 × 5 min)</button>
+            <div class="exp-progress hidden" aria-hidden="false">
+              <div class="exp-progress-bar"><div class="exp-progress-fill" id="experimentProgress"></div></div>
+              <span class="exp-progress-label" id="experimentProgressLabel" role="status"></span>
+            </div>
+            <div class="exp-results" id="experimentResults"></div>
+            <button class="tool-button" id="experimentExport" type="button" hidden>Exportar JSON</button>
           </div>
         </section>
 
