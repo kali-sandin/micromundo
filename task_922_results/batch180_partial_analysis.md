@@ -38,3 +38,23 @@ Control OFF previo: `control_off_10m.json` (10m) — confound conocido para div/
 Artifacts: `batch180_seed{12345..56789}.json/.err`, `batch180.log`,
 `control_off_180m.sh/.log`.
 
+
+## CP2d: comparacion pareada seed a seed vs control OFF 180m (2026-09-16 02:15)
+
+Con control OFF 180m (mismos seeds, misma config, secuencial) los confounds de
+div/coste desaparecen. Pareado 4/5 (seed56789 OFF en curso):
+
+| seed | ON wall/sim | OFF wall/sim | cost/OFF | ON divCV | OFF divCV | div/OFF |
+|---|---|---|---|---|---|---|
+| 12345 | 1785.3 | 1682 | 1.061 | 0.0860 | 0.0860 | 1.000 |
+| 23456 | 1700.4 | 1462 | 1.163 | 0.1073 | 0.1073 | 1.000 |
+| 34567 | 1669.6 | 1516 | 1.101 | 0.0910 | 0.0910 | 1.000 |
+| 45678 | 1704.8 | 1558 | 1.094 | 0.0897 | 0.0897 | 1.000 |
+
+Gates actualizados (pareados, 4/5):
+- diversidad >=80% OFF: **PASS 4/4** (ratio exacto 1.000; el FAIL anterior era artefacto del control de 10m)
+- coste <=1.05x OFF: **FAIL 4/4** (1.061–1.163; overhead real del ledger dual >5%)
+- residual/CV/slope sin cambio: residual PASS, CV PASS, slope FAIL 3/4 (0.71–11.42 %/10m)
+
+Lectura provisional: el gate de coste del shadow dual-ledger falla (>5%) y la
+pendiente tardia de consumers excede 5%/10m en 3/4 seeds. Veredicto final con 5/5.
