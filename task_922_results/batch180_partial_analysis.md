@@ -58,3 +58,33 @@ Gates actualizados (pareados, 4/5):
 
 Lectura provisional: el gate de coste del shadow dual-ledger falla (>5%) y la
 pendiente tardia de consumers excede 5%/10m en 3/4 seeds. Veredicto final con 5/5.
+
+## CP2e FINAL: pareado 5/5 y veredicto (2026-09-16 03:55)
+
+seed56789 OFF 180m completado (rc=0, t=10800, wall 19431s):
+
+| seed | ON wall/sim | OFF wall/sim | cost/OFF | div/OFF |
+|---|---|---|---|---|
+| 56789 | 1.708 | 1.799 | 0.949 | 1.000 |
+
+Poblaciones/extinciones ON vs OFF identicas seed a seed (shadow no altera
+dinamica; extinciones predator@300/producer-c@940 replican en ambas).
+
+### Gates finales 5/5 (fail-closed)
+
+- residual dual <=2%: **PASS** 5/5 (0.078-0.098%)
+- A+consumer vivos: **PASS** 5/5
+- CV_late <=25%: **PASS** (0.4-3.4%)
+- diversidad >=80% OFF: **PASS** 5/5 (ratio 1.000 exacto seed a seed)
+- coste <=5% OFF: **FAIL** 4/5 (1.061-1.163; seed56789 0.949; media 1.074)
+- pendiente <=5%/10m: **FAIL** 3/5 (5.93-11.42%/10m)
+
+### Veredicto: REFUTADA como mecanica activable (hipotesis documentada)
+
+El ledger dual masa/E es conservativo (residual ~0.1%) y neutral para dinamica
+y diversidad, pero no supera los gates de coste (>5% overhead en 4/5) ni
+garantiza equilibrio poblacional a 180m (pendiente >5%/10m en 3/5 seeds).
+El flag `conserve.dualLedger` queda OFF por defecto; no se activa en runtime.
+Protocolo completo, 5 seeds pareadas 180m, suite 93/93 y artefactos publicados.
+Siguiente paso (si Jared lo quiere) volveria como tarea separada: reducir overhead
+del shadow o atacar la deriva tardia de consumers con otra hipotesis.
