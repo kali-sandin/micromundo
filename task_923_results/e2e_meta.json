@@ -1,0 +1,81 @@
+{
+  "seed": 20260916,
+  "prediction": "Con +25% de luz, la biomasa de productores y la poblacion de consumers creceran mas rapido en los primeros 5 minutos que en el brazo control con la misma seed.",
+  "phases": {
+    "warmup": {
+      "sim_s": 600,
+      "wall_ms": 781903,
+      "counts": {
+        "producerDensity": 0.49986990521387875,
+        "producerB": 72,
+        "producerC": 8,
+        "consumers": 1805,
+        "predators": 7,
+        "energyAvg": 69.5562468128402
+      }
+    },
+    "control": {
+      "wall_ms": 921990
+    },
+    "treatment": {
+      "wall_ms": 848820
+    },
+    "parity_rerun": {
+      "wall_ms": 803254
+    }
+  },
+  "checks": {
+    "parity_bit_exact": true,
+    "samples_len": true,
+    "same_seed_design": true,
+    "report_schema": true,
+    "report_version": true,
+    "same_seed": true,
+    "prng_state": true,
+    "overhead_le_5pct": false
+  },
+  "cost": {
+    "native_ms": 851069,
+    "arm_ms": 921990,
+    "overhead_ratio": 1.083
+  },
+  "final_comparison": {
+    "control": {
+      "time_s": 900,
+      "populations_counts": {
+        "producerB": 72,
+        "producerC": 6,
+        "consumers": 2130,
+        "predators": 10,
+        "producerA_density": 0.1876
+      },
+      "births": 1638,
+      "deaths": 470,
+      "ledger": {
+        "mobile_energy_E": 58936.92,
+        "field_biomass_mass": 3340.12,
+        "carcass_energy_E": 5.65
+      },
+      "diversity_shannon_nats": 0.1905
+    },
+    "treatment": {
+      "time_s": 900,
+      "populations_counts": {
+        "producerB": 72,
+        "producerC": 6,
+        "consumers": 2315,
+        "predators": 11,
+        "producerA_density": 0.2522
+      },
+      "births": 1760,
+      "deaths": 406,
+      "ledger": {
+        "mobile_energy_E": 91959.55,
+        "field_biomass_mass": 4488.64,
+        "carcass_energy_E": 0
+      },
+      "diversity_shannon_nats": 0.181
+    }
+  },
+  "total_wall_ms": 4207178
+}

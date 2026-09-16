@@ -1,0 +1,273 @@
+{
+  "version": 1,
+  "schema": "micromundo.experiment/1",
+  "created": "2026-09-16T05:12:40.477Z",
+  "prediction": "Con +25% de luz, la biomasa de productores y la poblacion de consumers creceran mas rapido en los primeros 5 minutos que en el brazo control con la misma seed.",
+  "treatment": {
+    "solar_energy_multiplier": 1.25,
+    "description_es": "Tratamiento: solarEnergyBase x1.25 (+25% luz solar)"
+  },
+  "design": {
+    "arms": [
+      "control",
+      "treatment"
+    ],
+    "same_seed": true,
+    "duration_s_per_arm": 300,
+    "dt_s": 0.016666666666666666,
+    "hitos_s": [
+      60,
+      120,
+      180,
+      240,
+      300
+    ],
+    "snapshot": {
+      "seed": 20260916,
+      "prng_state": 3869723438,
+      "time_s": 600,
+      "populations_counts": {
+        "producerB": 72,
+        "producerC": 8,
+        "consumers": 1805,
+        "predators": 7,
+        "producerA_density": 0.4999
+      }
+    }
+  },
+  "units": {
+    "time": "s",
+    "energy": "E",
+    "biomass": "mass (densidad campo A)",
+    "diversity": "Shannon nats",
+    "populations": "individuos"
+  },
+  "arms": {
+    "control": {
+      "samples": [
+        {
+          "time_s": 600,
+          "populations_counts": {
+            "producerB": 72,
+            "producerC": 8,
+            "consumers": 1805,
+            "predators": 7,
+            "producerA_density": 0.4999
+          },
+          "births": 1184,
+          "deaths": 342,
+          "ledger": {
+            "mobile_energy_E": 128928.85,
+            "field_biomass_mass": 8897.68,
+            "carcass_energy_E": 0
+          },
+          "diversity_shannon_nats": 0.2131
+        },
+        {
+          "time_s": 660,
+          "populations_counts": {
+            "producerB": 72,
+            "producerC": 4,
+            "consumers": 2008,
+            "predators": 4,
+            "producerA_density": 0.4014
+          },
+          "births": 1394,
+          "deaths": 356,
+          "ledger": {
+            "mobile_energy_E": 129326.15,
+            "field_biomass_mass": 7144.08,
+            "carcass_energy_E": 0
+          },
+          "diversity_shannon_nats": 0.1777
+        },
+        {
+          "time_s": 720,
+          "populations_counts": {
+            "producerB": 72,
+            "producerC": 5,
+            "consumers": 2124,
+            "predators": 7,
+            "producerA_density": 0.3128
+          },
+          "births": 1522,
+          "deaths": 364,
+          "ledger": {
+            "mobile_energy_E": 119887.99,
+            "field_biomass_mass": 5567.24,
+            "carcass_energy_E": 0
+          },
+          "diversity_shannon_nats": 0.181
+        },
+        {
+          "time_s": 780,
+          "populations_counts": {
+            "producerB": 72,
+            "producerC": 9,
+            "consumers": 2165,
+            "predators": 7,
+            "producerA_density": 0.2481
+          },
+          "births": 1581,
+          "deaths": 378,
+          "ledger": {
+            "mobile_energy_E": 101852.96,
+            "field_biomass_mass": 4416.69,
+            "carcass_energy_E": 0
+          },
+          "diversity_shannon_nats": 0.1883
+        },
+        {
+          "time_s": 840,
+          "populations_counts": {
+            "producerB": 72,
+            "producerC": 8,
+            "consumers": 2171,
+            "predators": 4,
+            "producerA_density": 0.2076
+          },
+          "births": 1605,
+          "deaths": 400,
+          "ledger": {
+            "mobile_energy_E": 78927.44,
+            "field_biomass_mass": 3694.93,
+            "carcass_energy_E": 0
+          },
+          "diversity_shannon_nats": 0.1778
+        },
+        {
+          "time_s": 900,
+          "populations_counts": {
+            "producerB": 72,
+            "producerC": 6,
+            "consumers": 2130,
+            "predators": 10,
+            "producerA_density": 0.1876
+          },
+          "births": 1638,
+          "deaths": 470,
+          "ledger": {
+            "mobile_energy_E": 58936.92,
+            "field_biomass_mass": 3340.12,
+            "carcass_energy_E": 5.65
+          },
+          "diversity_shannon_nats": 0.1905
+        }
+      ],
+      "wall_ms": 921776
+    },
+    "treatment": {
+      "samples": [
+        {
+          "time_s": 600,
+          "populations_counts": {
+            "producerB": 72,
+            "producerC": 8,
+            "consumers": 1805,
+            "predators": 7,
+            "producerA_density": 0.4999
+          },
+          "births": 1184,
+          "deaths": 342,
+          "ledger": {
+            "mobile_energy_E": 128928.85,
+            "field_biomass_mass": 8897.68,
+            "carcass_energy_E": 0
+          },
+          "diversity_shannon_nats": 0.2131
+        },
+        {
+          "time_s": 660,
+          "populations_counts": {
+            "producerB": 72,
+            "producerC": 5,
+            "consumers": 2020,
+            "predators": 14,
+            "producerA_density": 0.4447
+          },
+          "births": 1415,
+          "deaths": 354,
+          "ledger": {
+            "mobile_energy_E": 133317.38,
+            "field_biomass_mass": 7916.44,
+            "carcass_energy_E": 0
+          },
+          "diversity_shannon_nats": 0.205
+        },
+        {
+          "time_s": 720,
+          "populations_counts": {
+            "producerB": 72,
+            "producerC": 6,
+            "consumers": 2161,
+            "predators": 9,
+            "producerA_density": 0.3796
+          },
+          "births": 1565,
+          "deaths": 367,
+          "ledger": {
+            "mobile_energy_E": 132646.52,
+            "field_biomass_mass": 6756.47,
+            "carcass_energy_E": 0
+          },
+          "diversity_shannon_nats": 0.1861
+        },
+        {
+          "time_s": 780,
+          "populations_counts": {
+            "producerB": 72,
+            "producerC": 11,
+            "consumers": 2264,
+            "predators": 5,
+            "producerA_density": 0.3237
+          },
+          "births": 1680,
+          "deaths": 378,
+          "ledger": {
+            "mobile_energy_E": 123684.5,
+            "field_biomass_mass": 5762.31,
+            "carcass_energy_E": 0
+          },
+          "diversity_shannon_nats": 0.1816
+        },
+        {
+          "time_s": 840,
+          "populations_counts": {
+            "producerB": 72,
+            "producerC": 8,
+            "consumers": 2299,
+            "predators": 9,
+            "producerA_density": 0.2803
+          },
+          "births": 1731,
+          "deaths": 393,
+          "ledger": {
+            "mobile_energy_E": 109803.58,
+            "field_biomass_mass": 4989.11,
+            "carcass_energy_E": 0
+          },
+          "diversity_shannon_nats": 0.1823
+        },
+        {
+          "time_s": 900,
+          "populations_counts": {
+            "producerB": 72,
+            "producerC": 6,
+            "consumers": 2315,
+            "predators": 11,
+            "producerA_density": 0.2522
+          },
+          "births": 1760,
+          "deaths": 406,
+          "ledger": {
+            "mobile_energy_E": 91959.55,
+            "field_biomass_mass": 4488.64,
+            "carcass_energy_E": 0
+          },
+          "diversity_shannon_nats": 0.181
+        }
+      ],
+      "wall_ms": 848668
+    }
+  }
+}

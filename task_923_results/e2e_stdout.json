@@ -1,0 +1,19 @@
+{
+  "ok": false,
+  "checks": {
+    "parity_bit_exact": true,
+    "samples_len": true,
+    "same_seed_design": true,
+    "report_schema": true,
+    "report_version": true,
+    "same_seed": true,
+    "prng_state": true,
+    "overhead_le_5pct": false
+  },
+  "cost": {
+    "native_ms": 851069,
+    "arm_ms": 921990,
+    "overhead_ratio": 1.083
+  },
+  "total_wall_ms": 4207178
+}
