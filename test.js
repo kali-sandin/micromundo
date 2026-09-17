@@ -620,6 +620,9 @@ function runFunctionalTests() {
   });
 
   assert('cambio de tamaño aplica ratio 16:9', () => {
+    api.applyWorldSizeFromForm({ get: (key) => key === 'width' ? '1000' : null });
+    expectEq(api.WORLD.w, 1778, 'ancho minimo no preserva alto valido de snapshot');
+    expectEq(api.WORLD.h, 1000, 'alto minimo quedo fuera del contrato de snapshot');
     api.applyWorldSizeFromForm({ get: (key) => key === 'width' ? '4000' : key === 'height' ? '2250' : null });
     expectEq(api.WORLD.w, 4000, 'ancho no aplicado');
     expectEq(api.WORLD.h, 2250, 'alto 16:9 no aplicado');
@@ -1429,6 +1432,61 @@ function runFunctionalTests() {
     const countsAfter = api.counts();
     expectEq(countsAfter.consumers, countsBefore.consumers, 'JSON roundtrip: consumers distintos');
     expectEq(countsAfter.predators, countsBefore.predators, 'JSON roundtrip: predators distintos');
+  });
+
+  assert('924 loadSnapshot restaura un mundo de otra dimension sin doble reset', () => {
+    const formForWidth = (width) => ({ get: (key) => key === 'width' ? String(width) : null });
+    try {
+      api.applyWorldSizeFromForm(formForWidth(4000));
+      for (let i = 0; i < 5; i++) api.simulate(0.5);
+      const snap = api.saveSnapshot();
+      const expectedCounts = api.counts();
+      const expectedFieldCells = snap.field.mass.length;
+      const expectedTime = snap.sim.time;
+
+      api.applyWorldSizeFromForm(formForWidth(16000));
+      const ok = api.loadSnapshot(snap);
+
+      expectEq(ok, true, 'loadSnapshot rechazo snapshot cross-dimension');
+      expectEq(api.WORLD.w, 4000, 'no restauro ancho del snapshot');
+      expectEq(api.WORLD.h, 2250, 'no restauro alto del snapshot');
+      expectEq(api.sim.producerField.mass.length, expectedFieldCells, 'campo no coincide con dimension restaurada');
+      expectEq(api.sim.time, expectedTime, 'un reset intermedio piso el tiempo restaurado');
+      expectEq(api.counts().consumers, expectedCounts.consumers, 'consumers no restaurados cross-dimension');
+      expectEq(api.counts().predators, expectedCounts.predators, 'predators no restaurados cross-dimension');
+    } finally {
+      api.applyWorldSizeFromForm(formForWidth(16000));
+    }
+  });
+
+  assert('924 loadSnapshot rechaza dimensiones y estructura malformed sin mutar estado', () => {
+    api.resetWorld();
+    for (let i = 0; i < 3; i++) api.simulate(0.5);
+    const snap = api.saveSnapshot();
+    const before = {
+      w: api.WORLD.w,
+      h: api.WORLD.h,
+      time: api.sim.time,
+      creatures: api.sim.creatures,
+      counts: JSON.stringify(api.counts())
+    };
+    const malformed = [
+      { ...snap, world: { w: null, h: 9000 } },
+      { ...snap, world: { w: Infinity, h: 9000 } },
+      { ...snap, world: { w: 999, h: 1000 } },
+      { ...snap, world: { w: 32001, h: 18000 } },
+      { ...snap, creatures: null }
+    ];
+    for (const bad of malformed) {
+      expectEq(api.loadSnapshot(bad), false, 'acepto snapshot malformed');
+      expectEq(api.WORLD.w, before.w, 'snapshot malformed muto ancho');
+      expectEq(api.WORLD.h, before.h, 'snapshot malformed muto alto');
+      expectEq(api.sim.time, before.time, 'snapshot malformed muto tiempo');
+      expectEq(api.sim.creatures, before.creatures, 'snapshot malformed reemplazo criaturas');
+      expectEq(JSON.stringify(api.counts()), before.counts, 'snapshot malformed muto poblaciones');
+    }
+    const badJSON = JSON.stringify({ ...snap, world: { w: null, h: 9000 } });
+    expectEq(api.loadSnapshotJSON(badJSON), false, 'loadSnapshotJSON acepto dimensiones malformed');
   });
 
   assert('loadSnapshot con seed restaurado es determinista', () => {

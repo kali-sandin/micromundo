@@ -2,6 +2,9 @@
   'use strict';
 
   const WORLD = { w: 16000, h: 9000 };
+  const WORLD_DIM_MIN = 1000;
+  const WORLD_DIM_MAX = 32000;
+  const WORLD_FORM_MIN_WIDTH = Math.ceil(WORLD_DIM_MIN * 16 / 9);
   const CELL = 190;
   const FIELD_CELL = 90;
   let GRID_COLS = Math.max(1, Math.ceil(WORLD.w / CELL));
@@ -10,7 +13,6 @@
   function recomputeGridDimensions() {
     GRID_COLS = Math.max(1, Math.ceil(WORLD.w / CELL));
     GRID_ROWS = Math.max(1, Math.ceil(WORLD.h / CELL));
-    initGrid();
   }
 
   function initGrid() {
@@ -4921,8 +4923,8 @@
         ['16000x9000', 'Completo por defecto · 16.000 x 9.000'],
         ['custom', 'Personalizado']
       ], 'Cambiar el tamaño reinicia el ecosistema.')
-      + numberField('width', 'Ancho', WORLD.w, 1000, 32000, 1)
-      + numberField('height', 'Alto', WORLD.h, 563, 18000, 1, 'Se fuerza proporción 16:9 al aplicar.');
+      + numberField('width', 'Ancho', WORLD.w, WORLD_FORM_MIN_WIDTH, WORLD_DIM_MAX, 1)
+      + numberField('height', 'Alto', WORLD.h, WORLD_DIM_MIN, 18000, 1, 'Se fuerza proporción 16:9 al aplicar.');
     const preset = document.getElementById('preset');
     const width = document.getElementById('width');
     const height = document.getElementById('height');
@@ -4944,7 +4946,7 @@
   }
 
   function applyWorldSizeFromForm(form) {
-    const width = clamp(Math.round(Number(form.get('width') || WORLD.w)), 1000, 32000);
+    const width = clamp(Math.round(Number(form.get('width') || WORLD.w)), WORLD_FORM_MIN_WIDTH, WORLD_DIM_MAX);
     WORLD.w = width;
     WORLD.h = Math.round(width * 9 / 16);
     recomputeGridDimensions();
@@ -4952,6 +4954,7 @@
     centerCamera({ fit: true });
     resetWorld();
     if (LOG_EVENTS) logEvent(`Tamaño del ecosistema: ${fmt.format(WORLD.w)} x ${fmt.format(WORLD.h)}`);
+    return true;
   }
 
   function addFromForm() {
@@ -5389,11 +5392,36 @@
     return JSON.stringify(saveSnapshot());
   }
 
-  function loadSnapshot(snap) {
+  function validSnapshotWorld(world) {
+    if (!world || typeof world !== 'object') return false;
+    return Number.isInteger(world.w) && Number.isFinite(world.w)
+      && Number.isInteger(world.h) && Number.isFinite(world.h)
+      && world.w >= WORLD_DIM_MIN && world.w <= WORLD_DIM_MAX
+      && world.h >= WORLD_DIM_MIN && world.h <= WORLD_DIM_MAX;
+  }
+
+  function validSnapshotShape(snap) {
     if (!snap || snap.version !== SNAPSHOT_VERSION) return false;
+    if (!snap.sim || typeof snap.sim !== 'object') return false;
+    if (!validSnapshotWorld(snap.world)) return false;
+    if (!Array.isArray(snap.creatures)) return false;
+    if (snap.carcasses != null && !Array.isArray(snap.carcasses)) return false;
+    if (snap.field != null && typeof snap.field !== 'object') return false;
+    if (snap.field?.mass != null && !Array.isArray(snap.field.mass)
+      && !ArrayBuffer.isView(snap.field.mass)) return false;
+    return true;
+  }
+
+  function loadSnapshot(snap) {
+    // Validar antes de mutar: un fichero corrupto no debe vaciar el mundo vivo.
+    if (!validSnapshotShape(snap)) return false;
     // Restaurar mundo si cambia de tamano
-    if (snap.world && (snap.world.w !== WORLD.w || snap.world.h !== WORLD.h)) {
-      applyWorldSizeFromForm(snap.world.w, snap.world.h);
+    if (snap.world.w !== WORLD.w || snap.world.h !== WORLD.h) {
+      WORLD.w = snap.world.w;
+      WORLD.h = snap.world.h;
+      recomputeGridDimensions();
+      updateWorldReadout();
+      centerCamera({ fit: true });
     }
     // Limpiar estado
     sim.creatures = [];
