@@ -1,0 +1,85 @@
+{
+  "task": "task_926",
+  "when": "2026-09-18T03:07:17.378Z",
+  "static_checks": [
+    {
+      "name": "toggle Energía es button type=button",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "toggle tiene nombre accesible (title+texto)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "panel section con aria-label",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "canvas obsGraph role=img + aria-label",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "botón cierre data-energy-close",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "handler Esc cierra panel (app.js)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "tabla flujos con caption",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "tabla flujos usa th scope",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "etiquetas de texto en flujos (no solo color)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "tendencias con texto ▲/▼/± (texto+color)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reflow 320px: media query presente",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reflow 320px: panel a ancho completo",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reflow 320px: stocks colapsan a 1 columna",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "runtime": {
+    "seed": 12345,
+    "t_sim_s": 180,
+    "dt": 0.016666666666666666,
+    "migration": "off",
+    "p95_update_ms": 0.006,
+    "p95_render_ms": 0.4416,
+    "samples": 178
+  },
+  "gates": {
+    "static_ok": true,
+    "p95_ok": true,
+    "all_ok": true
+  }
+}

@@ -1675,6 +1675,10 @@ function runFunctionalTests() {
 function runObservatoryTests() {
   const api = loadApp();
   suite('Observatorio task_926');
+  // Mundo inicializado como en el resto de suites que simulan: sin esto el grid
+  // esta vacio, la migracion anti-extincion spawnea consumidores fuera de grid
+  // y queryNearby2 crashea de forma no determinista (segun seed Date.now).
+  api.resetWorld();
 
   assert('observatoryFlows separa entradas, transferencias y salidas', () => {
     const prev = { photosynthField: 10, photosynthDirect: 5, trophicAmplification: 100, graze: 50,

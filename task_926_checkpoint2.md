@@ -21,3 +21,20 @@ Notas: predators 0 en las 5 seeds (extinción temprana consistente con lotes pre
 ## Veredicto
 
 Gate de cierre técnico de task_926 superado: agregados del Observatorio reproducen el runtime con error ≤2% (realmente ≤0.18%) y coste ≤2% (realmente ~0.1%). Pendiente solo validación UX 4/5 novatos (criterio humano, fuera de este gate).
+
+## Addendum: verificación UX/a11y automatizable (2026-09-18 05:0x)
+
+`task_926_results/ux_verify.js` (seed 12345, 180s sim, migr OFF, panel visible):
+- Estático 13/13 PASS: toggle button type=button con nombre accesible, panel aria-label, canvas role=img+aria-label, cierre data-energy-close + handler Esc, tabla con caption y th scope, etiquetas de texto (no solo color), tendencias ▲/▼/± en texto, reflow 320px (media query, panel full-width, stocks 1 columna).
+- Runtime: p95 updateObservatory 0.006ms/paso, p95 renderObservatory 0.44ms/sample << 16ms.
+
+## Corrección de flake en suite (misma entrega)
+
+Detectado: 3 tests de Observatorio podían fallar de forma no determinista porque
+`runObservatoryTests` simulaba sin inicializar mundo (grid vacío; la migración
+anti-extinción spawnea consumidores fuera de grid y `queryNearby2` lanza
+TypeError). El "106/106" de CP1 fue un pase sujeto a este flake. Fix test-only:
+`api.resetWorld()` al inicio de la suite, igual que el resto de suites que
+simulan. Suite completa tras fix: 106/106 reproducible.
+
+Pendiente 926: solo validación humana 4/5 novatos (criterio de cierre del kanban).
