@@ -1840,3 +1840,127 @@ select {
     max-height: 55vh;
   }
 }
+
+/* ── task_926: Observatorio de energía y biomasa ── */
+.energy-panel {
+  right: 14px;
+  top: 84px;
+  width: min(400px, calc(100vw - 20px));
+  max-height: 78vh;
+  overflow-y: auto;
+}
+
+.energy-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.obs-guide {
+  font-size: 0.74rem;
+  margin: 0;
+  opacity: 0.85;
+  line-height: 1.45;
+}
+
+.obs-stocks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.obs-stock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.obs-stock b {
+  font-size: 1.05rem;
+  color: #bfe3ff;
+}
+
+.obs-stock span {
+  font-size: 0.68rem;
+  opacity: 0.8;
+}
+
+.obs-stock small {
+  font-size: 0.66rem;
+  color: #f7c948;
+}
+
+.obs-flows {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.74rem;
+}
+
+.obs-flows caption {
+  caption-side: top;
+  text-align: left;
+  font-size: 0.68rem;
+  opacity: 0.75;
+  padding-bottom: 4px;
+}
+
+.obs-flows th,
+.obs-flows td {
+  text-align: left;
+  padding: 3px 6px;
+}
+
+.obs-flows th[scope="row"] { opacity: 0.9; font-weight: 500; }
+.obs-flows td { text-align: right; white-space: nowrap; }
+
+.obs-flows th[scope="rowgroup"] {
+  padding-top: 8px;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9fd8b0;
+}
+
+.obs-balance th { color: #bfe3ff; }
+.obs-balance td { font-weight: 700; }
+
+.obs-warn {
+  font-style: normal;
+  font-size: 0.66rem;
+  color: #f7c948;
+}
+
+#obsGraph {
+  width: 100%;
+  height: 150px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.obs-note {
+  font-size: 0.68rem;
+  margin: 0;
+  opacity: 0.85;
+  line-height: 1.45;
+}
+
+@media (max-width: 320px) {
+  .energy-panel {
+    left: 6px;
+    right: 6px;
+    width: auto;
+    top: auto;
+    bottom: 6px;
+    max-height: 70vh;
+  }
+
+  .obs-stocks { grid-template-columns: 1fr; }
+
+  .obs-flows th,
+  .obs-flows td { padding: 2px 3px; }
+}

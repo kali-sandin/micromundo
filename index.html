@@ -47,6 +47,7 @@
           <button class="tool-button" id="toggleGraphs" type="button"><span class="btn-icon">▧</span><span>Gráficas</span></button>
           <button class="tool-button active" id="toggleGenes" type="button"><span class="btn-icon">⟲</span><span>Genes</span></button>
           <button class="tool-button" id="toggleDebug" type="button"><span class="btn-icon">◎</span><span>Rangos</span></button>
+          <button class="tool-button" id="toggleEnergy" type="button" title="Observatorio de energía y biomasa: stocks, flujos y subsidio x18"><span class="btn-icon">⚡</span><span>Energía</span></button>
           <button class="tool-button" id="experimentToggle" type="button" title="Laboratorio causal: experimento control vs tratamiento"><span class="btn-icon">⚗</span><span>Experimento</span></button>
           <button class="tool-button" id="resetWorld" type="button"><span class="btn-icon">↻</span><span>Reiniciar</span></button>
           <button class="tool-button help-button" id="helpButton" type="button" title="Cómo funciona MicroMundo"><span class="btn-icon">?</span><span>Ayuda</span></button>
@@ -97,6 +98,44 @@
             </div>
             <div class="exp-results" id="experimentResults"></div>
             <button class="tool-button" id="experimentExport" type="button" hidden>Exportar JSON</button>
+          </div>
+        </section>
+
+        <section class="hud panel energy-panel hidden movable" id="energyPanel" aria-label="Observatorio de energía y biomasa">
+          <header class="panel-head drag-handle">
+            <h2>⚡ Observatorio de energía</h2>
+            <button class="icon-button" data-energy-close type="button" title="Cerrar (Esc)">×</button>
+          </header>
+          <div class="energy-body">
+            <p class="obs-guide">1) Predice qué pasará si cambias la luz (control «Energía» de la barra). 2) Obsérvalo aquí. 3) Confírmalo con un experimento causal.</p>
+            <div class="obs-stocks">
+              <div class="obs-stock"><b id="obsFieldMass">0</b><span>Biomasa campo A (mass)</span><small id="obsTrendField">±0</small></div>
+              <div class="obs-stock"><b id="obsMobileE">0</b><span>Energía móvil (E)</span></div>
+              <div class="obs-stock"><b id="obsCarcassE">0</b><span>Energía en cadáveres (E)</span></div>
+              <div class="obs-stock"><b id="obsTrendConsumers">±0</b><span>Desfase biomasa–consumidores</span></div>
+            </div>
+            <table class="obs-flows">
+              <caption>Flujos energéticos por segundo (E/s). Las transferencias mueven energía entre seres sin crearla ni destruirla.</caption>
+              <tbody>
+                <tr><th scope="rowgroup" colspan="2">Entradas (crean E)</th></tr>
+                <tr><th scope="row">Fotosíntesis campo A</th><td><span id="obsInField">0</span> E/s</td></tr>
+                <tr><th scope="row">Fotosíntesis directa B/C</th><td><span id="obsInDirect">0</span> E/s</td></tr>
+                <tr><th scope="row">Subsidio de pastoreo ×18 <em class="obs-warn">(simplificación del modelo)</em></th><td><span id="obsInSubsidy">0</span> E/s</td></tr>
+                <tr><th scope="rowgroup" colspan="2">Transferencias (no crean E)</th></tr>
+                <tr><th scope="row">Pastoreo</th><td><span id="obsTrGraze">0</span> E/s</td></tr>
+                <tr><th scope="row">Depredación</th><td><span id="obsTrPred">0</span> E/s</td></tr>
+                <tr><th scope="row">Carroña</th><td><span id="obsTrCarrion">0</span> E/s</td></tr>
+                <tr><th scope="rowgroup" colspan="2">Salidas (destruyen E)</th></tr>
+                <tr><th scope="row">Metabolismo</th><td><span id="obsOutMetab">0</span> E/s</td></tr>
+                <tr><th scope="row">Pérdida térmica</th><td><span id="obsOutThermal">0</span> E/s</td></tr>
+                <tr><th scope="row">Excreción (vuelve al campo)</th><td><span id="obsOutExcret">0</span> E/s</td></tr>
+                <tr><th scope="row">Otras pérdidas</th><td><span id="obsOutOther">0</span> E/s</td></tr>
+                <tr class="obs-balance"><th scope="row">Balance neto</th><td><span id="obsBalance">0</span> E/s</td></tr>
+              </tbody>
+            </table>
+            <canvas id="obsGraph" width="420" height="150" role="img" aria-label="Historial de 10 minutos de flujos: entradas, salidas y subsidio en E/s"></canvas>
+            <p class="obs-note">El <strong>subsidio ×18</strong> multiplica la energía de cada bocado de pastoreo: <span id="obsSubsidyShare">0 %</span>. Es una simplificación del modelo, no un proceso natural ni conservativo. Historial: 10 min.</p>
+            <button class="tool-button primary" id="obsLaunchExperiment" type="button">Lanzar experimento causal (+25 % luz)</button>
           </div>
         </section>
 

@@ -76,7 +76,7 @@ function createDomMock() {
     offsetWidth: 800, offsetHeight: 600, close() {}, showModal() {},
     hidden: false,
   };
-  const canvasIds = new Set(['world', 'graph', 'geneGraph']);
+  const canvasIds = new Set(['world', 'graph', 'geneGraph', 'obsGraph']);
   const doc = {
     getElementById: (id) => canvasIds.has(id) ? fakeCanvas : fakeEl,
     querySelector: () => fakeEl, querySelectorAll: () => [],
@@ -116,6 +116,8 @@ function loadApp() {
       applyWorldSizeFromForm,
       experimentSample, experimentRunArmSync, buildExperimentReport,
       EXPERIMENT_HITOS_S, EXPERIMENT_DURATION_S,
+      observatoryStocks, observatoryFlows, observatory, updateObservatory,
+      obsSnapshotAccum, obsReset, OBS_WINDOW_S,
       GROUPS, GROUP_KEYS, GROUP_LABELS, TYPE, PRODUCER,
       WORLD, CELL, FIELD_CELL,
       camera, worldToScreen, visibleTileOffsets,
@@ -1669,6 +1671,92 @@ function runFunctionalTests() {
 //  TESTS DE MIGRACION ANTI-EXTINCION
 // ═════════════════════════════════════════════════════════════
 
+// ─── task_926: Observatorio de energía y biomasa ────────────
+function runObservatoryTests() {
+  const api = loadApp();
+  suite('Observatorio task_926');
+
+  assert('observatoryFlows separa entradas, transferencias y salidas', () => {
+    const prev = { photosynthField: 10, photosynthDirect: 5, trophicAmplification: 100, graze: 50,
+      predation: 20, carcassEat: 5, excretion: 8, metabolism: 40, thermal: 4,
+      producerLoss: 2, reproduction: 9, birthGain: 9, deathDecay: 3, carcassExpire: 1 };
+    const cur = {};
+    for (const k of Object.keys(prev)) cur[k] = prev[k] * 2; // delta == prev
+    const f = api.observatoryFlows(prev, cur, 2);
+    expectEq(f.photo_field, 5, 'photo_field mal escalado');
+    expectEq(f.photo_direct, 2.5, 'photo_direct mal escalado');
+    expectEq(f.subsidy, 50, 'subsidio x18 mal escalado');
+    expectEq(f.graze, 25, 'graze mal escalado');
+    expectEq(f.predation, 10, 'predation mal escalado');
+    expectEq(f.metabolism, 20, 'metabolism mal escalado');
+    expectEq(f.thermal, 2, 'thermal mal escalado');
+    // other = producerLoss(1) + reproWaste(0.5) + deathDecay(1.5) + carcassExpire(0.5) = 3.5
+    expectEq(f.other_losses, 3, 'other_losses mal calculado');
+    const inputs = f.photo_field + f.photo_direct + f.subsidy;
+    const outputs = f.metabolism + f.thermal + f.other_losses;
+    expectEq(f.balance, inputs - outputs, 'balance != entradas - salidas');
+    expectEq(f.transfer, 25 + 10 + 2.5 + 4, 'transferencia total mal sumada');
+  });
+
+  assert('observatoryFlows tolera prev null y claves ausentes', () => {
+    const f = api.observatoryFlows(null, { photosynthField: 6 }, 3);
+    expectEq(f.photo_field, 2, 'debe tratar prev null como ceros');
+    expectOk(Number.isFinite(f.balance), 'balance no finito con claves ausentes');
+  });
+
+  assert('stocks distinguen masa (campo A) de energia (E)', () => {
+    let sum = 0;
+    for (let i = 0; i < api.sim.producerField.mass.length; i += 1) sum += api.sim.producerField.mass[i];
+    const s = api.observatoryStocks();
+    expectOk(Math.abs(s.field_biomass_mass - sum) < 1e-6, 'field_biomass_mass != suma de mass');
+    expectOk(s.mobile_energy_E >= 0 && s.carcass_energy_E >= 0, 'stocks E negativos');
+  });
+
+  assert('historial muestrea ~1/s y ventana <= 10 min', () => {
+    // updateObservatory se alimenta de updateStats (bucle render); en test lo
+    // drivamos manualmente con la misma cadencia (~1 muestra/s).
+    for (let i = 0; i < 660; i += 1) {
+      api.simulate(1 / 60);
+      if (i % 60 === 59) api.updateObservatory();
+    }
+    const h = api.observatory.history;
+    expectOk(h.length >= 5, 'historial vacio tras 660 pasos');
+    for (let i = 1; i < h.length; i += 1) {
+      expectOk(h[i].t - h[i - 1].t >= 0.999, 'muestra con dt < 1s');
+    }
+    const span = h[h.length - 1].t - h[0].t;
+    expectOk(span <= api.OBS_WINDOW_S + 1, 'ventana supera 10 min');
+    const last = h[h.length - 1];
+    for (const k of ['photo_field', 'subsidy', 'metabolism', 'balance']) {
+      expectOk(Number.isFinite(last.flows[k]), 'flujo no finito: ' + k);
+    }
+  });
+
+  assert('resetWorld limpia el historial del observatorio', () => {
+    api.updateObservatory();
+    api.simulate(1);
+    api.updateObservatory();
+    expectOk(api.observatory.history.length > 0, 'historial vacio antes de reset');
+    api.resetWorld();
+    expectEq(api.observatory.history.length, 0, 'historial no vacio tras reset');
+    // resetWorld llama updateStats(true), que establece una baseline nueva del
+    // mundo recien creado; el contrato es: sin mezcla de series (historial vacio)
+    // y lastSampleAt coherente con sim.time ya reiniciado a 0.
+    expectEq(api.observatory.lastSampleAt, 0, 'baseline no reiniciada a sim.time=0');
+  });
+
+  assert('loadSnapshotJSON tambien limpia el historial', () => {
+    for (let i = 0; i < 180; i += 1) {
+      api.simulate(1 / 60);
+      if (i % 60 === 59) api.updateObservatory();
+    }
+    expectOk(api.observatory.history.length > 0, 'sin historial previo al snapshot');
+    const json = api.saveSnapshotJSON();
+    expectOk(api.loadSnapshotJSON(json), 'loadSnapshotJSON fallo');
+    expectEq(api.observatory.history.length, 0, 'historial no vacio tras cargar snapshot');
+  });
+}
+
 function runMigrationTests() {
   const api = loadApp();
   suite('Migración anti-extinción');
@@ -1893,6 +1981,9 @@ function main() {
 
   if (filter === 'functional' || filter === 'all') {
     runFunctionalTests();
+  }
+  if (filter === 'observatory' || filter === 'all') {
+    runObservatoryTests();
   }
   if (filter === 'migration' || filter === 'all') {
     runMigrationTests();

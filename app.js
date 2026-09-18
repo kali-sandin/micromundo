@@ -226,6 +226,8 @@
   const graphCtx = graphCanvas.getContext('2d');
   const geneCanvas = document.getElementById('geneGraph');
   const geneCtx = geneCanvas.getContext('2d');
+  const obsCanvas = document.getElementById('obsGraph');
+  const obsCtx = obsCanvas.getContext('2d');
 
   const els = {
     playPause: document.getElementById('playPause'),
@@ -275,7 +277,27 @@
     experimentProgress: document.getElementById('experimentProgress'),
     experimentProgressLabel: document.getElementById('experimentProgressLabel'),
     experimentResults: document.getElementById('experimentResults'),
-    experimentExport: document.getElementById('experimentExport')
+    experimentExport: document.getElementById('experimentExport'),
+    energyPanel: document.getElementById('energyPanel'),
+    energyToggle: document.getElementById('toggleEnergy'),
+    obsLaunchExperiment: document.getElementById('obsLaunchExperiment'),
+    obsFieldMass: document.getElementById('obsFieldMass'),
+    obsMobileE: document.getElementById('obsMobileE'),
+    obsCarcassE: document.getElementById('obsCarcassE'),
+    obsTrendField: document.getElementById('obsTrendField'),
+    obsTrendConsumers: document.getElementById('obsTrendConsumers'),
+    obsInField: document.getElementById('obsInField'),
+    obsInDirect: document.getElementById('obsInDirect'),
+    obsInSubsidy: document.getElementById('obsInSubsidy'),
+    obsTrGraze: document.getElementById('obsTrGraze'),
+    obsTrPred: document.getElementById('obsTrPred'),
+    obsTrCarrion: document.getElementById('obsTrCarrion'),
+    obsOutMetab: document.getElementById('obsOutMetab'),
+    obsOutThermal: document.getElementById('obsOutThermal'),
+    obsOutExcret: document.getElementById('obsOutExcret'),
+    obsOutOther: document.getElementById('obsOutOther'),
+    obsBalance: document.getElementById('obsBalance'),
+    obsSubsidyShare: document.getElementById('obsSubsidyShare')
   };
 
   const camera = {
@@ -4108,6 +4130,8 @@
       sim.flowRate.transfer = (dGraze + dColony + dProdC + dPred + dCarcassEat + dExcret + dBirthGain) / dtStats;
       Object.assign(fp, fa);
     }
+    // task_926: Observatorio de energía y biomasa (historial + render si el panel está visible)
+    updateObservatory();
     // Re-sync mobileEnergySum cada ~60s para corregir drift acumulado
     // task_923: durante un experimento causal no debe dispararse (timing wall-clock
     // dependiente del rAF contaminaria la comparacion control/tratamiento)
@@ -4170,6 +4194,182 @@
         updateInspectors();
       }
     }
+  }
+
+  // ── task_926: Observatorio de energía y biomasa (solo lectura, sin tocar ecuaciones) ──
+  const OBS_WINDOW_S = 600; // 10 min de historial
+  const OBS_ACCUM_KEYS = ['photosynthField', 'photosynthDirect', 'trophicAmplification',
+    'graze', 'predation', 'carcassEat', 'metabolism', 'thermal', 'excretion',
+    'producerLoss', 'reproduction', 'birthGain', 'deathDecay', 'carcassExpire'];
+  const observatory = { history: [], lastAccum: null, lastSampleAt: -1 };
+
+  function obsSnapshotAccum() {
+    const fa = sim.flowAccum, out = {};
+    for (let i = 0; i < OBS_ACCUM_KEYS.length; i += 1) {
+      const k = OBS_ACCUM_KEYS[i];
+      out[k] = fa[k] || 0;
+    }
+    return out;
+  }
+
+  function obsReset() {
+    observatory.history.length = 0;
+    observatory.lastAccum = null;
+    observatory.lastSampleAt = -1;
+  }
+
+  // Stocks con unidades explícitas: masa del campo A != energía E
+  function observatoryStocks() {
+    const m = sim.producerField.mass;
+    let fm = 0;
+    for (let i = 0; i < m.length; i += 1) fm += m[i];
+    let ce = 0;
+    for (let i = 0; i < sim.carcasses.length; i += 1) ce += sim.carcasses[i].energy;
+    return { field_biomass_mass: fm, mobile_energy_E: sim.mobileEnergySum, carcass_energy_E: ce };
+  }
+
+  // Flujos E/s entre dos snapshots de flowAccum (función pura, testeable).
+  // Entradas reales: fotosíntesis + subsidio x18 (trophicAmplification, simplificación del modelo).
+  // Transferencias (no crean ni destruyen E): pastoreo, depredación, carroña, excreción.
+  // Destrucción: metabolismo, térmica, otras pérdidas.
+  function observatoryFlows(prev, cur, dt) {
+    const p = prev || {};
+    const d = (k) => (cur[k] || 0) - (p[k] || 0);
+    const reproWaste = Math.max(0, d('reproduction') - d('birthGain'));
+    const photoField = d('photosynthField');
+    const photoDirect = d('photosynthDirect');
+    const subsidy = d('trophicAmplification');
+    const metabolism = d('metabolism');
+    const thermal = d('thermal');
+    const excretion = d('excretion');
+    const other = d('producerLoss') + reproWaste + d('deathDecay') + d('carcassExpire');
+    const inputs = photoField + photoDirect + subsidy;
+    const outputs = metabolism + thermal + other;
+    return {
+      photo_field: photoField / dt, photo_direct: photoDirect / dt, subsidy: subsidy / dt,
+      graze: d('graze') / dt, predation: d('predation') / dt, carcass_eat: d('carcassEat') / dt,
+      excretion: excretion / dt,
+      metabolism: metabolism / dt, thermal: thermal / dt, other_losses: other / dt,
+      balance: (inputs - outputs) / dt,
+      transfer: (d('graze') + d('predation') + d('carcassEat') + excretion) / dt
+    };
+  }
+
+  function updateObservatory() {
+    if (observatory.lastSampleAt < 0 || !observatory.lastAccum) {
+      observatory.lastSampleAt = sim.time;
+      observatory.lastAccum = obsSnapshotAccum();
+      return;
+    }
+    const dtObs = sim.time - observatory.lastSampleAt;
+    if (dtObs < 1) return;
+    const now = obsSnapshotAccum();
+    const c = counts();
+    observatory.history.push({
+      t: sim.time, stocks: observatoryStocks(),
+      consumers: c.consumers,
+      flows: observatoryFlows(observatory.lastAccum, now, dtObs)
+    });
+    while (observatory.history.length && sim.time - observatory.history[0].t > OBS_WINDOW_S) observatory.history.shift();
+    observatory.lastAccum = now;
+    observatory.lastSampleAt = sim.time;
+    if (!els.energyPanel || els.energyPanel.classList.contains('hidden')) return;
+    renderObservatory();
+  }
+
+  function obsFmtE(v) {
+    const a = Math.abs(v);
+    if (a >= 1e6) return (v / 1e6).toFixed(2) + ' M';
+    if (a >= 1e3) return (v / 1e3).toFixed(1) + ' k';
+    return v.toFixed(1);
+  }
+
+  // Tendencia de una serie en la ventana (texto ▲/▼/± con signo, no solo color)
+  function obsTrendText(get, fmt) {
+    const h = observatory.history;
+    if (h.length < 2) return '±0';
+    const a = get(h[0]), b = get(h[h.length - 1]);
+    if (typeof a !== 'number' || typeof b !== 'number') return '±0';
+    const d = b - a;
+    const s = fmt(d);
+    return (d > 0 ? '▲ +' : d < 0 ? '▼ ' : '±') + s;
+  }
+
+  function renderObservatory() {
+    if (!observatory.history.length) return;
+    const last = observatory.history[observatory.history.length - 1];
+    const s = last.stocks;
+    els.obsFieldMass.textContent = obsFmtE(s.field_biomass_mass);
+    els.obsMobileE.textContent = obsFmtE(s.mobile_energy_E);
+    els.obsCarcassE.textContent = obsFmtE(s.carcass_energy_E);
+    els.obsTrendField.textContent = obsTrendText(x => x.stocks.field_biomass_mass, obsFmtE) + ' mass/10 min';
+    els.obsTrendConsumers.textContent = obsTrendText(x => x.consumers, v => String(Math.round(v))) + ' cons./10 min';
+    const f = last.flows;
+    els.obsInField.textContent = obsFmtE(f.photo_field);
+    els.obsInDirect.textContent = obsFmtE(f.photo_direct);
+    els.obsInSubsidy.textContent = obsFmtE(f.subsidy);
+    els.obsTrGraze.textContent = obsFmtE(f.graze);
+    els.obsTrPred.textContent = obsFmtE(f.predation);
+    els.obsTrCarrion.textContent = obsFmtE(f.carcass_eat);
+    els.obsOutMetab.textContent = obsFmtE(f.metabolism);
+    els.obsOutThermal.textContent = obsFmtE(f.thermal);
+    els.obsOutExcret.textContent = obsFmtE(f.excretion);
+    els.obsOutOther.textContent = obsFmtE(f.other_losses);
+    els.obsBalance.textContent = (f.balance >= 0 ? '+' : '') + obsFmtE(f.balance);
+    els.obsBalance.style.color = f.balance >= 0 ? '#5fd97a' : '#ff6b6b';
+    const inTotal = f.photo_field + f.photo_direct + f.subsidy;
+    els.obsSubsidyShare.textContent = inTotal > 0 ? (f.subsidy / inTotal * 100).toFixed(1) + ' % de las entradas' : '0 %';
+    drawObsChart();
+  }
+
+  function drawObsChart() {
+    const { w, h } = resizeCanvasToDisplay(obsCanvas, obsCtx, 420, 150);
+    const H = observatory.history;
+    if (H.length < 2) return;
+    obsCtx.setTransform(1, 0, 0, 1, 0, 0);
+    obsCtx.clearRect(0, 0, w, h);
+    const series = [
+      { key: x => x.flows.photo_field + x.flows.photo_direct + x.flows.subsidy, color: '#5fd97a', label: 'Entradas' },
+      { key: x => x.flows.metabolism + x.flows.thermal + x.flows.other_losses, color: '#ff6b6b', label: 'Salidas' },
+      { key: x => x.flows.subsidy, color: '#f7c948', label: 'Subsidio x18' }
+    ];
+    let lo = Infinity, hi = -Infinity;
+    for (const srs of series) {
+      for (let i = 0; i < H.length; i += 1) {
+        const v = srs.key(H[i]);
+        if (v < lo) lo = v;
+        if (v > hi) hi = v;
+      }
+    }
+    if (!isFinite(lo) || hi - lo < 1e-9) { lo = 0; hi = 1; }
+    const pad = (hi - lo) * 0.08;
+    lo -= pad; hi += pad;
+    const t0 = H[0].t, t1 = H[H.length - 1].t || t0 + 1;
+    const X = (t) => 4 + (t - t0) / Math.max(0.001, t1 - t0) * (w - 10);
+    const Y = (v) => h - 18 - (v - lo) / (hi - lo) * (h - 30);
+    obsCtx.strokeStyle = 'rgba(255,255,255,0.10)';
+    obsCtx.lineWidth = 1;
+    obsCtx.beginPath(); obsCtx.moveTo(0, Y(0) + 0.5); obsCtx.lineTo(w, Y(0) + 0.5); obsCtx.stroke();
+    obsCtx.font = '10px system-ui, sans-serif';
+    obsCtx.textAlign = 'left';
+    obsCtx.textBaseline = 'bottom';
+    obsCtx.fillStyle = 'rgba(220,232,226,0.72)';
+    obsCtx.fillText('E/s', 4, 10);
+    obsCtx.textAlign = 'right';
+    obsCtx.fillText(obsFmtE(hi), w - 4, 10);
+    obsCtx.textBaseline = 'top';
+    obsCtx.fillText(obsFmtE(lo), w - 4, h - 26);
+    for (const srs of series) {
+      obsCtx.strokeStyle = srs.color;
+      obsCtx.lineWidth = 1.5;
+      obsCtx.beginPath();
+      for (let i = 0; i < H.length; i += 1) {
+        const x = X(H[i].t), y = Y(srs.key(H[i]));
+        if (i === 0) obsCtx.moveTo(x, y); else obsCtx.lineTo(x, y);
+      }
+      obsCtx.stroke();
+    }
+    drawTimeAxis(obsCtx, w, h, (w - 10) / Math.max(1, t1 - t0));
   }
 
   function drawTimeAxis(context, w, h, pxPerSecond) {
@@ -4498,6 +4698,7 @@
     sim.liveProducerCCount = 0;
     sim.mobileEnergySum = 0;
     sim.carcasses.length = 0;
+    obsReset(); // task_926: el historial del observatorio no debe mezclar mundos
     sim.migrationTimer = 0;
     sim.graph.clear();
     sim.geneHistory.clear();
@@ -5111,6 +5312,35 @@
       }
     });
     els.systemEnergy.addEventListener('input', setSystemEnergy);
+    // task_926: Observatorio de energía y biomasa
+    if (els.energyToggle) {
+      els.energyToggle.addEventListener('click', () => {
+        const show = els.energyPanel.classList.toggle('hidden');
+        els.energyToggle.classList.toggle('active', !show);
+        if (!show) renderObservatory();
+      });
+    }
+    if (els.energyPanel) {
+      const obsClose = els.energyPanel.querySelector('[data-energy-close]');
+      if (obsClose) obsClose.addEventListener('click', () => {
+        els.energyPanel.classList.add('hidden');
+        if (els.energyToggle) els.energyToggle.classList.remove('active');
+      });
+      els.energyPanel.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') {
+          els.energyPanel.classList.add('hidden');
+          if (els.energyToggle) els.energyToggle.classList.remove('active');
+        }
+      });
+      if (els.obsLaunchExperiment) els.obsLaunchExperiment.addEventListener('click', () => {
+        els.energyPanel.classList.add('hidden');
+        if (els.energyToggle) els.energyToggle.classList.remove('active');
+        els.experimentPanel.classList.remove('hidden');
+        els.experimentToggle.classList.add('active');
+        els.experimentPrediction.focus();
+      });
+      makePanelDraggable(els.energyPanel);
+    }
     els.dayNightToggle.addEventListener('click', toggleDayNight);
     els.playPause.addEventListener('click', () => setPaused(!sim.paused));
     document.getElementById('toggleStats').addEventListener('click', (ev) => {
@@ -5471,6 +5701,7 @@
     // task_923: resetear acumulador de resync para no disparar una resincronizacion
     // espuria de mobileEnergySum dentro del updateStats del propio loadSnapshot
     sim.energyResyncAccum = 0;
+    obsReset(); // task_926: sim.time puede retroceder; no mezclar series de mundos distintos
     // Restaurar criaturas
     for (const c of snap.creatures) {
       const e = Object.assign({}, c);
