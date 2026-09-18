@@ -1,0 +1,372 @@
+{
+  "task": "task_926 gate agregados vs runtime",
+  "config": {
+    "seeds": [
+      12345,
+      23456,
+      34567,
+      45678,
+      56789
+    ],
+    "duration_s": 600,
+    "dt": 0.016666666666666666,
+    "migration": "off"
+  },
+  "results": [
+    {
+      "seed": 12345,
+      "wall_s": 1090.4,
+      "samples": 592,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1926,
+        "predators": 0
+      },
+      "obs_cost_pct": 0.0941,
+      "max_flow_rel_err_pct": 0.0019,
+      "max_stock_rel_err_pct": 0.1586,
+      "flows": {
+        "photo_field": {
+          "observed": 43561.67100116164,
+          "expected": 43598.4153760027,
+          "rel_err_pct": 0.0843
+        },
+        "photo_direct": {
+          "observed": 9563.050793564207,
+          "expected": 9569.554903440694,
+          "rel_err_pct": 0.068
+        },
+        "subsidy": {
+          "observed": 403230.7909141293,
+          "expected": 403691.9602097359,
+          "rel_err_pct": 0.1142
+        },
+        "graze": {
+          "observed": 38530.20050138079,
+          "expected": 38580.293409610626,
+          "rel_err_pct": 0.1298
+        },
+        "predation": {
+          "observed": 140.85578693077787,
+          "expected": 140.85578693077787,
+          "rel_err_pct": 0
+        },
+        "carcass_eat": {
+          "observed": 29.996741447643434,
+          "expected": 29.996741447643434,
+          "rel_err_pct": 0
+        },
+        "excretion": {
+          "observed": 457.9434154259377,
+          "expected": 458.5211150888277,
+          "rel_err_pct": 0.126
+        },
+        "metabolism": {
+          "observed": 299392.2956571256,
+          "expected": 299817.30943426304,
+          "rel_err_pct": 0.1418
+        },
+        "thermal": {
+          "observed": 0,
+          "expected": 0,
+          "rel_err_pct": 0
+        },
+        "other_losses": {
+          "observed": 64039.92466177221,
+          "expected": 64159.20189651852,
+          "rel_err_pct": 0.1859
+        }
+      },
+      "stock_err_pct": {
+        "field_biomass_mass": 0.0015860920198742436,
+        "mobile_energy_E": 0.0000649207079224659,
+        "carcass_energy_E": 0
+      }
+    },
+    {
+      "seed": 23456,
+      "wall_s": 913,
+      "samples": 592,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1971,
+        "predators": 0
+      },
+      "obs_cost_pct": 0.0969,
+      "max_flow_rel_err_pct": 0.0014,
+      "max_stock_rel_err_pct": 0.171,
+      "flows": {
+        "photo_field": {
+          "observed": 43795.32239125372,
+          "expected": 43831.916801461324,
+          "rel_err_pct": 0.0835
+        },
+        "photo_direct": {
+          "observed": 9749.74903042342,
+          "expected": 9756.185706750954,
+          "rel_err_pct": 0.066
+        },
+        "subsidy": {
+          "observed": 409170.47243630234,
+          "expected": 409627.3375867332,
+          "rel_err_pct": 0.1115
+        },
+        "graze": {
+          "observed": 39094.2928846479,
+          "expected": 39144.78592772104,
+          "rel_err_pct": 0.129
+        },
+        "predation": {
+          "observed": 148.89666684890588,
+          "expected": 148.89666684890588,
+          "rel_err_pct": 0
+        },
+        "carcass_eat": {
+          "observed": 13.059065191773575,
+          "expected": 13.059065191773575,
+          "rel_err_pct": 0
+        },
+        "excretion": {
+          "observed": 492.44615348300925,
+          "expected": 493.1122557983546,
+          "rel_err_pct": 0.1351
+        },
+        "metabolism": {
+          "observed": 308787.8618794126,
+          "expected": 309228.59983720136,
+          "rel_err_pct": 0.1425
+        },
+        "thermal": {
+          "observed": 0,
+          "expected": 0,
+          "rel_err_pct": 0
+        },
+        "other_losses": {
+          "observed": 64123.31251655187,
+          "expected": 64162.233678810546,
+          "rel_err_pct": 0.0607
+        }
+      },
+      "stock_err_pct": {
+        "field_biomass_mass": 0.001710384577796035,
+        "mobile_energy_E": 0.0002839653372835691,
+        "carcass_energy_E": 0
+      }
+    },
+    {
+      "seed": 34567,
+      "wall_s": 824.6,
+      "samples": 592,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1592,
+        "predators": 0
+      },
+      "obs_cost_pct": 0.1218,
+      "max_flow_rel_err_pct": 0.0013,
+      "max_stock_rel_err_pct": 0.108,
+      "flows": {
+        "photo_field": {
+          "observed": 41922.65043798395,
+          "expected": 41958.218071498384,
+          "rel_err_pct": 0.0848
+        },
+        "photo_direct": {
+          "observed": 10189.813557718902,
+          "expected": 10196.307011553601,
+          "rel_err_pct": 0.0637
+        },
+        "subsidy": {
+          "observed": 382569.0884422368,
+          "expected": 383052.924598943,
+          "rel_err_pct": 0.1263
+        },
+        "graze": {
+          "observed": 35057.63297626126,
+          "expected": 35104.90440447111,
+          "rel_err_pct": 0.1347
+        },
+        "predation": {
+          "observed": 161.5720387081211,
+          "expected": 161.5720387081211,
+          "rel_err_pct": 0
+        },
+        "carcass_eat": {
+          "observed": 32.06788269688314,
+          "expected": 32.06788269688314,
+          "rel_err_pct": 0
+        },
+        "excretion": {
+          "observed": 641.069358220048,
+          "expected": 641.8937894648818,
+          "rel_err_pct": 0.1284
+        },
+        "metabolism": {
+          "observed": 284272.20268800197,
+          "expected": 284647.9434876917,
+          "rel_err_pct": 0.132
+        },
+        "thermal": {
+          "observed": 0,
+          "expected": 0,
+          "rel_err_pct": 0
+        },
+        "other_losses": {
+          "observed": 55310.18624463344,
+          "expected": 55363.68849330811,
+          "rel_err_pct": 0.0966
+        }
+      },
+      "stock_err_pct": {
+        "field_biomass_mass": 0.0010799264356652432,
+        "mobile_energy_E": 0.0008971430420098136,
+        "carcass_energy_E": 0
+      }
+    },
+    {
+      "seed": 45678,
+      "wall_s": 883.3,
+      "samples": 592,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1905,
+        "predators": 0
+      },
+      "obs_cost_pct": 0.0915,
+      "max_flow_rel_err_pct": 0.0014,
+      "max_stock_rel_err_pct": 0.1564,
+      "flows": {
+        "photo_field": {
+          "observed": 43015.01415660893,
+          "expected": 43051.83577869551,
+          "rel_err_pct": 0.0855
+        },
+        "photo_direct": {
+          "observed": 9666.71866683624,
+          "expected": 9673.177013482882,
+          "rel_err_pct": 0.0668
+        },
+        "subsidy": {
+          "observed": 401823.90549199283,
+          "expected": 402307.7188793967,
+          "rel_err_pct": 0.1203
+        },
+        "graze": {
+          "observed": 37420.35623958098,
+          "expected": 37471.281761454346,
+          "rel_err_pct": 0.1359
+        },
+        "predation": {
+          "observed": 127.8537469739372,
+          "expected": 127.8537469739372,
+          "rel_err_pct": 0
+        },
+        "carcass_eat": {
+          "observed": 11.400574418791534,
+          "expected": 11.400574418791534,
+          "rel_err_pct": 0
+        },
+        "excretion": {
+          "observed": 463.0830705105323,
+          "expected": 463.70765576281593,
+          "rel_err_pct": 0.1347
+        },
+        "metabolism": {
+          "observed": 293597.04215539974,
+          "expected": 294019.3996185378,
+          "rel_err_pct": 0.1436
+        },
+        "thermal": {
+          "observed": 0,
+          "expected": 0,
+          "rel_err_pct": 0
+        },
+        "other_losses": {
+          "observed": 64007.593795896486,
+          "expected": 64071.43820350533,
+          "rel_err_pct": 0.0996
+        }
+      },
+      "stock_err_pct": {
+        "field_biomass_mass": 0.001563869163533433,
+        "mobile_energy_E": 0.000541003963050678,
+        "carcass_energy_E": 0
+      }
+    },
+    {
+      "seed": 56789,
+      "wall_s": 830.5,
+      "samples": 592,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1911,
+        "predators": 0
+      },
+      "obs_cost_pct": 0.1013,
+      "max_flow_rel_err_pct": 0.0017,
+      "max_stock_rel_err_pct": 0.1339,
+      "flows": {
+        "photo_field": {
+          "observed": 43061.790589521675,
+          "expected": 43098.474030036625,
+          "rel_err_pct": 0.0851
+        },
+        "photo_direct": {
+          "observed": 9984.794194790484,
+          "expected": 9991.247287930184,
+          "rel_err_pct": 0.0646
+        },
+        "subsidy": {
+          "observed": 398675.27223407134,
+          "expected": 399142.2461686827,
+          "rel_err_pct": 0.117
+        },
+        "graze": {
+          "observed": 37506.35204770194,
+          "expected": 37554.95715921707,
+          "rel_err_pct": 0.1294
+        },
+        "predation": {
+          "observed": 145.9965563778878,
+          "expected": 145.9965563778878,
+          "rel_err_pct": 0
+        },
+        "carcass_eat": {
+          "observed": 10.248013108376966,
+          "expected": 10.248013108376966,
+          "rel_err_pct": 0
+        },
+        "excretion": {
+          "observed": 393.36440141512486,
+          "expected": 393.8721737832653,
+          "rel_err_pct": 0.1289
+        },
+        "metabolism": {
+          "observed": 291856.744488138,
+          "expected": 292273.28189619875,
+          "rel_err_pct": 0.1425
+        },
+        "thermal": {
+          "observed": 0,
+          "expected": 0,
+          "rel_err_pct": 0
+        },
+        "other_losses": {
+          "observed": 63991.9371597951,
+          "expected": 64098.898371374795,
+          "rel_err_pct": 0.1669
+        }
+      },
+      "stock_err_pct": {
+        "field_biomass_mass": 0.0013387710659216513,
+        "mobile_energy_E": 0.0001084906900529945,
+        "carcass_energy_E": 0
+      }
+    }
+  ],
+  "gates": {
+    "flow_err_le_2pct": true,
+    "stock_err_le_2pct": true,
+    "cost_le_2pct": true
+  }
+}
