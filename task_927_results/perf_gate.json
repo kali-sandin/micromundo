@@ -1,0 +1,192 @@
+{
+  "schema": "micromundo.perf-gate/1",
+  "task": "task_927",
+  "clock": "process.cpuUsage",
+  "protocol": "ABBA balanced blocks",
+  "seed": 20260916,
+  "warmup_sim_s": 120,
+  "duration_sim_s": 15,
+  "blocks": 5,
+  "threshold": {
+    "aggregate_overhead_max_pct": 5
+  },
+  "metrics": {
+    "aggregate_ratio": 1.0057502364377755,
+    "aggregate_overhead_pct": 0.5750236437775502,
+    "ratio_p50": 1.0085230873416553,
+    "ratio_p95": 1.0311551615235166
+  },
+  "samples": [
+    {
+      "block": 1,
+      "order": [
+        "native",
+        "arm",
+        "arm",
+        "native"
+      ],
+      "runs": [
+        {
+          "kind": "native",
+          "cpu_ms": 15820.6,
+          "wall_ms": 16228.90246
+        },
+        {
+          "kind": "arm",
+          "cpu_ms": 15967.996,
+          "wall_ms": 16403.299419
+        },
+        {
+          "kind": "arm",
+          "cpu_ms": 15526.403,
+          "wall_ms": 15889.654338
+        },
+        {
+          "kind": "native",
+          "cpu_ms": 15407.638,
+          "wall_ms": 15878.488216
+        }
+      ],
+      "native_cpu_ms": 31228.238,
+      "arm_cpu_ms": 31494.398999999998,
+      "ratio": 1.0085230873416553
+    },
+    {
+      "block": 2,
+      "order": [
+        "arm",
+        "native",
+        "native",
+        "arm"
+      ],
+      "runs": [
+        {
+          "kind": "arm",
+          "cpu_ms": 16725.582,
+          "wall_ms": 17963.082934
+        },
+        {
+          "kind": "native",
+          "cpu_ms": 15666.071,
+          "wall_ms": 16112.975902
+        },
+        {
+          "kind": "native",
+          "cpu_ms": 15627.267,
+          "wall_ms": 16135.400116
+        },
+        {
+          "kind": "arm",
+          "cpu_ms": 15542.705,
+          "wall_ms": 16205.540931
+        }
+      ],
+      "native_cpu_ms": 31293.338,
+      "arm_cpu_ms": 32268.286999999997,
+      "ratio": 1.0311551615235166
+    },
+    {
+      "block": 3,
+      "order": [
+        "native",
+        "arm",
+        "arm",
+        "native"
+      ],
+      "runs": [
+        {
+          "kind": "native",
+          "cpu_ms": 15498.541,
+          "wall_ms": 16013.772267
+        },
+        {
+          "kind": "arm",
+          "cpu_ms": 15572.502,
+          "wall_ms": 16268.826774
+        },
+        {
+          "kind": "arm",
+          "cpu_ms": 15449.474,
+          "wall_ms": 16025.045186
+        },
+        {
+          "kind": "native",
+          "cpu_ms": 16419.886,
+          "wall_ms": 17339.055188
+        }
+      ],
+      "native_cpu_ms": 31918.426999999996,
+      "arm_cpu_ms": 31021.976000000002,
+      "ratio": 0.9719143114414757
+    },
+    {
+      "block": 4,
+      "order": [
+        "arm",
+        "native",
+        "native",
+        "arm"
+      ],
+      "runs": [
+        {
+          "kind": "arm",
+          "cpu_ms": 15850.199,
+          "wall_ms": 16807.102378
+        },
+        {
+          "kind": "native",
+          "cpu_ms": 15633.319,
+          "wall_ms": 16117.91398
+        },
+        {
+          "kind": "native",
+          "cpu_ms": 15725.695,
+          "wall_ms": 16420.308111
+        },
+        {
+          "kind": "arm",
+          "cpu_ms": 15681.517,
+          "wall_ms": 16364.379778
+        }
+      ],
+      "native_cpu_ms": 31359.014,
+      "arm_cpu_ms": 31531.716,
+      "ratio": 1.0055072522369486
+    },
+    {
+      "block": 5,
+      "order": [
+        "native",
+        "arm",
+        "arm",
+        "native"
+      ],
+      "runs": [
+        {
+          "kind": "native",
+          "cpu_ms": 15538.812,
+          "wall_ms": 16113.724758
+        },
+        {
+          "kind": "arm",
+          "cpu_ms": 15910.378,
+          "wall_ms": 16549.998994
+        },
+        {
+          "kind": "arm",
+          "cpu_ms": 16412.014,
+          "wall_ms": 17396.747329
+        },
+        {
+          "kind": "native",
+          "cpu_ms": 16393.946,
+          "wall_ms": 17383.254628
+        }
+      ],
+      "native_cpu_ms": 31932.758,
+      "arm_cpu_ms": 32322.392,
+      "ratio": 1.0122017020891212
+    }
+  ],
+  "pass": true
+}

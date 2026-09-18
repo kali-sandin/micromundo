@@ -1653,17 +1653,52 @@ function runFunctionalTests() {
     api.resetWorld();
     expStepLoop(api, 600); // calentar poblaciones
     const snap = api.saveSnapshot();
-    const runNative = () => { api.loadSnapshot(snap); const t = Date.now(); expStepLoop(api, 600); return Date.now() - t; };
-    const runArm = () => { const t = Date.now(); api.experimentRunArmSync(snap, 10, 1, [5, 10]); return Date.now() - t; };
-    runNative(); // calentar JIT fuera de medida
-    const natives = [runNative(), runNative()];
-    const arms = [runArm(), runArm()];
-    const nativeMs = Math.min.apply(null, natives);
-    const armMs = Math.min.apply(null, arms);
-    if (nativeMs <= 0) return 'nativo demasiado rapido para comparar';
-    const overhead = (armMs - nativeMs) / nativeMs;
-    if (overhead > 0.05) throw new Error(`overhead ${(overhead * 100).toFixed(1)}% > 5% (arm=${armMs}ms native=${nativeMs}ms)`);
-    return `arm=${armMs}ms native=${nativeMs}ms overhead=${(overhead * 100).toFixed(1)}%`;
+    const runNative = () => { api.loadSnapshot(snap); expStepLoop(api, 600); };
+    const runArm = () => { api.experimentRunArmSync(snap, 10, 1, [5, 10]); };
+    const measureCpuMs = (fn) => {
+      const start = process.cpuUsage();
+      fn();
+      const used = process.cpuUsage(start);
+      return (used.user + used.system) / 1000;
+    };
+    const percentile = (values, q) => {
+      const sorted = values.slice().sort((a, b) => a - b);
+      return sorted[Math.max(0, Math.ceil(q * sorted.length) - 1)];
+    };
+
+    // JIT y caches fuera de medida. Cuatro pares AB/BA alternan el orden sin
+    // usar el minimo sesgado de muestras agrupadas. El gate exhaustivo ABBA x5
+    // vive en task_923_results/ab_bench.js; este smoke evita cargar cinco
+    // minutos extra a cada suite. CPU time excluye desprogramacion externa.
+    runNative();
+    runArm();
+    const ratios = [];
+    let nativeTotal = 0;
+    let armTotal = 0;
+    for (let pair = 0; pair < 4; pair += 1) {
+      let nativeMs = 0;
+      let armMs = 0;
+      const order = pair % 2 === 0
+        ? [['native', runNative], ['arm', runArm]]
+        : [['arm', runArm], ['native', runNative]];
+      for (const [kind, fn] of order) {
+        const ms = measureCpuMs(fn);
+        if (kind === 'native') nativeMs = ms;
+        else armMs = ms;
+      }
+      nativeTotal += nativeMs;
+      armTotal += armMs;
+      ratios.push(armMs / nativeMs);
+    }
+    const aggregate = armTotal / nativeTotal;
+    const p50 = percentile(ratios, 0.5);
+    const p95 = percentile(ratios, 0.95);
+    const overhead = aggregate - 1;
+    if (overhead > 0.05) {
+      throw new Error(`overhead agregado ${(overhead * 100).toFixed(1)}% > 5% ` +
+        `(ratio p50=${p50.toFixed(3)} p95=${p95.toFixed(3)}, 4 pares AB/BA)`);
+    }
+    return `CPU AB/BA x4: agregado=${aggregate.toFixed(3)} p50=${p50.toFixed(3)} p95=${p95.toFixed(3)}`;
   });
 }
 
