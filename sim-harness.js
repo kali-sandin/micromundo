@@ -173,7 +173,7 @@ function createDomMock() {
     scrollWidth: 0, scrollHeight: 0, clientWidth: 800, clientHeight: 600,
     offsetWidth: 800, offsetHeight: 600,
   };
-  const canvasIds = new Set(['world', 'graph', 'geneGraph']);
+  const canvasIds = new Set(['world', 'graph', 'geneGraph', 'obsGraph']);
   const documentMock = {
     getElementById: (id) => (canvasIds.has(id) ? fakeCanvas : fakeElement),
     querySelector: () => fakeElement, querySelectorAll: () => [],
