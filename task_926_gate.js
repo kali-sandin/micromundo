@@ -206,7 +206,7 @@ function runSeed(seed) {
     sim_time_s: +api.sim.time.toFixed(1),
     counts: { producers: c.producers, consumers: c.consumers, predators: c.predators },
     obs_cost_pct: +((obsTimeMs / Math.max(1, wallMs)) * 100).toFixed(4),
-    max_flow_rel_err_pct: +Math.max(...Object.values(flowErr)).toFixed(4) * 1,
+    max_flow_rel_err_pct: +(Math.max(...Object.values(flowErr)) * 100).toFixed(4),
     max_stock_rel_err_pct: +(Math.max(...Object.values(stockErr)) * 100).toFixed(4),
     flows: flowReport, stock_err_pct: stockErr,
   };
