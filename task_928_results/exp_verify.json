@@ -1,0 +1,87 @@
+{
+  "task": "task_928",
+  "checks": [
+    {
+      "name": "toggle Expedición button type=button con title",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "panel section aria-label",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "panel oculto por defecto (class hidden)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "botón cierre data-expedition-close",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "handler Esc cierra panel (app.js)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "label predicción con for",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "textarea conclusión con label for",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "tabla comparativa usa th scope",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cuaderno import file input hidden con label for",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reflow 340px expedition-panel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "maxlength en predicción/conclusión",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "makePanelDraggable aplicado al panel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "init no abre el panel automáticamente",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "runtime carga sin excepción",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "p95 renderExpedition < 2ms (12 tarjetas)",
+      "ok": true,
+      "detail": "p95=0.015ms"
+    }
+  ],
+  "runtime": {
+    "p95_ms": 0.0152,
+    "max_ms": 0.6973,
+    "iter": 300
+  },
+  "ok": true,
+  "timestamp": "2026-09-19T01:33:32.006Z"
+}

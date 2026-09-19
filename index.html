@@ -49,6 +49,7 @@
           <button class="tool-button" id="toggleDebug" type="button"><span class="btn-icon">◎</span><span>Rangos</span></button>
           <button class="tool-button" id="toggleEnergy" type="button" title="Observatorio de energía y biomasa: stocks, flujos y subsidio x18"><span class="btn-icon">⚡</span><span>Energía</span></button>
           <button class="tool-button" id="experimentToggle" type="button" title="Laboratorio causal: experimento control vs tratamiento"><span class="btn-icon">⚗</span><span>Experimento</span></button>
+          <button class="tool-button" id="expeditionToggle" type="button" title="Expedición guiada y Cuaderno de campo: misión con predicción, observación, experimento y conclusiones"><span class="btn-icon">🧭</span><span>Expedición</span></button>
           <button class="tool-button" id="resetWorld" type="button"><span class="btn-icon">↻</span><span>Reiniciar</span></button>
           <button class="tool-button help-button" id="helpButton" type="button" title="Cómo funciona MicroMundo"><span class="btn-icon">?</span><span>Ayuda</span></button>
         </div>
@@ -136,6 +137,45 @@
             <canvas id="obsGraph" width="420" height="150" role="img" aria-label="Historial de 10 minutos de flujos: entradas, salidas y subsidio en E/s"></canvas>
             <p class="obs-note">El <strong>subsidio ×18</strong> multiplica la energía de cada bocado de pastoreo: <span id="obsSubsidyShare">0 %</span>. Es una simplificación del modelo, no un proceso natural ni conservativo. Historial: 10 min.</p>
             <button class="tool-button primary" id="obsLaunchExperiment" type="button">Lanzar experimento causal (+25 % luz)</button>
+          </div>
+        </section>
+
+        <section class="hud panel expedition-panel hidden movable" id="expeditionPanel" aria-label="Expedición guiada y cuaderno de campo">
+          <header class="panel-head drag-handle">
+            <h2>🧭 Expedición guiada · Cuaderno de campo</h2>
+            <button class="icon-button help-close" data-expedition-close type="button" title="Cerrar">×</button>
+          </header>
+          <div class="expedition-body">
+            <p class="inq-mission"><b>Misión 1 · ¿Más luz, más vida?</b> Predice qué pasará con +25% de luz, obsérvalo, confírmalo con un experimento causal y guarda tu conclusión.</p>
+            <ol class="inq-steps" id="expeditionSteps" aria-label="Pasos de la misión"></ol>
+            <div class="inq-block">
+              <label class="exp-label" for="expeditionPrediction">2. Tu predicción: ¿qué esperas con +25% de luz?</label>
+              <input id="expeditionPrediction" type="text" maxlength="200" placeholder="Ej.: más biomasa del campo y más consumidores">
+              <button class="tool-button" id="expeditionSavePrediction" type="button">Guardar predicción</button>
+            </div>
+            <div class="inq-block">
+              <label class="exp-label">3. Observa stocks y flujos en el Observatorio</label>
+              <button class="tool-button" id="expeditionMarkObserved" type="button">Abrir Observatorio y marcar observado</button>
+            </div>
+            <div class="inq-block">
+              <label class="exp-label">4–5. Ejecuta el experimento causal y compara</label>
+              <button class="tool-button primary" id="expeditionRun" type="button">Ejecutar experimento (2 × 5 min)</button>
+              <div class="exp-results" id="expeditionCompare"></div>
+            </div>
+            <div class="inq-block">
+              <label class="exp-label" for="expeditionConclusion">6. Tu conclusión (usa al menos una métrica vista)</label>
+              <textarea id="expeditionConclusion" rows="3" maxlength="400" placeholder="Ej.: con +25% de luz la biomasa subió X% y los consumidores Y% en 5 min"></textarea>
+              <button class="tool-button primary" id="expeditionSaveCard" type="button">7. Guardar tarjeta en el cuaderno</button>
+            </div>
+            <div class="inq-block">
+              <h3 class="exp-label">📓 Cuaderno de campo</h3>
+              <ul class="inq-cards" id="cuadernoList"></ul>
+              <div class="inq-actions">
+                <button class="tool-button" id="cuadernoExport" type="button">Exportar cuaderno (JSON)</button>
+                <label class="tool-button" for="cuadernoImport">Importar cuaderno<input id="cuadernoImport" type="file" accept="application/json,.json" hidden></label>
+              </div>
+              <p class="exp-note">Cada tarjeta guarda seed, PRNG, unidades y el aviso del subsidio x18 (simplificación del modelo, no un proceso natural).</p>
+            </div>
           </div>
         </section>
 

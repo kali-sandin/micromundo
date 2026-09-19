@@ -1964,3 +1964,18 @@ select {
   .obs-flows th,
   .obs-flows td { padding: 2px 3px; }
 }
+
+/* ── task_928: Expedición guiada y Cuaderno de campo ── */
+.expedition-panel { width: min(420px, calc(100vw - 24px)); max-height: min(70vh, 640px); overflow-y: auto; }
+.expedition-body { display: grid; gap: 10px; }
+.inq-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.inq-step { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: rgba(127,127,127,.18); color: var(--ink-soft, #9aa); }
+.inq-step.done { background: rgba(70,180,110,.22); }
+.inq-step.current { outline: 2px solid currentColor; font-weight: 700; }
+.inq-block { display: grid; gap: 6px; }
+.inq-block textarea { resize: vertical; }
+.inq-cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 12px; }
+.inq-cards .inq-empty { opacity: .6; font-style: italic; }
+.inq-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.inq-mission { font-size: 12px; margin: 0; }
+@media (max-width: 340px) { .expedition-panel { width: calc(100vw - 12px); } }

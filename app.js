@@ -297,7 +297,20 @@
     obsOutExcret: document.getElementById('obsOutExcret'),
     obsOutOther: document.getElementById('obsOutOther'),
     obsBalance: document.getElementById('obsBalance'),
-    obsSubsidyShare: document.getElementById('obsSubsidyShare')
+    obsSubsidyShare: document.getElementById('obsSubsidyShare'),
+    expeditionToggle: document.getElementById('expeditionToggle'),
+    expeditionPanel: document.getElementById('expeditionPanel'),
+    expeditionStepsEl: document.getElementById('expeditionSteps'),
+    expeditionPredictionInput: document.getElementById('expeditionPrediction'),
+    expeditionSavePrediction: document.getElementById('expeditionSavePrediction'),
+    expeditionMarkObserved: document.getElementById('expeditionMarkObserved'),
+    expeditionRun: document.getElementById('expeditionRun'),
+    expeditionConclusion: document.getElementById('expeditionConclusion'),
+    expeditionSaveCard: document.getElementById('expeditionSaveCard'),
+    expeditionCompare: document.getElementById('expeditionCompare'),
+    cuadernoList: document.getElementById('cuadernoList'),
+    cuadernoExport: document.getElementById('cuadernoExport'),
+    cuadernoImport: document.getElementById('cuadernoImport')
   };
 
   const camera = {
@@ -5341,6 +5354,44 @@
       });
       makePanelDraggable(els.energyPanel);
     }
+    // task_928: Expedición guiada y Cuaderno de campo (opt-in, oculto por defecto)
+    if (els.expeditionToggle && els.expeditionPanel) {
+      els.expeditionToggle.addEventListener('click', () => {
+        const show = els.expeditionPanel.classList.toggle('hidden');
+        els.expeditionToggle.classList.toggle('active', !show);
+        if (!show) { renderExpedition(); els.expeditionPredictionInput.focus(); }
+      });
+      const expdClose = els.expeditionPanel.querySelector('[data-expedition-close]');
+      if (expdClose) expdClose.addEventListener('click', () => {
+        els.expeditionPanel.classList.add('hidden');
+        els.expeditionToggle.classList.remove('active');
+      });
+      els.expeditionPanel.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') { els.expeditionPanel.classList.add('hidden'); els.expeditionToggle.classList.remove('active'); }
+      });
+      els.expeditionSavePrediction.addEventListener('click', () => {
+        inquiry.prediction = (els.expeditionPredictionInput.value || '').trim();
+        if (inquiry.prediction) renderExpedition();
+      });
+      els.expeditionMarkObserved.addEventListener('click', () => {
+        // Abrir el Observatorio para observar stocks/flujos en vivo
+        els.energyPanel.classList.remove('hidden');
+        if (els.energyToggle) els.energyToggle.classList.add('active');
+        renderObservatory();
+        inquiry.observed = true;
+        renderExpedition();
+      });
+      els.expeditionRun.addEventListener('click', () => { expeditionRunExperiment(); });
+      els.expeditionSaveCard.addEventListener('click', () => { expeditionSaveCard(); });
+      if (els.cuadernoExport) els.cuadernoExport.addEventListener('click', cuadernoExport);
+      if (els.cuadernoImport) els.cuadernoImport.addEventListener('change', () => {
+        if (els.cuadernoImport.files && els.cuadernoImport.files[0]) cuadernoImportFile(els.cuadernoImport.files[0]);
+        els.cuadernoImport.value = '';
+      });
+      makePanelDraggable(els.expeditionPanel);
+      cuadernoLoad();
+      renderExpedition();
+    }
     els.dayNightToggle.addEventListener('click', toggleDayNight);
     els.playPause.addEventListener('click', () => setPaused(!sim.paused));
     document.getElementById('toggleStats').addEventListener('click', (ev) => {
@@ -5923,6 +5974,8 @@
       renderExperimentResults(report);
       els.experimentExport.hidden = false;
       if (LOG_EVENTS) logEvent('Experimento causal completado (seed ' + report.design.snapshot.seed + ')');
+      if (typeof experiment.onComplete === 'function') { try { experiment.onComplete(report); } catch (cbErr) { console.error('experiment.onComplete:', cbErr); } }
+      return report;
     } catch (err) {
       console.error('runExperimentUI:', err);
       els.experimentResults.innerHTML = '<p class="exp-error">Error del experimento: ' + String(err && err.message || err) + '</p>';
@@ -5975,6 +6028,169 @@
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+
+  // ═══ task_928: Expedición guiada y Cuaderno de campo ═══
+  // Da propósito, secuencia y memoria a Laboratorio (923) + Observatorio (926)
+  // sin alterar ecuaciones. Opt-in: panel oculto por defecto (feature OFF).
+  const INQUIRY_VERSION = 1;
+  const INQUIRY_SCHEMA = 'micromundo.inquiry/1';
+  const CUADERNO_KEY = 'micromundo.cuaderno.v1';
+  const INQUIRY_STEPS = ['orientar', 'predecir', 'observar', 'experimentar', 'comparar', 'concluir', 'guardar'];
+  const INQUIRY_UNITS = { time: 's', energy: 'E', biomass: 'mass (densidad campo A)', populations: 'individuos' };
+  const INQUIRY_X18_NOTE = 'Aviso: la amplificación trófica x18 es un subsidio de simplificación del modelo, no un proceso natural ni conservativo.';
+  const inquiry = { step: 0, prediction: '', observed: false, report: null, conclusion: '' };
+  const cuaderno = { cards: [] };
+
+  function cuadernoAvailable() { return typeof localStorage !== 'undefined' && !!localStorage; }
+
+  function cuadernoSave() {
+    if (!cuadernoAvailable()) return false;
+    try { localStorage.setItem(CUADERNO_KEY, JSON.stringify({ schema: INQUIRY_SCHEMA, version: INQUIRY_VERSION, cards: cuaderno.cards })); return true; }
+    catch (e) { console.error('cuadernoSave:', e); return false; }
+  }
+
+  function cuadernoLoad() {
+    if (!cuadernoAvailable()) return false;
+    try {
+      const raw = localStorage.getItem(CUADERNO_KEY);
+      if (!raw) return false;
+      const res = validateCuaderno(raw);
+      if (res.ok) { cuaderno.cards = res.cards; return true; }
+      console.warn('cuadernoLoad:', res.error);
+    } catch (e) { console.error('cuadernoLoad:', e); }
+    return false;
+  }
+
+  function validateCuaderno(rawJson) {
+    let data;
+    try { data = JSON.parse(rawJson); } catch (e) { return { ok: false, error: 'JSON inválido: ' + e.message }; }
+    if (!data || typeof data !== 'object') return { ok: false, error: 'cuaderno no es objeto' };
+    if (data.schema !== INQUIRY_SCHEMA) return { ok: false, error: 'schema esperado ' + INQUIRY_SCHEMA };
+    if (data.version !== INQUIRY_VERSION) return { ok: false, error: 'version esperada ' + INQUIRY_VERSION };
+    if (!Array.isArray(data.cards)) return { ok: false, error: 'cards no es array' };
+    for (let i = 0; i < data.cards.length; i += 1) {
+      const c = data.cards[i];
+      if (!c || c.schema !== INQUIRY_SCHEMA || c.version !== INQUIRY_VERSION || !c.id) {
+        return { ok: false, error: 'card[' + i + '] inválida (schema/version/id)' };
+      }
+    }
+    return { ok: true, cards: data.cards };
+  }
+
+  // Resumen comparativo: consumidores y biomasa del campo en cada hito
+  function inquiryDeltas(report) {
+    if (!report || !report.arms) return null;
+    const cs = report.arms.control.samples, ts = report.arms.treatment.samples;
+    const rows = [];
+    for (let i = 0; i < cs.length && i < ts.length; i += 1) {
+      rows.push({
+        hito_s: i === 0 ? 0 : (report.design.hitos_s[i - 1] || 0),
+        consumers: { control: cs[i].populations_counts.consumers, treatment: ts[i].populations_counts.consumers, delta: experimentFmtDelta(cs[i].populations_counts.consumers, ts[i].populations_counts.consumers) },
+        field_biomass_mass: { control: cs[i].ledger.field_biomass_mass, treatment: ts[i].ledger.field_biomass_mass, delta: experimentFmtDelta(cs[i].ledger.field_biomass_mass, ts[i].ledger.field_biomass_mass) }
+      });
+    }
+    return rows;
+  }
+
+  function buildInquiryCard(sess, report) {
+    if (!sess || !report) return null;
+    const snap = report.design.snapshot;
+    return {
+      schema: INQUIRY_SCHEMA, version: INQUIRY_VERSION,
+      id: 'inq_' + snap.seed + '_' + Date.now().toString(36),
+      created: new Date().toISOString(),
+      mission: 1,
+      mission_title: '¿Más luz, más vida?',
+      prediction: sess.prediction || '',
+      conclusion: sess.conclusion || '',
+      experiment: {
+        seed: snap.seed, prng_state: snap.prng_state, time_s: snap.time_s,
+        solar_energy_multiplier: report.treatment.solar_energy_multiplier,
+        duration_s_per_arm: report.design.duration_s_per_arm,
+        comparison: inquiryDeltas(report)
+      },
+      units: INQUIRY_UNITS,
+      notes: [INQUIRY_X18_NOTE]
+    };
+  }
+
+  function inquiryComplete(sess) {
+    return !!(sess && sess.prediction && sess.observed && sess.report && sess.conclusion);
+  }
+
+  function renderExpedition() {
+    if (!els.expeditionStepsEl) return;
+    const done = [
+      true, // orientar: al abrir el panel
+      !!inquiry.prediction,
+      inquiry.observed,
+      !!inquiry.report,
+      !!inquiry.report,
+      !!inquiry.conclusion,
+      cuaderno.cards.length > 0 && !!inquiry.report && !!inquiry.conclusion && !!inquiry.prediction
+    ];
+    let cur = 0;
+    for (let i = 0; i < done.length; i += 1) { if (!done[i]) { cur = i; break; } cur = i; }
+    inquiry.step = cur;
+    els.expeditionStepsEl.innerHTML = INQUIRY_STEPS.map((s, i) =>
+      `<li class="inq-step ${done[i] ? 'done' : ''} ${i === cur ? 'current' : ''}" aria-current="${i === cur ? 'step' : 'false'}">${i + 1}. ${s}</li>`).join('');
+    // Comparar: tabla con deltas reales del reporte
+    if (els.expeditionCompare && inquiry.report) {
+      const rows = inquiryDeltas(inquiry.report) || [];
+      els.expeditionCompare.innerHTML = '<table class="exp-table"><caption>Control → Tratamiento (+25% luz), misma seed. Individuos y mass.</caption>' +
+        '<tr><th scope="col">Hito</th><th scope="col">Consumidores</th><th scope="col">Biomasa campo (mass)</th></tr>' +
+        rows.map(r => `<tr><th scope="row">${r.hito_s / 60}m</th><td>${r.consumers.control} → ${r.consumers.treatment} <span class="exp-c">${r.consumers.delta}</span></td><td>${r.field_biomass_mass.control.toFixed(1)} → ${r.field_biomass_mass.treatment.toFixed(1)} <span class="exp-c">${r.field_biomass_mass.delta}</span></td></tr>`).join('') + '</table>';
+    }
+    if (els.cuadernoList) {
+      els.cuadernoList.innerHTML = cuaderno.cards.length
+        ? cuaderno.cards.slice(-10).reverse().map(c => `<li><b>${c.created.slice(0, 16).replace('T', ' ')}</b> · seed ${c.experiment.seed} · «${(c.conclusion || '').slice(0, 90)}»</li>`).join('')
+        : '<li class="inq-empty">Aún no hay tarjetas guardadas.</li>';
+    }
+  }
+
+  async function expeditionRunExperiment() {
+    if (experiment.running || inquiry.report) return;
+    els.expeditionRun.disabled = true;
+    els.expeditionPredictionInput.disabled = true;
+    // Copiar la predicción de la expedición al laboratorio y ejecutarlo
+    els.experimentPrediction.value = inquiry.prediction || '';
+    const report = await runExperimentUI();
+    els.expeditionRun.disabled = false;
+    if (report) { inquiry.report = report; renderExpedition(); }
+  }
+
+  function expeditionSaveCard() {
+    if (!inquiryComplete(inquiry)) return;
+    const card = buildInquiryCard(inquiry, inquiry.report);
+    if (!card) return;
+    cuaderno.cards.push(card);
+    cuadernoSave();
+    renderExpedition();
+    if (LOG_EVENTS) logEvent('Tarjeta de cuaderno guardada (seed ' + card.experiment.seed + ')');
+  }
+
+  function cuadernoExport() {
+    const blob = new Blob([JSON.stringify({ schema: INQUIRY_SCHEMA, version: INQUIRY_VERSION, exported: new Date().toISOString(), cards: cuaderno.cards }, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'micromundo_cuaderno_' + Date.now() + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+
+  function cuadernoImportFile(file) {
+    const rd = new FileReader();
+    rd.onload = () => {
+      const res = validateCuaderno(String(rd.result));
+      if (!res.ok) { alert('Cuaderno inválido: ' + res.error); return; }
+      const ids = new Set(cuaderno.cards.map(c => c.id));
+      let added = 0;
+      for (const c of res.cards) if (!ids.has(c.id)) { cuaderno.cards.push(c); added += 1; }
+      cuadernoSave(); renderExpedition();
+      if (LOG_EVENTS) logEvent('Cuaderno importado: +' + added + ' tarjetas');
+    };
+    rd.readAsText(file);
   }
 
   function init() {

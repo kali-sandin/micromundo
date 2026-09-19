@@ -117,6 +117,8 @@ function loadApp() {
       experimentSample, experimentRunArmSync, buildExperimentReport,
       EXPERIMENT_HITOS_S, EXPERIMENT_DURATION_S,
       observatoryStocks, observatoryFlows, observatory, updateObservatory,
+      buildInquiryCard, validateCuaderno, inquiryComplete, inquiryDeltas,
+      INQUIRY_SCHEMA, INQUIRY_VERSION, CUADERNO_KEY, inquiry, cuaderno, cuadernoSave, cuadernoLoad,
       obsSnapshotAccum, obsReset, OBS_WINDOW_S,
       GROUPS, GROUP_KEYS, GROUP_LABELS, TYPE, PRODUCER,
       WORLD, CELL, FIELD_CELL,
@@ -2013,6 +2015,69 @@ function printReport() {
 }
 
 // ─── Main ────────────────────────────────────────────────────
+// ─── task_928: Expedición guiada y Cuaderno de campo ────────
+function runInquiryTests() {
+  const api = loadApp();
+  suite('Expedición task_928');
+
+  const fakeReport = () => ({
+    design: { snapshot: { seed: 12345, prng_state: 999, time_s: 0 }, hitos_s: [60, 120, 180, 240, 300], duration_s_per_arm: 300 },
+    treatment: { solar_energy_multiplier: 1.25 },
+    arms: {
+      control: { samples: [0, 1, 2, 3, 4, 5].map(i => ({ populations_counts: { consumers: 10 + i }, ledger: { field_biomass_mass: 100 + i * 10 } })) },
+      treatment: { samples: [0, 1, 2, 3, 4, 5].map(i => ({ populations_counts: { consumers: 12 + i * 2 }, ledger: { field_biomass_mass: 120 + i * 15 } })) }
+    }
+  });
+
+  assert('buildInquiryCard versiona schema, unidades y aviso x18', () => {
+    const card = api.buildInquiryCard({ prediction: 'mas biomasa', conclusion: 'subio', observed: true, report: fakeReport() }, fakeReport());
+    expectOk(!!card, 'card null');
+    expectEq(card.schema, 'micromundo.inquiry/1', 'schema');
+    expectEq(card.version, 1, 'version');
+    expectOk(!!card.id, 'sin id');
+    expectOk(card.units && card.units.biomass === 'mass (densidad campo A)', 'unidades');
+    expectOk(card.notes.some(n => n.includes('x18') && /no un proceso natural/.test(n)), 'falta aviso x18');
+    expectEq(card.experiment.seed, 12345, 'seed');
+    expectEq(card.experiment.prng_state, 999, 'prng');
+  });
+
+  assert('inquiryDeltas compara consumidores y biomasa por hito', () => {
+    const rows = api.inquiryDeltas(fakeReport());
+    expectOk(Array.isArray(rows) && rows.length === 6, 'filas');
+    expectEq(rows[5].hito_s, 300, 'hito final');
+    expectEq(rows[3].consumers.control, 13, 'consumers control');
+    expectEq(rows[3].consumers.treatment, 18, 'consumers tratamiento');
+    expectOk(rows[5].field_biomass_mass.delta.includes('%'), 'delta sin %');
+  });
+
+  assert('validateCuaderno rechaza schema/version/cards invalidos', () => {
+    expectOk(!api.validateCuaderno('{no json').ok, 'JSON roto aceptado');
+    expectOk(!api.validateCuaderno(JSON.stringify({ schema: 'otro/1', version: 1, cards: [] })).ok, 'schema erroneo aceptado');
+    expectOk(!api.validateCuaderno(JSON.stringify({ schema: api.INQUIRY_SCHEMA, version: 2, cards: [] })).ok, 'version erronea aceptada');
+    expectOk(!api.validateCuaderno(JSON.stringify({ schema: api.INQUIRY_SCHEMA, version: 1 })).ok, 'cards ausentes aceptado');
+    expectOk(!api.validateCuaderno(JSON.stringify({ schema: api.INQUIRY_SCHEMA, version: 1, cards: [{ schema: 'x' }] })).ok, 'card invalida aceptada');
+  });
+
+  assert('validateCuaderno acepta roundtrip del cuaderno exportado', () => {
+    const card = api.buildInquiryCard({ prediction: 'p', conclusion: 'c', observed: true }, fakeReport());
+    const raw = JSON.stringify({ schema: api.INQUIRY_SCHEMA, version: api.INQUIRY_VERSION, cards: [card] });
+    const res = api.validateCuaderno(raw);
+    expectOk(res.ok, 'roundtrip rechazado: ' + (res.error || ''));
+    expectEq(res.cards.length, 1, 'numero de cards');
+  });
+
+  assert('inquiryComplete exige prediccion+observado+reporte+conclusion', () => {
+    expectOk(!api.inquiryComplete({}), 'sesion vacia completa');
+    expectOk(!api.inquiryComplete({ prediction: 'p', observed: true, report: {} }), 'sin conclusion completa');
+    expectOk(api.inquiryComplete({ prediction: 'p', observed: true, report: {}, conclusion: 'c' }), 'completa rechazada');
+  });
+
+  assert('sin localStorage el cuaderno no explota (save/load no-op)', () => {
+    expectEq(api.cuadernoSave(), false, 'save deberia ser false sin localStorage');
+    expectEq(api.cuadernoLoad(), false, 'load deberia ser false sin localStorage');
+  });
+}
+
 function main() {
   const filter = process.argv[2] || 'all';
 
@@ -2026,6 +2091,9 @@ function main() {
   }
   if (filter === 'migration' || filter === 'all') {
     runMigrationTests();
+  }
+  if (filter === 'inquiry' || filter === 'all') {
+    runInquiryTests();
   }
   if (filter === 'perf' || filter === 'all') {
     runPerfTests();
