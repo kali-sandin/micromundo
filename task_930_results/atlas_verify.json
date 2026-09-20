@@ -83,7 +83,7 @@
     {
       "name": "resample 1 Hz muy por debajo del presupuesto de frame (16 ms)",
       "ok": true,
-      "detail": "0.2936 ms/op"
+      "detail": "0.3276 ms/op"
     },
     {
       "name": "ring acotado tras 300 pushes",
@@ -97,5 +97,5 @@
     }
   ],
   "ok": true,
-  "ts": "2026-09-20T03:51:21.094Z"
+  "ts": "2026-09-20T04:05:54.018Z"
 }
