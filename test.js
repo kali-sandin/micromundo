@@ -117,7 +117,7 @@ function loadApp() {
       experimentSample, experimentRunArmSync, buildExperimentReport,
       EXPERIMENT_HITOS_S, EXPERIMENT_DURATION_S,
       observatoryStocks, observatoryFlows, observatory, updateObservatory,
-      buildInquiryCard, validateCuaderno, inquiryComplete, inquiryDeltas,
+      buildInquiryCard, validateCuaderno, mergeCuadernoCards, inquiryComplete, inquiryDeltas,
       INQUIRY_SCHEMA, INQUIRY_VERSION, CUADERNO_KEY, inquiry, cuaderno, cuadernoSave, cuadernoLoad,
       obsSnapshotAccum, obsReset, OBS_WINDOW_S,
       atlasResample, atlasCountDensity, atlasDelta, atlasRingPush, atlasSnapshotAt,
@@ -2171,6 +2171,30 @@ function runInquiryTests() {
     expectOk(!api.validateCuaderno(JSON.stringify({ schema: api.INQUIRY_SCHEMA, version: 1, cards: Array(501).fill(card) })).ok, 'max cards no aplicado');
     const larga = api.buildInquiryCard({ prediction: 'p'.repeat(3000), conclusion: 'c', observed: true }, fakeReport());
     expectOk(!api.validateCuaderno(JSON.stringify({ schema: api.INQUIRY_SCHEMA, version: 1, cards: [larga] })).ok, 'prediction enorme aceptada');
+  });
+
+  assert('task_931: merge del cuaderno deduplica ids dentro de la importacion', () => {
+    const original = api.buildInquiryCard({ prediction: 'p', conclusion: 'c', observed: true }, fakeReport());
+    const duplicate = { ...original };
+    const fresh = { ...original, id: original.id + '_fresh' };
+    const merged = api.mergeCuadernoCards([], [original, duplicate, fresh]);
+    expectEq(merged.cards.length, 2, 'conservo ids duplicados');
+    expectEq(merged.added, 2, 'conteo added incorrecto');
+    expectEq(merged.duplicates, 1, 'conteo duplicate incorrecto');
+    expectEq(merged.overflow, 0, 'marco overflow sin alcanzar limite');
+  });
+
+  assert('task_931: merge del cuaderno respeta limite global de 500', () => {
+    const base = api.buildInquiryCard({ prediction: 'p', conclusion: 'c', observed: true }, fakeReport());
+    const existing = Array.from({ length: 499 }, (_, i) => ({ ...base, id: 'local_' + i }));
+    const incoming = Array.from({ length: 500 }, (_, i) => ({ ...base, id: 'import_' + i }));
+    const merged = api.mergeCuadernoCards(existing, incoming);
+    expectEq(merged.cards.length, 500, 'merge excedio limite global');
+    expectEq(merged.added, 1, 'debio admitir solo una card nueva');
+    expectEq(merged.duplicates, 0, 'marco duplicados inexistentes');
+    expectEq(merged.overflow, 499, 'conteo overflow incorrecto');
+    expectEq(existing.length, 499, 'muto array existente');
+    expectEq(incoming.length, 500, 'muto array importado');
   });
 
   assert('inquiryComplete exige prediccion+observado+reporte+conclusion', () => {

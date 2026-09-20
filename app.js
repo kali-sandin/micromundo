@@ -6449,6 +6449,26 @@
     return { ok: true, cards: data.cards };
   }
 
+  // Fusion acotada y determinista: una importacion valida no puede saltarse el
+  // limite global ni introducir dos veces el mismo id dentro del propio fichero.
+  function mergeCuadernoCards(existing, incoming) {
+    const cards = [];
+    const ids = new Set();
+    let duplicates = 0;
+    let overflow = 0;
+    let added = 0;
+    const append = (card, isImport) => {
+      if (ids.has(card.id)) { duplicates += 1; return; }
+      if (cards.length >= CUADERNO_MAX_CARDS) { overflow += 1; return; }
+      ids.add(card.id);
+      cards.push(card);
+      if (isImport) added += 1;
+    };
+    for (const card of Array.isArray(existing) ? existing : []) append(card, false);
+    for (const card of Array.isArray(incoming) ? incoming : []) append(card, true);
+    return { cards, added, duplicates, overflow };
+  }
+
   // Resumen comparativo: consumidores y biomasa del campo en cada hito
   function inquiryDeltas(report) {
     if (!report || !report.arms) return null;
@@ -6570,11 +6590,22 @@
     rd.onload = () => {
       const res = validateCuaderno(String(rd.result));
       if (!res.ok) { alert('Cuaderno inválido: ' + res.error); return; }
-      const ids = new Set(cuaderno.cards.map(c => c.id));
-      let added = 0;
-      for (const c of res.cards) if (!ids.has(c.id)) { cuaderno.cards.push(c); added += 1; }
-      cuadernoSave(); renderExpedition();
-      if (LOG_EVENTS) logEvent('Cuaderno importado: +' + added + ' tarjetas');
+      const before = cuaderno.cards;
+      const merged = mergeCuadernoCards(before, res.cards);
+      cuaderno.cards = merged.cards;
+      if (!cuadernoSave()) {
+        cuaderno.cards = before;
+        alert('No se pudo guardar el Cuaderno importado; no se aplicaron cambios.');
+        return;
+      }
+      renderExpedition();
+      if (merged.duplicates || merged.overflow) {
+        const details = [];
+        if (merged.duplicates) details.push(merged.duplicates + ' duplicadas');
+        if (merged.overflow) details.push(merged.overflow + ' sobre el límite de ' + CUADERNO_MAX_CARDS);
+        alert('Importación parcial: ' + details.join(' y ') + ' no se añadieron.');
+      }
+      if (LOG_EVENTS) logEvent('Cuaderno importado: +' + merged.added + ' tarjetas');
     };
     rd.readAsText(file);
   }
