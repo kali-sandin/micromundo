@@ -1,0 +1,464 @@
+[gate] seed 12345 t=0.0 wall=0s atlasMs=0.0140189528465271
+[gate] seed 12345 t=9.5 wall=10s atlasMs=44.921702325344086
+[gate] seed 12345 t=19.5 wall=20s atlasMs=84.18346869945526
+[gate] seed 12345 t=29.5 wall=30s atlasMs=122.55195367336273
+[gate] seed 12345 t=40.2 wall=40s atlasMs=161.98784059286118
+[gate] seed 12345 t=51.0 wall=50s atlasMs=206.72512274980545
+[gate] seed 12345 t=61.7 wall=60s atlasMs=244.7248633503914
+[gate] seed 12345 t=72.6 wall=70s atlasMs=287.1371520757675
+[gate] seed 12345 t=83.8 wall=80s atlasMs=329.94961899518967
+[gate] seed 12345 t=94.9 wall=90s atlasMs=377.19834446907043
+[gate] seed 12345 t=106.3 wall=100s atlasMs=420.9044067263603
+[gate] seed 12345 t=117.8 wall=110s atlasMs=469.2501361966133
+[gate] seed 12345 t=129.1 wall=120s atlasMs=511.8550289273262
+[gate] seed 12345 t=140.7 wall=130s atlasMs=554.9798308610916
+[gate] seed 12345 t=152.4 wall=140s atlasMs=604.5635290145874
+[gate] seed 12345 t=164.3 wall=150s atlasMs=649.82019084692
+[gate] seed 12345 t=176.0 wall=160s atlasMs=696.2446835041046
+[gate] seed 12345 t=187.9 wall=170s atlasMs=739.4200566411018
+[gate] seed 12345 t=199.9 wall=180s atlasMs=786.6182968020439
+[gate] seed 12345 t=211.8 wall=190s atlasMs=837.4832248091698
+[gate] seed 12345 t=223.9 wall=200s atlasMs=884.8437044620514
+[gate] seed 12345 t=235.8 wall=210s atlasMs=930.9115264415741
+[gate] seed 12345 t=247.4 wall=220s atlasMs=980.2908269762993
+[gate] seed 12345 t=259.1 wall=230s atlasMs=1028.3917561769485
+[gate] seed 12345 t=270.8 wall=240s atlasMs=1072.8066990971565
+[gate] seed 12345 t=282.2 wall=250s atlasMs=1116.2907119393349
+[gate] seed 12345 t=293.4 wall=260s atlasMs=1159.1586729884148
+[gate] seed 12345 t=304.3 wall=270s atlasMs=1202.9254875779152
+[gate] seed 12345 t=314.7 wall=280s atlasMs=1244.6020436882973
+[gate] seed 12345 t=325.2 wall=290s atlasMs=1288.0270150899887
+[gate] seed 12345 t=335.5 wall=300s atlasMs=1326.4904366135597
+[gate] seed 12345 t=345.4 wall=310s atlasMs=1364.5955327749252
+[gate] seed 12345 t=355.0 wall=320s atlasMs=1398.9942271709442
+[gate] seed 12345 t=364.4 wall=330s atlasMs=1433.8629369139671
+[gate] seed 12345 t=373.7 wall=340s atlasMs=1468.0546196699142
+[gate] seed 12345 t=382.6 wall=350s atlasMs=1502.9937802553177
+[gate] seed 12345 t=391.3 wall=360s atlasMs=1538.2289832234383
+[gate] seed 12345 t=399.7 wall=370s atlasMs=1570.6833154559135
+[gate] seed 12345 t=407.8 wall=380s atlasMs=1601.8880081772804
+[gate] seed 12345 t=415.9 wall=390s atlasMs=1635.0478036999702
+[gate] seed 12345 t=423.8 wall=400s atlasMs=1666.8401840925217
+[gate] seed 12345 t=431.4 wall=410s atlasMs=1697.0754531025887
+[gate] seed 12345 t=438.8 wall=420s atlasMs=1727.4618498682976
+[gate] seed 12345 t=446.2 wall=430s atlasMs=1759.4108538031578
+[gate] seed 12345 t=453.3 wall=440s atlasMs=1788.3350003957748
+[gate] seed 12345 t=460.3 wall=451s atlasMs=1817.8780336380005
+[gate] seed 12345 t=467.2 wall=461s atlasMs=1843.106423676014
+[gate] seed 12345 t=473.9 wall=471s atlasMs=1872.7107632756233
+[gate] seed 12345 t=480.5 wall=481s atlasMs=1898.177785038948
+[gate] seed 12345 t=487.1 wall=491s atlasMs=1929.8005326986313
+[gate] seed 12345 t=493.5 wall=501s atlasMs=1956.1919948458672
+[gate] seed 12345 t=499.8 wall=511s atlasMs=1981.575105726719
+[gate] seed 12345 t=505.9 wall=521s atlasMs=2007.9616817235947
+[gate] seed 12345 t=511.9 wall=531s atlasMs=2033.2408415079117
+[gate] seed 12345 t=517.8 wall=541s atlasMs=2059.508618056774
+[gate] seed 12345 t=523.7 wall=551s atlasMs=2085.2033571004868
+[gate] seed 12345 t=529.5 wall=561s atlasMs=2112.575572311878
+[gate] seed 12345 t=535.0 wall=571s atlasMs=2136.2684332728386
+[gate] seed 12345 t=540.6 wall=581s atlasMs=2162.6373858451843
+[gate] seed 12345 t=546.1 wall=591s atlasMs=2184.403784573078
+[gate] seed 12345 t=551.5 wall=601s atlasMs=2207.2300314307213
+[gate] seed 12345 t=556.9 wall=611s atlasMs=2233.2530792951584
+[gate] seed 12345 t=562.1 wall=621s atlasMs=2255.621353149414
+[gate] seed 12345 t=567.2 wall=631s atlasMs=2279.840661406517
+[gate] seed 12345 t=572.3 wall=641s atlasMs=2302.046920955181
+[gate] seed 12345 t=577.5 wall=651s atlasMs=2325.6535587906837
+[gate] seed 12345 t=582.5 wall=661s atlasMs=2349.342654943466
+[gate] seed 12345 t=587.4 wall=671s atlasMs=2372.220348417759
+[gate] seed 12345 t=592.4 wall=681s atlasMs=2392.4075209498405
+[gate] seed 12345 t=597.2 wall=691s atlasMs=2417.830140888691
+seed 12345: coste_atlas=0.3492% p95=0.0124ms err_bio=0% err_dens=0% delta_ok=true mem=0.3652MB ring=65 zone=592 (wall 696.6s)
+[gate] seed 23456 t=0.0 wall=0s atlasMs=0.012314975261688232
+[gate] seed 23456 t=9.2 wall=10s atlasMs=41.80291473865509
+[gate] seed 23456 t=18.4 wall=20s atlasMs=93.6026822924614
+[gate] seed 23456 t=28.1 wall=30s atlasMs=131.01733684539795
+[gate] seed 23456 t=38.2 wall=40s atlasMs=170.24155622720718
+[gate] seed 23456 t=48.7 wall=50s atlasMs=215.94773280620575
+[gate] seed 23456 t=59.2 wall=60s atlasMs=256.0724119544029
+[gate] seed 23456 t=69.7 wall=70s atlasMs=296.551796913147
+[gate] seed 23456 t=80.9 wall=80s atlasMs=340.5110293030739
+[gate] seed 23456 t=91.8 wall=90s atlasMs=384.8602814078331
+[gate] seed 23456 t=103.0 wall=100s atlasMs=429.763095498085
+[gate] seed 23456 t=114.1 wall=110s atlasMs=473.60614389181137
+[gate] seed 23456 t=124.6 wall=120s atlasMs=517.1354411244392
+[gate] seed 23456 t=135.8 wall=130s atlasMs=561.7281800508499
+[gate] seed 23456 t=147.2 wall=140s atlasMs=607.4322394728661
+[gate] seed 23456 t=158.5 wall=150s atlasMs=651.1838344335556
+[gate] seed 23456 t=169.8 wall=160s atlasMs=696.1670477390289
+[gate] seed 23456 t=181.5 wall=170s atlasMs=745.3732157349586
+[gate] seed 23456 t=193.1 wall=180s atlasMs=793.0747121572495
+[gate] seed 23456 t=204.9 wall=190s atlasMs=836.5871008634567
+[gate] seed 23456 t=216.9 wall=200s atlasMs=883.5599656701088
+[gate] seed 23456 t=228.4 wall=210s atlasMs=933.5347162485123
+[gate] seed 23456 t=240.3 wall=220s atlasMs=983.9537172913551
+[gate] seed 23456 t=252.0 wall=230s atlasMs=1032.0298984646797
+[gate] seed 23456 t=263.5 wall=240s atlasMs=1077.1067931056023
+[gate] seed 23456 t=274.2 wall=250s atlasMs=1119.6601858735085
+[gate] seed 23456 t=284.7 wall=260s atlasMs=1164.9391251802444
+[gate] seed 23456 t=295.3 wall=270s atlasMs=1208.809843659401
+[gate] seed 23456 t=305.5 wall=280s atlasMs=1248.8544158935547
+[gate] seed 23456 t=315.3 wall=290s atlasMs=1291.1578724384308
+[gate] seed 23456 t=325.2 wall=300s atlasMs=1332.8116084337234
+[gate] seed 23456 t=334.8 wall=310s atlasMs=1368.925253689289
+[gate] seed 23456 t=344.1 wall=320s atlasMs=1406.514376282692
+[gate] seed 23456 t=353.3 wall=330s atlasMs=1442.7315543293953
+[gate] seed 23456 t=361.9 wall=340s atlasMs=1481.7760627269745
+[gate] seed 23456 t=370.5 wall=350s atlasMs=1515.5265157222748
+[gate] seed 23456 t=378.8 wall=360s atlasMs=1549.073621749878
+[gate] seed 23456 t=386.9 wall=370s atlasMs=1581.9890396595001
+[gate] seed 23456 t=394.8 wall=380s atlasMs=1617.4993675351143
+[gate] seed 23456 t=402.6 wall=390s atlasMs=1651.8300162553787
+[gate] seed 23456 t=410.2 wall=400s atlasMs=1680.8689588308334
+[gate] seed 23456 t=417.8 wall=410s atlasMs=1713.6357185840607
+[gate] seed 23456 t=425.2 wall=420s atlasMs=1743.6239781975746
+[gate] seed 23456 t=432.3 wall=430s atlasMs=1772.3804693222046
+[gate] seed 23456 t=439.4 wall=440s atlasMs=1801.4256719350815
+[gate] seed 23456 t=446.3 wall=450s atlasMs=1831.49966776371
+[gate] seed 23456 t=452.9 wall=460s atlasMs=1857.9854677319527
+[gate] seed 23456 t=459.5 wall=470s atlasMs=1888.3242092728615
+[gate] seed 23456 t=466.1 wall=480s atlasMs=1914.286457657814
+[gate] seed 23456 t=472.5 wall=490s atlasMs=1943.8431731462479
+[gate] seed 23456 t=478.7 wall=501s atlasMs=1970.3233044147491
+[gate] seed 23456 t=484.9 wall=511s atlasMs=1996.4628292918205
+[gate] seed 23456 t=490.9 wall=521s atlasMs=2023.029815196991
+[gate] seed 23456 t=496.8 wall=531s atlasMs=2044.8960221409798
+[gate] seed 23456 t=502.6 wall=541s atlasMs=2070.491930305958
+[gate] seed 23456 t=508.4 wall=551s atlasMs=2098.4841344952583
+[gate] seed 23456 t=514.0 wall=561s atlasMs=2121.3296099305153
+[gate] seed 23456 t=519.6 wall=571s atlasMs=2148.3732122778893
+[gate] seed 23456 t=525.1 wall=581s atlasMs=2170.9376522302628
+[gate] seed 23456 t=530.5 wall=591s atlasMs=2199.928138911724
+[gate] seed 23456 t=535.9 wall=601s atlasMs=2222.715434014797
+[gate] seed 23456 t=541.1 wall=611s atlasMs=2244.7383162379265
+[gate] seed 23456 t=546.2 wall=621s atlasMs=2268.4499210119247
+[gate] seed 23456 t=551.4 wall=631s atlasMs=2292.8380024433136
+[gate] seed 23456 t=556.5 wall=641s atlasMs=2317.0125494003296
+[gate] seed 23456 t=561.4 wall=651s atlasMs=2340.39314109087
+[gate] seed 23456 t=566.3 wall=661s atlasMs=2365.032187283039
+[gate] seed 23456 t=571.2 wall=671s atlasMs=2388.105022609234
+[gate] seed 23456 t=576.0 wall=681s atlasMs=2406.6195813417435
+[gate] seed 23456 t=580.8 wall=691s atlasMs=2430.692042350769
+[gate] seed 23456 t=585.6 wall=701s atlasMs=2457.954780817032
+[gate] seed 23456 t=590.3 wall=711s atlasMs=2476.4593354463577
+[gate] seed 23456 t=595.0 wall=721s atlasMs=2500.813292980194
+[gate] seed 23456 t=599.7 wall=731s atlasMs=2525.3528460860252
+seed 23456: coste_atlas=0.3452% p95=0.0122ms err_bio=0% err_dens=0% delta_ok=true mem=0.3652MB ring=65 zone=592 (wall 731.5s)
+[gate] seed 34567 t=0.0 wall=0s atlasMs=0.012480974197387695
+[gate] seed 34567 t=8.9 wall=10s atlasMs=37.8352986574173
+[gate] seed 34567 t=18.4 wall=20s atlasMs=81.95424699783325
+[gate] seed 34567 t=28.0 wall=30s atlasMs=117.61037701368332
+[gate] seed 34567 t=37.5 wall=40s atlasMs=157.0696610212326
+[gate] seed 34567 t=47.6 wall=50s atlasMs=192.7380588054657
+[gate] seed 34567 t=57.8 wall=60s atlasMs=236.49188935756683
+[gate] seed 34567 t=68.1 wall=70s atlasMs=278.96209168434143
+[gate] seed 34567 t=78.6 wall=80s atlasMs=317.733427464962
+[gate] seed 34567 t=89.3 wall=90s atlasMs=361.89178544282913
+[gate] seed 34567 t=100.2 wall=100s atlasMs=401.3070958852768
+[gate] seed 34567 t=111.0 wall=110s atlasMs=445.03147089481354
+[gate] seed 34567 t=122.2 wall=120s atlasMs=487.9281135201454
+[gate] seed 34567 t=133.4 wall=130s atlasMs=530.9176208972931
+[gate] seed 34567 t=144.3 wall=140s atlasMs=574.5067262649536
+[gate] seed 34567 t=155.6 wall=150s atlasMs=618.177846968174
+[gate] seed 34567 t=167.0 wall=160s atlasMs=663.1014736294746
+[gate] seed 34567 t=178.1 wall=170s atlasMs=706.9420373439789
+[gate] seed 34567 t=189.7 wall=180s atlasMs=752.126845061779
+[gate] seed 34567 t=201.3 wall=190s atlasMs=799.4879055023193
+[gate] seed 34567 t=212.7 wall=200s atlasMs=849.643901348114
+[gate] seed 34567 t=224.4 wall=210s atlasMs=898.0881361961365
+[gate] seed 34567 t=236.2 wall=220s atlasMs=944.3933789134026
+[gate] seed 34567 t=247.9 wall=230s atlasMs=987.5274857878685
+[gate] seed 34567 t=259.5 wall=240s atlasMs=1033.7346472740173
+[gate] seed 34567 t=271.2 wall=250s atlasMs=1079.3889214396477
+[gate] seed 34567 t=282.8 wall=260s atlasMs=1130.3283959031105
+[gate] seed 34567 t=294.2 wall=270s atlasMs=1175.5929794311523
+[gate] seed 34567 t=305.5 wall=280s atlasMs=1219.2398092746735
+[gate] seed 34567 t=316.3 wall=290s atlasMs=1263.0811507105827
+[gate] seed 34567 t=326.9 wall=300s atlasMs=1306.855551958084
+[gate] seed 34567 t=337.6 wall=310s atlasMs=1348.9062503576279
+[gate] seed 34567 t=348.0 wall=320s atlasMs=1388.0302893519402
+[gate] seed 34567 t=358.1 wall=330s atlasMs=1427.6557494401932
+[gate] seed 34567 t=367.9 wall=340s atlasMs=1466.7780305743217
+[gate] seed 34567 t=377.7 wall=350s atlasMs=1503.6967841982841
+[gate] seed 34567 t=387.1 wall=360s atlasMs=1543.3550162911415
+[gate] seed 34567 t=396.6 wall=370s atlasMs=1578.423249721527
+[gate] seed 34567 t=405.8 wall=380s atlasMs=1613.9698469042778
+[gate] seed 34567 t=414.7 wall=390s atlasMs=1650.7971805334091
+[gate] seed 34567 t=423.5 wall=400s atlasMs=1681.9175446033478
+[gate] seed 34567 t=431.9 wall=410s atlasMs=1719.5521816015244
+[gate] seed 34567 t=440.2 wall=420s atlasMs=1751.7716012597084
+[gate] seed 34567 t=448.3 wall=430s atlasMs=1784.6397951841354
+[gate] seed 34567 t=456.2 wall=440s atlasMs=1812.7690094709396
+[gate] seed 34567 t=463.9 wall=450s atlasMs=1845.2174853682518
+[gate] seed 34567 t=471.5 wall=460s atlasMs=1878.608172237873
+[gate] seed 34567 t=479.0 wall=470s atlasMs=1907.263174712658
+[gate] seed 34567 t=486.3 wall=480s atlasMs=1937.9211120009422
+[gate] seed 34567 t=493.4 wall=490s atlasMs=1966.1570872068405
+[gate] seed 34567 t=500.5 wall=500s atlasMs=1996.6242271065712
+[gate] seed 34567 t=507.6 wall=510s atlasMs=2025.7321185469627
+[gate] seed 34567 t=514.4 wall=521s atlasMs=2057.23003000021
+[gate] seed 34567 t=521.2 wall=531s atlasMs=2082.2271102666855
+[gate] seed 34567 t=527.8 wall=541s atlasMs=2113.213006734848
+[gate] seed 34567 t=534.3 wall=551s atlasMs=2139.184827208519
+[gate] seed 34567 t=540.8 wall=561s atlasMs=2168.5288278460503
+[gate] seed 34567 t=547.3 wall=571s atlasMs=2193.748013615608
+[gate] seed 34567 t=553.5 wall=581s atlasMs=2222.3248276114464
+[gate] seed 34567 t=559.6 wall=591s atlasMs=2247.9902688860893
+[gate] seed 34567 t=565.8 wall=601s atlasMs=2273.8299326896667
+[gate] seed 34567 t=571.7 wall=611s atlasMs=2299.9529797434807
+[gate] seed 34567 t=577.6 wall=621s atlasMs=2326.797808945179
+[gate] seed 34567 t=583.5 wall=631s atlasMs=2352.467690229416
+[gate] seed 34567 t=589.0 wall=641s atlasMs=2374.6809834837914
+[gate] seed 34567 t=594.6 wall=651s atlasMs=2400.808652162552
+seed 34567: coste_atlas=0.3668% p95=0.0129ms err_bio=0% err_dens=0% delta_ok=true mem=0.3652MB ring=65 zone=592 (wall 660.3s)
+[gate] seed 45678 t=0.0 wall=0s atlasMs=0.014851987361907959
+[gate] seed 45678 t=9.1 wall=10s atlasMs=39.63081169128418
+[gate] seed 45678 t=18.8 wall=20s atlasMs=81.05501729249954
+[gate] seed 45678 t=28.7 wall=30s atlasMs=121.59119176864624
+[gate] seed 45678 t=38.5 wall=40s atlasMs=161.65511417388916
+[gate] seed 45678 t=48.8 wall=50s atlasMs=202.47898310422897
+[gate] seed 45678 t=59.2 wall=60s atlasMs=242.58513760566711
+[gate] seed 45678 t=69.7 wall=70s atlasMs=283.1838482618332
+[gate] seed 45678 t=80.4 wall=80s atlasMs=326.9544335603714
+[gate] seed 45678 t=91.4 wall=90s atlasMs=370.6589451432228
+[gate] seed 45678 t=102.6 wall=100s atlasMs=415.36153984069824
+[gate] seed 45678 t=113.7 wall=110s atlasMs=464.54194712638855
+[gate] seed 45678 t=125.0 wall=120s atlasMs=507.98002672195435
+[gate] seed 45678 t=136.2 wall=130s atlasMs=551.1379212141037
+[gate] seed 45678 t=147.6 wall=140s atlasMs=595.1205247044563
+[gate] seed 45678 t=159.3 wall=150s atlasMs=642.5972417593002
+[gate] seed 45678 t=170.8 wall=160s atlasMs=687.8589178323746
+[gate] seed 45678 t=182.2 wall=170s atlasMs=735.741278886795
+[gate] seed 45678 t=193.7 wall=180s atlasMs=778.9440034627914
+[gate] seed 45678 t=205.5 wall=190s atlasMs=826.3925324678421
+[gate] seed 45678 t=217.1 wall=200s atlasMs=874.3077558875084
+[gate] seed 45678 t=229.0 wall=210s atlasMs=920.963150203228
+[gate] seed 45678 t=240.8 wall=220s atlasMs=964.0533831715584
+[gate] seed 45678 t=252.2 wall=230s atlasMs=1014.0394904017448
+[gate] seed 45678 t=264.0 wall=240s atlasMs=1058.2592948675156
+[gate] seed 45678 t=275.6 wall=250s atlasMs=1107.0987817645073
+[gate] seed 45678 t=287.0 wall=260s atlasMs=1153.601765036583
+[gate] seed 45678 t=298.4 wall=270s atlasMs=1197.7967612147331
+[gate] seed 45678 t=309.4 wall=280s atlasMs=1244.5905490517616
+[gate] seed 45678 t=320.2 wall=290s atlasMs=1290.8555296063423
+[gate] seed 45678 t=330.9 wall=300s atlasMs=1331.42353618145
+[gate] seed 45678 t=341.3 wall=310s atlasMs=1371.2561830878258
+[gate] seed 45678 t=351.3 wall=320s atlasMs=1410.509275317192
+[gate] seed 45678 t=361.1 wall=330s atlasMs=1450.3660834431648
+[gate] seed 45678 t=370.7 wall=340s atlasMs=1486.2291715741158
+[gate] seed 45678 t=380.0 wall=350s atlasMs=1528.9705485105515
+[gate] seed 45678 t=388.9 wall=360s atlasMs=1563.3729662895203
+[gate] seed 45678 t=397.7 wall=370s atlasMs=1602.9627748727798
+[gate] seed 45678 t=406.1 wall=380s atlasMs=1637.040941298008
+[gate] seed 45678 t=414.4 wall=390s atlasMs=1670.632118344307
+[gate] seed 45678 t=422.4 wall=400s atlasMs=1705.8962514996529
+[gate] seed 45678 t=430.4 wall=410s atlasMs=1739.774580180645
+[gate] seed 45678 t=438.2 wall=420s atlasMs=1772.3765489459038
+[gate] seed 45678 t=445.8 wall=430s atlasMs=1801.0579077005386
+[gate] seed 45678 t=453.3 wall=440s atlasMs=1834.124038219452
+[gate] seed 45678 t=460.4 wall=450s atlasMs=1863.8329784870148
+[gate] seed 45678 t=467.5 wall=460s atlasMs=1893.3526263833046
+[gate] seed 45678 t=474.5 wall=470s atlasMs=1921.3357213139534
+[gate] seed 45678 t=481.3 wall=480s atlasMs=1952.62808740139
+[gate] seed 45678 t=488.0 wall=490s atlasMs=1982.186319887638
+[gate] seed 45678 t=494.5 wall=501s atlasMs=2007.4985935688019
+[gate] seed 45678 t=500.9 wall=511s atlasMs=2034.8299784064293
+[gate] seed 45678 t=507.2 wall=521s atlasMs=2066.515873372555
+[gate] seed 45678 t=513.1 wall=531s atlasMs=2092.5887400507927
+[gate] seed 45678 t=519.0 wall=541s atlasMs=2120.700927913189
+[gate] seed 45678 t=524.8 wall=551s atlasMs=2147.480854511261
+[gate] seed 45678 t=530.7 wall=561s atlasMs=2174.7627096176147
+[gate] seed 45678 t=536.4 wall=571s atlasMs=2197.614279270172
+[gate] seed 45678 t=542.0 wall=581s atlasMs=2224.4211755394936
+[gate] seed 45678 t=547.5 wall=591s atlasMs=2246.9589525461197
+[gate] seed 45678 t=553.1 wall=601s atlasMs=2273.037745177746
+[gate] seed 45678 t=558.5 wall=611s atlasMs=2297.5374767780304
+[gate] seed 45678 t=563.9 wall=621s atlasMs=2319.8529648184776
+[gate] seed 45678 t=569.2 wall=631s atlasMs=2346.7684937119484
+[gate] seed 45678 t=574.3 wall=641s atlasMs=2370.1103368401527
+[gate] seed 45678 t=579.5 wall=651s atlasMs=2393.8084565401077
+[gate] seed 45678 t=584.7 wall=661s atlasMs=2416.788354039192
+[gate] seed 45678 t=589.7 wall=671s atlasMs=2440.659926176071
+[gate] seed 45678 t=594.7 wall=681s atlasMs=2464.3502961993217
+[gate] seed 45678 t=599.6 wall=691s atlasMs=2488.524697303772
+seed 45678: coste_atlas=0.3598% p95=0.0127ms err_bio=0% err_dens=0% delta_ok=true mem=0.3652MB ring=65 zone=592 (wall 691.7s)
+[gate] seed 56789 t=0.0 wall=0s atlasMs=0.011426031589508057
+[gate] seed 56789 t=9.3 wall=10s atlasMs=52.03004592657089
+[gate] seed 56789 t=19.2 wall=20s atlasMs=92.12393426895142
+[gate] seed 56789 t=29.3 wall=30s atlasMs=130.14484935998917
+[gate] seed 56789 t=39.3 wall=40s atlasMs=171.16017490625381
+[gate] seed 56789 t=49.8 wall=50s atlasMs=215.01531118154526
+[gate] seed 56789 t=60.0 wall=60s atlasMs=258.7168114185333
+[gate] seed 56789 t=70.3 wall=70s atlasMs=298.01029312610626
+[gate] seed 56789 t=81.0 wall=80s atlasMs=338.70030534267426
+[gate] seed 56789 t=91.7 wall=90s atlasMs=382.19495725631714
+[gate] seed 56789 t=102.5 wall=100s atlasMs=422.05297017097473
+[gate] seed 56789 t=113.4 wall=110s atlasMs=467.1984992623329
+[gate] seed 56789 t=124.5 wall=120s atlasMs=512.2322282791138
+[gate] seed 56789 t=135.8 wall=130s atlasMs=555.055546104908
+[gate] seed 56789 t=147.1 wall=140s atlasMs=604.4002428650856
+[gate] seed 56789 t=158.9 wall=150s atlasMs=649.6743410825729
+[gate] seed 56789 t=170.7 wall=160s atlasMs=698.6680191159248
+[gate] seed 56789 t=182.3 wall=170s atlasMs=748.1016799211502
+[gate] seed 56789 t=194.2 wall=180s atlasMs=796.6924631595612
+[gate] seed 56789 t=206.0 wall=190s atlasMs=843.883098423481
+[gate] seed 56789 t=217.8 wall=200s atlasMs=890.9345601797104
+[gate] seed 56789 t=229.8 wall=210s atlasMs=943.0290657281876
+[gate] seed 56789 t=241.6 wall=220s atlasMs=990.4683516025543
+[gate] seed 56789 t=253.2 wall=230s atlasMs=1038.8801889419556
+[gate] seed 56789 t=264.6 wall=240s atlasMs=1081.8803864717484
+[gate] seed 56789 t=276.1 wall=250s atlasMs=1126.6347181200981
+[gate] seed 56789 t=287.1 wall=260s atlasMs=1170.994611620903
+[gate] seed 56789 t=298.1 wall=270s atlasMs=1216.3012290000916
+[gate] seed 56789 t=309.1 wall=280s atlasMs=1262.8239499926567
+[gate] seed 56789 t=319.5 wall=290s atlasMs=1304.9357216358185
+[gate] seed 56789 t=330.0 wall=300s atlasMs=1347.838702738285
+[gate] seed 56789 t=340.2 wall=310s atlasMs=1389.9514964818954
+[gate] seed 56789 t=350.0 wall=320s atlasMs=1430.21697640419
+[gate] seed 56789 t=359.6 wall=330s atlasMs=1467.1003215312958
+[gate] seed 56789 t=368.9 wall=340s atlasMs=1506.114705979824
+[gate] seed 56789 t=377.8 wall=350s atlasMs=1539.9355348944664
+[gate] seed 56789 t=386.8 wall=360s atlasMs=1575.3445104956627
+[gate] seed 56789 t=395.5 wall=370s atlasMs=1613.163056910038
+[gate] seed 56789 t=403.9 wall=380s atlasMs=1647.0607087612152
+[gate] seed 56789 t=412.1 wall=390s atlasMs=1679.4099352359772
+[gate] seed 56789 t=420.3 wall=400s atlasMs=1716.8868250846863
+[gate] seed 56789 t=428.3 wall=410s atlasMs=1749.4405502676964
+[gate] seed 56789 t=435.9 wall=420s atlasMs=1784.424733698368
+[gate] seed 56789 t=443.6 wall=430s atlasMs=1813.5599319338799
+[gate] seed 56789 t=451.1 wall=440s atlasMs=1845.9685778021812
+[gate] seed 56789 t=458.4 wall=450s atlasMs=1876.5643941760063
+[gate] seed 56789 t=465.6 wall=460s atlasMs=1905.867233991623
+[gate] seed 56789 t=472.6 wall=470s atlasMs=1936.943817436695
+[gate] seed 56789 t=479.3 wall=480s atlasMs=1962.9190211296082
+[gate] seed 56789 t=485.9 wall=490s atlasMs=1994.3053818941116
+[gate] seed 56789 t=492.5 wall=500s atlasMs=2020.2178995013237
+[gate] seed 56789 t=498.9 wall=511s atlasMs=2047.619745373726
+[gate] seed 56789 t=505.3 wall=521s atlasMs=2078.8910980820656
+[gate] seed 56789 t=511.5 wall=531s atlasMs=2107.0316400527954
+[gate] seed 56789 t=517.5 wall=541s atlasMs=2135.366477549076
+[gate] seed 56789 t=523.5 wall=551s atlasMs=2162.2031905055046
+[gate] seed 56789 t=529.5 wall=561s atlasMs=2188.8960785269737
+[gate] seed 56789 t=535.2 wall=571s atlasMs=2211.8207463026047
+[gate] seed 56789 t=540.9 wall=581s atlasMs=2240.678369283676
+[gate] seed 56789 t=546.6 wall=591s atlasMs=2264.971922636032
+[gate] seed 56789 t=552.1 wall=601s atlasMs=2291.607909500599
+[gate] seed 56789 t=557.6 wall=611s atlasMs=2314.512507081032
+[gate] seed 56789 t=563.1 wall=621s atlasMs=2342.957819581032
+[gate] seed 56789 t=568.4 wall=631s atlasMs=2365.5568466186523
+[gate] seed 56789 t=573.6 wall=641s atlasMs=2389.644614636898
+[gate] seed 56789 t=578.8 wall=651s atlasMs=2412.222871541977
+[gate] seed 56789 t=584.0 wall=661s atlasMs=2436.6244624853134
+[gate] seed 56789 t=589.1 wall=671s atlasMs=2459.6238575577736
+[gate] seed 56789 t=594.2 wall=681s atlasMs=2484.176729142666
+[gate] seed 56789 t=599.1 wall=691s atlasMs=2508.8794342279434
+seed 56789: coste_atlas=0.3629% p95=0.0124ms err_bio=0% err_dens=0% delta_ok=true mem=0.3652MB ring=65 zone=592 (wall 692.7s)
+{
+  "task": "task_930",
+  "gate": {
+    "cost_ok": true,
+    "p95_ok": true,
+    "err_ok": true,
+    "delta_ok": true,
+    "mem_ok": true
+  },
+  "seeds": [
+    {
+      "seed": 12345,
+      "wall_s": 696.6,
+      "checks": 592,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1926,
+        "predators": 0
+      },
+      "atlas_cost_pct": 0.3492,
+      "p95_update_ms": 0.0124,
+      "biomass_err_max_pct": 0,
+      "density_err_max_pct": 0,
+      "delta_snapshot_ok": true,
+      "atlas_cells": 1296,
+      "ring_max": 65,
+      "zone_hist_max": 592,
+      "atlas_mem_mb": 0.3652
+    },
+    {
+      "seed": 23456,
+      "wall_s": 731.5,
+      "checks": 592,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1971,
+        "predators": 0
+      },
+      "atlas_cost_pct": 0.3452,
+      "p95_update_ms": 0.0122,
+      "biomass_err_max_pct": 0,
+      "density_err_max_pct": 0,
+      "delta_snapshot_ok": true,
+      "atlas_cells": 1296,
+      "ring_max": 65,
+      "zone_hist_max": 592,
+      "atlas_mem_mb": 0.3652
+    },
+    {
+      "seed": 34567,
+      "wall_s": 660.3,
+      "checks": 592,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1592,
+        "predators": 0
+      },
+      "atlas_cost_pct": 0.3668,
+      "p95_update_ms": 0.0129,
+      "biomass_err_max_pct": 0,
+      "density_err_max_pct": 0,
+      "delta_snapshot_ok": true,
+      "atlas_cells": 1296,
+      "ring_max": 65,
+      "zone_hist_max": 592,
+      "atlas_mem_mb": 0.3652
+    },
+    {
+      "seed": 45678,
+      "wall_s": 691.7,
+      "checks": 592,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1905,
+        "predators": 0
+      },
+      "atlas_cost_pct": 0.3598,
+      "p95_update_ms": 0.0127,
+      "biomass_err_max_pct": 0,
+      "density_err_max_pct": 0,
+      "delta_snapshot_ok": true,
+      "atlas_cells": 1296,
+      "ring_max": 65,
+      "zone_hist_max": 592,
+      "atlas_mem_mb": 0.3652
+    },
+    {
+      "seed": 56789,
+      "wall_s": 692.7,
+      "checks": 592,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1911,
+        "predators": 0
+      },
+      "atlas_cost_pct": 0.3629,
+      "p95_update_ms": 0.0124,
+      "biomass_err_max_pct": 0,
+      "density_err_max_pct": 0,
+      "delta_snapshot_ok": true,
+      "atlas_cells": 1296,
+      "ring_max": 65,
+      "zone_hist_max": 592,
+      "atlas_mem_mb": 0.3652
+    }
+  ],
+  "generated_at": "2026-09-20T03:18:30.783Z"
+}
+GATE: cost_ok=PASS p95_ok=PASS err_ok=PASS delta_ok=PASS mem_ok=PASS

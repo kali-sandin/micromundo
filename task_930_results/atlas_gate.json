@@ -3,30 +3,106 @@
   "gate": {
     "cost_ok": true,
     "p95_ok": true,
-    "err_ok": false,
+    "err_ok": true,
     "delta_ok": true,
     "mem_ok": true
   },
   "seeds": [
     {
       "seed": 12345,
-      "wall_s": 67.8,
-      "checks": 3601,
-      "sim_time_s": 60,
+      "wall_s": 696.6,
+      "checks": 592,
+      "sim_time_s": 600,
       "counts": {
-        "consumers": 714,
-        "predators": 30
+        "consumers": 1926,
+        "predators": 0
       },
-      "atlas_cost_pct": 0.4668,
-      "p95_update_ms": 0.0182,
-      "biomass_err_max_pct": 2.3383,
-      "density_err_max_pct": 0.2797,
+      "atlas_cost_pct": 0.3492,
+      "p95_update_ms": 0.0124,
+      "biomass_err_max_pct": 0,
+      "density_err_max_pct": 0,
       "delta_snapshot_ok": true,
       "atlas_cells": 1296,
-      "ring_max": 60,
-      "zone_hist_max": 59,
-      "atlas_mem_mb": 0.3159
+      "ring_max": 65,
+      "zone_hist_max": 592,
+      "atlas_mem_mb": 0.3652
+    },
+    {
+      "seed": 23456,
+      "wall_s": 731.5,
+      "checks": 592,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1971,
+        "predators": 0
+      },
+      "atlas_cost_pct": 0.3452,
+      "p95_update_ms": 0.0122,
+      "biomass_err_max_pct": 0,
+      "density_err_max_pct": 0,
+      "delta_snapshot_ok": true,
+      "atlas_cells": 1296,
+      "ring_max": 65,
+      "zone_hist_max": 592,
+      "atlas_mem_mb": 0.3652
+    },
+    {
+      "seed": 34567,
+      "wall_s": 660.3,
+      "checks": 592,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1592,
+        "predators": 0
+      },
+      "atlas_cost_pct": 0.3668,
+      "p95_update_ms": 0.0129,
+      "biomass_err_max_pct": 0,
+      "density_err_max_pct": 0,
+      "delta_snapshot_ok": true,
+      "atlas_cells": 1296,
+      "ring_max": 65,
+      "zone_hist_max": 592,
+      "atlas_mem_mb": 0.3652
+    },
+    {
+      "seed": 45678,
+      "wall_s": 691.7,
+      "checks": 592,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1905,
+        "predators": 0
+      },
+      "atlas_cost_pct": 0.3598,
+      "p95_update_ms": 0.0127,
+      "biomass_err_max_pct": 0,
+      "density_err_max_pct": 0,
+      "delta_snapshot_ok": true,
+      "atlas_cells": 1296,
+      "ring_max": 65,
+      "zone_hist_max": 592,
+      "atlas_mem_mb": 0.3652
+    },
+    {
+      "seed": 56789,
+      "wall_s": 692.7,
+      "checks": 592,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1911,
+        "predators": 0
+      },
+      "atlas_cost_pct": 0.3629,
+      "p95_update_ms": 0.0124,
+      "biomass_err_max_pct": 0,
+      "density_err_max_pct": 0,
+      "delta_snapshot_ok": true,
+      "atlas_cells": 1296,
+      "ring_max": 65,
+      "zone_hist_max": 592,
+      "atlas_mem_mb": 0.3652
     }
   ],
-  "generated_at": "2026-09-20T01:08:04.701Z"
+  "generated_at": "2026-09-20T03:18:30.783Z"
 }

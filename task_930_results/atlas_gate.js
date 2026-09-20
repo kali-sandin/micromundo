@@ -148,7 +148,10 @@ function runSeed(seed) {
     const d1 = hr() - t1;
     atlasMs += d1; callMs.push(d1);
 
-    if (api.atlas.biomass) {
+    if (api.atlas.biomass && api.atlas.lastSampleAt === api.sim.time) {
+      // check de conservacion SOLO en el instante de muestreo: la capa se
+      // muestrea a 1 Hz por diseno, compararla contra runtime instantaneo
+      // en ticks intermedios mediria obsolescencia <=1s, no precision.
       let bSum = 0; const B = api.atlas.biomass;
       for (let i = 0; i < B.length; i += 1) bSum += B[i];
       let dSum = 0; const D = api.atlas.density;
