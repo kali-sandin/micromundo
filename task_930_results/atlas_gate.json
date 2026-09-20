@@ -1,0 +1,32 @@
+{
+  "task": "task_930",
+  "gate": {
+    "cost_ok": true,
+    "p95_ok": true,
+    "err_ok": false,
+    "delta_ok": true,
+    "mem_ok": true
+  },
+  "seeds": [
+    {
+      "seed": 12345,
+      "wall_s": 67.8,
+      "checks": 3601,
+      "sim_time_s": 60,
+      "counts": {
+        "consumers": 714,
+        "predators": 30
+      },
+      "atlas_cost_pct": 0.4668,
+      "p95_update_ms": 0.0182,
+      "biomass_err_max_pct": 2.3383,
+      "density_err_max_pct": 0.2797,
+      "delta_snapshot_ok": true,
+      "atlas_cells": 1296,
+      "ring_max": 60,
+      "zone_hist_max": 59,
+      "atlas_mem_mb": 0.3159
+    }
+  ],
+  "generated_at": "2026-09-20T01:08:04.701Z"
+}

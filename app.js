@@ -4438,21 +4438,42 @@
     lastSampleAt: -1
   };
 
-  // Promedia una malla fuente (mass por celda del campo A) a la malla del atlas.
-  // Pura y testeable: preserva la masa media por celda fuente.
+  // Remuestrea una malla fuente (mass por celda del campo A) a la malla del atlas
+  // con pesos de solape por area. Pura y testeable: preserva la masa media por
+  // celda fuente y conserva el total (Σ_dst out·area_dst = Σ_src src), de modo
+  // que la capa muestra mass/celda fuente comparable entre tamaños de malla.
+  function atlasAxisSpans(nSrc, nDst) {
+    const spans = new Array(nDst);
+    for (let d = 0; d < nDst; d += 1) {
+      const a = d * nSrc / nDst, b = (d + 1) * nSrc / nDst;
+      const s = [];
+      for (let i = Math.floor(a); i < Math.ceil(b) && i < nSrc; i += 1) {
+        const lo = Math.max(a, i), hi = Math.min(b, i + 1);
+        if (hi > lo) s.push(i * 1, hi - lo); // pares [srcIdx, peso]
+      }
+      spans[d] = s;
+    }
+    return spans;
+  }
+
   function atlasResample(src, srcCols, srcRows, dstCols, dstRows) {
     const out = new Float32Array(dstCols * dstRows);
+    const xs = atlasAxisSpans(srcCols, dstCols);
+    const ys = atlasAxisSpans(srcRows, dstRows);
+    const area = (srcCols / dstCols) * (srcRows / dstRows); // celdas fuente por celda destino
     for (let dy = 0; dy < dstRows; dy += 1) {
-      const y0 = Math.floor(dy * srcRows / dstRows);
-      const y1 = Math.max(y0 + 1, Math.floor((dy + 1) * srcRows / dstRows));
+      const yw = ys[dy];
       for (let dx = 0; dx < dstCols; dx += 1) {
-        const x0 = Math.floor(dx * srcCols / dstCols);
-        const x1 = Math.max(x0 + 1, Math.floor((dx + 1) * srcCols / dstCols));
-        let s = 0, n = 0;
-        for (let y = y0; y < y1 && y < srcRows; y += 1) {
-          for (let x = x0; x < x1 && x < srcCols; x += 1) { s += src[y * srcCols + x]; n += 1; }
+        const xw = xs[dx];
+        let s = 0;
+        for (let a = 0; a < yw.length; a += 2) {
+          const sy = yw[a], wy = yw[a + 1];
+          const row = sy * srcCols;
+          for (let b = 0; b < xw.length; b += 2) {
+            s += src[row + xw[b]] * wy * xw[b + 1];
+          }
         }
-        out[dy * dstCols + dx] = n ? s / n : 0;
+        out[dy * dstCols + dx] = s / area;
       }
     }
     return out;

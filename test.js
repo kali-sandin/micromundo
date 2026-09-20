@@ -1908,6 +1908,16 @@ function runAtlasTests() {
     expectOk(o0 < o1, 'bloques no ordenados');
   });
 
+  assert('task_930: atlasResample conserva el total escalado (area-weighted)', () => {
+    const src = new Float32Array(53 * 27);
+    for (let i = 0; i < src.length; i += 1) src[i] = (i * 37 % 101) / 7 + 0.5;
+    const out = api.atlasResample(src, 53, 27, 48, 27);
+    let sS = 0; for (let i = 0; i < src.length; i += 1) sS += src[i];
+    let sD = 0; for (let i = 0; i < out.length; i += 1) sD += out[i];
+    const totalScaled = sD * (src.length / out.length);
+    expectOk(Math.abs(totalScaled - sS) / sS < 1e-4, 'total no conservado: ' + totalScaled + ' vs ' + sS);
+  });
+
   assert('task_930: atlasResample con dst mayor que src no pierde celdas', () => {
     const src = new Float32Array([2, 4]);
     const out = api.atlasResample(src, 2, 1, 4, 1);
