@@ -1,0 +1,101 @@
+{
+  "checks": [
+    {
+      "name": "toggle Mapa button type=button con title",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "panel section aria-label",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "panel oculto por defecto (class hidden)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "botón cierre data-atlas-close",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "handler Esc cierra panel (app.js)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "canvas mapa tabindex + role + aria-label",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "radios de capa con label asociado",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ficha de zona con aria-live",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "nota correlación no causalidad",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "muestreo gated por atlasOpen (coste 0 cerrado)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reflow 340px atlas-panel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "makePanelDraggable aplicado al panel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "init no abre el panel automáticamente",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "arrays acotados: ring cap y ventana ficha",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "capa Δ60s declarada",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reset del atlas en reset de mundo",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "resample 1 Hz muy por debajo del presupuesto de frame (16 ms)",
+      "ok": true,
+      "detail": "1.2937 ms/op"
+    },
+    {
+      "name": "ring acotado tras 300 pushes",
+      "ok": true,
+      "detail": "len=66"
+    },
+    {
+      "name": "presupuesto memoria < 8MB",
+      "ok": true,
+      "detail": "598.7 KB"
+    }
+  ],
+  "ok": true,
+  "ts": "2026-09-20T00:44:37.298Z"
+}

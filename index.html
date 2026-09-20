@@ -48,6 +48,7 @@
           <button class="tool-button active" id="toggleGenes" type="button"><span class="btn-icon">⟲</span><span>Genes</span></button>
           <button class="tool-button" id="toggleDebug" type="button"><span class="btn-icon">◎</span><span>Rangos</span></button>
           <button class="tool-button" id="toggleEnergy" type="button" title="Observatorio de energía y biomasa: stocks, flujos y subsidio x18"><span class="btn-icon">⚡</span><span>Energía</span></button>
+          <button class="tool-button" id="atlasToggle" type="button" title="Atlas vivo: capas espaciales de biomasa, densidad y cambio en 60 s"><span class="btn-icon">🗺</span><span>Mapa</span></button>
           <button class="tool-button" id="experimentToggle" type="button" title="Laboratorio causal: experimento control vs tratamiento"><span class="btn-icon">⚗</span><span>Experimento</span></button>
           <button class="tool-button" id="expeditionToggle" type="button" title="Expedición guiada y Cuaderno de campo: misión con predicción, observación, experimento y conclusiones"><span class="btn-icon">🧭</span><span>Expedición</span></button>
           <button class="tool-button" id="resetWorld" type="button"><span class="btn-icon">↻</span><span>Reiniciar</span></button>
@@ -176,6 +177,27 @@
               </div>
               <p class="exp-note">Cada tarjeta guarda seed, PRNG, unidades y el aviso del subsidio x18 (simplificación del modelo, no un proceso natural).</p>
             </div>
+          </div>
+        </section>
+
+        <section class="hud panel atlas-panel hidden movable" id="atlasPanel" aria-label="Atlas vivo: capas espaciales del ecosistema">
+          <header class="panel-head drag-handle">
+            <h2>🗺 Atlas vivo</h2>
+            <button class="icon-button" data-atlas-close type="button" title="Cerrar (Esc)">×</button>
+          </header>
+          <div class="atlas-body">
+            <fieldset class="atlas-layers">
+              <legend>Capa (unidades por celda)</legend>
+              <label><input type="radio" name="atlasLayer" value="biomass" checked> Biomasa campo A (mass)</label>
+              <label><input type="radio" name="atlasLayer" value="density"> Densidad de consumidores (ind.)</label>
+              <label><input type="radio" name="atlasLayer" value="delta"> Δ biomasa 60 s (mass)</label>
+            </fieldset>
+            <canvas id="atlasCanvas" width="420" height="260" tabindex="0" role="application" aria-label="Mapa de calor de la capa activa. Usa las flechas para elegir zona."></canvas>
+            <p class="atlas-legend">Máx <b id="atlasMax">0</b> · Mín <b id="atlasMin">0</b> <span class="atlas-hint" id="atlasHint"></span></p>
+            <div class="atlas-zone" id="atlasZone" aria-live="polite">Elige una zona del mapa (clic o flechas) para ver su ficha.</div>
+            <canvas id="atlasSpark" width="420" height="80" role="img" aria-label="Historial de 10 minutos de la zona seleccionada"></canvas>
+            <p class="atlas-note">El mapa muestra <strong>correlación espacial, no causalidad</strong>. Muestreo 1 Hz · historial 10 min · datos reales del ecosistema.</p>
+            <button class="tool-button" id="atlasCompare" type="button">Comparar misma seed (Experimento)</button>
           </div>
         </section>
 

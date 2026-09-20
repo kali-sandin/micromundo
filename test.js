@@ -76,7 +76,7 @@ function createDomMock() {
     offsetWidth: 800, offsetHeight: 600, close() {}, showModal() {},
     hidden: false,
   };
-  const canvasIds = new Set(['world', 'graph', 'geneGraph', 'obsGraph']);
+  const canvasIds = new Set(['world', 'graph', 'geneGraph', 'obsGraph', 'atlasCanvas', 'atlasSpark']);
   const doc = {
     getElementById: (id) => canvasIds.has(id) ? fakeCanvas : fakeEl,
     querySelector: () => fakeEl, querySelectorAll: () => [],
@@ -120,6 +120,8 @@ function loadApp() {
       buildInquiryCard, validateCuaderno, inquiryComplete, inquiryDeltas,
       INQUIRY_SCHEMA, INQUIRY_VERSION, CUADERNO_KEY, inquiry, cuaderno, cuadernoSave, cuadernoLoad,
       obsSnapshotAccum, obsReset, OBS_WINDOW_S,
+      atlasResample, atlasCountDensity, atlasDelta, atlasRingPush, atlasSnapshotAt,
+      atlas, atlasReset, atlasConfigure, ATLAS_MAX_COLS, ATLAS_DELTA_S, ATLAS_RING_CAP, ATLAS_WINDOW_S,
       GROUPS, GROUP_KEYS, GROUP_LABELS, TYPE, PRODUCER,
       WORLD, CELL, FIELD_CELL,
       camera, worldToScreen, visibleTileOffsets,
@@ -1893,6 +1895,79 @@ function runMigrationTests() {
 //  TESTS DE RENDIMIENTO
 // ═════════════════════════════════════════════════════════════
 
+function runAtlasTests() {
+  const api = loadApp();
+
+  assert('task_930: atlasResample preserva la media por celda fuente', () => {
+    const src = new Float32Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]); // 4x3
+    const out = api.atlasResample(src, 4, 3, 2, 1);
+    expectEq(out.length, 2, 'longitud inesperada');
+    const total = src.reduce((a, b) => a + b, 0) / 12;
+    const o0 = out[0], o1 = out[1];
+    expectOk(Math.abs((o0 + o1) / 2 - total) < 1e-6, 'media no preservada');
+    expectOk(o0 < o1, 'bloques no ordenados');
+  });
+
+  assert('task_930: atlasResample con dst mayor que src no pierde celdas', () => {
+    const src = new Float32Array([2, 4]);
+    const out = api.atlasResample(src, 2, 1, 4, 1);
+    expectEq(out.length, 4, 'longitud inesperada');
+    expectOk(Math.abs(out[0] - 2) < 1e-6 && Math.abs(out[3] - 4) < 1e-6, 'extremos alterados');
+  });
+
+  assert('task_930: atlasCountDensity bucketiza consumidores vivos', () => {
+    const creatures = [
+      { x: 10, y: 10, alive: true, type: 1 },
+      { x: 12, y: 12, alive: true, type: 1 },
+      { x: 900, y: 900, alive: true, type: 1 },
+      { x: 20, y: 20, alive: false, type: 1 },
+      { x: 15, y: 15, alive: true, type: 2 }
+    ];
+    const d = api.atlasCountDensity(creatures, 2, 2, 1000, 1000, 1);
+    expectEq(d[0], 2, 'celda 0,0 mal contada');
+    expectEq(d[3], 1, 'celda 1,1 mal contada');
+    expectEq(d[1] + d[2], 0, 'celdas vacias con conteo');
+  });
+
+  assert('task_930: atlasDelta resta elemento a elemento y tolera ref null', () => {
+    const cur = new Float32Array([3, 5]);
+    const ref = new Float32Array([1, 5]);
+    const d = api.atlasDelta(cur, ref);
+    expectEq(d[0], 2, 'delta incorrecto');
+    expectEq(d[1], 0, 'delta cero incorrecto');
+    const d2 = api.atlasDelta(cur, null);
+    expectEq(d2[0] + d2[1], 0, 'ref null deberia dar ceros');
+  });
+
+  assert('task_930: ring acotado por capacidad y edad; snapshot a 60s', () => {
+    const ring = [];
+    for (let t = 0; t <= 200; t += 1) {
+      api.atlasRingPush(ring, t, new Float32Array([t]), 65, 66);
+    }
+    expectOk(ring.length <= 66, 'ring excede cap');
+    expectOk(ring[ring.length - 1].m[0] === 200, 'ultimo snapshot incorrecto');
+    const snap = api.atlasSnapshotAt(ring, 200, 60);
+    expectOk(!!snap && Math.abs((200 - snap.t) - 60) <= 1, 'snapshot 60s no encontrado');
+    expectEq(api.atlasSnapshotAt([], 100, 60), null, 'ring vacio deberia devolver null');
+  });
+
+  assert('task_930: atlas arranca limpio y reset acota arrays', () => {
+    expectEq(api.atlas.cols, 0, 'atlas no deberia configurarse cerrado');
+    api.atlas.ring.push({ t: 1, m: new Float32Array(1) });
+    api.atlas.zoneHistory.push({ t: 1, b: 1, d: 1 });
+    api.atlasReset();
+    expectEq(api.atlas.ring.length, 0, 'ring no vaciado');
+    expectEq(api.atlas.zoneHistory.length, 0, 'zoneHistory no vaciado');
+  });
+
+  assert('task_930: constantes acotadas (memoria <= 8MB nominal)', () => {
+    const cells = api.ATLAS_MAX_COLS * api.ATLAS_MAX_COLS;
+    const bytes = api.ATLAS_RING_CAP * cells * 4 + api.ATLAS_WINDOW_S * 8;
+    expectOk(bytes < 8 * 1024 * 1024, 'presupuesto de memoria excedido');
+    expectEq(api.ATLAS_DELTA_S, 60, 'delta distinto de 60s');
+  });
+}
+
 function runPerfTests() {
   const api = loadApp();
   suite('Rendimiento');
@@ -2116,6 +2191,9 @@ function main() {
   }
   if (filter === 'inquiry' || filter === 'all') {
     runInquiryTests();
+  }
+  if (filter === 'atlas' || filter === 'all') {
+    runAtlasTests();
   }
   if (filter === 'perf' || filter === 'all') {
     runPerfTests();

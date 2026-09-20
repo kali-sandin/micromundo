@@ -1979,3 +1979,79 @@ select {
 .inq-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .inq-mission { font-size: 12px; margin: 0; }
 @media (max-width: 340px) { .expedition-panel { width: calc(100vw - 12px); } }
+
+/* ── task_930: Atlas vivo (capas espaciales) ── */
+.atlas-panel {
+  right: 14px;
+  top: 84px;
+  width: min(460px, calc(100vw - 20px));
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.atlas-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.atlas-layers {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 0.74rem;
+}
+
+.atlas-layers legend {
+  font-size: 0.72rem;
+  opacity: 0.85;
+  padding: 0 4px;
+}
+
+#atlasCanvas {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: crosshair;
+}
+
+#atlasCanvas:focus-visible {
+  outline: 2px solid #f7c948;
+  outline-offset: 2px;
+}
+
+.atlas-legend {
+  font-size: 0.74rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.atlas-hint { opacity: 0.75; }
+
+.atlas-zone {
+  font-size: 0.76rem;
+  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  padding: 8px 10px;
+  min-height: 2.6em;
+}
+
+#atlasSpark { width: 100%; height: auto; }
+
+.atlas-note {
+  font-size: 0.72rem;
+  margin: 0;
+  opacity: 0.8;
+  line-height: 1.45;
+}
+
+@media (max-width: 340px) {
+  .atlas-panel { width: calc(100vw - 12px); }
+}

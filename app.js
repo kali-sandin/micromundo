@@ -228,6 +228,10 @@
   const geneCtx = geneCanvas.getContext('2d');
   const obsCanvas = document.getElementById('obsGraph');
   const obsCtx = obsCanvas.getContext('2d');
+  const atlasCanvas = document.getElementById('atlasCanvas');
+  const atlasCtx = atlasCanvas.getContext('2d');
+  const atlasSparkCanvas = document.getElementById('atlasSpark');
+  const atlasSparkCtx = atlasSparkCanvas.getContext('2d');
 
   const els = {
     playPause: document.getElementById('playPause'),
@@ -310,7 +314,16 @@
     expeditionCompare: document.getElementById('expeditionCompare'),
     cuadernoList: document.getElementById('cuadernoList'),
     cuadernoExport: document.getElementById('cuadernoExport'),
-    cuadernoImport: document.getElementById('cuadernoImport')
+    cuadernoImport: document.getElementById('cuadernoImport'),
+    atlasToggle: document.getElementById('atlasToggle'),
+    atlasPanel: document.getElementById('atlasPanel'),
+    atlasCanvasEl: document.getElementById('atlasCanvas'),
+    atlasSparkEl: document.getElementById('atlasSpark'),
+    atlasZone: document.getElementById('atlasZone'),
+    atlasMax: document.getElementById('atlasMax'),
+    atlasMin: document.getElementById('atlasMin'),
+    atlasHint: document.getElementById('atlasHint'),
+    atlasCompare: document.getElementById('atlasCompare')
   };
 
   const camera = {
@@ -4145,6 +4158,7 @@
     }
     // task_926: Observatorio de energía y biomasa (historial + render si el panel está visible)
     updateObservatory();
+    updateAtlas(); // task_930: muestrea solo si el panel Atlas está abierto
     // Re-sync mobileEnergySum cada ~60s para corregir drift acumulado
     // task_923: durante un experimento causal no debe dispararse (timing wall-clock
     // dependiente del rAF contaminaria la comparacion control/tratamiento)
@@ -4406,6 +4420,242 @@
       context.fillText(seconds === 0 ? 'ahora' : `-${seconds}s`, x, h - 16);
     }
     context.restore();
+  }
+
+  // ── task_930: Atlas vivo (capas espaciales, solo lectura, OFF por defecto) ──
+  // No cambia ecuaciones: solo muestrea producerField y posiciones a 1 Hz
+  // mientras el panel está abierto. Arrays tipados y acotados.
+  const ATLAS_MAX_COLS = 48;
+  const ATLAS_DELTA_S = 60;   // ventana de la capa Δ
+  const ATLAS_RING_CAP = 66;  // 1 Hz × 60 s + margen
+  const ATLAS_WINDOW_S = 600; // ficha: 10 min de historial de la zona
+  const atlas = {
+    layer: 'biomass', selected: -1,
+    cols: 0, rows: 0,
+    biomass: null, density: null,
+    ring: [],            // {t, m:Float32Array} — instantáneas de biomasa (Δ60 s)
+    zoneHistory: [],     // {t, b, d} de la zona seleccionada (acotado a ATLAS_WINDOW_S)
+    lastSampleAt: -1
+  };
+
+  // Promedia una malla fuente (mass por celda del campo A) a la malla del atlas.
+  // Pura y testeable: preserva la masa media por celda fuente.
+  function atlasResample(src, srcCols, srcRows, dstCols, dstRows) {
+    const out = new Float32Array(dstCols * dstRows);
+    for (let dy = 0; dy < dstRows; dy += 1) {
+      const y0 = Math.floor(dy * srcRows / dstRows);
+      const y1 = Math.max(y0 + 1, Math.floor((dy + 1) * srcRows / dstRows));
+      for (let dx = 0; dx < dstCols; dx += 1) {
+        const x0 = Math.floor(dx * srcCols / dstCols);
+        const x1 = Math.max(x0 + 1, Math.floor((dx + 1) * srcCols / dstCols));
+        let s = 0, n = 0;
+        for (let y = y0; y < y1 && y < srcRows; y += 1) {
+          for (let x = x0; x < x1 && x < srcCols; x += 1) { s += src[y * srcCols + x]; n += 1; }
+        }
+        out[dy * dstCols + dx] = n ? s / n : 0;
+      }
+    }
+    return out;
+  }
+
+  // Cuenta consumidores vivos por celda (pura y testeable).
+  function atlasCountDensity(creatures, dstCols, dstRows, w, h, consumerType) {
+    const out = new Uint16Array(dstCols * dstRows);
+    for (let i = 0; i < creatures.length; i += 1) {
+      const c = creatures[i];
+      if (!c || !c.alive || c.type !== consumerType) continue;
+      let cx = Math.floor((c.x / w) * dstCols); if (cx < 0) cx = 0; if (cx >= dstCols) cx = dstCols - 1;
+      let cy = Math.floor((c.y / h) * dstRows); if (cy < 0) cy = 0; if (cy >= dstRows) cy = dstRows - 1;
+      out[cy * dstCols + cx] += 1;
+    }
+    return out;
+  }
+
+  // Diferencia elemento a elemento (capa Δ). Pura.
+  function atlasDelta(cur, ref) {
+    const n = Math.min(cur.length, ref ? ref.length : 0);
+    const out = new Float32Array(cur.length);
+    for (let i = 0; i < n; i += 1) out[i] = cur[i] - ref[i];
+    return out;
+  }
+
+  // Mantiene el ring acotado por edad y capacidad (pura; devuelve el mismo array).
+  function atlasRingPush(ring, t, m, maxAge, cap) {
+    ring.push({ t, m });
+    while (ring.length > cap || (ring.length > 1 && t - ring[0].t > maxAge)) ring.shift();
+    return ring;
+  }
+
+  // Instantánea más cercana a t-age; null si no hay cobertura suficiente.
+  function atlasSnapshotAt(ring, t, age) {
+    let best = null, bestErr = Infinity;
+    for (let i = 0; i < ring.length; i += 1) {
+      const err = Math.abs((t - ring[i].t) - age);
+      if (err < bestErr) { bestErr = err; best = ring[i]; }
+    }
+    return (best && bestErr <= 5) ? best : null;
+  }
+
+  function atlasOpen() {
+    return !!(els.atlasPanel && !els.atlasPanel.classList.contains('hidden'));
+  }
+
+  function atlasReset() {
+    atlas.cols = 0; atlas.rows = 0;
+    atlas.biomass = null; atlas.density = null;
+    atlas.ring.length = 0; atlas.zoneHistory.length = 0;
+    atlas.selected = -1; atlas.lastSampleAt = -1;
+  }
+
+  function atlasConfigure() {
+    const field = sim.producerField;
+    if (!field || !field.cols || !field.rows) return;
+    const cols = Math.min(field.cols, ATLAS_MAX_COLS);
+    const rows = Math.max(1, Math.round(cols * field.rows / field.cols));
+    if (cols !== atlas.cols || rows !== atlas.rows) {
+      atlas.cols = cols; atlas.rows = rows;
+      atlas.biomass = null; atlas.density = null;
+      atlas.ring.length = 0; atlas.zoneHistory.length = 0;
+      atlas.selected = -1;
+    }
+  }
+
+  function updateAtlas() {
+    if (!atlasOpen()) return;
+    atlasConfigure();
+    if (!atlas.cols) return;
+    if (atlas.lastSampleAt >= 0 && sim.time - atlas.lastSampleAt < 1) return;
+    atlas.lastSampleAt = sim.time;
+    const field = sim.producerField;
+    atlas.biomass = atlasResample(field.mass, field.cols, field.rows, atlas.cols, atlas.rows);
+    atlas.ring.push({ t: sim.time, m: atlas.biomass });
+    while (atlas.ring.length > ATLAS_RING_CAP ||
+      (atlas.ring.length > 1 && sim.time - atlas.ring[0].t > ATLAS_DELTA_S + 5)) atlas.ring.shift();
+    atlas.density = atlasCountDensity(sim.creatures, atlas.cols, atlas.rows, WORLD.w, WORLD.h, TYPE.CONSUMER);
+    if (atlas.selected >= 0) {
+      atlas.zoneHistory.push({ t: sim.time, b: atlas.biomass[atlas.selected], d: atlas.density[atlas.selected] });
+      while (atlas.zoneHistory.length && sim.time - atlas.zoneHistory[0].t > ATLAS_WINDOW_S) atlas.zoneHistory.shift();
+    }
+    renderAtlas();
+  }
+
+  function atlasLayerValues() {
+    if (atlas.layer === 'density') return { v: atlas.density, unit: 'ind.', diverging: false, needDelta: false };
+    if (atlas.layer === 'delta') {
+      const snap = atlasSnapshotAt(atlas.ring, sim.time, ATLAS_DELTA_S);
+      if (!snap) return { v: null, unit: 'mass', diverging: true, needDelta: true };
+      return { v: atlasDelta(atlas.biomass, snap.m), unit: 'mass', diverging: true, needDelta: false };
+    }
+    return { v: atlas.biomass, unit: 'mass', diverging: false, needDelta: false };
+  }
+
+  // Rampa de color accesible: azul→verde→amarillo→rojo (secuencial) y
+  // rojo←gris→verde (divergente para Δ, cambio con signo).
+  function atlasColor(v01, diverging) {
+    const t = Math.max(0, Math.min(1, v01));
+    if (diverging) {
+      // 0.5 = neutro; lados hacia rojo (neg) y verde (pos)
+      if (t < 0.5) { const k = t / 0.5; return `rgb(${Math.round(180 + 75 * k)},${Math.round(60 + 40 * k)},${Math.round(60 + 30 * k)})`; }
+      const k = (t - 0.5) / 0.5; return `rgb(${Math.round(255 - 175 * k)},${Math.round(100 + 115 * k)},${Math.round(90 + 20 * k)})`;
+    }
+    const stops = [[10, 60, 120], [38, 130, 110], [70, 180, 90], [235, 200, 70], [215, 70, 70]];
+    const f = t * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(f)), k = f - i;
+    const a = stops[i], b = stops[i + 1];
+    return `rgb(${Math.round(a[0] + (b[0] - a[0]) * k)},${Math.round(a[1] + (b[1] - a[1]) * k)},${Math.round(a[2] + (b[2] - a[2]) * k)})`;
+  }
+
+  function renderAtlas() {
+    if (!atlas.biomass || !atlas.density) return;
+    const { w, h } = resizeCanvasToDisplay(atlasCanvas, atlasCtx, 420, 260);
+    atlasCtx.setTransform(1, 0, 0, 1, 0, 0);
+    atlasCtx.clearRect(0, 0, w, h);
+    const L = atlasLayerValues();
+    const hint = els.atlasHint;
+    if (hint) hint.textContent = L.needDelta ? 'Δ: esperando 60 s de historial…' : '';
+    if (!L.v) return;
+    let lo = Infinity, hi = -Infinity;
+    for (let i = 0; i < L.v.length; i += 1) { if (L.v[i] < lo) lo = L.v[i]; if (L.v[i] > hi) hi = L.v[i]; }
+    if (!isFinite(lo)) { lo = 0; hi = 1; }
+    if (!L.diverging) { lo = 0; }
+    else { const m = Math.max(Math.abs(lo), Math.abs(hi), 1e-9); lo = -m; hi = m; }
+    const cw = w / atlas.cols, ch = h / atlas.rows;
+    for (let y = 0; y < atlas.rows; y += 1) {
+      for (let x = 0; x < atlas.cols; x += 1) {
+        const v = L.v[y * atlas.cols + x];
+        const t = (v - lo) / (hi - lo || 1);
+        atlasCtx.fillStyle = atlasColor(t, L.diverging);
+        atlasCtx.fillRect(x * cw, y * ch, cw + 0.6, ch + 0.6);
+      }
+    }
+    if (atlas.selected >= 0) {
+      const sx = (atlas.selected % atlas.cols) * cw, sy = Math.floor(atlas.selected / atlas.cols) * ch;
+      atlasCtx.strokeStyle = '#fff';
+      atlasCtx.lineWidth = 2;
+      atlasCtx.strokeRect(sx + 1, sy + 1, cw - 2, ch - 2);
+    }
+    if (els.atlasMax) els.atlasMax.textContent = (L.diverging ? '+' : '') + (hi >= 1000 ? (hi / 1000).toFixed(1) + 'k' : hi.toFixed(1)) + ' ' + L.unit;
+    if (els.atlasMin) els.atlasMin.textContent = (L.diverging ? '−' : '') + (Math.abs(lo) >= 1000 ? (Math.abs(lo) / 1000).toFixed(1) + 'k' : Math.abs(lo).toFixed(1)) + ' ' + L.unit;
+    renderAtlasZone();
+    drawAtlasSpark();
+  }
+
+  function atlasZoneText() {
+    if (atlas.selected < 0) return 'Elige una zona del mapa (clic o flechas) para ver su ficha.';
+    const col = atlas.selected % atlas.cols, row = Math.floor(atlas.selected / atlas.cols);
+    const b = atlas.biomass[atlas.selected], d = atlas.density[atlas.selected];
+    const snap = atlasSnapshotAt(atlas.ring, sim.time, ATLAS_DELTA_S);
+    const db = snap ? b - snap.m[atlas.selected] : null;
+    const H = atlas.zoneHistory;
+    let trend = '±';
+    if (H.length >= 2) {
+      const diff = H[H.length - 1].b - H[0].b;
+      trend = (diff > 0 ? '▲ +' : diff < 0 ? '▼ ' : '±') + diff.toFixed(1);
+    }
+    const area = (WORLD.w / atlas.cols) * (WORLD.h / atlas.rows);
+    const dPer = (d / (area / 1e6)).toFixed(2); // ind./km² simulados
+    return `Zona (col ${col + 1}, fila ${row + 1}) · biomasa ${b.toFixed(1)} mass · Δ60 s ${db === null ? 'n/d' : (db >= 0 ? '+' : '') + db.toFixed(1)} mass · consumidores ${d} (${dPer}/km²) · tendencia 10 min ${trend} mass`;
+  }
+
+  function renderAtlasZone() {
+    if (els.atlasZone) els.atlasZone.textContent = atlasZoneText();
+  }
+
+  function drawAtlasSpark() {
+    const { w, h } = resizeCanvasToDisplay(atlasSparkCanvas, atlasSparkCtx, 420, 80);
+    atlasSparkCtx.setTransform(1, 0, 0, 1, 0, 0);
+    atlasSparkCtx.clearRect(0, 0, w, h);
+    const H = atlas.zoneHistory;
+    if (H.length < 2) {
+      atlasSparkCtx.fillStyle = 'rgba(220,232,226,0.6)';
+      atlasSparkCtx.font = '11px system-ui, sans-serif';
+      atlasSparkCtx.fillText(atlas.selected >= 0 ? 'Historial de la zona…' : 'Selecciona una zona para su historial', 8, 16);
+      return;
+    }
+    const t0 = H[0].t, t1 = H[H.length - 1].t || t0 + 1;
+    const series = [
+      { key: (p) => p.b, color: '#5fd97a' },
+      { key: (p) => p.d, color: '#f7c948' }
+    ];
+    let lo = Infinity, hi = -Infinity;
+    for (const s of series) for (let i = 0; i < H.length; i += 1) { const v = s.key(H[i]); if (v < lo) lo = v; if (v > hi) hi = v; }
+    if (hi - lo < 1e-9) { hi = lo + 1; }
+    const X = (t) => 8 + (w - 16) * (t - t0) / (t1 - t0);
+    const Y = (v) => h - 12 - (h - 24) * (v - lo) / (hi - lo);
+    for (const s of series) {
+      atlasSparkCtx.strokeStyle = s.color;
+      atlasSparkCtx.lineWidth = 1.5;
+      atlasSparkCtx.beginPath();
+      for (let i = 0; i < H.length; i += 1) {
+        const x = X(H[i].t), y = Y(s.key(H[i]));
+        if (i === 0) atlasSparkCtx.moveTo(x, y); else atlasSparkCtx.lineTo(x, y);
+      }
+      atlasSparkCtx.stroke();
+    }
+    atlasSparkCtx.font = '10px system-ui, sans-serif';
+    atlasSparkCtx.fillStyle = 'rgba(220,232,226,0.72)';
+    atlasSparkCtx.textBaseline = 'top';
+    atlasSparkCtx.fillText('verde: biomasa · amarillo: consumidores', 8, 2);
+    drawTimeAxis(atlasSparkCtx, w, h, (w - 16) / Math.max(1, t1 - t0));
   }
 
   function drawGraph() {
@@ -4712,6 +4962,7 @@
     sim.mobileEnergySum = 0;
     sim.carcasses.length = 0;
     obsReset(); // task_926: el historial del observatorio no debe mezclar mundos
+    atlasReset(); // task_930: el atlas tampoco
     sim.migrationTimer = 0;
     sim.graph.clear();
     sim.geneHistory.clear();
@@ -5392,6 +5643,65 @@
       cuadernoLoad();
       renderExpedition();
     }
+
+    // task_930: Atlas vivo — opt-in, oculto por defecto, sin coste cerrado
+    if (els.atlasToggle && els.atlasPanel) {
+      els.atlasToggle.addEventListener('click', () => {
+        const show = els.atlasPanel.classList.toggle('hidden');
+        els.atlasToggle.classList.toggle('active', !show);
+        if (!show) { atlas.lastSampleAt = -1; updateAtlas(); els.atlasCanvasEl.focus(); }
+      });
+      const atlasClose = els.atlasPanel.querySelector('[data-atlas-close]');
+      if (atlasClose) atlasClose.addEventListener('click', () => {
+        els.atlasPanel.classList.add('hidden');
+        els.atlasToggle.classList.remove('active');
+      });
+      els.atlasPanel.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') {
+          els.atlasPanel.classList.add('hidden');
+          els.atlasToggle.classList.remove('active');
+        }
+      });
+      els.atlasPanel.querySelectorAll('input[name="atlasLayer"]').forEach((r) => {
+        r.addEventListener('change', () => { atlas.layer = r.value; renderAtlas(); });
+      });
+      els.atlasCanvasEl.addEventListener('click', (ev) => {
+        const rect = els.atlasCanvasEl.getBoundingClientRect();
+        const x = ev.clientX - rect.left, y = ev.clientY - rect.top;
+        const col = Math.min(atlas.cols - 1, Math.max(0, Math.floor(x / rect.width * atlas.cols)));
+        const row = Math.min(atlas.rows - 1, Math.max(0, Math.floor(y / rect.height * atlas.rows)));
+        if (atlas.cols && atlas.rows) {
+          atlas.selected = row * atlas.cols + col;
+          atlas.zoneHistory.length = 0;
+          renderAtlas();
+        }
+      });
+      els.atlasCanvasEl.addEventListener('keydown', (ev) => {
+        if (!atlas.cols) return;
+        let col = atlas.selected < 0 ? 0 : atlas.selected % atlas.cols;
+        let row = atlas.selected < 0 ? 0 : Math.floor(atlas.selected / atlas.cols);
+        let moved = true;
+        if (ev.key === 'ArrowLeft') col = Math.max(0, col - 1);
+        else if (ev.key === 'ArrowRight') col = Math.min(atlas.cols - 1, col + 1);
+        else if (ev.key === 'ArrowUp') row = Math.max(0, row - 1);
+        else if (ev.key === 'ArrowDown') row = Math.min(atlas.rows - 1, row + 1);
+        else moved = false;
+        if (moved) {
+          ev.preventDefault();
+          const was = atlas.selected;
+          atlas.selected = row * atlas.cols + col;
+          if (was !== atlas.selected) atlas.zoneHistory.length = 0;
+          renderAtlas();
+        }
+      });
+      if (els.atlasCompare) els.atlasCompare.addEventListener('click', () => {
+        if (els.experimentPanel && els.experimentPanel.classList.contains('hidden')) {
+          els.experimentToggle.click();
+        }
+        els.experimentPanel.scrollIntoView({ block: 'nearest' });
+      });
+      makePanelDraggable(els.atlasPanel);
+    }
     els.dayNightToggle.addEventListener('click', toggleDayNight);
     els.playPause.addEventListener('click', () => setPaused(!sim.paused));
     document.getElementById('toggleStats').addEventListener('click', (ev) => {
@@ -5753,6 +6063,7 @@
     // espuria de mobileEnergySum dentro del updateStats del propio loadSnapshot
     sim.energyResyncAccum = 0;
     obsReset(); // task_926: sim.time puede retroceder; no mezclar series de mundos distintos
+    atlasReset(); // task_930
     // Restaurar criaturas
     for (const c of snap.creatures) {
       const e = Object.assign({}, c);
