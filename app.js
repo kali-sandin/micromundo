@@ -6062,18 +6062,57 @@
     return false;
   }
 
+  const CUADERNO_MAX_CARDS = 500;
+  const CUADERNO_MAX_STR = 2000;
+  const CUADERNO_MAX_FILE = 2 * 1024 * 1024; // 2 MB
+
+  const HTML_TAG_RE = /<\/?[a-z][^>]*>/i;
+  function vStr(v, max) { return typeof v === 'string' && v.length <= max; }
+  function vText(v, max) { return vStr(v, max) && !HTML_TAG_RE.test(v); }
+  function vNum(v) { return typeof v === 'number' && isFinite(v); }
+
+  // Validación estructural y acotada campo a campo (task_929):
+  // ninguna card importada puede colar HTML ni romper el render posterior.
+  function validateCuadernoCard(c, i) {
+    const bad = (m) => ({ ok: false, error: 'card[' + i + '] inválida (' + m + ')' });
+    if (!c || typeof c !== 'object' || Array.isArray(c)) return bad('no es objeto');
+    if (c.schema !== INQUIRY_SCHEMA || c.version !== INQUIRY_VERSION) return bad('schema/version');
+    if (!vStr(c.id, 64) || !/^[A-Za-z0-9_-]+$/.test(c.id)) return bad('id');
+    if (!vStr(c.created, 40) || !/^\d{4}-\d{2}-\d{2}T/.test(c.created)) return bad('created');
+    if (!vText(c.prediction, CUADERNO_MAX_STR)) return bad('prediction');
+    if (!vText(c.conclusion, CUADERNO_MAX_STR)) return bad('conclusion');
+    if ('mission' in c && !(typeof c.mission === 'number' && Number.isInteger(c.mission) && c.mission >= 0 && c.mission <= 99)) return bad('mission');
+    if ('mission_title' in c && !vText(c.mission_title, 120)) return bad('mission_title');
+    const ex = c.experiment;
+    if (!ex || typeof ex !== 'object' || Array.isArray(ex)) return bad('experiment');
+    if (!vNum(ex.seed) || !Number.isInteger(ex.seed) || ex.seed < 0 || ex.seed > Number.MAX_SAFE_INTEGER) return bad('seed');
+    if ('prng_state' in ex && !(vNum(ex.prng_state) || vStr(ex.prng_state, 64))) return bad('prng_state');
+    if (!vNum(ex.time_s) || ex.time_s < 0) return bad('time_s');
+    if (!vNum(ex.solar_energy_multiplier) || ex.solar_energy_multiplier <= 0) return bad('solar_energy_multiplier');
+    if (!vNum(ex.duration_s_per_arm) || ex.duration_s_per_arm <= 0) return bad('duration_s_per_arm');
+    if ('comparison' in ex && ex.comparison !== null) {
+      if (!Array.isArray(ex.comparison) || ex.comparison.length > 200) return bad('comparison');
+    }
+    if ('units' in c && (!c.units || typeof c.units !== 'object' || Array.isArray(c.units))) return bad('units');
+    if ('notes' in c) {
+      if (!Array.isArray(c.notes) || c.notes.length > 20) return bad('notes');
+      for (const n of c.notes) if (!vText(n, 400)) return bad('notes[]');
+    }
+    return { ok: true, card: c };
+  }
+
   function validateCuaderno(rawJson) {
+    if (typeof rawJson !== 'string' || rawJson.length > CUADERNO_MAX_FILE) return { ok: false, error: 'fichero demasiado grande o no textual' };
     let data;
     try { data = JSON.parse(rawJson); } catch (e) { return { ok: false, error: 'JSON inválido: ' + e.message }; }
     if (!data || typeof data !== 'object') return { ok: false, error: 'cuaderno no es objeto' };
     if (data.schema !== INQUIRY_SCHEMA) return { ok: false, error: 'schema esperado ' + INQUIRY_SCHEMA };
     if (data.version !== INQUIRY_VERSION) return { ok: false, error: 'version esperada ' + INQUIRY_VERSION };
     if (!Array.isArray(data.cards)) return { ok: false, error: 'cards no es array' };
+    if (data.cards.length > CUADERNO_MAX_CARDS) return { ok: false, error: 'demasiadas cards (max ' + CUADERNO_MAX_CARDS + ')' };
     for (let i = 0; i < data.cards.length; i += 1) {
-      const c = data.cards[i];
-      if (!c || c.schema !== INQUIRY_SCHEMA || c.version !== INQUIRY_VERSION || !c.id) {
-        return { ok: false, error: 'card[' + i + '] inválida (schema/version/id)' };
-      }
+      const r = validateCuadernoCard(data.cards[i], i);
+      if (!r.ok) return r;
     }
     return { ok: true, cards: data.cards };
   }
@@ -6143,9 +6182,23 @@
         rows.map(r => `<tr><th scope="row">${r.hito_s / 60}m</th><td>${r.consumers.control} → ${r.consumers.treatment} <span class="exp-c">${r.consumers.delta}</span></td><td>${r.field_biomass_mass.control.toFixed(1)} → ${r.field_biomass_mass.treatment.toFixed(1)} <span class="exp-c">${r.field_biomass_mass.delta}</span></td></tr>`).join('') + '</table>';
     }
     if (els.cuadernoList) {
-      els.cuadernoList.innerHTML = cuaderno.cards.length
-        ? cuaderno.cards.slice(-10).reverse().map(c => `<li><b>${c.created.slice(0, 16).replace('T', ' ')}</b> · seed ${c.experiment.seed} · «${(c.conclusion || '').slice(0, 90)}»</li>`).join('')
-        : '<li class="inq-empty">Aún no hay tarjetas guardadas.</li>';
+      // task_929: render con nodos/textContent; nunca innerHTML con datos importados
+      els.cuadernoList.replaceChildren();
+      if (!cuaderno.cards.length) {
+        const li = document.createElement('li');
+        li.className = 'inq-empty';
+        li.textContent = 'Aún no hay tarjetas guardadas.';
+        els.cuadernoList.appendChild(li);
+      } else {
+        for (const c of cuaderno.cards.slice(-10).reverse()) {
+          const li = document.createElement('li');
+          const b = document.createElement('b');
+          b.textContent = String(c.created).slice(0, 16).replace('T', ' ');
+          li.appendChild(b);
+          li.appendChild(document.createTextNode(' · seed ' + c.experiment.seed + ' · «' + String(c.conclusion || '').slice(0, 90) + '»'));
+          els.cuadernoList.appendChild(li);
+        }
+      }
     }
   }
 
@@ -6180,6 +6233,7 @@
   }
 
   function cuadernoImportFile(file) {
+    if (file && file.size > CUADERNO_MAX_FILE) { alert('Cuaderno inválido: fichero demasiado grande'); return; }
     const rd = new FileReader();
     rd.onload = () => {
       const res = validateCuaderno(String(rd.result));

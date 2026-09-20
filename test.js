@@ -2066,6 +2066,28 @@ function runInquiryTests() {
     expectEq(res.cards.length, 1, 'numero de cards');
   });
 
+  assert('task_929: validateCuaderno rechaza XSS y cards incompletas', () => {
+    const mk = (over) => JSON.stringify({ schema: api.INQUIRY_SCHEMA, version: 1, cards: [Object.assign(api.buildInquiryCard({ prediction: 'p', conclusion: 'c', observed: true }, fakeReport()), over)] });
+    expectOk(!api.validateCuaderno(mk({ conclusion: '<img src=x onerror=alert(1)>' })).ok, 'XSS en conclusion aceptado');
+    const sinCreated = api.buildInquiryCard({ prediction: 'p', conclusion: 'c', observed: true }, fakeReport());
+    delete sinCreated.created; expectOk(!api.validateCuaderno(JSON.stringify({ schema: api.INQUIRY_SCHEMA, version: 1, cards: [sinCreated] })).ok, 'card sin created aceptada');
+    const sinExperiment = api.buildInquiryCard({ prediction: 'p', conclusion: 'c', observed: true }, fakeReport());
+    delete sinExperiment.experiment; expectOk(!api.validateCuaderno(JSON.stringify({ schema: api.INQUIRY_SCHEMA, version: 1, cards: [sinExperiment] })).ok, 'card sin experiment aceptada');
+    expectOk(!api.validateCuaderno(mk({ id: 'inq_1<script>' })).ok, 'id con caracteres raros aceptado');
+    expectOk(!api.validateCuaderno(mk({ 'experiment': null })).ok, 'experiment null aceptado');
+    const seedMal = api.buildInquiryCard({ prediction: 'p', conclusion: 'c', observed: true }, fakeReport());
+    seedMal.experiment.seed = '1;alert(1)'; expectOk(!api.validateCuaderno(JSON.stringify({ schema: api.INQUIRY_SCHEMA, version: 1, cards: [seedMal] })).ok, 'seed no numerica aceptada');
+  });
+
+  assert('task_929: validateCuaderno acota tamaños y card valida hace roundtrip', () => {
+    const card = api.buildInquiryCard({ prediction: 'p', conclusion: 'c', observed: true }, fakeReport());
+    const raw = JSON.stringify({ schema: api.INQUIRY_SCHEMA, version: 1, cards: [card] });
+    expectOk(api.validateCuaderno(raw).ok, 'card legitima rechazada');
+    expectOk(!api.validateCuaderno(JSON.stringify({ schema: api.INQUIRY_SCHEMA, version: 1, cards: Array(501).fill(card) })).ok, 'max cards no aplicado');
+    const larga = api.buildInquiryCard({ prediction: 'p'.repeat(3000), conclusion: 'c', observed: true }, fakeReport());
+    expectOk(!api.validateCuaderno(JSON.stringify({ schema: api.INQUIRY_SCHEMA, version: 1, cards: [larga] })).ok, 'prediction enorme aceptada');
+  });
+
   assert('inquiryComplete exige prediccion+observado+reporte+conclusion', () => {
     expectOk(!api.inquiryComplete({}), 'sesion vacia completa');
     expectOk(!api.inquiryComplete({ prediction: 'p', observed: true, report: {} }), 'sin conclusion completa');
