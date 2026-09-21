@@ -323,7 +323,10 @@
     atlasMax: document.getElementById('atlasMax'),
     atlasMin: document.getElementById('atlasMin'),
     atlasHint: document.getElementById('atlasHint'),
-    atlasCompare: document.getElementById('atlasCompare')
+    atlasCompare: document.getElementById('atlasCompare'),
+    redToggle: document.getElementById('redToggle'),
+    redPanel: document.getElementById('redPanel'),
+    redCompare: document.getElementById('redCompare')
   };
 
   const camera = {
@@ -4158,6 +4161,7 @@
     }
     // task_926: Observatorio de energía y biomasa (historial + render si el panel está visible)
     updateObservatory();
+    updateRed(); // task_932: muestrea solo si el panel Red trófica está abierto
     updateAtlas(); // task_930: muestrea solo si el panel Atlas está abierto
     // Re-sync mobileEnergySum cada ~60s para corregir drift acumulado
     // task_923: durante un experimento causal no debe dispararse (timing wall-clock
@@ -4280,6 +4284,143 @@
       balance: (inputs - outputs) / dt,
       transfer: (d('graze') + d('predation') + d('carcassEat') + excretion) / dt
     };
+  }
+
+  // ── task_932: Red trófica viva (solo lectura, OFF por defecto) ──
+  // Ledger 1 Hz acotado (ring 66 muestras) y aristas sobre ventana 60 s.
+  // Masa del campo A y energia E se rotulan por separado; el subsidio x18
+  // (trophicAmplification) se reporta como tal: no es produccion natural.
+  const RED_WINDOW_S = 60;
+  const RED_RING_CAP = 66; // 1 Hz x 60 s + margen
+  const RED_ACCUM_KEYS = ['graze', 'colonyFeed', 'prodCGraze', 'predation', 'carcassEat',
+    'carcassToField', 'metabolism', 'excretion', 'thermal', 'photosynthField',
+    'photosynthDirect', 'trophicAmplification', 'predIncome', 'predMetab', 'predThermal',
+    'fnlContact', 'fnlCapture'];
+  const red = { ring: [], lastSampleAt: -1, els: null };
+
+  function redOpen() {
+    return !!(els.redPanel && !els.redPanel.classList.contains('hidden'));
+  }
+
+  function redReset() {
+    red.ring.length = 0;
+    red.lastSampleAt = -1;
+  }
+
+  function redSnapshotAccum() {
+    const fa = sim.flowAccum, out = {};
+    for (let i = 0; i < RED_ACCUM_KEYS.length; i += 1) out[RED_ACCUM_KEYS[i]] = fa[RED_ACCUM_KEYS[i]] || 0;
+    out.migConsumers = sim.migrations.consumers;
+    out.migPredators = sim.migrations.predators;
+    return out;
+  }
+
+  // Flujos de la red en una ventana dt (funcion pura, testeable).
+  // mass/s solo para el campo A; el resto en E/s. graze_assim_E incluye el
+  // subsidio x18: por eso subsidy_E se desglosa aparte.
+  function redFlows(prev, cur, dt) {
+    const p = prev || {};
+    const d = (k) => (cur[k] || 0) - (p[k] || 0);
+    const per = (v) => v / dt;
+    const graze = d('graze'), tAmp = d('trophicAmplification');
+    const consOut = d('metabolism') + d('thermal') - d('predMetab') - d('predThermal');
+    return {
+      photo_field_mass: per(d('photosynthField')),
+      photo_direct: per(d('photosynthDirect')),
+      graze_mass: per(graze),
+      graze_assim_E: per(graze + tAmp),
+      subsidy_E: per(tAmp),
+      bc_feed: per(d('colonyFeed') + d('prodCGraze')),
+      predation: per(d('predation')),
+      carrion_eat: per(d('carcassEat')),
+      carrion_field: per(d('carcassToField')),
+      excretion: per(d('excretion')),
+      heat: per(d('metabolism') + d('thermal')),
+      cons_out: per(Math.max(0, consOut)),
+      pred_in: per(d('predIncome')),
+      pred_out: per(d('predMetab') + d('predThermal')),
+      contact: d('fnlContact'),
+      capture: d('fnlCapture'),
+      mig_consumers: d('migConsumers'),
+      mig_predators: d('migPredators')
+    };
+  }
+
+  function redEls() {
+    if (!red.els) {
+      const ids = ['redLSunA', 'redLSunBC', 'redLACons', 'redLBCCons', 'redLConsPred',
+        'redLCarrMob', 'redLCarrField', 'redLHeat',
+        'redConsPop', 'redConsIn', 'redConsOut', 'redConsRatio', 'redConsExtra',
+        'redPredPop', 'redPredIn', 'redPredOut', 'redPredRatio', 'redPredExtra',
+        'redFieldCells', 'redFieldIn', 'redFieldOut', 'redFieldRatio', 'redFieldExtra', 'redDiag'];
+      red.els = {};
+      for (let i = 0; i < ids.length; i += 1) red.els[ids[i]] = document.getElementById(ids[i]);
+    }
+    return red.els;
+  }
+
+  function updateRed() {
+    if (!redOpen()) return;
+    if (red.lastSampleAt >= 0 && sim.time - red.lastSampleAt < 1) return;
+    red.lastSampleAt = sim.time;
+    red.ring.push({ t: sim.time, a: redSnapshotAccum() });
+    while (red.ring.length > RED_RING_CAP ||
+      (red.ring.length > 1 && sim.time - red.ring[0].t > RED_WINDOW_S + 5)) red.ring.shift();
+    renderRed();
+  }
+
+  function renderRed() {
+    const R = red.ring;
+    if (!R.length) return;
+    // Base de la ventana: la muestra mas antigua con antiguedad < 60 s
+    let base = R[0];
+    for (let i = 1; i < R.length; i += 1) {
+      if (sim.time - R[i].t < RED_WINDOW_S) break;
+      base = R[i];
+    }
+    const dt = Math.max(1e-6, sim.time - base.t);
+    const f = redFlows(base.a, R[R.length - 1].a, dt);
+    const el = redEls();
+    const c = counts();
+    const E = (v) => obsFmtE(v) + ' E/s';
+    const M = (v) => obsFmtE(v) + ' mass/s';
+    if (el.redLSunA) el.redLSunA.textContent = M(f.photo_field_mass);
+    if (el.redLSunBC) el.redLSunBC.textContent = E(f.photo_direct);
+    if (el.redLACons) el.redLACons.textContent = M(f.graze_mass);
+    if (el.redLBCCons) el.redLBCCons.textContent = E(f.bc_feed);
+    if (el.redLConsPred) el.redLConsPred.textContent = E(f.predation);
+    if (el.redLCarrMob) el.redLCarrMob.textContent = E(f.carrion_eat);
+    if (el.redLCarrField) el.redLCarrField.textContent = E(f.carrion_field + f.excretion);
+    if (el.redLHeat) el.redLHeat.textContent = E(f.heat);
+    const ratio = (a, b) => (b > 1e-9 ? (a / b).toFixed(2) : '—');
+    // carroña (carcassEat) mezcla consumidores y depredadores: no se reparte a ojo,
+    // se muestra solo como arista Carroña→Consumidores/Depredadores
+    const consIn = f.graze_assim_E + f.bc_feed;
+    if (el.redConsPop) el.redConsPop.textContent = fmt.format(c.consumers);
+    if (el.redConsIn) el.redConsIn.textContent = obsFmtE(consIn);
+    if (el.redConsOut) el.redConsOut.textContent = obsFmtE(f.cons_out);
+    if (el.redConsRatio) el.redConsRatio.textContent = ratio(consIn, f.cons_out);
+    if (el.redConsExtra) el.redConsExtra.textContent = 'rescates 60 s: ' + f.mig_consumers;
+    if (el.redPredPop) el.redPredPop.textContent = fmt.format(c.predators);
+    if (el.redPredIn) el.redPredIn.textContent = obsFmtE(f.pred_in);
+    if (el.redPredOut) el.redPredOut.textContent = obsFmtE(f.pred_out);
+    if (el.redPredRatio) el.redPredRatio.textContent = ratio(f.pred_in, f.pred_out);
+    const capPct = f.contact > 0 ? (100 * f.capture / f.contact).toFixed(1) + ' %' : 'sin contactos';
+    if (el.redPredExtra) el.redPredExtra.textContent = 'captura: ' + capPct;
+    const pf = sim.producerField;
+    if (el.redFieldCells) el.redFieldCells.textContent = fmt.format(pf.mass.length);
+    if (el.redFieldIn) el.redFieldIn.textContent = obsFmtE(f.photo_field_mass);
+    if (el.redFieldOut) el.redFieldOut.textContent = obsFmtE(f.graze_mass);
+    if (el.redFieldRatio) el.redFieldRatio.textContent = ratio(f.photo_field_mass, f.graze_mass);
+    if (el.redFieldExtra) el.redFieldExtra.textContent = 'stock ' + obsFmtE(pf.total) + ' mass';
+    if (el.redDiag) {
+      const w = sim.time - base.t;
+      el.redDiag.textContent = 'Ventana ' + w.toFixed(0) + ' s' + (w < RED_WINDOW_S - 1 ? ' (esperando 60 s…)' : '') +
+        ' · Depredadores: ' + f.contact + ' contactos → ' + f.capture + ' capturas (' + capPct + ')' +
+        ' · ingreso ' + E(f.pred_in) + ' vs gasto ' + E(f.pred_out) +
+        ' · rescates 60 s: C ' + f.mig_consumers + ', D ' + f.mig_predators +
+        '. Persistencia = sin rescates; migración repuebla; subsidio ×18 multiplica cada bocado.';
+    }
   }
 
   function updateObservatory() {
@@ -4984,6 +5125,7 @@
     sim.carcasses.length = 0;
     obsReset(); // task_926: el historial del observatorio no debe mezclar mundos
     atlasReset(); // task_930: el atlas tampoco
+    redReset(); // task_932: la red trofica tampoco
     sim.migrationTimer = 0;
     sim.graph.clear();
     sim.geneHistory.clear();
@@ -5723,6 +5865,31 @@
       });
       makePanelDraggable(els.atlasPanel);
     }
+
+    // task_932: Red trofica viva — opt-in, oculta por defecto, sin coste cerrado
+    if (els.redToggle && els.redPanel) {
+      const redHide = () => {
+        els.redPanel.classList.add('hidden');
+        els.redToggle.classList.remove('active');
+      };
+      els.redToggle.addEventListener('click', () => {
+        const show = els.redPanel.classList.toggle('hidden');
+        els.redToggle.classList.toggle('active', !show);
+        if (!show) { red.lastSampleAt = -1; updateRed(); }
+      });
+      const redClose = els.redPanel.querySelector('[data-red-close]');
+      if (redClose) redClose.addEventListener('click', redHide);
+      els.redPanel.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') redHide();
+      });
+      if (els.redCompare) els.redCompare.addEventListener('click', () => {
+        if (els.experimentPanel && els.experimentPanel.classList.contains('hidden')) {
+          els.experimentToggle.click();
+        }
+        els.experimentPanel.scrollIntoView({ block: 'nearest' });
+      });
+      makePanelDraggable(els.redPanel);
+    }
     els.dayNightToggle.addEventListener('click', toggleDayNight);
     els.playPause.addEventListener('click', () => setPaused(!sim.paused));
     document.getElementById('toggleStats').addEventListener('click', (ev) => {
@@ -6085,6 +6252,7 @@
     sim.energyResyncAccum = 0;
     obsReset(); // task_926: sim.time puede retroceder; no mezclar series de mundos distintos
     atlasReset(); // task_930
+    redReset(); // task_932: sim.time puede retroceder
     // Restaurar criaturas
     for (const c of snap.creatures) {
       const e = Object.assign({}, c);

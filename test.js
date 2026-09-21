@@ -122,6 +122,7 @@ function loadApp() {
       obsSnapshotAccum, obsReset, OBS_WINDOW_S,
       atlasResample, atlasCountDensity, atlasDelta, atlasRingPush, atlasSnapshotAt,
       atlas, atlasReset, atlasConfigure, ATLAS_MAX_COLS, ATLAS_DELTA_S, ATLAS_RING_CAP, ATLAS_WINDOW_S,
+      redFlows, redSnapshotAccum, redReset, updateRed, red, RED_WINDOW_S, RED_RING_CAP,
       GROUPS, GROUP_KEYS, GROUP_LABELS, TYPE, PRODUCER,
       WORLD, CELL, FIELD_CELL,
       camera, worldToScreen, visibleTileOffsets,
@@ -2209,6 +2210,67 @@ function runInquiryTests() {
   });
 }
 
+// ─── task_932: Red trófica viva ───
+function runRedTests() {
+  const api = loadApp();
+  suite('Red trófica task_932');
+  api.resetWorld();
+
+  assert('redFlows separa mass del campo A de E y desglosa el subsidio x18', () => {
+    const prev = { graze: 10, trophicAmplification: 170, photosynthField: 100, photosynthDirect: 5,
+      colonyFeed: 3, prodCGraze: 2, predation: 20, carcassEat: 4, carcassToField: 6, excretion: 8,
+      metabolism: 40, thermal: 4, predIncome: 24, predMetab: 10, predThermal: 1,
+      fnlContact: 200, fnlCapture: 10, migConsumers: 2, migPredators: 1 };
+    const cur = {};
+    for (const k of Object.keys(prev)) cur[k] = prev[k] * 2; // delta == prev
+    const f = api.redFlows(prev, cur, 10);
+    expectEq(f.graze_mass, 1, 'graze_mass mal escalado');
+    expectEq(f.graze_assim_E, 18, 'asimilado A->consumidor != bite+subsidio');
+    expectEq(f.subsidy_E, 17, 'subsidio x18 mal desglosado');
+    expectEq(f.photo_field_mass, 10, 'fotosintesis campo A mal escalada');
+    expectEq(f.photo_direct, 0.5, 'fotosintesis directa mal escalada');
+    expectEq(f.bc_feed, 0.5, 'alimentacion B/C mal sumada');
+    expectEq(f.predation, 2, 'depredacion mal escalada');
+    expectEq(f.heat, 4.4, 'calor != metabolismo+termica');
+    expectEq(f.cons_out, 3.3, 'gasto consumidores mal restado');
+    expectEq(f.pred_in, 2.4, 'ingreso depredadores mal escalado');
+    expectEq(f.pred_out, 1.1, 'gasto depredadores mal escalado');
+    expectEq(f.contact, 200, 'contactos absolutos mal contados');
+    expectEq(f.capture, 10, 'capturas absolutas mal contadas');
+    expectEq(f.mig_consumers, 2, 'rescates consumidores mal contados');
+    expectEq(f.mig_predators, 1, 'rescates depredadores mal contados');
+  });
+
+  assert('redFlows tolera prev null y claves ausentes sin NaN', () => {
+    const f = api.redFlows(null, { graze: 6, metabolism: 3 }, 3);
+    expectEq(f.graze_mass, 2, 'prev null debe contar como ceros');
+    for (const k of Object.keys(f)) {
+      expectOk(Number.isFinite(f[k]), k + ' no finito con claves ausentes');
+    }
+  });
+
+  assert('updateRed muestrea 1 Hz y acota el ring a la ventana de 60 s', () => {
+    api.redReset();
+    for (let t = 0; t <= 90; t += 0.5) {
+      api.sim.time = t;
+      api.updateRed();
+    }
+    expectOk(api.red.ring.length <= api.RED_RING_CAP, 'ring excede el limite de capacidad');
+    expectOk(api.red.ring.length >= 30, 'ring demasiado corto para 90 s de muestreo');
+    const first = api.red.ring[0], last = api.red.ring[api.red.ring.length - 1];
+    expectOk(last.t - first.t <= api.RED_WINDOW_S + 5, 'ventana del ring > 65 s');
+  });
+
+  assert('redReset vacia el ledger entre mundos', () => {
+    api.redReset();
+    expectEq(api.red.ring.length, 0, 'ring no vacio tras reset');
+    expectEq(api.red.lastSampleAt, -1, 'lastSampleAt no reiniciado');
+    const snap = api.redSnapshotAccum();
+    expectOk(Number.isFinite(snap.graze) && Number.isFinite(snap.migConsumers),
+      'snapshot con campos no finitos');
+  });
+}
+
 function main() {
   const filter = process.argv[2] || 'all';
 
@@ -2228,6 +2290,9 @@ function main() {
   }
   if (filter === 'atlas' || filter === 'all') {
     runAtlasTests();
+  }
+  if (filter === 'red' || filter === 'all') {
+    runRedTests();
   }
   if (filter === 'perf' || filter === 'all') {
     runPerfTests();

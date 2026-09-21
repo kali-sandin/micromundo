@@ -2055,3 +2055,66 @@ select {
 @media (max-width: 340px) {
   .atlas-panel { width: calc(100vw - 12px); }
 }
+
+/* ── task_932: Red trofica viva ── */
+.red-panel {
+  right: 14px;
+  top: 84px;
+  width: min(460px, calc(100vw - 20px));
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.red-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+#redDiagram {
+  width: 100%;
+  height: auto;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+}
+
+.red-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.74rem;
+}
+
+.red-table th,
+.red-table td {
+  text-align: right;
+  padding: 4px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.red-table thead th,
+.red-table tbody th[scope="row"] {
+  text-align: left;
+}
+
+.red-diag {
+  font-size: 0.76rem;
+  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.red-note {
+  font-size: 0.72rem;
+  margin: 0;
+  opacity: 0.8;
+  line-height: 1.45;
+}
+
+@media (max-width: 340px) {
+  .red-panel { width: calc(100vw - 12px); }
+  .red-table { font-size: 0.68rem; }
+}

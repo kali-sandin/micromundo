@@ -1,0 +1,30 @@
+{
+  "task": "task_932",
+  "gate": {
+    "cost_ok": true,
+    "p95_ok": true,
+    "err_ok": true,
+    "continuity_ok": true,
+    "mem_ok": true
+  },
+  "seeds": [
+    {
+      "seed": 12345,
+      "wall_s": 57.4,
+      "sim_time_s": 45,
+      "counts": {
+        "consumers": 718,
+        "predators": 30
+      },
+      "red_cost_pct": 0.0977,
+      "p95_update_ms": 0.0139,
+      "err_graze_pct": 1.3004,
+      "err_predation_pct": 0,
+      "err_heat_pct": 0.0439,
+      "ring_max": 45,
+      "gap_max_s": 1.017,
+      "red_mem_kb": 30.02
+    }
+  ],
+  "generated_at": "2026-09-21T00:17:21.008Z"
+}

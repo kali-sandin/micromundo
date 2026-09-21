@@ -49,6 +49,7 @@
           <button class="tool-button" id="toggleDebug" type="button"><span class="btn-icon">◎</span><span>Rangos</span></button>
           <button class="tool-button" id="toggleEnergy" type="button" title="Observatorio de energía y biomasa: stocks, flujos y subsidio x18"><span class="btn-icon">⚡</span><span>Energía</span></button>
           <button class="tool-button" id="atlasToggle" type="button" title="Atlas vivo: capas espaciales de biomasa, densidad y cambio en 60 s"><span class="btn-icon">🗺</span><span>Mapa</span></button>
+          <button class="tool-button" id="redToggle" type="button" title="Red trófica viva: quién alimenta a quién, con flujos reales de 60 s"><span class="btn-icon">🕸</span><span>Red</span></button>
           <button class="tool-button" id="experimentToggle" type="button" title="Laboratorio causal: experimento control vs tratamiento"><span class="btn-icon">⚗</span><span>Experimento</span></button>
           <button class="tool-button" id="expeditionToggle" type="button" title="Expedición guiada y Cuaderno de campo: misión con predicción, observación, experimento y conclusiones"><span class="btn-icon">🧭</span><span>Expedición</span></button>
           <button class="tool-button" id="resetWorld" type="button"><span class="btn-icon">↻</span><span>Reiniciar</span></button>
@@ -198,6 +199,62 @@
             <canvas id="atlasSpark" width="420" height="80" role="img" aria-label="Historial de 10 minutos de la zona seleccionada"></canvas>
             <p class="atlas-note">El mapa muestra <strong>correlación espacial, no causalidad</strong>. Muestreo 1 Hz · historial 10 min · datos reales del ecosistema.</p>
             <button class="tool-button" id="atlasCompare" type="button">Comparar misma seed (Experimento)</button>
+          </div>
+        </section>
+
+        <section class="hud panel red-panel hidden movable" id="redPanel" aria-label="Red trófica viva: relaciones y diagnóstico">
+          <header class="panel-head drag-handle">
+            <h2>🕸 Red trófica</h2>
+            <button class="icon-button" data-red-close type="button" title="Cerrar (Esc)">×</button>
+          </header>
+          <div class="red-body">
+            <svg id="redDiagram" viewBox="0 0 420 250" width="420" height="250" role="img" aria-label="Diagrama de la red trófica: luz, productores A, B y C, consumidores, depredadores, carroña y campo, con flujos de 60 segundos">
+              <defs></defs>
+              <g stroke="#7a8aa0" stroke-width="1.5" fill="none">
+                <path id="redESunA" d="M210 38 C 210 60, 105 60, 105 86"/>
+                <path id="redESunBC" d="M210 38 C 210 60, 300 60, 300 86"/>
+                <path id="redEACons" d="M105 130 C 105 160, 180 160, 195 172"/>
+                <path id="redEBCCons" d="M300 130 C 300 160, 240 160, 235 172"/>
+                <path id="redEConsPred" d="M215 214 C 235 214, 245 214, 255 214"/>
+                <path id="redECarrMob" d="M105 172 C 70 190, 80 214, 110 214"/>
+                <path id="redEMobCarr" d="M215 200 C 180 226, 160 230, 150 226"/>
+                <path id="redECarrField" d="M110 226 C 90 240, 300 240, 320 226"/>
+                <path id="redEHeat" d="M300 200 C 340 214, 350 150, 355 108"/>
+              </g>
+              <g font-size="9" fill="#c7d3e4" text-anchor="middle">
+                <text x="210" y="30" id="redNSun" fill="#ffd979" font-weight="bold">☀ Luz</text>
+                <text x="105" y="80" id="redNA" fill="#76d25d" font-weight="bold">Campo A</text>
+                <text x="300" y="80" id="redNBC" fill="#48d28d" font-weight="bold">Productores B/C</text>
+                <text x="205" y="168" id="redNCons" fill="#54b7f1" font-weight="bold">Consumidores</text>
+                <text x="310" y="196" id="redNPred" fill="#f05b50" font-weight="bold">Depredadores</text>
+                <text x="110" y="238" id="redNCarr" fill="#b9a06a" font-weight="bold">Carroña / Campo</text>
+                <text x="360" y="100" id="redNHeat" fill="#ff8d8d" font-weight="bold">Calor</text>
+              </g>
+              <g font-size="8.5" fill="#9fb2c8" text-anchor="middle">
+                <text id="redLSunA" x="150" y="56">0 mass/s</text>
+                <text id="redLSunBC" x="268" y="56">0 E/s</text>
+                <text id="redLACons" x="140" y="150">0 mass/s</text>
+                <text id="redLBCCons" x="272" y="150">0 E/s</text>
+                <text id="redLConsPred" x="235" y="208">0 E/s</text>
+                <text id="redLCarrMob" x="80" y="200">0 E/s</text>
+                <text id="redLCarrField" x="210" y="248">0 E/s</text>
+                <text id="redLHeat" x="348" y="150">0 E/s</text>
+              </g>
+            </svg>
+            <table class="red-table">
+              <caption class="sr-only">Diagnóstico por nivel trófico, ventana de 60 segundos</caption>
+              <thead>
+                <tr><th scope="col">Nivel</th><th scope="col">Población</th><th scope="col">Ingesta (E/s)</th><th scope="col">Gasto (E/s)</th><th scope="col">Ingesta/Gasto</th><th scope="col">Extra</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">Consumidores</th><td id="redConsPop">0</td><td id="redConsIn">0</td><td id="redConsOut">0</td><td id="redConsRatio">—</td><td id="redConsExtra"></td></tr>
+                <tr><th scope="row">Depredadores</th><td id="redPredPop">0</td><td id="redPredIn">0</td><td id="redPredOut">0</td><td id="redPredRatio">—</td><td id="redPredExtra"></td></tr>
+                <tr><th scope="row">Campo A (mass)</th><td id="redFieldCells">0</td><td id="redFieldIn">0</td><td id="redFieldOut">0</td><td id="redFieldRatio">—</td><td id="redFieldExtra"></td></tr>
+              </tbody>
+            </table>
+            <div class="red-diag" id="redDiag" aria-live="polite">Esperando 60 s de historial…</div>
+            <p class="red-note">El pastoreo retira <strong>mass</strong> del campo A y se convierte en energía con el <strong>subsidio ×18</strong>: simplificación del modelo, no producción natural. La <strong>migración/rescate</strong> repuebla niveles desde fuera: no es natalidad. Ventana 60 s · muestreo 1 Hz · datos reales.</p>
+            <button class="tool-button" id="redCompare" type="button">Comparar misma seed (Experimento)</button>
           </div>
         </section>
 
