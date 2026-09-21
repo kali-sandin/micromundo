@@ -5,7 +5,8 @@
  * Por cada seed (5 seeds x 10m, dt 1/60, migracion OFF), panel Red ABIERTO
  * (peor caso de coste):
  *  - Aggregate check: integral de las tasas de redFlows en ventanas 1 s
- *    consecutivas (sin solape) vs delta total de flowAccum al final del run.
+ *    consecutivas (sin solape) vs delta de flowAccum dentro de la MISMA
+ *    ventana del ring (~60 s), que es lo que muestra el panel.
  *    Gate error <=2% por familia (graze mass, depredacion, calor).
  *  - Continuidad: max dt entre muestras consecutivas del ring <= 2 s
  *    (muestreo 1 Hz por diseno).
@@ -140,7 +141,11 @@ function runSeed(seed) {
   const R = api.red.ring;
   for (let i = 1; i < R.length; i += 1) gapMax = Math.max(gapMax, R[i].t - R[i - 1].t);
 
-  // integral de ventanas 1 s consecutivas (sin solape) vs delta total del run
+  // integral de ventanas 1 s consecutivas (sin solape) vs delta total del run.
+  // El ring esta acotado (RED_RING_CAP=66, ~60 s): la integral cubre solo la
+  // ventana del ring, asi que la referencia es el delta de acumuladores en ESA
+  // MISMA ventana (R[0].a -> R[last].a). Comparar contra el delta del run entero
+  // seria un artefacto del harness, no un error del panel.
   let intGraze = 0, intPred = 0, intHeat = 0;
   for (let i = 1; i < R.length; i += 1) {
     const wdt = Math.max(1e-6, R[i].t - R[i - 1].t);
@@ -149,13 +154,13 @@ function runSeed(seed) {
     intPred += f.predation * wdt;
     intHeat += f.heat * wdt;
   }
-  // referencia: acumuladores en la ULTIMA muestra del ring (el tramo <1 s tras la
-  // ultima muestra no esta integrado por diseno: muestreo 1 Hz)
+  // referencia: delta de acumuladores dentro de la ventana del ring
   const acc1 = R.length ? R[R.length - 1].a : acc0;
+  const ref0 = R.length ? R[0].a : acc0;
   const relErr = (a, b) => (Math.max(Math.abs(a), Math.abs(b)) < 1e-9 ? 0 : Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)));
-  const errGraze = relErr(intGraze, acc1.graze - acc0.graze);
-  const errPred = relErr(intPred, acc1.predation - acc0.predation);
-  const errHeat = relErr(intHeat, (acc1.metabolism + acc1.thermal) - (acc0.metabolism + acc0.thermal));
+  const errGraze = relErr(intGraze, acc1.graze - ref0.graze);
+  const errPred = relErr(intPred, acc1.predation - ref0.predation);
+  const errHeat = relErr(intHeat, (acc1.metabolism + acc1.thermal) - (ref0.metabolism + ref0.thermal));
 
   const wallMs = Math.max(1, Date.now() - wallStart);
   callMs.sort((a, b) => a - b);
