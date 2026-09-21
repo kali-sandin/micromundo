@@ -1,1 +1,232 @@
 [gate] seed 12345 t=0.0 wall=0s redMs=2.9
+[gate] seed 12345 t=26.0 wall=30s redMs=24.0
+[gate] seed 12345 t=54.4 wall=60s redMs=43.7
+[gate] seed 12345 t=84.3 wall=90s redMs=63.8
+[gate] seed 12345 t=115.9 wall=120s redMs=82.1
+[gate] seed 12345 t=147.5 wall=150s redMs=99.8
+[gate] seed 12345 t=179.9 wall=180s redMs=118.1
+[gate] seed 12345 t=212.5 wall=210s redMs=134.0
+[gate] seed 12345 t=245.8 wall=240s redMs=149.9
+[gate] seed 12345 t=278.4 wall=270s redMs=165.5
+[gate] seed 12345 t=306.9 wall=300s redMs=180.9
+[gate] seed 12345 t=335.2 wall=330s redMs=195.5
+[gate] seed 12345 t=361.7 wall=360s redMs=211.0
+[gate] seed 12345 t=386.5 wall=390s redMs=235.1
+[gate] seed 12345 t=409.6 wall=420s redMs=247.7
+[gate] seed 12345 t=431.0 wall=450s redMs=259.8
+[gate] seed 12345 t=451.5 wall=480s redMs=271.6
+[gate] seed 12345 t=470.7 wall=510s redMs=282.6
+[gate] seed 12345 t=489.1 wall=540s redMs=293.5
+[gate] seed 12345 t=506.4 wall=570s redMs=304.4
+[gate] seed 12345 t=522.9 wall=600s redMs=314.5
+[gate] seed 12345 t=538.6 wall=630s redMs=325.2
+[gate] seed 12345 t=553.8 wall=660s redMs=335.2
+[gate] seed 12345 t=568.5 wall=690s redMs=345.4
+[gate] seed 12345 t=582.9 wall=720s redMs=355.4
+[gate] seed 12345 t=596.9 wall=750s redMs=364.9
+seed 12345: coste_red=0.0485% p95=0.0099ms err_graze=0% err_pred=0% err_heat=0% ring=65 gap=1.017s mem=41.58KB (wall 757.5s)
+[gate] seed 23456 t=0.0 wall=0s redMs=5.7
+[gate] seed 23456 t=27.2 wall=30s redMs=26.2
+[gate] seed 23456 t=56.5 wall=60s redMs=48.2
+[gate] seed 23456 t=87.2 wall=90s redMs=65.8
+[gate] seed 23456 t=118.6 wall=120s redMs=83.7
+[gate] seed 23456 t=150.6 wall=150s redMs=102.9
+[gate] seed 23456 t=183.0 wall=180s redMs=123.4
+[gate] seed 23456 t=216.2 wall=210s redMs=142.0
+[gate] seed 23456 t=248.8 wall=240s redMs=162.1
+[gate] seed 23456 t=280.3 wall=270s redMs=178.4
+[gate] seed 23456 t=310.2 wall=300s redMs=194.6
+[gate] seed 23456 t=338.2 wall=330s redMs=210.3
+[gate] seed 23456 t=364.4 wall=360s redMs=224.8
+[gate] seed 23456 t=388.6 wall=390s redMs=244.8
+[gate] seed 23456 t=410.5 wall=420s redMs=257.6
+[gate] seed 23456 t=427.1 wall=450s redMs=271.3
+[gate] seed 23456 t=443.2 wall=480s redMs=284.6
+[gate] seed 23456 t=458.7 wall=510s redMs=296.1
+[gate] seed 23456 t=473.2 wall=540s redMs=308.3
+[gate] seed 23456 t=488.4 wall=570s redMs=319.4
+[gate] seed 23456 t=503.1 wall=600s redMs=330.6
+[gate] seed 23456 t=518.9 wall=630s redMs=342.2
+[gate] seed 23456 t=534.4 wall=660s redMs=353.6
+[gate] seed 23456 t=549.1 wall=690s redMs=364.2
+[gate] seed 23456 t=563.6 wall=720s redMs=374.4
+[gate] seed 23456 t=577.6 wall=750s redMs=385.5
+[gate] seed 23456 t=591.2 wall=780s redMs=395.8
+seed 23456: coste_red=0.0505% p95=0.0096ms err_graze=0% err_pred=0% err_heat=0% ring=65 gap=1.017s mem=41.58KB (wall 800s)
+[gate] seed 34567 t=0.0 wall=0s redMs=6.0
+[gate] seed 34567 t=25.2 wall=30s redMs=26.6
+[gate] seed 34567 t=52.8 wall=60s redMs=48.1
+[gate] seed 34567 t=81.8 wall=90s redMs=66.5
+[gate] seed 34567 t=111.9 wall=120s redMs=85.4
+[gate] seed 34567 t=142.9 wall=150s redMs=105.9
+[gate] seed 34567 t=174.4 wall=180s redMs=125.7
+[gate] seed 34567 t=205.7 wall=210s redMs=145.7
+[gate] seed 34567 t=237.3 wall=240s redMs=163.7
+[gate] seed 34567 t=269.3 wall=270s redMs=181.5
+[gate] seed 34567 t=300.3 wall=300s redMs=198.3
+[gate] seed 34567 t=330.3 wall=330s redMs=214.2
+[gate] seed 34567 t=358.7 wall=360s redMs=229.3
+[gate] seed 34567 t=385.8 wall=390s redMs=244.0
+[gate] seed 34567 t=411.1 wall=420s redMs=258.3
+[gate] seed 34567 t=435.0 wall=450s redMs=272.3
+[gate] seed 34567 t=457.1 wall=480s redMs=285.0
+[gate] seed 34567 t=478.1 wall=510s redMs=296.7
+[gate] seed 34567 t=498.2 wall=540s redMs=310.2
+[gate] seed 34567 t=517.4 wall=570s redMs=322.2
+[gate] seed 34567 t=536.0 wall=600s redMs=333.6
+[gate] seed 34567 t=553.5 wall=630s redMs=344.6
+[gate] seed 34567 t=570.4 wall=660s redMs=358.0
+[gate] seed 34567 t=586.8 wall=690s redMs=370.2
+seed 34567: coste_red=0.053% p95=0.0095ms err_graze=0% err_pred=0% err_heat=0% ring=65 gap=1.017s mem=41.58KB (wall 715.8s)
+[gate] seed 45678 t=0.0 wall=0s redMs=5.4
+[gate] seed 45678 t=27.0 wall=30s redMs=25.1
+[gate] seed 45678 t=56.2 wall=60s redMs=44.6
+[gate] seed 45678 t=87.3 wall=90s redMs=63.7
+[gate] seed 45678 t=119.8 wall=120s redMs=83.4
+[gate] seed 45678 t=152.9 wall=150s redMs=103.1
+[gate] seed 45678 t=185.8 wall=180s redMs=123.3
+[gate] seed 45678 t=219.4 wall=210s redMs=141.8
+[gate] seed 45678 t=252.7 wall=240s redMs=157.5
+[gate] seed 45678 t=285.6 wall=270s redMs=173.9
+[gate] seed 45678 t=316.8 wall=300s redMs=188.7
+[gate] seed 45678 t=346.1 wall=330s redMs=203.9
+[gate] seed 45678 t=373.3 wall=360s redMs=220.5
+[gate] seed 45678 t=398.3 wall=390s redMs=235.8
+[gate] seed 45678 t=421.2 wall=420s redMs=248.5
+[gate] seed 45678 t=443.0 wall=450s redMs=260.9
+[gate] seed 45678 t=463.4 wall=480s redMs=272.6
+[gate] seed 45678 t=482.7 wall=510s redMs=284.0
+[gate] seed 45678 t=500.8 wall=540s redMs=295.0
+[gate] seed 45678 t=517.9 wall=570s redMs=306.0
+[gate] seed 45678 t=534.4 wall=600s redMs=316.7
+[gate] seed 45678 t=550.2 wall=630s redMs=327.6
+[gate] seed 45678 t=565.3 wall=660s redMs=338.8
+[gate] seed 45678 t=579.9 wall=690s redMs=350.8
+[gate] seed 45678 t=594.1 wall=720s redMs=361.0
+seed 45678: coste_red=0.0499% p95=0.0096ms err_graze=0% err_pred=0% err_heat=0% ring=65 gap=1.017s mem=41.58KB (wall 733.1s)
+[gate] seed 56789 t=0.0 wall=0s redMs=4.3
+[gate] seed 56789 t=26.7 wall=30s redMs=26.0
+[gate] seed 56789 t=54.9 wall=60s redMs=44.7
+[gate] seed 56789 t=84.5 wall=90s redMs=62.1
+[gate] seed 56789 t=114.8 wall=120s redMs=81.1
+[gate] seed 56789 t=144.9 wall=150s redMs=100.2
+[gate] seed 56789 t=176.9 wall=180s redMs=119.6
+[gate] seed 56789 t=209.7 wall=210s redMs=136.7
+[gate] seed 56789 t=242.4 wall=240s redMs=152.6
+[gate] seed 56789 t=274.7 wall=270s redMs=169.4
+[gate] seed 56789 t=305.1 wall=300s redMs=186.3
+[gate] seed 56789 t=334.3 wall=330s redMs=201.3
+[gate] seed 56789 t=360.9 wall=360s redMs=215.2
+[gate] seed 56789 t=386.0 wall=390s redMs=229.6
+[gate] seed 56789 t=409.3 wall=420s redMs=242.1
+[gate] seed 56789 t=431.3 wall=450s redMs=254.4
+[gate] seed 56789 t=452.0 wall=480s redMs=266.2
+[gate] seed 56789 t=471.6 wall=510s redMs=277.8
+[gate] seed 56789 t=489.8 wall=540s redMs=289.7
+[gate] seed 56789 t=507.2 wall=570s redMs=300.4
+[gate] seed 56789 t=523.9 wall=600s redMs=311.7
+[gate] seed 56789 t=540.0 wall=630s redMs=322.7
+[gate] seed 56789 t=555.4 wall=660s redMs=333.5
+[gate] seed 56789 t=570.1 wall=690s redMs=343.9
+[gate] seed 56789 t=584.3 wall=720s redMs=354.0
+[gate] seed 56789 t=598.2 wall=750s redMs=363.5
+seed 56789: coste_red=0.0484% p95=0.0091ms err_graze=0% err_pred=0% err_heat=0% ring=65 gap=1.017s mem=41.58KB (wall 754.3s)
+{
+  "task": "task_932",
+  "gate": {
+    "cost_ok": true,
+    "p95_ok": true,
+    "err_ok": true,
+    "continuity_ok": true,
+    "mem_ok": true
+  },
+  "seeds": [
+    {
+      "seed": 12345,
+      "wall_s": 757.5,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1926,
+        "predators": 0
+      },
+      "red_cost_pct": 0.0485,
+      "p95_update_ms": 0.0099,
+      "err_graze_pct": 0,
+      "err_predation_pct": 0,
+      "err_heat_pct": 0,
+      "ring_max": 65,
+      "gap_max_s": 1.017,
+      "red_mem_kb": 41.58
+    },
+    {
+      "seed": 23456,
+      "wall_s": 800,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1971,
+        "predators": 0
+      },
+      "red_cost_pct": 0.0505,
+      "p95_update_ms": 0.0096,
+      "err_graze_pct": 0,
+      "err_predation_pct": 0,
+      "err_heat_pct": 0,
+      "ring_max": 65,
+      "gap_max_s": 1.017,
+      "red_mem_kb": 41.58
+    },
+    {
+      "seed": 34567,
+      "wall_s": 715.8,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1592,
+        "predators": 0
+      },
+      "red_cost_pct": 0.053,
+      "p95_update_ms": 0.0095,
+      "err_graze_pct": 0,
+      "err_predation_pct": 0,
+      "err_heat_pct": 0,
+      "ring_max": 65,
+      "gap_max_s": 1.017,
+      "red_mem_kb": 41.58
+    },
+    {
+      "seed": 45678,
+      "wall_s": 733.1,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1905,
+        "predators": 0
+      },
+      "red_cost_pct": 0.0499,
+      "p95_update_ms": 0.0096,
+      "err_graze_pct": 0,
+      "err_predation_pct": 0,
+      "err_heat_pct": 0,
+      "ring_max": 65,
+      "gap_max_s": 1.017,
+      "red_mem_kb": 41.58
+    },
+    {
+      "seed": 56789,
+      "wall_s": 754.3,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1911,
+        "predators": 0
+      },
+      "red_cost_pct": 0.0484,
+      "p95_update_ms": 0.0091,
+      "err_graze_pct": 0,
+      "err_predation_pct": 0,
+      "err_heat_pct": 0,
+      "ring_max": 65,
+      "gap_max_s": 1.017,
+      "red_mem_kb": 41.58
+    }
+  ],
+  "generated_at": "2026-09-21T01:43:12.069Z"
+}
+GATE: cost_ok=PASS p95_ok=PASS err_ok=PASS continuity_ok=PASS mem_ok=PASS

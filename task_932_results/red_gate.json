@@ -10,14 +10,82 @@
   "seeds": [
     {
       "seed": 12345,
-      "wall_s": 122,
-      "sim_time_s": 120,
+      "wall_s": 757.5,
+      "sim_time_s": 600,
       "counts": {
-        "consumers": 705,
-        "predators": 30
+        "consumers": 1926,
+        "predators": 0
       },
-      "red_cost_pct": 0.0678,
-      "p95_update_ms": 0.0112,
+      "red_cost_pct": 0.0485,
+      "p95_update_ms": 0.0099,
+      "err_graze_pct": 0,
+      "err_predation_pct": 0,
+      "err_heat_pct": 0,
+      "ring_max": 65,
+      "gap_max_s": 1.017,
+      "red_mem_kb": 41.58
+    },
+    {
+      "seed": 23456,
+      "wall_s": 800,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1971,
+        "predators": 0
+      },
+      "red_cost_pct": 0.0505,
+      "p95_update_ms": 0.0096,
+      "err_graze_pct": 0,
+      "err_predation_pct": 0,
+      "err_heat_pct": 0,
+      "ring_max": 65,
+      "gap_max_s": 1.017,
+      "red_mem_kb": 41.58
+    },
+    {
+      "seed": 34567,
+      "wall_s": 715.8,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1592,
+        "predators": 0
+      },
+      "red_cost_pct": 0.053,
+      "p95_update_ms": 0.0095,
+      "err_graze_pct": 0,
+      "err_predation_pct": 0,
+      "err_heat_pct": 0,
+      "ring_max": 65,
+      "gap_max_s": 1.017,
+      "red_mem_kb": 41.58
+    },
+    {
+      "seed": 45678,
+      "wall_s": 733.1,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1905,
+        "predators": 0
+      },
+      "red_cost_pct": 0.0499,
+      "p95_update_ms": 0.0096,
+      "err_graze_pct": 0,
+      "err_predation_pct": 0,
+      "err_heat_pct": 0,
+      "ring_max": 65,
+      "gap_max_s": 1.017,
+      "red_mem_kb": 41.58
+    },
+    {
+      "seed": 56789,
+      "wall_s": 754.3,
+      "sim_time_s": 600,
+      "counts": {
+        "consumers": 1911,
+        "predators": 0
+      },
+      "red_cost_pct": 0.0484,
+      "p95_update_ms": 0.0091,
       "err_graze_pct": 0,
       "err_predation_pct": 0,
       "err_heat_pct": 0,
@@ -26,5 +94,5 @@
       "red_mem_kb": 41.58
     }
   ],
-  "generated_at": "2026-09-21T00:40:15.737Z"
+  "generated_at": "2026-09-21T01:43:12.069Z"
 }
