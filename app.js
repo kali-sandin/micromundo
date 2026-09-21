@@ -4352,7 +4352,7 @@
         'redLCarrMob', 'redLCarrField', 'redLHeat',
         'redConsPop', 'redConsIn', 'redConsOut', 'redConsRatio', 'redConsExtra',
         'redPredPop', 'redPredIn', 'redPredOut', 'redPredRatio', 'redPredExtra',
-        'redFieldCells', 'redFieldIn', 'redFieldOut', 'redFieldRatio', 'redFieldExtra', 'redDiag'];
+        'redFieldStock', 'redFieldIn', 'redFieldOut', 'redFieldRatio', 'redFieldExtra', 'redDiag'];
       red.els = {};
       for (let i = 0; i < ids.length; i += 1) red.els[ids[i]] = document.getElementById(ids[i]);
     }
@@ -4396,23 +4396,23 @@
     // carroña (carcassEat) mezcla consumidores y depredadores: no se reparte a ojo,
     // se muestra solo como arista Carroña→Consumidores/Depredadores
     const consIn = f.graze_assim_E + f.bc_feed;
-    if (el.redConsPop) el.redConsPop.textContent = fmt.format(c.consumers);
-    if (el.redConsIn) el.redConsIn.textContent = obsFmtE(consIn);
-    if (el.redConsOut) el.redConsOut.textContent = obsFmtE(f.cons_out);
+    if (el.redConsPop) el.redConsPop.textContent = fmt.format(c.consumers) + ' ind.';
+    if (el.redConsIn) el.redConsIn.textContent = E(consIn);
+    if (el.redConsOut) el.redConsOut.textContent = E(f.cons_out);
     if (el.redConsRatio) el.redConsRatio.textContent = ratio(consIn, f.cons_out);
     if (el.redConsExtra) el.redConsExtra.textContent = 'rescates 60 s: ' + f.mig_consumers;
-    if (el.redPredPop) el.redPredPop.textContent = fmt.format(c.predators);
-    if (el.redPredIn) el.redPredIn.textContent = obsFmtE(f.pred_in);
-    if (el.redPredOut) el.redPredOut.textContent = obsFmtE(f.pred_out);
+    if (el.redPredPop) el.redPredPop.textContent = fmt.format(c.predators) + ' ind.';
+    if (el.redPredIn) el.redPredIn.textContent = E(f.pred_in);
+    if (el.redPredOut) el.redPredOut.textContent = E(f.pred_out);
     if (el.redPredRatio) el.redPredRatio.textContent = ratio(f.pred_in, f.pred_out);
     const capPct = f.contact > 0 ? (100 * f.capture / f.contact).toFixed(1) + ' %' : 'sin contactos';
     if (el.redPredExtra) el.redPredExtra.textContent = 'captura: ' + capPct;
     const pf = sim.producerField;
-    if (el.redFieldCells) el.redFieldCells.textContent = fmt.format(pf.mass.length);
-    if (el.redFieldIn) el.redFieldIn.textContent = obsFmtE(f.photo_field_mass);
-    if (el.redFieldOut) el.redFieldOut.textContent = obsFmtE(f.graze_mass);
+    if (el.redFieldStock) el.redFieldStock.textContent = obsFmtE(pf.total) + ' mass';
+    if (el.redFieldIn) el.redFieldIn.textContent = M(f.photo_field_mass);
+    if (el.redFieldOut) el.redFieldOut.textContent = M(f.graze_mass);
     if (el.redFieldRatio) el.redFieldRatio.textContent = ratio(f.photo_field_mass, f.graze_mass);
-    if (el.redFieldExtra) el.redFieldExtra.textContent = 'stock ' + obsFmtE(pf.total) + ' mass';
+    if (el.redFieldExtra) el.redFieldExtra.textContent = fmt.format(pf.mass.length) + ' celdas';
     if (el.redDiag) {
       const w = sim.time - base.t;
       el.redDiag.textContent = 'Ventana ' + w.toFixed(0) + ' s' + (w < RED_WINDOW_S - 1 ? ' (esperando 60 s…)' : '') +

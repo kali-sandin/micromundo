@@ -77,8 +77,20 @@ function createDomMock() {
     hidden: false,
   };
   const canvasIds = new Set(['world', 'graph', 'geneGraph', 'obsGraph', 'atlasCanvas', 'atlasSpark']);
+  const elements = new Map();
+  const elementFor = (id) => {
+    if (canvasIds.has(id)) return fakeCanvas;
+    if (!elements.has(id)) {
+      elements.set(id, {
+        ...fakeEl,
+        style: {},
+        classList: { add() {}, remove() {}, toggle() {}, contains: () => false }
+      });
+    }
+    return elements.get(id);
+  };
   const doc = {
-    getElementById: (id) => canvasIds.has(id) ? fakeCanvas : fakeEl,
+    getElementById: elementFor,
     querySelector: () => fakeEl, querySelectorAll: () => [],
     createElement: (tag) => tag === 'canvas' ? fakeCanvas : fakeEl, createTextNode: () => fakeEl,
     body: fakeEl, documentElement: fakeEl,
@@ -162,7 +174,7 @@ function loadApp() {
   vm.createContext(ctx);
   vm.runInContext(src, ctx, { filename: 'app.js' });
   if (!ctx.__sim) throw new Error('No se pudo extraer __sim');
-  ctx.__sim.__test = { window, worldCanvas: document.getElementById('world') };
+  ctx.__sim.__test = { window, worldCanvas: document.getElementById('world'), getElementById: document.getElementById };
   return ctx.__sim;
 }
 
@@ -2268,6 +2280,36 @@ function runRedTests() {
     const snap = api.redSnapshotAccum();
     expectOk(Number.isFinite(snap.graze) && Number.isFinite(snap.migConsumers),
       'snapshot con campos no finitos');
+  });
+
+  assert('task_933: tabla Red declara unidades por magnitud sin llamar poblacion al campo', () => {
+    const html = fs.readFileSync(path.join(PROJ_DIR, 'index.html'), 'utf8');
+    expectOk(html.includes('<th scope="col">Stock / población</th>'), 'falta cabecera neutral de stock/poblacion');
+    expectOk(html.includes('<th scope="col">Entrada</th>') && html.includes('<th scope="col">Salida</th>'),
+      'entrada/salida siguen codificando una unidad global');
+    expectOk(html.includes('id="redFieldStock">0 mass</td>'), 'Campo A no declara stock mass');
+    expectOk(html.includes('id="redFieldIn">0 mass/s</td>') && html.includes('id="redFieldOut">0 mass/s</td>'),
+      'Campo A no declara flujos mass/s');
+    expectOk(!html.includes('<th scope="col">Ingesta (E/s)</th>'), 'persiste cabecera E/s falsa para Campo A');
+
+    api.redReset();
+    api.sim.time = 0;
+    api.updateRed();
+    api.sim.flowAccum.photosynthField += 120;
+    api.sim.flowAccum.graze += 30;
+    api.sim.flowAccum.trophicAmplification += 510;
+    api.sim.flowAccum.predIncome += 12;
+    api.sim.flowAccum.predMetab += 6;
+    api.sim.time = 60;
+    api.updateRed();
+    const cell = (id) => api.__test.getElementById(id).textContent;
+    expectOk(/ ind\.$/.test(cell('redConsPop')), 'poblacion de consumidores sin unidad individuos');
+    expectOk(/ E\/s$/.test(cell('redConsIn')), 'entrada de consumidores sin E/s');
+    expectOk(/ E\/s$/.test(cell('redPredOut')), 'salida de depredadores sin E/s');
+    expectOk(/ mass$/.test(cell('redFieldStock')), 'stock de Campo A sin mass');
+    expectOk(/ mass\/s$/.test(cell('redFieldIn')) && / mass\/s$/.test(cell('redFieldOut')),
+      'flujos de Campo A sin mass/s');
+    expectOk(/ celdas$/.test(cell('redFieldExtra')), 'numero de celdas no quedo como metadato');
   });
 }
 
