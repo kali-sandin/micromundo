@@ -4443,7 +4443,7 @@
   };
   const crono = {
     enabled: false, ring: [], events: [], lastSampleAt: -1,
-    lastPops: null, lastBalanceEventAt: -1e9, lastActionKey: '', sel: -1
+    lastPops: null, lastBalanceEventAt: -1e9, lastActionKey: '', sel: null
   };
 
   function cronoReset() {
@@ -4453,7 +4453,7 @@
     crono.lastPops = null;
     crono.lastBalanceEventAt = -1e9;
     crono.lastActionKey = '';
-    crono.sel = -1;
+    crono.sel = null;
   }
 
   function cronoOpen() {
@@ -4504,11 +4504,18 @@
   }
 
   function cronoPushEvent(ev) {
-    ev.i = crono.events.length;
     ev.kindLabel = CRONO_KIND_LABEL[ev.kind] || ev.kind;
     crono.events.push(ev);
-    if (crono.events.length > CRONO_EVENTS_CAP) crono.events.shift();
+    if (crono.events.length > CRONO_EVENTS_CAP) {
+      const dropped = crono.events.shift();
+      if (crono.sel === dropped) crono.sel = null;
+    }
     if (cronoOpen()) renderCrono();
+  }
+
+  function cronoSelectEvent(ev) {
+    crono.sel = crono.events.includes(ev) ? ev : null;
+    return crono.sel;
   }
 
   // Registro de acciones del usuario. key permite deduplicar (sliders, spam):
@@ -4601,7 +4608,7 @@
       const li = document.createElement('li');
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'crono-item' + (crono.sel === i ? ' selected' : '');
+      btn.className = 'crono-item' + (crono.sel === ev ? ' selected' : '');
       const tEl = document.createElement('span');
       tEl.className = 'crono-t';
       tEl.textContent = nowText2(ev.t);
@@ -4610,14 +4617,14 @@
       btn.appendChild(tEl);
       btn.appendChild(lEl);
       btn.addEventListener('click', () => {
-        crono.sel = ev.i;
+        cronoSelectEvent(ev);
         renderCrono();
       });
       li.appendChild(btn);
       frag.appendChild(li);
     }
     els.cronoList.replaceChildren(frag);
-    const sel = crono.events[crono.sel];
+    const sel = crono.sel;
     els.cronoDetail.textContent = sel
       ? cronoRenderDetail(sel)
       : (crono.events.length ? 'Elige un marcador para ver antes/después.' : 'Sin marcadores todavía. Grabación 1 Hz · 10 min.');

@@ -138,6 +138,7 @@ function loadApp() {
       atlas, atlasReset, atlasConfigure, ATLAS_MAX_COLS, ATLAS_DELTA_S, ATLAS_RING_CAP, ATLAS_WINDOW_S,
       redFlows, redSnapshotAccum, redReset, updateRed, red, RED_WINDOW_S, RED_RING_CAP,
       cronoDetectPops, cronoDetectBalance, cronoSampleAt, cronoReset, updateCrono, buildCronoJSON,
+      cronoSelectEvent,
       crono, cronoAction, CRONO_VERSION, CRONO_SCHEMA, CRONO_WINDOW_S, CRONO_RING_CAP, CRONO_EVENTS_CAP,
       GROUPS, GROUP_KEYS, GROUP_LABELS, TYPE, PRODUCER,
       WORLD, CELL, FIELD_CELL,
@@ -2439,6 +2440,22 @@ function runCronoTests() {
     // tope de eventos via cronoAction (claves únicas -> sin dedupe)
     for (let k = 0; k < api.CRONO_EVENTS_CAP + 50; k += 1) api.cronoAction('Accion ' + k, 'detalle');
     expectLte(api.crono.events.length, api.CRONO_EVENTS_CAP, 'tope de eventos no aplicado');
+  });
+
+  assert('crono: selección sigue siendo valida tras rotar mas de 400 eventos', () => {
+    api.cronoReset();
+    api.crono.enabled = true;
+    for (let k = 0; k < api.CRONO_EVENTS_CAP + 50; k += 1) {
+      api.cronoAction('Accion ' + k, 'detalle');
+    }
+    const newest = api.crono.events[api.crono.events.length - 1];
+    expectEq(api.cronoSelectEvent(newest), newest, 'evento nuevo no seleccionable tras overflow');
+    expectEq(api.crono.sel, newest, 'seleccion no conserva identidad del evento');
+    const oldest = api.crono.events[0];
+    api.cronoSelectEvent(oldest);
+    api.cronoAction('Accion post-overflow', 'detalle');
+    expectEq(api.crono.sel, null, 'seleccion obsoleta sobrevivio al descarte del evento');
+    expectEq(api.cronoSelectEvent({}), null, 'acepto evento fuera del ring');
   });
 
   assert('crono: buildCronoJSON exporta schema v1 con eventos y ring', () => {
