@@ -1,0 +1,69 @@
+[gate] seed 12345 OFF t=0.0 wall=0s cronoMs=0.0
+[gate] seed 12345 OFF t=32.4 wall=30s cronoMs=7.3
+[gate] seed 12345 OFF t=66.6 wall=60s cronoMs=12.4
+[gate] seed 12345 OFF t=102.6 wall=90s cronoMs=18.0
+[gate] seed 12345 OFF t=141.0 wall=120s cronoMs=23.8
+[gate] seed 12345 OFF t=181.4 wall=150s cronoMs=30.1
+[gate] seed 12345 OFF t=220.7 wall=180s cronoMs=35.7
+[gate] seed 12345 OFF t=261.1 wall=210s cronoMs=41.3
+[gate] seed 12345 OFF t=300.0 wall=240s cronoMs=46.9
+[gate] seed 12345 OFF t=335.8 wall=270s cronoMs=52.3
+[gate] seed 12345 OFF t=368.1 wall=300s cronoMs=57.5
+[gate] seed 12345 OFF t=396.9 wall=330s cronoMs=62.4
+[gate] seed 12345 OFF t=423.2 wall=360s cronoMs=66.9
+[gate] seed 12345 OFF t=447.6 wall=390s cronoMs=71.0
+[gate] seed 12345 OFF t=470.3 wall=420s cronoMs=74.7
+[gate] seed 12345 OFF t=491.7 wall=450s cronoMs=78.2
+[gate] seed 12345 OFF t=512.3 wall=480s cronoMs=81.5
+[gate] seed 12345 OFF t=531.9 wall=510s cronoMs=84.7
+[gate] seed 12345 OFF t=550.9 wall=540s cronoMs=87.9
+[gate] seed 12345 OFF t=569.2 wall=570s cronoMs=90.9
+[gate] seed 12345 OFF t=586.8 wall=600s cronoMs=93.7
+[gate] seed 12345 ON t=0.0 wall=0s cronoMs=4.4
+[gate] seed 12345 ON t=31.8 wall=30s cronoMs=22.6
+[gate] seed 12345 ON t=65.7 wall=60s cronoMs=39.4
+[gate] seed 12345 ON t=101.2 wall=90s cronoMs=57.0
+[gate] seed 12345 ON t=138.2 wall=120s cronoMs=75.3
+[gate] seed 12345 ON t=177.8 wall=150s cronoMs=96.7
+[gate] seed 12345 ON t=217.5 wall=180s cronoMs=116.0
+[gate] seed 12345 ON t=258.6 wall=210s cronoMs=135.1
+[gate] seed 12345 ON t=298.6 wall=240s cronoMs=153.7
+[gate] seed 12345 ON t=335.1 wall=270s cronoMs=173.3
+[gate] seed 12345 ON t=367.9 wall=300s cronoMs=191.4
+[gate] seed 12345 ON t=397.1 wall=330s cronoMs=206.2
+[gate] seed 12345 ON t=423.0 wall=360s cronoMs=220.2
+[gate] seed 12345 ON t=447.1 wall=390s cronoMs=232.1
+[gate] seed 12345 ON t=469.4 wall=420s cronoMs=243.0
+[gate] seed 12345 ON t=490.5 wall=450s cronoMs=253.7
+[gate] seed 12345 ON t=510.8 wall=480s cronoMs=264.1
+[gate] seed 12345 ON t=530.3 wall=510s cronoMs=274.2
+[gate] seed 12345 ON t=549.1 wall=540s cronoMs=284.5
+[gate] seed 12345 ON t=567.4 wall=570s cronoMs=296.0
+[gate] seed 12345 ON t=584.9 wall=600s cronoMs=305.5
+seed 12345: parity=OK coste=0.0501% p95=0.0039ms ring=593 gap=1.017s events=2 mem=74.13KB (wall 626.7s)
+{
+  "task": "task_934",
+  "gate": {
+    "fidelity_ok": true,
+    "cost_ok": true,
+    "p95_ok": true,
+    "continuity_ok": true,
+    "mem_ok": true
+  },
+  "seeds": [
+    {
+      "seed": 12345,
+      "wall_s": 626.7,
+      "parity_ok": true,
+      "parity_diffs": [],
+      "cost_pct": 0.0501,
+      "p95_ms": 0.0039,
+      "ring_max": 593,
+      "gap_max_s": 1.017,
+      "events": 2,
+      "mem_kb": 74.13
+    }
+  ],
+  "generated_at": "2026-09-22T03:19:18.142Z"
+}
+GATE: fidelity_ok=PASS cost_ok=PASS p95_ok=PASS continuity_ok=PASS mem_ok=PASS
