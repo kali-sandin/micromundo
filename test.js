@@ -70,6 +70,7 @@ function createDomMock() {
     textContent: '', innerHTML: '', value: '50', style: {},
     classList: { add() {}, remove() {}, toggle() {}, contains: () => false },
     appendChild() {}, removeChild() {}, querySelectorAll: () => [], querySelector: () => null,
+    replaceChildren() {},
     addEventListener() {}, removeEventListener() {},
     setAttribute() {}, getAttribute: () => null, removeAttribute() {},
     scrollWidth: 0, scrollHeight: 0, clientWidth: 800, clientHeight: 600,
@@ -93,6 +94,7 @@ function createDomMock() {
     getElementById: elementFor,
     querySelector: () => fakeEl, querySelectorAll: () => [],
     createElement: (tag) => tag === 'canvas' ? fakeCanvas : fakeEl, createTextNode: () => fakeEl,
+    createDocumentFragment: () => fakeEl,
     body: fakeEl, documentElement: fakeEl,
     addEventListener() {}, removeEventListener() {}, readyState: 'complete',
   };
@@ -135,6 +137,8 @@ function loadApp() {
       atlasResample, atlasCountDensity, atlasDelta, atlasRingPush, atlasSnapshotAt,
       atlas, atlasReset, atlasConfigure, ATLAS_MAX_COLS, ATLAS_DELTA_S, ATLAS_RING_CAP, ATLAS_WINDOW_S,
       redFlows, redSnapshotAccum, redReset, updateRed, red, RED_WINDOW_S, RED_RING_CAP,
+      cronoDetectPops, cronoDetectBalance, cronoSampleAt, cronoReset, updateCrono, buildCronoJSON,
+      crono, cronoAction, CRONO_VERSION, CRONO_SCHEMA, CRONO_WINDOW_S, CRONO_RING_CAP, CRONO_EVENTS_CAP,
       GROUPS, GROUP_KEYS, GROUP_LABELS, TYPE, PRODUCER,
       WORLD, CELL, FIELD_CELL,
       camera, worldToScreen, visibleTileOffsets,
@@ -2336,6 +2340,9 @@ function main() {
   if (filter === 'red' || filter === 'all') {
     runRedTests();
   }
+  if (filter === 'crono' || filter === 'all') {
+    runCronoTests();
+  }
   if (filter === 'perf' || filter === 'all') {
     runPerfTests();
   }
@@ -2347,6 +2354,115 @@ function main() {
   console.log(JSON.stringify(results, null, 2));
 
   process.exit(results.summary.failed > 0 ? 1 : 0);
+}
+
+// ─── task_934: Cronología viva ───
+
+function runCronoTests() {
+  const api = loadApp();
+  suite('Cronología viva task_934');
+
+  assert('cronoDetectPops detecta extinción y recolonización por cruce de cero', () => {
+    const det = api.cronoDetectPops({ pb: 5, pc: 0, cons: 12, pred: 3 }, { pb: 5, pc: 4, cons: 0, pred: 3 });
+    expectEq(det.length, 2);
+    expectOk(det.some((d) => d.kind === 'extinction' && d.key === 'cons'), 'falta extinción consumidores');
+    expectOk(det.some((d) => d.kind === 'recolonization' && d.key === 'pc'), 'falta recolonización productores C');
+  });
+
+  assert('cronoDetectPops no dispara sin cruce de cero y tolera prev null', () => {
+    expectEq(api.cronoDetectPops({ pb: 5, pc: 2, cons: 3, pred: 1 }, { pb: 4, pc: 2, cons: 3, pred: 2 }).length, 0);
+    expectEq(api.cronoDetectPops(null, { pb: 1, pc: 0, cons: 0, pred: 0 }).length, 0);
+  });
+
+  assert('cronoDetectBalance exige signos opuestos sostenidos', () => {
+    const mk = (a, b, n) => Array.from({ length: n }, (_, i) => ({ balance: i < n / 2 ? a : b }));
+    expectEq(api.cronoDetectBalance(mk(5, -5, 40)).from, 5);
+    expectEq(api.cronoDetectBalance(mk(5, 7, 40)), null, 'mismo signo no debe disparar');
+    expectEq(api.cronoDetectBalance(mk(1e-5, -5, 40)), null, 'magnitud despreciable no debe disparar');
+    expectEq(api.cronoDetectBalance(mk(5, -5, 10)), null, 'ventana corta no debe disparar');
+  });
+
+  assert('crono: grabación OFF por defecto, updateCrono no muestrea', () => {
+    expectEq(api.crono.enabled, false, 'la cronología debe nacer desactivada');
+    api.sim.time = 10;
+    api.updateCrono();
+    expectEq(api.crono.ring.length, 0, 'no debe muestrear con flag OFF');
+  });
+
+  assert('crono: activación, muestreo 1 Hz y límites del ring', () => {
+    api.cronoReset();
+    api.crono.enabled = true;
+    api.sim.time = 0;
+    api.updateCrono();
+    expectEq(api.crono.ring.length, 1);
+    api.sim.time = 0.5;
+    api.updateCrono();
+    expectEq(api.crono.ring.length, 1, 'no debe muestrear más de 1 Hz');
+    api.sim.time = 1.2;
+    api.updateCrono();
+    expectEq(api.crono.ring.length, 2);
+    const last = api.sim.time;
+    for (let t = 2; t <= 700; t += 1) { api.sim.time = t; api.updateCrono(); }
+    expectLte(api.crono.ring.length, api.CRONO_RING_CAP, 'ring sin acotar');
+    expectLte(api.sim.time - api.crono.ring[0].t, api.CRONO_WINDOW_S + 6, 'ventana 10 min excedida');
+    expectGte(api.crono.events.length, 0);
+    expectOk(api.sim.time >= last, 'sanity');
+  });
+
+  assert('crono: cronoAction deduplica y respeta flag OFF', () => {
+    api.cronoReset();
+    api.crono.enabled = false;
+    api.cronoAction('Luz solar', 'x2');
+    expectEq(api.crono.events.length, 0, 'no debe registrar con flag OFF');
+    api.crono.enabled = true;
+    api.cronoAction('Luz solar', 'x2');
+    api.cronoAction('Luz solar', 'x2');
+    expectEq(api.crono.events.length, 1, 'dedupe de acciones idénticas falla');
+    api.cronoAction('Luz solar', 'x3');
+    expectEq(api.crono.events.length, 2);
+  });
+
+  assert('crono: extinción detectada en muestreo y tope de eventos', () => {
+    api.cronoReset();
+    api.crono.enabled = true;
+    api.sim.seed = 12345;
+    api.resetWorld();
+    expectOk(api.sim.liveConsumerCount > 0, 'mundo sin consumidores iniciales');
+    api.sim.time = 0;
+    api.updateCrono();
+    // forzar extinción total de consumidores para el siguiente sample
+    // (counts() lee los contadores cacheados, no recorre creatures)
+    api.sim.liveConsumerCount = 0;
+    api.sim.time += 2;
+    api.updateCrono();
+    expectOk(api.crono.events.some((ev) => ev.kind === 'extinction'), 'extinción no detectada');
+    // tope de eventos via cronoAction (claves únicas -> sin dedupe)
+    for (let k = 0; k < api.CRONO_EVENTS_CAP + 50; k += 1) api.cronoAction('Accion ' + k, 'detalle');
+    expectLte(api.crono.events.length, api.CRONO_EVENTS_CAP, 'tope de eventos no aplicado');
+  });
+
+  assert('crono: buildCronoJSON exporta schema v1 con eventos y ring', () => {
+    api.cronoReset();
+    api.crono.enabled = true;
+    api.sim.time = 0;
+    api.updateCrono();
+    const j = api.buildCronoJSON();
+    expectEq(j.schema, api.CRONO_SCHEMA);
+    expectEq(j.version, 1);
+    expectOk(Array.isArray(j.events) && Array.isArray(j.ring));
+    expectOk(j.ring.length >= 1 && typeof j.ring[0].t === 'number');
+    expectOk(j.ring[0].field_biomass_mass !== undefined && j.ring[0].balance_E_s !== undefined);
+    expectOk(String(j.causalidad).includes('no causalidad'));
+  });
+
+  assert('crono: cronoReset limpia ring y eventos (reset/load limpios)', () => {
+    api.cronoReset();
+    expectEq(api.crono.ring.length, 0);
+    expectEq(api.crono.events.length, 0);
+    expectEq(api.crono.lastSampleAt, -1);
+    expectEq(api.crono.enabled, true, 'reset no debe apagar el flag (persiste la sesión)');
+    api.crono.enabled = false;
+  });
 }
 
 main();

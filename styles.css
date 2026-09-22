@@ -2118,3 +2118,82 @@ select {
   .red-panel { width: calc(100vw - 12px); }
   .red-table { font-size: 0.68rem; }
 }
+
+/* ── task_934: Cronología viva ── */
+.crono-panel {
+  right: 14px;
+  top: 84px;
+  width: min(460px, calc(100vw - 20px));
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.crono-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.crono-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 34vh;
+  overflow-y: auto;
+}
+
+.crono-item {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: 0.76rem;
+  color: #c7d3e4;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 6px;
+  padding: 5px 8px;
+  cursor: pointer;
+}
+
+.crono-item:hover,
+.crono-item:focus-visible,
+.crono-item.selected {
+  background: rgba(84, 183, 241, 0.16);
+  border-color: rgba(84, 183, 241, 0.5);
+  outline: none;
+}
+
+.crono-item .crono-t {
+  font-variant-numeric: tabular-nums;
+  color: #8fa3bd;
+  flex: 0 0 auto;
+}
+
+.crono-detail {
+  font-size: 0.76rem;
+  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  padding: 8px 10px;
+  min-height: 2.6em;
+}
+
+.crono-note {
+  font-size: 0.72rem;
+  margin: 0;
+  opacity: 0.8;
+  line-height: 1.45;
+}
+
+@media (max-width: 340px) {
+  .crono-panel { width: calc(100vw - 12px); }
+  .crono-item { font-size: 0.7rem; }
+}

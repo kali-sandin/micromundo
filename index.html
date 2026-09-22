@@ -50,6 +50,7 @@
           <button class="tool-button" id="toggleEnergy" type="button" title="Observatorio de energía y biomasa: stocks, flujos y subsidio x18"><span class="btn-icon">⚡</span><span>Energía</span></button>
           <button class="tool-button" id="atlasToggle" type="button" title="Atlas vivo: capas espaciales de biomasa, densidad y cambio en 60 s"><span class="btn-icon">🗺</span><span>Mapa</span></button>
           <button class="tool-button" id="redToggle" type="button" title="Red trófica viva: quién alimenta a quién, con flujos reales de 60 s"><span class="btn-icon">🕸</span><span>Red</span></button>
+          <button class="tool-button" id="cronoToggle" type="button" title="Cronología viva: acciones y transiciones observadas, con datos reales"><span class="btn-icon">🕐</span><span>Cronología</span></button>
           <button class="tool-button" id="experimentToggle" type="button" title="Laboratorio causal: experimento control vs tratamiento"><span class="btn-icon">⚗</span><span>Experimento</span></button>
           <button class="tool-button" id="expeditionToggle" type="button" title="Expedición guiada y Cuaderno de campo: misión con predicción, observación, experimento y conclusiones"><span class="btn-icon">🧭</span><span>Expedición</span></button>
           <button class="tool-button" id="resetWorld" type="button"><span class="btn-icon">↻</span><span>Reiniciar</span></button>
@@ -255,6 +256,19 @@
             <div class="red-diag" id="redDiag" aria-live="polite">Esperando 60 s de historial…</div>
             <p class="red-note">El pastoreo retira <strong>mass</strong> del campo A y se convierte en energía con el <strong>subsidio ×18</strong>: simplificación del modelo, no producción natural. La <strong>migración/rescate</strong> repuebla niveles desde fuera: no es natalidad. Ventana 60 s · muestreo 1 Hz · datos reales.</p>
             <button class="tool-button" id="redCompare" type="button">Comparar misma seed (Experimento)</button>
+          </div>
+        </section>
+
+        <section class="hud panel crono-panel hidden movable" id="cronoPanel" aria-label="Cronología viva: acciones y transiciones observadas">
+          <header class="panel-head drag-handle">
+            <h2>🕐 Cronología</h2>
+            <button class="icon-button" data-crono-close type="button" title="Cerrar (Esc)">×</button>
+          </header>
+          <div class="crono-body">
+            <ul class="crono-list" id="cronoList" role="list" aria-label="Marcadores temporales"></ul>
+            <div class="crono-detail" id="cronoDetail" aria-live="polite">Sin marcadores todavía. La grabación arranca al abrir esta cronología y conserva 10 min (1 Hz).</div>
+            <p class="crono-note">Marcadores descriptivos: muestran <strong>coincidencia temporal, no causalidad</strong>. Muestreo 1 Hz · historial 10 min · export JSON v1.</p>
+            <button class="tool-button" id="cronoExport" type="button">Exportar JSON (v1)</button>
           </div>
         </section>
 

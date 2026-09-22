@@ -1,0 +1,25 @@
+{
+  "task": "task_934",
+  "gate": {
+    "fidelity_ok": true,
+    "cost_ok": true,
+    "p95_ok": true,
+    "continuity_ok": true,
+    "mem_ok": true
+  },
+  "seeds": [
+    {
+      "seed": 12345,
+      "wall_s": 118.1,
+      "parity_ok": true,
+      "parity_diffs": [],
+      "cost_pct": 0.0728,
+      "p95_ms": 0.0048,
+      "ring_max": 119,
+      "gap_max_s": 1.017,
+      "events": 0,
+      "mem_kb": 14.88
+    }
+  ],
+  "generated_at": "2026-09-22T01:00:25.174Z"
+}

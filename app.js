@@ -326,7 +326,12 @@
     atlasCompare: document.getElementById('atlasCompare'),
     redToggle: document.getElementById('redToggle'),
     redPanel: document.getElementById('redPanel'),
-    redCompare: document.getElementById('redCompare')
+    redCompare: document.getElementById('redCompare'),
+    cronoToggle: document.getElementById('cronoToggle'),
+    cronoPanel: document.getElementById('cronoPanel'),
+    cronoList: document.getElementById('cronoList'),
+    cronoDetail: document.getElementById('cronoDetail'),
+    cronoExport: document.getElementById('cronoExport')
   };
 
   const camera = {
@@ -4163,6 +4168,7 @@
     updateObservatory();
     updateRed(); // task_932: muestrea solo si el panel Red trófica está abierto
     updateAtlas(); // task_930: muestrea solo si el panel Atlas está abierto
+    updateCrono(); // task_934: ring 1 Hz / 10 min si la cronología está activada
     // Re-sync mobileEnergySum cada ~60s para corregir drift acumulado
     // task_923: durante un experimento causal no debe dispararse (timing wall-clock
     // dependiente del rAF contaminaria la comparacion control/tratamiento)
@@ -4421,6 +4427,219 @@
         ' · rescates 60 s: C ' + f.mig_consumers + ', D ' + f.mig_predators +
         '. Persistencia = sin rescates; migración repuebla; subsidio ×18 multiplica cada bocado.';
     }
+  }
+
+  // ── task_934: Cronología viva (solo lectura, OFF por defecto) ──
+  // Ring común 1 Hz / 10 min con acciones y transiciones detectadas de forma
+  // pura. Marcadores descriptivos: coincidencia temporal, no causalidad.
+  const CRONO_WINDOW_S = 600;
+  const CRONO_RING_CAP = 606; // 1 Hz x 600 s + margen
+  const CRONO_EVENTS_CAP = 400;
+  const CRONO_SCHEMA = 'micromundo.cronologia';
+  const CRONO_VERSION = 1;
+  const CRONO_KIND_LABEL = {
+    action: 'Acción', extinction: 'Extinción', recolonization: 'Recolonización',
+    balance: 'Balance'
+  };
+  const crono = {
+    enabled: false, ring: [], events: [], lastSampleAt: -1,
+    lastPops: null, lastBalanceEventAt: -1e9, lastActionKey: '', sel: -1
+  };
+
+  function cronoReset() {
+    crono.ring.length = 0;
+    crono.events.length = 0;
+    crono.lastSampleAt = -1;
+    crono.lastPops = null;
+    crono.lastBalanceEventAt = -1e9;
+    crono.lastActionKey = '';
+    crono.sel = -1;
+  }
+
+  function cronoOpen() {
+    return !!(els.cronoPanel && !els.cronoPanel.classList.contains('hidden'));
+  }
+
+  function cronoPops() {
+    const c = counts();
+    return { pb: c.producerB, pc: c.producerC, cons: c.consumers, pred: c.predators };
+  }
+
+  // Detector puro (testeable): extinción/recolonización por cruce de cero.
+  function cronoDetectPops(prev, cur) {
+    const out = [];
+    if (!prev) return out;
+    const labels = { pb: 'Productores B', pc: 'Productores C', cons: 'Consumidores', pred: 'Depredadores' };
+    for (const k in labels) {
+      const p = prev[k] || 0, n = cur[k] || 0;
+      if (p > 0 && n === 0) out.push({ key: k, label: labels[k], kind: 'extinction' });
+      else if (p === 0 && n > 0) out.push({ key: k, label: labels[k], kind: 'recolonization' });
+    }
+    return out;
+  }
+
+  // Detector puro (testeable): cambio sostenido de balance. Compara la media
+  // de balance de la primera mitad de la ventana de 60 s contra la segunda;
+  // solo dispara con signos opuestos y magnitudes no despreciables.
+  function cronoDetectBalance(window60) {
+    if (!Array.isArray(window60) || window60.length < 30) return null;
+    const n = window60.length, half = n >> 1;
+    let a = 0, b = 0;
+    for (let i = 0; i < half; i += 1) a += window60[i].balance;
+    for (let i = half; i < n; i += 1) b += window60[i].balance;
+    a /= half; b /= (n - half);
+    const EPS = 1e-3;
+    if (Math.abs(a) < EPS || Math.abs(b) < EPS) return null;
+    if ((a > 0) === (b > 0)) return null;
+    return { from: a, to: b };
+  }
+
+  function cronoWindow60() {
+    const R = crono.ring, out = [];
+    for (let i = R.length - 1; i >= 0; i -= 1) {
+      if (sim.time - R[i].t > 60) break;
+      out.unshift(R[i]);
+    }
+    return out;
+  }
+
+  function cronoPushEvent(ev) {
+    ev.i = crono.events.length;
+    ev.kindLabel = CRONO_KIND_LABEL[ev.kind] || ev.kind;
+    crono.events.push(ev);
+    if (crono.events.length > CRONO_EVENTS_CAP) crono.events.shift();
+    if (cronoOpen()) renderCrono();
+  }
+
+  // Registro de acciones del usuario. key permite deduplicar (sliders, spam):
+  // por defecto distingue valor final (label + detail).
+  function cronoAction(label, detail, key) {
+    if (!crono.enabled) return;
+    const k = key || (label + '|' + (detail || ''));
+    if (k === crono.lastActionKey) return;
+    crono.lastActionKey = k;
+    cronoPushEvent({ t: sim.time, kind: 'action', label, detail: detail || '' });
+  }
+
+  function updateCrono() {
+    if (!crono.enabled) return;
+    if (crono.lastSampleAt >= 0 && sim.time - crono.lastSampleAt < 1) return;
+    crono.lastSampleAt = sim.time;
+    const pops = cronoPops();
+    const H = observatory.history;
+    const balance = H.length ? H[H.length - 1].flows.balance : sim.flowRate.balance;
+    const s = observatoryStocks();
+    crono.ring.push({ t: sim.time, pb: pops.pb, pc: pops.pc, cons: pops.cons, pred: pops.pred, field: s.field_biomass_mass, balance });
+    while (crono.ring.length > CRONO_RING_CAP ||
+      (crono.ring.length > 1 && sim.time - crono.ring[0].t > CRONO_WINDOW_S + 5)) crono.ring.shift();
+    const det = cronoDetectPops(crono.lastPops, pops);
+    for (let i = 0; i < det.length; i += 1) {
+      const d = det[i];
+      cronoPushEvent({
+        t: sim.time, kind: d.kind, label: d.label,
+        detail: d.kind === 'recolonization'
+          ? 'reaparece población > 0 (natalidad o migración: coincidencia, no causa)'
+          : 'población llega a 0'
+      });
+    }
+    crono.lastPops = pops;
+    const bd = cronoDetectBalance(cronoWindow60());
+    if (bd && sim.time - crono.lastBalanceEventAt >= 60) {
+      crono.lastBalanceEventAt = sim.time;
+      cronoPushEvent({
+        t: sim.time, kind: 'balance', label: 'Balance energético',
+        detail: 'media 30 s pasa de ' + obsFmtE(bd.from) + ' a ' + obsFmtE(bd.to) + ' E/s (cambio sostenido)'
+      });
+    }
+    if (cronoOpen()) renderCrono();
+  }
+
+  // Muestra del ring más próxima a un instante dado (búsqueda pura, testeable).
+  function cronoSampleAt(t) {
+    const R = crono.ring;
+    if (!R.length) return null;
+    let best = R[0], bd = Math.abs(R[0].t - t);
+    for (let i = 1; i < R.length; i += 1) {
+      const d = Math.abs(R[i].t - t);
+      if (d < bd) { bd = d; best = R[i]; }
+    }
+    return best;
+  }
+
+  function cronoRow(name, a, b) {
+    return name + ': ' + obsFmtE(a) + ' → ' + obsFmtE(b) + '\n';
+  }
+
+  function cronoRenderDetail(ev) {
+    const before = cronoSampleAt(ev.t - 60);
+    const after = cronoSampleAt(ev.t + 60) || crono.ring[crono.ring.length - 1];
+    if (!before || !after) return ev.kindLabel + ' · ' + ev.label + ' — sin historial suficiente.';
+    let txt = ev.kindLabel + ' · ' + ev.label + ' (t=' + nowText2(ev.t) + ')\n';
+    txt += ev.detail ? ev.detail + '\n' : '';
+    txt += 'Antes (t-60 s) → después (t+60 s):\n';
+    txt += cronoRow('Consumidores', before.cons, after.cons);
+    txt += cronoRow('Depredadores', before.pred, after.pred);
+    txt += cronoRow('Biomasa campo A (mass)', before.field, after.field);
+    txt += 'Balance E/s: ' + obsFmtE(before.balance) + ' → ' + obsFmtE(after.balance) + '\n';
+    txt += 'Coincidencia temporal, no causalidad. Compara con Población y Energía.';
+    return txt;
+  }
+
+  function nowText2(t) {
+    const mins = Math.floor(t / 60), secs = Math.floor(t % 60);
+    return String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+  }
+
+  function renderCrono() {
+    if (!els.cronoList || !els.cronoDetail) return;
+    if (typeof document.createDocumentFragment !== 'function' ||
+      typeof els.cronoList.replaceChildren !== 'function') return;
+    const frag = document.createDocumentFragment();
+    const start = Math.max(0, crono.events.length - 60);
+    for (let i = start; i < crono.events.length; i += 1) {
+      const ev = crono.events[i];
+      const li = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'crono-item' + (crono.sel === i ? ' selected' : '');
+      const tEl = document.createElement('span');
+      tEl.className = 'crono-t';
+      tEl.textContent = nowText2(ev.t);
+      const lEl = document.createElement('span');
+      lEl.textContent = ev.kindLabel + ' · ' + ev.label;
+      btn.appendChild(tEl);
+      btn.appendChild(lEl);
+      btn.addEventListener('click', () => {
+        crono.sel = ev.i;
+        renderCrono();
+      });
+      li.appendChild(btn);
+      frag.appendChild(li);
+    }
+    els.cronoList.replaceChildren(frag);
+    const sel = crono.events[crono.sel];
+    els.cronoDetail.textContent = sel
+      ? cronoRenderDetail(sel)
+      : (crono.events.length ? 'Elige un marcador para ver antes/después.' : 'Sin marcadores todavía. Grabación 1 Hz · 10 min.');
+  }
+
+  // Export JSON v1 (función pura sobre el estado, testeable).
+  function buildCronoJSON() {
+    return {
+      schema: CRONO_SCHEMA,
+      version: CRONO_VERSION,
+      generated_t: sim.time,
+      window_s: CRONO_WINDOW_S,
+      sample_hz: 1,
+      causalidad: 'descriptivo; coincidencia temporal, no causalidad',
+      events: crono.events.map((e) => ({
+        t: e.t, kind: e.kind, label: e.label, detail: e.detail
+      })),
+      ring: crono.ring.map((r) => ({
+        t: r.t, producerB: r.pb, producerC: r.pc, consumers: r.cons,
+        predators: r.pred, field_biomass_mass: r.field, balance_E_s: r.balance
+      }))
+    };
   }
 
   function updateObservatory() {
@@ -5082,6 +5301,7 @@
     sim.dayNightEnabled = !sim.dayNightEnabled;
     els.dayNightToggle.classList.toggle('active', sim.dayNightEnabled);
     if (!sim.dayNightEnabled) sim.solarEnergy = sim.solarEnergyBase;
+    cronoAction('Ciclo día/noche', sim.dayNightEnabled ? 'activado' : 'desactivado'); // task_934
     updateStats(true);
   }
 
@@ -5094,6 +5314,7 @@
 
   function setPaused(paused) {
     sim.paused = paused;
+    cronoAction(paused ? 'Pausa' : 'Play', 'velocidad de simulación', 'pausa:' + paused); // task_934
     els.playPause.innerHTML = paused ? '<span class="btn-icon">▶</span><span>Play</span>' : '<span class="btn-icon">⏸</span><span>Pausa</span>';
     els.playPause.classList.toggle('active', paused);
   }
@@ -5126,6 +5347,7 @@
     obsReset(); // task_926: el historial del observatorio no debe mezclar mundos
     atlasReset(); // task_930: el atlas tampoco
     redReset(); // task_932: la red trofica tampoco
+    cronoReset(); // task_934: la cronología tampoco (reset limpio)
     sim.migrationTimer = 0;
     sim.graph.clear();
     sim.geneHistory.clear();
@@ -5613,6 +5835,7 @@
       const label = sim.selectedAddKind === 'consumer' ? 'consumidores' : 'depredadores';
       const producerLabel = sim.selectedAddKind === 'producer' ? 'productores' : label;
       if (LOG_EVENTS) logEvent(`Añadidos ${fmt.format(created)} ${producerLabel} desde el popup`, 'birth');
+      cronoAction('Añadir seres', fmt.format(created) + ' ' + producerLabel + ' desde el popup'); // task_934
     }
     if (amount === 1 && lastCreated) selectCreature(lastCreated);
     updateStats(true);
@@ -5719,6 +5942,9 @@
       });
     });
     els.speed.addEventListener('input', setSpeed);
+    els.speed.addEventListener('change', () => { // task_934: valor final del slider
+      cronoAction('Velocidad', 'x' + sim.speed.toFixed(sim.speed < 10 ? 1 : 0));
+    });
     // task_923: laboratorio causal
     els.experimentToggle.addEventListener('click', () => {
       const show = els.experimentPanel.classList.toggle('hidden');
@@ -5739,6 +5965,9 @@
       }
     });
     els.systemEnergy.addEventListener('input', setSystemEnergy);
+    els.systemEnergy.addEventListener('change', () => { // task_934: valor final del slider
+      cronoAction('Luz solar', 'x' + sim.solarEnergyBase.toFixed(sim.solarEnergyBase < 2 ? 1 : 0));
+    });
     // task_926: Observatorio de energía y biomasa
     if (els.energyToggle) {
       els.energyToggle.addEventListener('click', () => {
@@ -5889,6 +6118,38 @@
         els.experimentPanel.scrollIntoView({ block: 'nearest' });
       });
       makePanelDraggable(els.redPanel);
+    }
+
+    // task_934: Cronología viva — opt-in, oculta por defecto, grabación OFF hasta activarla
+    if (els.cronoToggle && els.cronoPanel) {
+      const cronoHide = () => {
+        els.cronoPanel.classList.add('hidden');
+        els.cronoToggle.classList.remove('active');
+      };
+      els.cronoToggle.addEventListener('click', () => {
+        const show = els.cronoPanel.classList.toggle('hidden');
+        els.cronoToggle.classList.toggle('active', !show);
+        if (!show && !crono.enabled) {
+          crono.enabled = true; // activar grabación la primera vez que se abre
+          crono.lastSampleAt = -1;
+        }
+        if (!show) { updateCrono(); renderCrono(); }
+      });
+      const cronoClose = els.cronoPanel.querySelector('[data-crono-close]');
+      if (cronoClose) cronoClose.addEventListener('click', cronoHide);
+      els.cronoPanel.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') cronoHide();
+      });
+      if (els.cronoExport) els.cronoExport.addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(buildCronoJSON(), null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'cronologia-v' + CRONO_VERSION + '-t' + Math.round(sim.time) + 's.json';
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      });
+      makePanelDraggable(els.cronoPanel);
     }
     els.dayNightToggle.addEventListener('click', toggleDayNight);
     els.playPause.addEventListener('click', () => setPaused(!sim.paused));
@@ -6253,6 +6514,7 @@
     obsReset(); // task_926: sim.time puede retroceder; no mezclar series de mundos distintos
     atlasReset(); // task_930
     redReset(); // task_932: sim.time puede retroceder
+    cronoReset(); // task_934: carga de snapshot limpia la cronología
     // Restaurar criaturas
     for (const c of snap.creatures) {
       const e = Object.assign({}, c);
@@ -6474,6 +6736,7 @@
       renderExperimentResults(report);
       els.experimentExport.hidden = false;
       if (LOG_EVENTS) logEvent('Experimento causal completado (seed ' + report.design.snapshot.seed + ')');
+      cronoAction('Experimento causal', 'completado (seed ' + report.design.snapshot.seed + ')'); // task_934
       if (typeof experiment.onComplete === 'function') { try { experiment.onComplete(report); } catch (cbErr) { console.error('experiment.onComplete:', cbErr); } }
       return report;
     } catch (err) {
