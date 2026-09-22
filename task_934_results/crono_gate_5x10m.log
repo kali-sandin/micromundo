@@ -1,0 +1,293 @@
+[gate] seed 12345 OFF t=0.0 wall=0s cronoMs=0.0
+[gate] seed 12345 OFF t=33.4 wall=30s cronoMs=7.3
+[gate] seed 12345 OFF t=67.3 wall=60s cronoMs=12.5
+[gate] seed 12345 OFF t=98.7 wall=90s cronoMs=18.7
+[gate] seed 12345 OFF t=131.7 wall=120s cronoMs=24.8
+[gate] seed 12345 OFF t=166.1 wall=150s cronoMs=31.4
+[gate] seed 12345 OFF t=201.7 wall=180s cronoMs=36.7
+[gate] seed 12345 OFF t=238.1 wall=210s cronoMs=43.0
+[gate] seed 12345 OFF t=275.5 wall=240s cronoMs=49.5
+[gate] seed 12345 OFF t=312.3 wall=270s cronoMs=55.0
+[gate] seed 12345 OFF t=346.1 wall=300s cronoMs=60.6
+[gate] seed 12345 OFF t=377.2 wall=330s cronoMs=65.2
+[gate] seed 12345 OFF t=405.6 wall=360s cronoMs=70.0
+[gate] seed 12345 OFF t=431.7 wall=390s cronoMs=74.4
+[gate] seed 12345 OFF t=455.8 wall=420s cronoMs=78.6
+[gate] seed 12345 OFF t=478.3 wall=450s cronoMs=82.1
+[gate] seed 12345 OFF t=499.6 wall=480s cronoMs=85.7
+[gate] seed 12345 OFF t=519.4 wall=510s cronoMs=89.0
+[gate] seed 12345 OFF t=538.2 wall=540s cronoMs=92.2
+[gate] seed 12345 OFF t=556.2 wall=570s cronoMs=95.2
+[gate] seed 12345 OFF t=573.4 wall=600s cronoMs=98.1
+[gate] seed 12345 OFF t=590.1 wall=630s cronoMs=100.9
+[gate] seed 12345 ON t=0.0 wall=0s cronoMs=4.6
+[gate] seed 12345 ON t=32.6 wall=30s cronoMs=23.5
+[gate] seed 12345 ON t=67.8 wall=60s cronoMs=40.7
+[gate] seed 12345 ON t=105.0 wall=90s cronoMs=59.7
+[gate] seed 12345 ON t=143.6 wall=120s cronoMs=78.9
+[gate] seed 12345 ON t=182.8 wall=150s cronoMs=101.3
+[gate] seed 12345 ON t=222.0 wall=180s cronoMs=123.3
+[gate] seed 12345 ON t=260.8 wall=210s cronoMs=144.4
+[gate] seed 12345 ON t=298.3 wall=240s cronoMs=163.9
+[gate] seed 12345 ON t=333.0 wall=270s cronoMs=180.6
+[gate] seed 12345 ON t=364.8 wall=300s cronoMs=196.5
+[gate] seed 12345 ON t=393.9 wall=330s cronoMs=210.6
+[gate] seed 12345 ON t=420.5 wall=360s cronoMs=225.2
+[gate] seed 12345 ON t=445.0 wall=390s cronoMs=238.9
+[gate] seed 12345 ON t=467.8 wall=420s cronoMs=252.2
+[gate] seed 12345 ON t=489.3 wall=450s cronoMs=263.3
+[gate] seed 12345 ON t=509.4 wall=480s cronoMs=274.0
+[gate] seed 12345 ON t=528.4 wall=510s cronoMs=289.1
+[gate] seed 12345 ON t=546.4 wall=540s cronoMs=299.2
+[gate] seed 12345 ON t=563.7 wall=570s cronoMs=309.0
+[gate] seed 12345 ON t=580.5 wall=600s cronoMs=319.0
+[gate] seed 12345 ON t=596.7 wall=630s cronoMs=328.6
+seed 12345: parity=OK coste=0.0519% p95=0.0044ms ring=593 gap=1.017s events=2 mem=74.13KB (wall 636.6s)
+[gate] seed 23456 OFF t=0.0 wall=0s cronoMs=0.0
+[gate] seed 23456 OFF t=32.6 wall=30s cronoMs=4.6
+[gate] seed 23456 OFF t=68.0 wall=60s cronoMs=10.4
+[gate] seed 23456 OFF t=104.7 wall=90s cronoMs=16.1
+[gate] seed 23456 OFF t=142.4 wall=120s cronoMs=21.6
+[gate] seed 23456 OFF t=180.6 wall=150s cronoMs=29.1
+[gate] seed 23456 OFF t=218.6 wall=180s cronoMs=35.1
+[gate] seed 23456 OFF t=256.5 wall=210s cronoMs=41.6
+[gate] seed 23456 OFF t=293.2 wall=240s cronoMs=47.5
+[gate] seed 23456 OFF t=327.8 wall=270s cronoMs=53.6
+[gate] seed 23456 OFF t=359.4 wall=300s cronoMs=59.3
+[gate] seed 23456 OFF t=388.1 wall=330s cronoMs=64.7
+[gate] seed 23456 OFF t=414.4 wall=360s cronoMs=69.5
+[gate] seed 23456 OFF t=438.5 wall=390s cronoMs=73.7
+[gate] seed 23456 OFF t=461.1 wall=420s cronoMs=77.9
+[gate] seed 23456 OFF t=482.3 wall=450s cronoMs=82.0
+[gate] seed 23456 OFF t=502.4 wall=480s cronoMs=85.9
+[gate] seed 23456 OFF t=521.3 wall=510s cronoMs=89.5
+[gate] seed 23456 OFF t=539.5 wall=540s cronoMs=93.1
+[gate] seed 23456 OFF t=556.7 wall=570s cronoMs=96.4
+[gate] seed 23456 OFF t=573.3 wall=600s cronoMs=99.6
+[gate] seed 23456 OFF t=589.3 wall=630s cronoMs=102.7
+[gate] seed 23456 ON t=0.0 wall=0s cronoMs=6.1
+[gate] seed 23456 ON t=32.3 wall=30s cronoMs=33.8
+[gate] seed 23456 ON t=67.3 wall=60s cronoMs=53.3
+[gate] seed 23456 ON t=103.6 wall=90s cronoMs=70.0
+[gate] seed 23456 ON t=140.9 wall=120s cronoMs=88.4
+[gate] seed 23456 ON t=178.6 wall=150s cronoMs=107.7
+[gate] seed 23456 ON t=216.9 wall=180s cronoMs=127.8
+[gate] seed 23456 ON t=255.3 wall=210s cronoMs=148.4
+[gate] seed 23456 ON t=292.0 wall=240s cronoMs=166.0
+[gate] seed 23456 ON t=326.6 wall=270s cronoMs=183.9
+[gate] seed 23456 ON t=358.3 wall=300s cronoMs=199.6
+[gate] seed 23456 ON t=386.9 wall=330s cronoMs=213.4
+[gate] seed 23456 ON t=413.4 wall=360s cronoMs=226.8
+[gate] seed 23456 ON t=437.9 wall=390s cronoMs=239.7
+[gate] seed 23456 ON t=460.7 wall=420s cronoMs=251.5
+[gate] seed 23456 ON t=482.1 wall=450s cronoMs=262.9
+[gate] seed 23456 ON t=502.3 wall=480s cronoMs=273.8
+[gate] seed 23456 ON t=521.4 wall=510s cronoMs=284.3
+[gate] seed 23456 ON t=539.6 wall=540s cronoMs=294.5
+[gate] seed 23456 ON t=556.9 wall=570s cronoMs=304.3
+[gate] seed 23456 ON t=573.5 wall=600s cronoMs=313.8
+[gate] seed 23456 ON t=589.5 wall=630s cronoMs=323.3
+seed 23456: parity=OK coste=0.0506% p95=0.0044ms ring=593 gap=1.017s events=2 mem=74.13KB (wall 650.4s)
+[gate] seed 34567 OFF t=0.0 wall=0s cronoMs=0.0
+[gate] seed 34567 OFF t=31.2 wall=30s cronoMs=5.0
+[gate] seed 34567 OFF t=65.3 wall=60s cronoMs=10.7
+[gate] seed 34567 OFF t=101.8 wall=90s cronoMs=16.6
+[gate] seed 34567 OFF t=139.4 wall=120s cronoMs=23.1
+[gate] seed 34567 OFF t=177.7 wall=150s cronoMs=29.4
+[gate] seed 34567 OFF t=216.5 wall=180s cronoMs=35.5
+[gate] seed 34567 OFF t=255.7 wall=210s cronoMs=41.2
+[gate] seed 34567 OFF t=294.2 wall=240s cronoMs=47.8
+[gate] seed 34567 OFF t=331.0 wall=270s cronoMs=53.6
+[gate] seed 34567 OFF t=365.3 wall=300s cronoMs=58.9
+[gate] seed 34567 OFF t=397.6 wall=330s cronoMs=64.6
+[gate] seed 34567 OFF t=427.3 wall=360s cronoMs=70.0
+[gate] seed 34567 OFF t=454.6 wall=390s cronoMs=75.0
+[gate] seed 34567 OFF t=480.0 wall=420s cronoMs=79.6
+[gate] seed 34567 OFF t=503.9 wall=450s cronoMs=84.0
+[gate] seed 34567 OFF t=526.6 wall=480s cronoMs=88.2
+[gate] seed 34567 OFF t=548.1 wall=510s cronoMs=93.4
+[gate] seed 34567 OFF t=568.5 wall=540s cronoMs=97.2
+[gate] seed 34567 OFF t=588.0 wall=570s cronoMs=100.8
+[gate] seed 34567 ON t=0.0 wall=0s cronoMs=6.3
+[gate] seed 34567 ON t=30.7 wall=30s cronoMs=24.2
+[gate] seed 34567 ON t=63.9 wall=60s cronoMs=42.7
+[gate] seed 34567 ON t=99.0 wall=90s cronoMs=61.9
+[gate] seed 34567 ON t=135.3 wall=120s cronoMs=81.7
+[gate] seed 34567 ON t=172.4 wall=150s cronoMs=101.6
+[gate] seed 34567 ON t=209.9 wall=180s cronoMs=122.5
+[gate] seed 34567 ON t=248.1 wall=210s cronoMs=142.8
+[gate] seed 34567 ON t=286.2 wall=240s cronoMs=162.2
+[gate] seed 34567 ON t=322.7 wall=270s cronoMs=181.1
+[gate] seed 34567 ON t=356.4 wall=300s cronoMs=198.4
+[gate] seed 34567 ON t=387.9 wall=330s cronoMs=215.4
+[gate] seed 34567 ON t=417.6 wall=360s cronoMs=231.9
+[gate] seed 34567 ON t=444.9 wall=390s cronoMs=248.3
+[gate] seed 34567 ON t=470.4 wall=420s cronoMs=260.7
+[gate] seed 34567 ON t=494.3 wall=450s cronoMs=274.1
+[gate] seed 34567 ON t=516.9 wall=480s cronoMs=285.6
+[gate] seed 34567 ON t=538.4 wall=510s cronoMs=297.0
+[gate] seed 34567 ON t=558.8 wall=540s cronoMs=307.9
+[gate] seed 34567 ON t=578.3 wall=570s cronoMs=319.4
+[gate] seed 34567 ON t=596.8 wall=600s cronoMs=331.1
+seed 34567: parity=OK coste=0.055% p95=0.0047ms ring=593 gap=1.017s events=2 mem=74.13KB (wall 605.5s)
+[gate] seed 45678 OFF t=0.0 wall=0s cronoMs=0.0
+[gate] seed 45678 OFF t=32.0 wall=30s cronoMs=5.8
+[gate] seed 45678 OFF t=67.0 wall=60s cronoMs=11.8
+[gate] seed 45678 OFF t=103.7 wall=90s cronoMs=17.9
+[gate] seed 45678 OFF t=141.1 wall=120s cronoMs=23.9
+[gate] seed 45678 OFF t=180.0 wall=150s cronoMs=30.3
+[gate] seed 45678 OFF t=219.5 wall=180s cronoMs=37.2
+[gate] seed 45678 OFF t=258.8 wall=210s cronoMs=43.8
+[gate] seed 45678 OFF t=296.8 wall=240s cronoMs=50.8
+[gate] seed 45678 OFF t=332.4 wall=270s cronoMs=57.2
+[gate] seed 45678 OFF t=365.2 wall=300s cronoMs=62.7
+[gate] seed 45678 OFF t=394.9 wall=330s cronoMs=67.9
+[gate] seed 45678 OFF t=422.2 wall=360s cronoMs=72.5
+[gate] seed 45678 OFF t=447.5 wall=390s cronoMs=77.1
+[gate] seed 45678 OFF t=471.0 wall=420s cronoMs=81.4
+[gate] seed 45678 OFF t=492.9 wall=450s cronoMs=85.2
+[gate] seed 45678 OFF t=513.4 wall=480s cronoMs=88.6
+[gate] seed 45678 OFF t=532.7 wall=510s cronoMs=92.2
+[gate] seed 45678 OFF t=551.1 wall=540s cronoMs=95.6
+[gate] seed 45678 OFF t=568.6 wall=570s cronoMs=98.9
+[gate] seed 45678 OFF t=585.6 wall=600s cronoMs=102.1
+[gate] seed 45678 ON t=0.0 wall=0s cronoMs=6.4
+[gate] seed 45678 ON t=32.7 wall=30s cronoMs=22.9
+[gate] seed 45678 ON t=67.8 wall=60s cronoMs=40.7
+[gate] seed 45678 ON t=104.5 wall=90s cronoMs=58.3
+[gate] seed 45678 ON t=142.8 wall=120s cronoMs=76.2
+[gate] seed 45678 ON t=182.7 wall=150s cronoMs=96.0
+[gate] seed 45678 ON t=223.5 wall=180s cronoMs=117.6
+[gate] seed 45678 ON t=263.4 wall=210s cronoMs=136.4
+[gate] seed 45678 ON t=301.7 wall=240s cronoMs=155.0
+[gate] seed 45678 ON t=337.4 wall=270s cronoMs=174.4
+[gate] seed 45678 ON t=370.1 wall=300s cronoMs=192.2
+[gate] seed 45678 ON t=399.8 wall=330s cronoMs=207.4
+[gate] seed 45678 ON t=427.1 wall=360s cronoMs=222.4
+[gate] seed 45678 ON t=452.2 wall=390s cronoMs=235.3
+[gate] seed 45678 ON t=475.5 wall=420s cronoMs=246.2
+[gate] seed 45678 ON t=497.3 wall=450s cronoMs=257.2
+[gate] seed 45678 ON t=517.6 wall=480s cronoMs=267.5
+[gate] seed 45678 ON t=536.9 wall=510s cronoMs=277.7
+[gate] seed 45678 ON t=555.2 wall=540s cronoMs=287.6
+[gate] seed 45678 ON t=572.6 wall=570s cronoMs=297.0
+[gate] seed 45678 ON t=589.3 wall=600s cronoMs=306.3
+seed 45678: parity=OK coste=0.0504% p95=0.0044ms ring=593 gap=1.017s events=2 mem=74.13KB (wall 620.1s)
+[gate] seed 56789 OFF t=0.0 wall=0s cronoMs=0.0
+[gate] seed 56789 OFF t=33.2 wall=30s cronoMs=5.3
+[gate] seed 56789 OFF t=68.5 wall=60s cronoMs=11.2
+[gate] seed 56789 OFF t=106.0 wall=90s cronoMs=17.6
+[gate] seed 56789 OFF t=144.4 wall=120s cronoMs=23.9
+[gate] seed 56789 OFF t=183.6 wall=150s cronoMs=30.6
+[gate] seed 56789 OFF t=223.4 wall=180s cronoMs=37.9
+[gate] seed 56789 OFF t=262.6 wall=210s cronoMs=44.3
+[gate] seed 56789 OFF t=299.7 wall=240s cronoMs=51.2
+[gate] seed 56789 OFF t=334.7 wall=270s cronoMs=57.2
+[gate] seed 56789 OFF t=366.9 wall=300s cronoMs=63.1
+[gate] seed 56789 OFF t=396.4 wall=330s cronoMs=68.6
+[gate] seed 56789 OFF t=423.4 wall=360s cronoMs=73.9
+[gate] seed 56789 OFF t=448.6 wall=390s cronoMs=78.8
+[gate] seed 56789 OFF t=472.0 wall=420s cronoMs=83.5
+[gate] seed 56789 OFF t=493.8 wall=450s cronoMs=87.8
+[gate] seed 56789 OFF t=514.4 wall=480s cronoMs=91.8
+[gate] seed 56789 OFF t=533.8 wall=510s cronoMs=95.6
+[gate] seed 56789 OFF t=552.3 wall=540s cronoMs=99.3
+[gate] seed 56789 OFF t=569.9 wall=570s cronoMs=102.8
+[gate] seed 56789 OFF t=586.8 wall=600s cronoMs=106.2
+[gate] seed 56789 ON t=0.0 wall=0s cronoMs=5.0
+[gate] seed 56789 ON t=32.8 wall=30s cronoMs=24.7
+[gate] seed 56789 ON t=67.6 wall=60s cronoMs=43.2
+[gate] seed 56789 ON t=104.3 wall=90s cronoMs=63.1
+[gate] seed 56789 ON t=142.2 wall=120s cronoMs=84.0
+[gate] seed 56789 ON t=181.4 wall=150s cronoMs=104.3
+[gate] seed 56789 ON t=221.6 wall=180s cronoMs=125.6
+[gate] seed 56789 ON t=261.3 wall=210s cronoMs=146.1
+[gate] seed 56789 ON t=298.9 wall=240s cronoMs=166.5
+[gate] seed 56789 ON t=333.9 wall=270s cronoMs=185.0
+[gate] seed 56789 ON t=365.9 wall=300s cronoMs=202.8
+[gate] seed 56789 ON t=395.1 wall=330s cronoMs=220.2
+[gate] seed 56789 ON t=421.7 wall=360s cronoMs=236.6
+[gate] seed 56789 ON t=446.5 wall=390s cronoMs=252.6
+[gate] seed 56789 ON t=469.7 wall=420s cronoMs=265.8
+[gate] seed 56789 ON t=491.2 wall=450s cronoMs=278.4
+[gate] seed 56789 ON t=511.5 wall=480s cronoMs=290.5
+[gate] seed 56789 ON t=530.7 wall=510s cronoMs=302.3
+[gate] seed 56789 ON t=548.9 wall=540s cronoMs=313.5
+[gate] seed 56789 ON t=566.3 wall=570s cronoMs=324.8
+[gate] seed 56789 ON t=583.0 wall=600s cronoMs=335.6
+[gate] seed 56789 ON t=599.1 wall=630s cronoMs=347.6
+seed 56789: parity=OK coste=0.0551% p95=0.0042ms ring=593 gap=1.017s events=2 mem=74.13KB (wall 632s)
+{
+  "task": "task_934",
+  "gate": {
+    "fidelity_ok": true,
+    "cost_ok": true,
+    "p95_ok": true,
+    "continuity_ok": true,
+    "mem_ok": true
+  },
+  "seeds": [
+    {
+      "seed": 12345,
+      "wall_s": 636.6,
+      "parity_ok": true,
+      "parity_diffs": [],
+      "cost_pct": 0.0519,
+      "p95_ms": 0.0044,
+      "ring_max": 593,
+      "gap_max_s": 1.017,
+      "events": 2,
+      "mem_kb": 74.13
+    },
+    {
+      "seed": 23456,
+      "wall_s": 650.4,
+      "parity_ok": true,
+      "parity_diffs": [],
+      "cost_pct": 0.0506,
+      "p95_ms": 0.0044,
+      "ring_max": 593,
+      "gap_max_s": 1.017,
+      "events": 2,
+      "mem_kb": 74.13
+    },
+    {
+      "seed": 34567,
+      "wall_s": 605.5,
+      "parity_ok": true,
+      "parity_diffs": [],
+      "cost_pct": 0.055,
+      "p95_ms": 0.0047,
+      "ring_max": 593,
+      "gap_max_s": 1.017,
+      "events": 2,
+      "mem_kb": 74.13
+    },
+    {
+      "seed": 45678,
+      "wall_s": 620.1,
+      "parity_ok": true,
+      "parity_diffs": [],
+      "cost_pct": 0.0504,
+      "p95_ms": 0.0044,
+      "ring_max": 593,
+      "gap_max_s": 1.017,
+      "events": 2,
+      "mem_kb": 74.13
+    },
+    {
+      "seed": 56789,
+      "wall_s": 632,
+      "parity_ok": true,
+      "parity_diffs": [],
+      "cost_pct": 0.0551,
+      "p95_ms": 0.0042,
+      "ring_max": 593,
+      "gap_max_s": 1.017,
+      "events": 2,
+      "mem_kb": 74.13
+    }
+  ],
+  "generated_at": "2026-09-22T02:47:10.611Z"
+}
+GATE: fidelity_ok=PASS cost_ok=PASS p95_ok=PASS continuity_ok=PASS mem_ok=PASS
